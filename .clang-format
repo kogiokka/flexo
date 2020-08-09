@@ -1,0 +1,6 @@
+BasedOnStyle: Mozilla
+ColumnLimit: 120
+IndentCaseLabels: false
+Cpp11BracedListStyle: true
+BreakBeforeBraces: Linux
+AlwaysBreakAfterDefinitionReturnType: All

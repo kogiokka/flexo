@@ -1,0 +1,10 @@
+[Bb]uild
+[Oo]ut
+.kdev4
+*.kdev4
+imgui.ini
+
+models/*
+!models/default
+
+tf_record.txt
