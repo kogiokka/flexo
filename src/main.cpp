@@ -34,8 +34,7 @@ int
 main(int argc, char** argv)
 {
   MainWindow app("SOM - Surface fitting", 1200, 800);
+  app.show();
 
-  app.initializeGL();
-  app.paintGL();
   return 0;
 }

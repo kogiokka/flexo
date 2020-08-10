@@ -7,7 +7,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_shader(nullptr)
   , m_lattice(nullptr)
 {
-  initialize();
+  m_lattice = new Lattice(32, 1000, 0.1f);
 }
 
 MainWindow::~MainWindow()
@@ -17,41 +17,30 @@ MainWindow::~MainWindow()
 }
 
 void
-MainWindow::paintGL()
+MainWindow::handleEvent(SDL_Event event)
 {
-  bool quit = false;
-  SDL_Event evt;
-
-  while (!quit) {
-    while (SDL_PollEvent(&evt)) {
-      switch (evt.type) {
-      case SDL_KEYDOWN:
-        if (evt.key.keysym.sym == SDLK_q) {
-          if (evt.key.keysym.mod & KMOD_CTRL) {
-            quit = true;
-          }
-        }
-        break;
-      case SDL_QUIT:
-        quit = true;
-        break;
-      case SDL_WINDOWEVENT:
-        switch (evt.window.event) {
-        case SDL_WINDOWEVENT_RESIZED:
-          resizeGL();
-          break;
-        }
+  switch (event.type) {
+  case SDL_KEYDOWN:
+    if (event.key.keysym.sym == SDLK_q) {
+      if (event.key.keysym.mod & KMOD_CTRL) {
+        m_alive = false;
       }
     }
-    glViewport(0, 0, m_width, m_height);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    m_shader->SetUniformMatrix4fv("view_proj_matrix", viewProjMatrix(m_width, m_height, 1.0f));
-    auto const vert_buffer = m_lattice->vertexBuffer();
-    glNamedBufferSubData(m_vbo, 0, vert_buffer.size() * sizeof(float), vert_buffer.data());
-    glDrawArrays(GL_TRIANGLES, 0, vert_buffer.size());
-    SDL_GL_SwapWindow(m_window);
+    break;
   }
+}
+
+void
+MainWindow::paintGL()
+{
+  glViewport(0, 0, m_width, m_height);
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  m_shader->SetUniformMatrix4fv("view_proj_matrix", viewProjMatrix(m_width, m_height, 1.0f));
+  auto const vert_buffer = m_lattice->vertexBuffer();
+  glNamedBufferSubData(m_vbo, 0, vert_buffer.size() * sizeof(float), vert_buffer.data());
+  glDrawArrays(GL_TRIANGLES, 0, vert_buffer.size());
+  SDL_GL_SwapWindow(m_window);
 }
 
 void
@@ -75,8 +64,6 @@ MainWindow::initializeGL()
   glEnable(GL_DEBUG_OUTPUT);
   glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
-
-  m_lattice = new Lattice(32, 1000, 0.1f);
 
   std::vector<float> const vert_buffer = m_lattice->vertexBuffer();
   int const stride = 5 * sizeof(float);

@@ -24,4 +24,5 @@ public:
   virtual void initializeGL() override;
   virtual void resizeGL() override;
   virtual void paintGL() override;
+  virtual void handleEvent(SDL_Event event) override;
 };

@@ -1,7 +1,8 @@
 #include "sdl_opengl_window.hpp"
 
 SDLOpenGLWindow::SDLOpenGLWindow(std::string name, int width, int height)
-  : m_width(width)
+  : m_alive(true)
+  , m_width(width)
   , m_height(height)
   , m_window(nullptr)
   , m_glContext(nullptr)
@@ -23,21 +24,38 @@ SDLOpenGLWindow::SDLOpenGLWindow(std::string name, int width, int height)
   auto const flags = SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI;
   m_window = SDL_CreateWindow(name.c_str(), SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, flags);
   SDL_SetWindowMinimumSize(m_window, m_width, m_height);
-}
-
-void
-SDLOpenGLWindow::initialize()
-{
-  if (m_glContext != nullptr)
-    return;
-
   m_glContext = SDL_GL_CreateContext(m_window);
   SDL_GL_MakeCurrent(m_window, m_glContext);
   SDL_GL_SetSwapInterval(1);
 
   gladLoadGLLoader(SDL_GL_GetProcAddress);
+}
 
-  initializeGL();
+void
+SDLOpenGLWindow::show()
+{
+  initializeGL(); // Require implementation
+
+  SDL_Event event;
+  while (m_alive) {
+    while (SDL_PollEvent(&event)) {
+      switch (event.type) {
+      case SDL_WINDOWEVENT:
+        switch (event.window.event) {
+        case SDL_WINDOWEVENT_RESIZED:
+          resizeGL(); // Require implementation
+          break;
+        }
+        break;
+      case SDL_QUIT:
+        m_alive = false;
+        break;
+      }
+
+      handleEvent(event); // Require implementation
+    }
+    paintGL(); // Require implementation
+  }
 }
 
 SDLOpenGLWindow::~SDLOpenGLWindow()
