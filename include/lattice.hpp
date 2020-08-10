@@ -12,7 +12,7 @@
 
 class Lattice
 {
-  int m_size;
+  int m_dimen;
   int m_currIteration;
   int m_leftIteration;
   float m_timeConstant;
@@ -26,6 +26,7 @@ public:
   Lattice(int size, int iterations, float rate);
   bool input(std::vector<float> in);
   bool isFinished() const;
+  int dimension() const;
   int iterations() const;
   float learningRate() const;
   float neighborhoodRadius() const;

@@ -3,7 +3,7 @@
 #include <imgui.h>
 
 Lattice::Lattice(int size, int iterations, float rate)
-  : m_size(size)
+  : m_dimen(size)
   , m_currIteration(0)
   , m_leftIteration(iterations)
   , m_currRate(rate)
@@ -27,7 +27,7 @@ Lattice::input(std::vector<float> in)
   if (m_leftIteration <= 0)
     return false;
 
-  m_neighborhoodRadius = m_size * exp(-m_currIteration / m_timeConstant);
+  m_neighborhoodRadius = m_dimen * exp(-m_currIteration / m_timeConstant);
 
   std::unique_ptr<Node> bmu;
   float dist_min = std::numeric_limits<float>::max();
@@ -73,6 +73,12 @@ Lattice::error() const
 }
 
 int
+Lattice::dimension() const
+{
+  return m_dimen;
+}
+
+int
 Lattice::iterations() const
 {
   return m_currIteration;
@@ -109,14 +115,14 @@ Lattice::vertexBuffer() const
   std::vector<float> buffer;
   buffer.reserve(5 * m_neurons.size());
 
-  for (int i = 0; i < m_size - 1; ++i) {
-    for (int j = 0; j < m_size - 1; ++j) {
-      indices.push_back(i * m_size + j);
-      indices.push_back((i + 1) * m_size + j);
-      indices.push_back(i * m_size + j + 1);
-      indices.push_back(i * m_size + j + 1);
-      indices.push_back((i + 1) * m_size + j);
-      indices.push_back((i + 1) * m_size + j + 1);
+  for (int i = 0; i < m_dimen - 1; ++i) {
+    for (int j = 0; j < m_dimen - 1; ++j) {
+      indices.push_back(i * m_dimen + j);
+      indices.push_back((i + 1) * m_dimen + j);
+      indices.push_back(i * m_dimen + j + 1);
+      indices.push_back(i * m_dimen + j + 1);
+      indices.push_back((i + 1) * m_dimen + j);
+      indices.push_back((i + 1) * m_dimen + j + 1);
     }
   }
   for (int i : indices) {
