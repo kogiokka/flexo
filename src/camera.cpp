@@ -2,7 +2,7 @@
 
 Camera::Camera()
   : m_worldUp{0.0f, 1.0f, 0.0f}
-  , m_center{0.5f, 0.5f, 0.5f}
+  , m_center{0.0f, 0.0f, 0.0f}
   , m_theta(0.0f)
   , m_phi(1.5707f)
   , m_radius(100.f)
@@ -258,4 +258,3 @@ Camera::NormRadian(float radian)
   else
     return radian;
 }
-
