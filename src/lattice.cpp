@@ -11,10 +11,10 @@ Lattice::Lattice(int size, int iterations, float rate)
   , m_neighborhoodRadius(size)
   , m_error(0.0f)
 {
-  RandomVec3 rc;
+  RandomVec<3> rv;
   for (int i = 0; i < size; ++i) {
     for (int j = 0; j < size; ++j) {
-      auto const& w = rc.color();
+      auto const& w = rv.vec();
       m_neurons.emplace_back(i, j, std::vector<float>(w.begin(), w.end()));
     }
   }
@@ -106,32 +106,4 @@ bool
 Lattice::isFinished() const
 {
   return (m_leftIteration <= 0);
-}
-
-std::vector<float>
-Lattice::vertexBuffer() const
-{
-  std::vector<int> indices;
-  std::vector<float> buffer;
-  buffer.reserve(5 * m_neurons.size());
-
-  for (int i = 0; i < m_dimen - 1; ++i) {
-    for (int j = 0; j < m_dimen - 1; ++j) {
-      indices.push_back(i * m_dimen + j);
-      indices.push_back((i + 1) * m_dimen + j);
-      indices.push_back(i * m_dimen + j + 1);
-      indices.push_back(i * m_dimen + j + 1);
-      indices.push_back((i + 1) * m_dimen + j);
-      indices.push_back((i + 1) * m_dimen + j + 1);
-    }
-  }
-  for (int i : indices) {
-    auto const& n = m_neurons[i];
-    buffer.push_back(n.x());
-    buffer.push_back(n.y());
-    buffer.push_back(n[0]);
-    buffer.push_back(n[1]);
-    buffer.push_back(n[2]);
-  }
-  return buffer;
 }

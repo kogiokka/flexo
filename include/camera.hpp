@@ -45,6 +45,10 @@ public:
     PitchUp,
     PitchDown,
   };
+  enum class Projection {
+    Orthographic,
+    Perspective,
+  };
   Camera();
   ~Camera();
   void SetAspectRatio(float ratio);
@@ -57,9 +61,10 @@ public:
   void InitDragTranslation(int x, int y);
   void DragRotation(int x, int y);
   void DragTranslation(int x, int y);
+  void WheelZoom(int direction);
   void Moving(Camera::Translate direction);
   void Turning(Camera::Rotate direction);
-  void WheelZoom(int direction);
+  void SetProjection(Camera::Projection projection);
   glm::mat4 ViewProjectionMatrix() const;
   glm::mat4 ViewMatrix() const;
   glm::mat4 ProjectionMatrix() const;
@@ -67,6 +72,7 @@ public:
   glm::vec3 const ForwardVector() const;
 
 private:
+  Projection m_projection;
   glm::vec3 CartesianCoord(float theta, float phi) const;
   inline float NormRadian(float radian);
 };

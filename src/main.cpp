@@ -1,13 +1,9 @@
-#include "lattice.hpp"
 #include "main_window.hpp"
-#include "random_vec3.hpp"
-#include "shader.hpp"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <filesystem>
-#include <iostream>
 #include <string>
 
 // void
@@ -32,7 +28,7 @@
 int
 main(int argc, char** argv)
 {
-  MainWindow app("SOM - Surface fitting", 1200, 800);
+  MainWindow app("SOM - Surface fitting", 800, 800);
   app.show();
 
   return 0;

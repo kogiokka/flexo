@@ -2,16 +2,17 @@
 
 Camera::Camera()
   : m_worldUp{0.0f, 1.0f, 0.0f}
-  , m_center{0.0f, 0.0f, 0.0f}
+  , m_center{0.5f, 0.5f, 0.5f}
   , m_theta(0.0f)
   , m_phi(1.5707f)
-  , m_radius(600.f)
+  , m_radius(100.f)
   , m_aspectRatio(0.0f)
-  , m_viewVolumeSize(200.f)
+  , m_viewVolumeSize(100.f)
   , m_moveRate(0.4f)
   , m_rotateRate(0.005f)
   , m_zoom(0.8f)
   , m_horizontalCoef(1)
+  , m_projection(Projection::Perspective)
 {
   UpdateViewCoord();
 }
@@ -123,16 +124,24 @@ Camera::SetTheta(float theta)
 void
 Camera::WheelZoom(int direction)
 {
-  float const tmp_zoom = m_zoom + direction * 0.02;
-  constexpr float min = 0.01f;
-  constexpr float max = 1.0f;
+  switch (m_projection) {
+  case Projection::Orthographic: {
+    float const tmp_zoom = m_zoom + direction * 0.02;
+    constexpr float min = 0.01f;
+    constexpr float max = 1.0f;
 
-  if (tmp_zoom < min) {
-    m_zoom = min;
-  } else if (tmp_zoom >= max) {
-    m_zoom = max;
-  } else {
-    m_zoom = tmp_zoom;
+    if (tmp_zoom < min) {
+      m_zoom = min;
+    } else if (tmp_zoom >= max) {
+      m_zoom = max;
+    } else {
+      m_zoom = tmp_zoom;
+    }
+  } break;
+  case Projection::Perspective: {
+    m_radius += direction * 2.0f;
+    UpdateViewCoord();
+  } break;
   }
 }
 
@@ -146,21 +155,31 @@ glm::mat4
 Camera::ProjectionMatrix() const
 {
   assert(m_aspectRatio != 0.0);
-  float const v = m_viewVolumeSize * m_aspectRatio * m_zoom;
-  float const h = m_viewVolumeSize * m_zoom;
-  return glm::ortho(-v, v, -h, h, 0.f, 1000.f);
+  glm::mat4 mat;
+  switch (m_projection) {
+  case Projection::Orthographic: {
+    float const v = m_viewVolumeSize * m_aspectRatio * m_zoom;
+    float const h = m_viewVolumeSize * m_zoom;
+    mat = glm::ortho(-v, v, -h, h, 0.1f, 1000.f);
+  } break;
+  case Projection::Perspective: {
+    mat = glm::perspective(glm::radians(45.0f), m_aspectRatio, 0.1f, 2000.0f);
+  } break;
+  }
+
+  return mat;
 }
 
 glm::mat4
 Camera::ViewProjectionMatrix() const
 {
-  assert(m_aspectRatio != 0.0);
+  return ProjectionMatrix() * ViewMatrix();
+}
 
-  glm::mat4 const view = glm::lookAt(m_position, m_center, m_worldUp);
-
-  float const v = m_viewVolumeSize * m_aspectRatio * m_zoom;
-  float const h = m_viewVolumeSize * m_zoom;
-  return glm::ortho(-v, v, -h, h, 0.f, 1000.f) * view;
+void
+Camera::SetProjection(Camera::Projection projection)
+{
+  m_projection = projection;
 }
 
 glm::vec3 const
@@ -239,3 +258,4 @@ Camera::NormRadian(float radian)
   else
     return radian;
 }
+

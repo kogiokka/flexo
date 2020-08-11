@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "node.hpp"
-#include "random_vec3.hpp"
+#include "random_vec.hpp"
 
 class Lattice
 {
@@ -32,5 +32,4 @@ public:
   float neighborhoodRadius() const;
   float error() const;
   std::vector<Node> const& neurons() const;
-  std::vector<float> vertexBuffer() const;
 };

@@ -7,6 +7,10 @@
 #include "shader.hpp"
 
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <imgui.h>
+#include <imgui_impl_opengl3.h>
+#include <imgui_impl_sdl.h>
 
 #include <iostream>
 #include <string>

@@ -14,7 +14,7 @@ void main()
   vec3 lightDir = normalize(lightSrc - v_pos);
 
   const float ambientCoef = 0.1;
-  const float diffusionCoef = dot(norm, lightDir);
+  const float diffusionCoef = 0.8 * dot(norm, lightDir);
   const float specularCoef = 0.4;
 
   vec3 ambient = ambientCoef * lightColor;

@@ -9,9 +9,10 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_lattice(nullptr)
   , m_model(nullptr)
 {
-  // m_lattice = new Lattice(32, 1000, 0.1f);
+  m_lattice = new Lattice(16, 1000, 0.1f);
   m_camera = new Camera();
   m_camera->SetAspectRatio(m_width, m_height);
+  m_camera->SetProjection(Camera::Projection::Perspective);
 }
 
 MainWindow::~MainWindow()
@@ -25,14 +26,28 @@ MainWindow::~MainWindow()
 void
 MainWindow::paintGL()
 {
+  static float const scale = 20.0f;
+  static auto const scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3{0.5f, 0.5f,0.5f});
   glViewport(0, 0, m_width, m_height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   m_shader->SetUniform3fv("viewPos", m_camera->Position());
   m_shader->SetUniform3fv("lightSrc", m_camera->Position());
   m_shader->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
+  m_camera->SetCenter(scale / 2, scale / 2, scale / 2);
 
-  glDrawArrays(GL_TRIANGLES, 0, m_model->vertexCount());
+  for (auto n : m_lattice->neurons()) {
+    m_shader->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), scale * glm::vec3{n[0], n[1], n[2]}) * scaleMat);
+    glDrawArrays(GL_TRIANGLES, 0, m_model->vertexCount());
+  }
+
+  // ImGui_ImplOpenGL3_NewFrame();
+  // ImGui_ImplSDL2_NewFrame(m_window);
+  // ImGui::NewFrame();
+  // ImGui::Begin("Surface Fitting");
+  // ImGui::End();
+  // ImGui::Render();
+  // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   SDL_GL_SwapWindow(m_window);
 }
@@ -48,10 +63,11 @@ MainWindow::initializeGL()
        GLenum severity,
        GLsizei length,
        GLchar const* message,
-       void const* user_param) noexcept {
-      std::cerr << "Type: " << std::hex << type << ", ";
-      std::cerr << "Severity: " << std::hex << severity << ", ";
-      std::cerr << "Message: " << message << "\n";
+       void const* userParam) noexcept {
+      std::cerr << std::hex;
+      std::cerr << "[Type " << type << "]";
+      std::cerr << "[Severity " << severity << "]";
+      std::cerr << " Message: " << message << "\n";
     },
     nullptr);
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
@@ -88,6 +104,11 @@ MainWindow::initializeGL()
   m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
 
   glEnable(GL_DEPTH_TEST);
+
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGui_ImplOpenGL3_Init();
+  ImGui_ImplSDL2_InitForOpenGL(m_window, m_glContext);
 }
 
 void
@@ -99,6 +120,9 @@ MainWindow::onWindowResized()
 void
 MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
 {
+  auto const& io = ImGui::GetIO();
+  if (io.WantCaptureKeyboard)
+    return;
   switch (keyEvent.keysym.sym) {
   case SDLK_q:
     if (keyEvent.keysym.mod & KMOD_CTRL) {
@@ -111,6 +135,8 @@ MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
 void
 MainWindow::onMouseButtonDown(SDL_MouseButtonEvent buttonEvent)
 {
+  if (ImGui::GetIO().WantCaptureMouse)
+    return;
   switch (buttonEvent.button) {
   case SDL_BUTTON_LEFT:
     m_camera->InitDragTranslation(buttonEvent.x, buttonEvent.y);
@@ -124,6 +150,8 @@ MainWindow::onMouseButtonDown(SDL_MouseButtonEvent buttonEvent)
 void
 MainWindow::onMouseMotion(SDL_MouseMotionEvent motionEvent)
 {
+  if (ImGui::GetIO().WantCaptureMouse)
+    return;
   switch (motionEvent.state) {
   case SDL_BUTTON_LMASK:
     m_camera->DragTranslation(motionEvent.x, motionEvent.y);
