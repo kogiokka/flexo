@@ -31,37 +31,95 @@ SDLOpenGLWindow::SDLOpenGLWindow(std::string name, int width, int height)
   gladLoadGLLoader(SDL_GL_GetProcAddress);
 }
 
+SDLOpenGLWindow::~SDLOpenGLWindow()
+{
+  SDL_DestroyWindow(m_window);
+  SDL_Quit();
+}
+
 void
 SDLOpenGLWindow::show()
 {
   initializeGL(); // Require implementation
 
-  SDL_Event event;
   while (m_alive) {
-    while (SDL_PollEvent(&event)) {
-      switch (event.type) {
-      case SDL_WINDOWEVENT:
-        switch (event.window.event) {
-        case SDL_WINDOWEVENT_RESIZED:
-          resizeGL(); // Require implementation
-          break;
-        }
-        break;
-      case SDL_QUIT:
-        m_alive = false;
-        break;
-      }
-
-      handleEvent(event); // Require implementation
-    }
+    SDL_Event event;
+    handleEvent(event);
     paintGL(); // Require implementation
   }
 }
 
-SDLOpenGLWindow::~SDLOpenGLWindow()
+void
+SDLOpenGLWindow::handleEvent(SDL_Event event)
 {
-  SDL_DestroyWindow(m_window);
-  SDL_Quit();
+  while (SDL_PollEvent(&event)) {
+    switch (event.type) {
+    case SDL_KEYDOWN:
+      onKeyDown(event.key);
+      break;
+    case SDL_KEYUP:
+      onKeyUp(event.key);
+      break;
+    case SDL_MOUSEBUTTONDOWN:
+      onMouseButtonDown(event.button);
+      break;
+    case SDL_MOUSEBUTTONUP:
+      onMouseButtonUp(event.button);
+      break;
+    case SDL_MOUSEMOTION:
+      onMouseMotion(event.motion);
+      break;
+    case SDL_MOUSEWHEEL:
+      onMouseWheel(event.wheel);
+      break;
+    case SDL_WINDOWEVENT:
+      switch (event.window.event) {
+      case SDL_WINDOWEVENT_RESIZED:
+        resizeGL();
+        break;
+      }
+      break;
+    case SDL_QUIT:
+      m_alive = false;
+      break;
+    }
+  }
+}
+
+void SDLOpenGLWindow::onKeyDown(SDL_KeyboardEvent)
+{
+  return; // Override this function to do things.
+}
+
+void SDLOpenGLWindow::onKeyUp(SDL_KeyboardEvent)
+{
+  return; // Override this function to do things.
+}
+
+void SDLOpenGLWindow::onMouseButtonDown(SDL_MouseButtonEvent)
+{
+  return; // Override this function to do things.
+}
+
+void SDLOpenGLWindow::onMouseButtonUp(SDL_MouseButtonEvent)
+{
+  return; // Override this function to do things.
+}
+
+void SDLOpenGLWindow::onMouseMotion(SDL_MouseMotionEvent)
+{
+  return; // Override this function to do things.
+}
+
+void SDLOpenGLWindow::onMouseWheel(SDL_MouseWheelEvent)
+{
+  return; // Override this function to do things.
+}
+
+void
+SDLOpenGLWindow::resizeGL()
+{
+  SDL_GetWindowSize(m_window, &m_width, &m_height);
 }
 
 SDL_Window*

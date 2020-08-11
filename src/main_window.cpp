@@ -23,40 +23,47 @@ MainWindow::~MainWindow()
 }
 
 void
-MainWindow::handleEvent(SDL_Event event)
+MainWindow::onKeyDown(SDL_KeyboardEvent key)
 {
-  switch (event.type) {
-  case SDL_KEYDOWN:
-    if (event.key.keysym.sym == SDLK_q) {
-      if (event.key.keysym.mod & KMOD_CTRL) {
-        m_alive = false;
-      }
-    }
-    break;
-  case SDL_MOUSEWHEEL:
-    m_camera->WheelZoom(-event.wheel.y);
-    break;
-  case SDL_MOUSEBUTTONDOWN:
-    switch (event.button.button) {
-    case SDL_BUTTON_LEFT:
-      m_camera->InitDragTranslation(event.button.x, event.button.y);
-      break;
-    }
-  case SDL_BUTTON_RIGHT: {
-    m_camera->InitDragRotation(event.button.x, event.button.y);
-    break;
-  } break;
-  case SDL_MOUSEMOTION:
-    switch (event.motion.state) {
-    case SDL_BUTTON_LMASK:
-      m_camera->DragTranslation(event.motion.x, event.motion.y);
-      break;
-    case SDL_BUTTON_RMASK:
-      m_camera->DragRotation(event.motion.x, event.motion.y);
-      break;
+  switch (key.keysym.sym) {
+  case SDLK_q:
+    if (key.keysym.mod & KMOD_CTRL) {
+      m_alive = false;
     }
     break;
   }
+}
+
+void
+MainWindow::onMouseButtonDown(SDL_MouseButtonEvent button)
+{
+  switch (button.button) {
+  case SDL_BUTTON_LEFT:
+    m_camera->InitDragTranslation(button.x, button.y);
+    break;
+  case SDL_BUTTON_RIGHT:
+    m_camera->InitDragRotation(button.x, button.y);
+    break;
+  }
+}
+
+void
+MainWindow::onMouseMotion(SDL_MouseMotionEvent motion)
+{
+  switch (motion.state) {
+  case SDL_BUTTON_LMASK:
+    m_camera->DragTranslation(motion.x, motion.y);
+    break;
+  case SDL_BUTTON_RMASK:
+    m_camera->DragRotation(motion.x, motion.y);
+    break;
+  }
+}
+
+void
+MainWindow::onMouseWheel(SDL_MouseWheelEvent wheel)
+{
+  m_camera->WheelZoom(-wheel.y);
 }
 
 void
@@ -125,10 +132,4 @@ MainWindow::initializeGL()
   m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
 
   glEnable(GL_DEPTH_TEST);
-}
-
-void
-MainWindow::resizeGL()
-{
-  SDL_GetWindowSize(m_window, &m_width, &m_height);
 }

@@ -2,9 +2,9 @@
 
 #include "camera.hpp"
 #include "lattice.hpp"
+#include "model.hpp"
 #include "sdl_opengl_window.hpp"
 #include "shader.hpp"
-#include "model.hpp"
 
 #include <glm/glm.hpp>
 
@@ -25,7 +25,9 @@ public:
   MainWindow(std::string name, int width, int height);
   ~MainWindow();
   virtual void initializeGL() override;
-  virtual void resizeGL() override;
   virtual void paintGL() override;
-  virtual void handleEvent(SDL_Event event) override;
+  virtual void onMouseButtonDown(SDL_MouseButtonEvent button) override;
+  virtual void onMouseMotion(SDL_MouseMotionEvent motion) override;
+  virtual void onMouseWheel(SDL_MouseWheelEvent wheel) override;
+  virtual void onKeyDown(SDL_KeyboardEvent key) override;
 };
