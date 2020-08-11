@@ -1,22 +1,25 @@
 #pragma once
 
+#include "camera.hpp"
 #include "lattice.hpp"
 #include "sdl_opengl_window.hpp"
 #include "shader.hpp"
+#include "model.hpp"
 
 #include <glm/glm.hpp>
 
-#include <string>
 #include <iostream>
+#include <string>
 
 class MainWindow : public SDLOpenGLWindow
 {
   GLuint m_vao;
   GLuint m_vbo;
+  GLuint m_vboIdx;
   Shader* m_shader;
+  Camera* m_camera;
   Lattice* m_lattice;
-
-  glm::mat4 viewProjMatrix(int width, int height, float zoom);
+  Model* m_model;
 
 public:
   MainWindow(std::string name, int width, int height);

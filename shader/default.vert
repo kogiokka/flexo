@@ -1,14 +1,16 @@
 #version 450
 
-layout (location = 0) in vec2 position;
-layout (location = 1) in vec3 color;
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
 
-uniform mat4 view_proj_matrix;
+uniform mat4 viewProjMat;
 
-out vec3 v_color;
+out vec3 v_pos;
+out vec3 v_norm;
 
 void main()
 {
-  gl_Position = view_proj_matrix * vec4(position, 0.0, 1.0);
-  v_color = color;
+  gl_Position = viewProjMat * vec4(position, 1.0);
+  v_pos = position;
+  v_norm = normal;
 }
