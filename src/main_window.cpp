@@ -23,50 +23,6 @@ MainWindow::~MainWindow()
 }
 
 void
-MainWindow::onKeyDown(SDL_KeyboardEvent key)
-{
-  switch (key.keysym.sym) {
-  case SDLK_q:
-    if (key.keysym.mod & KMOD_CTRL) {
-      m_alive = false;
-    }
-    break;
-  }
-}
-
-void
-MainWindow::onMouseButtonDown(SDL_MouseButtonEvent button)
-{
-  switch (button.button) {
-  case SDL_BUTTON_LEFT:
-    m_camera->InitDragTranslation(button.x, button.y);
-    break;
-  case SDL_BUTTON_RIGHT:
-    m_camera->InitDragRotation(button.x, button.y);
-    break;
-  }
-}
-
-void
-MainWindow::onMouseMotion(SDL_MouseMotionEvent motion)
-{
-  switch (motion.state) {
-  case SDL_BUTTON_LMASK:
-    m_camera->DragTranslation(motion.x, motion.y);
-    break;
-  case SDL_BUTTON_RMASK:
-    m_camera->DragRotation(motion.x, motion.y);
-    break;
-  }
-}
-
-void
-MainWindow::onMouseWheel(SDL_MouseWheelEvent wheel)
-{
-  m_camera->WheelZoom(-wheel.y);
-}
-
-void
 MainWindow::paintGL()
 {
   glViewport(0, 0, m_width, m_height);
@@ -132,4 +88,54 @@ MainWindow::initializeGL()
   m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
 
   glEnable(GL_DEPTH_TEST);
+}
+
+void
+MainWindow::onWindowResized()
+{
+  m_camera->SetAspectRatio(m_width, m_height);
+}
+
+void
+MainWindow::onKeyDown(SDL_KeyboardEvent key)
+{
+  switch (key.keysym.sym) {
+  case SDLK_q:
+    if (key.keysym.mod & KMOD_CTRL) {
+      m_alive = false;
+    }
+    break;
+  }
+}
+
+void
+MainWindow::onMouseButtonDown(SDL_MouseButtonEvent button)
+{
+  switch (button.button) {
+  case SDL_BUTTON_LEFT:
+    m_camera->InitDragTranslation(button.x, button.y);
+    break;
+  case SDL_BUTTON_RIGHT:
+    m_camera->InitDragRotation(button.x, button.y);
+    break;
+  }
+}
+
+void
+MainWindow::onMouseMotion(SDL_MouseMotionEvent motion)
+{
+  switch (motion.state) {
+  case SDL_BUTTON_LMASK:
+    m_camera->DragTranslation(motion.x, motion.y);
+    break;
+  case SDL_BUTTON_RMASK:
+    m_camera->DragRotation(motion.x, motion.y);
+    break;
+  }
+}
+
+void
+MainWindow::onMouseWheel(SDL_MouseWheelEvent wheel)
+{
+  m_camera->WheelZoom(-wheel.y);
 }

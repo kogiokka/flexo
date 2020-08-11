@@ -30,4 +30,5 @@ public:
   virtual void onMouseMotion(SDL_MouseMotionEvent motion) override;
   virtual void onMouseWheel(SDL_MouseWheelEvent wheel) override;
   virtual void onKeyDown(SDL_KeyboardEvent key) override;
+  virtual void onWindowResized() override;
 };

@@ -1,6 +1,6 @@
 #include "lattice.hpp"
-#include "random_vec3.hpp"
 #include "main_window.hpp"
+#include "random_vec3.hpp"
 #include "shader.hpp"
 
 #include <glad/glad.h>
@@ -9,7 +9,6 @@
 #include <filesystem>
 #include <iostream>
 #include <string>
-
 
 // void
 // importFonts(std::filesystem::path dir_path)

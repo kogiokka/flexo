@@ -75,7 +75,8 @@ SDLOpenGLWindow::handleEvent(SDL_Event event)
     case SDL_WINDOWEVENT:
       switch (event.window.event) {
       case SDL_WINDOWEVENT_RESIZED:
-        resizeGL();
+        SDL_GetWindowSize(m_window, &m_width, &m_height);
+        onWindowResized();
         break;
       }
       break;
@@ -117,9 +118,9 @@ void SDLOpenGLWindow::onMouseWheel(SDL_MouseWheelEvent)
 }
 
 void
-SDLOpenGLWindow::resizeGL()
+SDLOpenGLWindow::onWindowResized()
 {
-  SDL_GetWindowSize(m_window, &m_width, &m_height);
+  return; // Override this function to do things.
 }
 
 SDL_Window*
