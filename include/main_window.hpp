@@ -26,9 +26,9 @@ public:
   ~MainWindow();
   virtual void initializeGL() override;
   virtual void paintGL() override;
-  virtual void onMouseButtonDown(SDL_MouseButtonEvent button) override;
-  virtual void onMouseMotion(SDL_MouseMotionEvent motion) override;
-  virtual void onMouseWheel(SDL_MouseWheelEvent wheel) override;
-  virtual void onKeyDown(SDL_KeyboardEvent key) override;
+  virtual void onMouseButtonDown(SDL_MouseButtonEvent buttonEvent) override;
+  virtual void onMouseMotion(SDL_MouseMotionEvent motionEvent) override;
+  virtual void onMouseWheel(SDL_MouseWheelEvent wheelEvent) override;
+  virtual void onKeyDown(SDL_KeyboardEvent keyEvent) override;
   virtual void onWindowResized() override;
 };

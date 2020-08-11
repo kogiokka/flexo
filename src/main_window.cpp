@@ -97,11 +97,11 @@ MainWindow::onWindowResized()
 }
 
 void
-MainWindow::onKeyDown(SDL_KeyboardEvent key)
+MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
 {
-  switch (key.keysym.sym) {
+  switch (keyEvent.keysym.sym) {
   case SDLK_q:
-    if (key.keysym.mod & KMOD_CTRL) {
+    if (keyEvent.keysym.mod & KMOD_CTRL) {
       m_alive = false;
     }
     break;
@@ -109,33 +109,33 @@ MainWindow::onKeyDown(SDL_KeyboardEvent key)
 }
 
 void
-MainWindow::onMouseButtonDown(SDL_MouseButtonEvent button)
+MainWindow::onMouseButtonDown(SDL_MouseButtonEvent buttonEvent)
 {
-  switch (button.button) {
+  switch (buttonEvent.button) {
   case SDL_BUTTON_LEFT:
-    m_camera->InitDragTranslation(button.x, button.y);
+    m_camera->InitDragTranslation(buttonEvent.x, buttonEvent.y);
     break;
   case SDL_BUTTON_RIGHT:
-    m_camera->InitDragRotation(button.x, button.y);
+    m_camera->InitDragRotation(buttonEvent.x, buttonEvent.y);
     break;
   }
 }
 
 void
-MainWindow::onMouseMotion(SDL_MouseMotionEvent motion)
+MainWindow::onMouseMotion(SDL_MouseMotionEvent motionEvent)
 {
-  switch (motion.state) {
+  switch (motionEvent.state) {
   case SDL_BUTTON_LMASK:
-    m_camera->DragTranslation(motion.x, motion.y);
+    m_camera->DragTranslation(motionEvent.x, motionEvent.y);
     break;
   case SDL_BUTTON_RMASK:
-    m_camera->DragRotation(motion.x, motion.y);
+    m_camera->DragRotation(motionEvent.x, motionEvent.y);
     break;
   }
 }
 
 void
-MainWindow::onMouseWheel(SDL_MouseWheelEvent wheel)
+MainWindow::onMouseWheel(SDL_MouseWheelEvent wheelEvent)
 {
-  m_camera->WheelZoom(-wheel.y);
+  m_camera->WheelZoom(-wheelEvent.y);
 }

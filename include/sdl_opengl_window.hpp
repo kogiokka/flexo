@@ -14,12 +14,12 @@ protected:
   SDL_Window* m_window;
   SDL_GLContext m_glContext;
   void handleEvent(SDL_Event event);
-  virtual void onKeyDown(SDL_KeyboardEvent key);
-  virtual void onKeyUp(SDL_KeyboardEvent key);
-  virtual void onMouseButtonDown(SDL_MouseButtonEvent button);
-  virtual void onMouseButtonUp(SDL_MouseButtonEvent button);
-  virtual void onMouseMotion(SDL_MouseMotionEvent motion);
-  virtual void onMouseWheel(SDL_MouseWheelEvent wheel);
+  virtual void onKeyDown(SDL_KeyboardEvent keyEvent);
+  virtual void onKeyUp(SDL_KeyboardEvent keyEvent);
+  virtual void onMouseButtonDown(SDL_MouseButtonEvent buttonEvent);
+  virtual void onMouseButtonUp(SDL_MouseButtonEvent buttonEvent);
+  virtual void onMouseMotion(SDL_MouseMotionEvent motionEvent);
+  virtual void onMouseWheel(SDL_MouseWheelEvent wheelEvent);
   virtual void onWindowResized();
 
 public:
