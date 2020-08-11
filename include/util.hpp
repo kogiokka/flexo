@@ -8,9 +8,12 @@
 
 namespace util
 {
+namespace str
+{
 std::vector<std::string>
-splitString(std::string target, std::string pattern);
+split(std::string target, std::string pattern);
 
 bool
-stringStartsWith(std::string target, std::string prefix);
+startsWith(std::string target, std::string prefix);
+}
 }

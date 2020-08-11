@@ -19,7 +19,6 @@ class MainWindow : public SDLOpenGLWindow
 {
   GLuint m_vao;
   GLuint m_vbo;
-  GLuint m_vboIdx;
   Shader* m_shader;
   Camera* m_camera;
   Lattice* m_lattice;

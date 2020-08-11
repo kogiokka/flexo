@@ -24,18 +24,18 @@ Model::readOBJ(std::string path)
 
   string line;
   while (getline(file, line)) {
-    if (util::stringStartsWith(line, "v ")) {
-      vector<string> const tokens = util::splitString(line, R"(\s+)");
+    if (util::str::startsWith(line, "v ")) {
+      vector<string> const tokens = util::str::split(line, R"(\s+)");
       vert.push_back(array<float, 3>{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
-    } else if (util::stringStartsWith(line, "vn ")) {
-      vector<string> const tokens = util::splitString(line, R"(\s+)");
+    } else if (util::str::startsWith(line, "vn ")) {
+      vector<string> const tokens = util::str::split(line, R"(\s+)");
       norm.push_back(array<float, 3>{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
-    } else if (util::stringStartsWith(line, "f ")) {
-      vector<string> const group = util::splitString(line, R"(\s+)");
+    } else if (util::str::startsWith(line, "f ")) {
+      vector<string> const group = util::str::split(line, R"(\s+)");
       if (group.size() > 4)
         return false;
       for (int v = 1; v < group.size(); ++v) {
-        vector<string> const idx = util::splitString(group[v], R"(/)");
+        vector<string> const idx = util::str::split(group[v], R"(/)");
         auto const vertex = vert[stoi(idx[0]) - 1];
         auto const normal = norm[stoi(idx[2]) - 1];
         m_vertexBuffer.insert(m_vertexBuffer.end(), vertex.begin(), vertex.end());

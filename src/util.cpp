@@ -1,7 +1,7 @@
 #include "util.hpp"
 
 std::vector<std::string>
-util::splitString(std::string target, std::string pattern)
+util::str::split(std::string target, std::string pattern)
 {
   using namespace std;
   regex re(pattern);
@@ -13,7 +13,7 @@ util::splitString(std::string target, std::string pattern)
 }
 
 bool
-util::stringStartsWith(std::string target, std::string prefix)
+util::str::startsWith(std::string target, std::string prefix)
 {
   return (target.substr(0, prefix.size()) == prefix);
 }

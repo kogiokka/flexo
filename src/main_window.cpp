@@ -27,7 +27,7 @@ void
 MainWindow::paintGL()
 {
   static float const scale = 20.0f;
-  static auto const scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3{0.5f, 0.5f,0.5f});
+  static auto const scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3{0.5f, 0.5f, 0.5f});
   glViewport(0, 0, m_width, m_height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -36,8 +36,10 @@ MainWindow::paintGL()
   m_shader->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
   m_camera->SetCenter(scale / 2, scale / 2, scale / 2);
 
+  std::vector<float> gridLines;
   for (auto n : m_lattice->neurons()) {
-    m_shader->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), scale * glm::vec3{n[0], n[1], n[2]}) * scaleMat);
+    m_shader->SetUniformMatrix4fv("modelMat",
+                                  glm::translate(glm::mat4(1.0f), scale * glm::vec3{n[0], n[1], n[2]}) * scaleMat);
     glDrawArrays(GL_TRIANGLES, 0, m_model->vertexCount());
   }
 
