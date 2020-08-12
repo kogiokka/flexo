@@ -38,10 +38,10 @@ MainWindow::paintGL()
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  m_shader->Use();
   m_shader->SetUniform3fv("viewPos", m_camera->Position());
   m_shader->SetUniform3fv("lightSrc", m_camera->Position());
   m_shader->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
-  m_shader->Use();
 
   auto const neurons = m_lattice->neurons();
 
@@ -59,9 +59,13 @@ MainWindow::paintGL()
   for (int i = 0; i < size - 1; ++i) {
     for (int j = 0; j < size - 1; ++j) {
       indices.push_back(i * size + j);
-      indices.push_back((i + 1) * size + j);
-      indices.push_back((i + 1) * size + j + 1);
       indices.push_back(i * size + j + 1);
+      indices.push_back(i * size + j + 1);
+      indices.push_back((i + 1) * size + j + 1);
+      indices.push_back((i + 1) * size + j + 1);
+      indices.push_back((i + 1) * size + j);
+      indices.push_back((i + 1) * size + j);
+      indices.push_back(i * size + j);
     }
   }
   for (int i : indices) {
@@ -77,7 +81,8 @@ MainWindow::paintGL()
   m_shaderLines->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
   glBindVertexArray(m_vaoLines);
   glNamedBufferData(m_vboLines, gridLines.size() * sizeof(float), gridLines.data(), GL_STATIC_DRAW);
-  glDrawArrays(GL_LINE_LOOP, 0, indices.size());
+  glDrawArrays(GL_LINES, 0, indices.size());
+
 
   // ImGui_ImplOpenGL3_NewFrame();
   // ImGui_ImplSDL2_NewFrame(m_window);
@@ -179,6 +184,9 @@ MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
     if (keyEvent.keysym.mod & KMOD_CTRL) {
       m_alive = false;
     }
+    break;
+  case SDLK_r:
+    m_camera->SetCenter(m_scale / 2, m_scale / 2, m_scale / 2);
     break;
   }
 }
