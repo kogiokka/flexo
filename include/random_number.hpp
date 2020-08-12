@@ -13,6 +13,7 @@ protected:
 
 public:
   RandomNumber();
+  virtual ~RandomNumber();
   virtual T get() = 0;
   virtual std::vector<T> vector(std::size_t dimension) = 0;
 };
@@ -21,5 +22,10 @@ template<typename T>
 RandomNumber<T>::RandomNumber()
   : m_device{}
   , m_engine(m_device())
+{
+}
+
+template<typename T>
+RandomNumber<T>::~RandomNumber()
 {
 }
