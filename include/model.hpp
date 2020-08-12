@@ -3,18 +3,22 @@
 #include "util.hpp"
 
 #include <array>
+#include <cstddef>
+#include <cstdint>
 #include <fstream>
 #include <string>
 #include <vector>
 
 class Model
 {
-  int m_vertexCount;
-  std::vector<float> m_vertexBuffer;
+  std::vector<std::array<float, 3>> m_positions;
+  std::vector<std::array<float, 3>> m_normals;
+  std::vector<std::uint16_t> m_posIdx;
+  std::vector<std::uint16_t> m_normIdx;
 
 public:
   Model();
   bool readOBJ(std::string path);
-  std::vector<float> const& vertexBuffer() const;
-  int vertexCount() const;
+  std::vector<float> vertexBuffer() const;
+  std::size_t vertexCount() const;
 };

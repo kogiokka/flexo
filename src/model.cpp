@@ -1,8 +1,10 @@
 #include "model.hpp"
 
 Model::Model()
-  : m_vertexCount(0)
-  , m_vertexBuffer(0)
+  : m_positions(0)
+  , m_normals(0)
+  , m_posIdx(0)
+  , m_normIdx(0)
 {
 }
 
@@ -17,30 +19,22 @@ Model::readOBJ(std::string path)
   if (file.fail())
     return false;
 
-  vector<array<float, 3>> vert;
-  vector<array<float, 3>> norm;
-  vector<unsigned short> vertIdx;
-  vector<unsigned short> normIdx;
-
   string line;
   while (getline(file, line)) {
     if (util::str::startsWith(line, "v ")) {
       vector<string> const tokens = util::str::split(line, R"(\s+)");
-      vert.push_back(array<float, 3>{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
+      m_positions.push_back(array<float, 3>{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
     } else if (util::str::startsWith(line, "vn ")) {
       vector<string> const tokens = util::str::split(line, R"(\s+)");
-      norm.push_back(array<float, 3>{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
+      m_normals.push_back(array<float, 3>{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
     } else if (util::str::startsWith(line, "f ")) {
       vector<string> const group = util::str::split(line, R"(\s+)");
       if (group.size() > 4)
         return false;
       for (int v = 1; v < group.size(); ++v) {
         vector<string> const idx = util::str::split(group[v], R"(/)");
-        auto const vertex = vert[stoi(idx[0]) - 1];
-        auto const normal = norm[stoi(idx[2]) - 1];
-        m_vertexBuffer.insert(m_vertexBuffer.end(), vertex.begin(), vertex.end());
-        m_vertexBuffer.insert(m_vertexBuffer.end(), normal.begin(), normal.end());
-        ++m_vertexCount;
+        m_posIdx.push_back(stoi(idx[0]) - 1);
+        m_normIdx.push_back(stoi(idx[2]) - 1);
       }
     }
   }
@@ -49,14 +43,25 @@ Model::readOBJ(std::string path)
   return true;
 }
 
-std::vector<float> const&
+std::vector<float>
 Model::vertexBuffer() const
 {
-  return m_vertexBuffer;
+  std::vector<float> buffer;
+
+  for (auto i : m_posIdx) {
+    auto const pos = m_positions[i];
+    buffer.insert(buffer.end(), pos.begin(), pos.end());
+  }
+  for (auto i : m_normIdx) {
+    auto const norm = m_normals[i];
+    buffer.insert(buffer.end(), norm.begin(), norm.end());
+  }
+
+  return buffer;
 }
 
-int
+std::size_t
 Model::vertexCount() const
 {
-  return m_vertexCount;
+  return m_posIdx.size();
 }

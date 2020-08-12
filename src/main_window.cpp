@@ -5,7 +5,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_vao(0)
   , m_vbo(0)
   , m_vaoLines(0)
-  , m_scale(20.0f)
+  , m_scale(50.0f)
   , m_shader(nullptr)
   , m_shaderLines(nullptr)
   , m_camera(nullptr)
@@ -83,7 +83,6 @@ MainWindow::paintGL()
   glNamedBufferData(m_vboLines, gridLines.size() * sizeof(float), gridLines.data(), GL_STATIC_DRAW);
   glDrawArrays(GL_LINES, 0, indices.size());
 
-
   // ImGui_ImplOpenGL3_NewFrame();
   // ImGui_ImplSDL2_NewFrame(m_window);
   // ImGui::NewFrame();
@@ -124,14 +123,13 @@ MainWindow::initializeGL()
   glVertexArrayAttribFormat(m_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
   glVertexArrayAttribFormat(m_vao, 1, 3, GL_FLOAT, GL_FALSE, 0);
 
-  int const stride = 6 * sizeof(float);
-  glCreateBuffers(1, &m_vbo);
-  glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, stride);
-  glVertexArrayVertexBuffer(m_vao, 1, m_vbo, 3 * sizeof(float), stride);
-
   m_model = new Model();
   m_model->readOBJ("res/models/Icosphere.obj");
-  auto const& buffer = m_model->vertexBuffer();
+  auto const buffer = m_model->vertexBuffer();
+  auto const stride = 3 * sizeof(float);
+  glCreateBuffers(1, &m_vbo);
+  glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, stride);
+  glVertexArrayVertexBuffer(m_vao, 1, m_vbo, m_model->vertexCount() * stride, stride);
   glNamedBufferStorage(m_vbo, buffer.size() * sizeof(float), buffer.data(), GL_DYNAMIC_STORAGE_BIT);
 
   glEnableVertexAttribArray(0);
