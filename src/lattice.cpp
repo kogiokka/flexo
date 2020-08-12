@@ -11,10 +11,10 @@ Lattice::Lattice(int size, int iterations, float rate)
   , m_neighborhoodRadius(size)
   , m_error(0.0f)
 {
-  RandomVec<3> rv;
+  RandomRealNumber<float> random(0.0f, 1.0f);
   for (int i = 0; i < size; ++i) {
     for (int j = 0; j < size; ++j) {
-      auto const& w = rv.vec();
+      auto const& w = random.vector(3);
       m_neurons.emplace_back(i, j, std::vector<float>(w.begin(), w.end()));
     }
   }

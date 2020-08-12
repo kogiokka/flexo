@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "node.hpp"
-#include "random_vec.hpp"
+#include "random_real_number.hpp"
 
 class Lattice
 {

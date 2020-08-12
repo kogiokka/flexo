@@ -19,8 +19,6 @@ MainWindow::MainWindow(std::string name, int width, int height)
   // Some lighting problem with Perspective mode
   // m_camera->SetProjection(Camera::Projection::Perspective);
   m_camera->SetCenter(m_scale / 2, m_scale / 2, m_scale / 2);
-
-  m_random = new RandomVec<1>();
 }
 
 MainWindow::~MainWindow()
@@ -88,9 +86,8 @@ MainWindow::paintGL()
 
   static bool start = false;
   if (start && !m_lattice->isFinished()) {
-    int const idx = static_cast<int>(m_random->vec()[0] * (m_model->vertexCount() - 1));
     std::vector<float> weights;
-    for (auto w : m_model->positions()[idx]) {
+    for (auto w : m_model->positions()[m_random->get()]) {
       weights.push_back(w);
     }
     m_lattice->input(weights);
@@ -141,6 +138,7 @@ MainWindow::initializeGL()
 
   m_model = new Model();
   m_model->readOBJ("res/models/Icosphere.obj");
+  m_random = new RandomIntNumber<unsigned int>(0, m_model->vertexCount() - 1);
   auto const buffer = m_model->vertexBuffer();
   auto const stride = 3 * sizeof(float);
   glCreateBuffers(1, &m_vbo);

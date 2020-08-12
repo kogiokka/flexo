@@ -3,7 +3,7 @@
 #include "camera.hpp"
 #include "lattice.hpp"
 #include "model.hpp"
-#include "random_vec.hpp"
+#include "random_int_number.hpp"
 #include "sdl_opengl_window.hpp"
 #include "shader.hpp"
 
@@ -28,7 +28,7 @@ class MainWindow : public SDLOpenGLWindow
   Camera* m_camera;
   Lattice* m_lattice;
   Model* m_model;
-  RandomVec<1>* m_random;
+  RandomIntNumber<unsigned int>* m_random;
 
 public:
   MainWindow(std::string name, int width, int height);
