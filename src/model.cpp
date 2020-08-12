@@ -43,6 +43,12 @@ Model::readOBJ(std::string path)
   return true;
 }
 
+std::vector<std::array<float, 3>> const&
+Model::positions() const
+{
+  return m_positions;
+}
+
 std::vector<float>
 Model::vertexBuffer() const
 {
@@ -62,6 +68,12 @@ Model::vertexBuffer() const
 
 std::size_t
 Model::vertexCount() const
+{
+  return m_positions.size();
+}
+
+std::size_t
+Model::vertexRenderSize() const
 {
   return m_posIdx.size();
 }

@@ -19,10 +19,13 @@ MainWindow::MainWindow(std::string name, int width, int height)
   // Some lighting problem with Perspective mode
   // m_camera->SetProjection(Camera::Projection::Perspective);
   m_camera->SetCenter(m_scale / 2, m_scale / 2, m_scale / 2);
+
+  m_random = new RandomVec<1>();
 }
 
 MainWindow::~MainWindow()
 {
+  delete m_random;
   delete m_model;
   delete m_lattice;
   delete m_camera;
@@ -49,7 +52,7 @@ MainWindow::paintGL()
   for (auto const& n : neurons) {
     m_shader->SetUniformMatrix4fv("modelMat",
                                   glm::translate(glm::mat4(1.0f), m_scale * glm::vec3{n[0], n[1], n[2]}) * scaleMat);
-    glDrawArrays(GL_TRIANGLES, 0, m_model->vertexCount());
+    glDrawArrays(GL_TRIANGLES, 0, m_model->vertexRenderSize());
   }
 
   auto const size = m_lattice->dimension();
@@ -83,13 +86,26 @@ MainWindow::paintGL()
   glNamedBufferData(m_vboLines, gridLines.size() * sizeof(float), gridLines.data(), GL_STATIC_DRAW);
   glDrawArrays(GL_LINES, 0, indices.size());
 
-  // ImGui_ImplOpenGL3_NewFrame();
-  // ImGui_ImplSDL2_NewFrame(m_window);
-  // ImGui::NewFrame();
-  // ImGui::Begin("Surface Fitting");
-  // ImGui::End();
-  // ImGui::Render();
-  // ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+  static bool start = false;
+  if (start && !m_lattice->isFinished()) {
+    int const idx = static_cast<int>(m_random->vec()[0] * (m_model->vertexCount() - 1));
+    std::vector<float> weights;
+    for (auto w : m_model->positions()[idx]) {
+      weights.push_back(w);
+    }
+    m_lattice->input(weights);
+  }
+  ImGui_ImplOpenGL3_NewFrame();
+  ImGui_ImplSDL2_NewFrame(m_window);
+  ImGui::NewFrame();
+  ImGui::Begin("Surface Fitting");
+  ImGui::Text("Iterations: %d", m_lattice->iterations());
+  if (ImGui::Button("Start")) {
+    start = true;
+  }
+  ImGui::End();
+  ImGui::Render();
+  ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
   SDL_GL_SwapWindow(m_window);
 }
@@ -129,7 +145,7 @@ MainWindow::initializeGL()
   auto const stride = 3 * sizeof(float);
   glCreateBuffers(1, &m_vbo);
   glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, stride);
-  glVertexArrayVertexBuffer(m_vao, 1, m_vbo, m_model->vertexCount() * stride, stride);
+  glVertexArrayVertexBuffer(m_vao, 1, m_vbo, m_model->vertexRenderSize() * stride, stride);
   glNamedBufferStorage(m_vbo, buffer.size() * sizeof(float), buffer.data(), GL_DYNAMIC_STORAGE_BIT);
 
   glEnableVertexAttribArray(0);

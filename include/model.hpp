@@ -19,6 +19,8 @@ class Model
 public:
   Model();
   bool readOBJ(std::string path);
+  std::vector<std::array<float, 3>> const& positions() const;
   std::vector<float> vertexBuffer() const;
   std::size_t vertexCount() const;
+  std::size_t vertexRenderSize() const;
 };
