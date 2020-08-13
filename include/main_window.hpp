@@ -13,6 +13,7 @@
 #include <imgui_impl_opengl3.h>
 #include <imgui_impl_sdl.h>
 
+#include <filesystem>
 #include <iostream>
 #include <string>
 
@@ -34,6 +35,8 @@ class MainWindow : public SDLOpenGLWindow
   Model* m_model;
   RandomIntNumber<unsigned int>* m_random;
   std::vector<unsigned short> m_latticeIndices;
+
+  void importFonts(std::filesystem::path dir_path);
 
 public:
   MainWindow(std::string name, int width, int height);
