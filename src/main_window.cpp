@@ -34,7 +34,7 @@ MainWindow::~MainWindow()
 void
 MainWindow::paintGL()
 {
-  static auto const scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3{0.5f, 0.5f, 0.5f});
+  static auto const scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.6f);
   glViewport(0, 0, m_width, m_height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -44,45 +44,29 @@ MainWindow::paintGL()
   m_shader->SetUniform3fv("lightSrc", m_camera->Position());
   m_shader->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
 
-  auto const neurons = m_lattice->neurons();
+  auto const& neurons = m_lattice->neurons();
+
+  std::vector<std::array<float, 3>> renderPos;
+  renderPos.reserve(neurons.size());
+  for (auto const& n : neurons) {
+    float const x = n[0] * m_scale;
+    float const y = n[1] * m_scale;
+    float const z = n[2] * m_scale;
+    renderPos.push_back({x, y, z});
+  }
 
   glBindVertexArray(m_vao);
-  for (auto const& n : neurons) {
-    m_shader->SetUniformMatrix4fv("modelMat",
-                                  glm::translate(glm::mat4(1.0f), m_scale * glm::vec3{n[0], n[1], n[2]}) * scaleMat);
-    glDrawArrays(GL_TRIANGLES, 0, m_model->vertexRenderSize());
+  for (auto p : renderPos) {
+    m_shader->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), glm::vec3{p[0], p[1], p[2]}) * scaleMat);
+    glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
   }
 
-  auto const size = m_lattice->dimension();
-  std::vector<int> indices;
-  std::vector<float> gridLines;
-
-  for (int i = 0; i < size - 1; ++i) {
-    for (int j = 0; j < size - 1; ++j) {
-      indices.push_back(i * size + j);
-      indices.push_back(i * size + j + 1);
-      indices.push_back(i * size + j + 1);
-      indices.push_back((i + 1) * size + j + 1);
-      indices.push_back((i + 1) * size + j + 1);
-      indices.push_back((i + 1) * size + j);
-      indices.push_back((i + 1) * size + j);
-      indices.push_back(i * size + j);
-    }
-  }
-  for (int i : indices) {
-    std::vector<float> weights = neurons[i].weights();
-    for (auto& w : weights) {
-      w *= m_scale;
-    }
-    gridLines.insert(gridLines.begin(), weights.begin(), weights.end());
-  }
-
+  glBindVertexArray(m_vaoLines);
   m_shaderLines->Use();
   m_shaderLines->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
   m_shaderLines->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-  glBindVertexArray(m_vaoLines);
-  glNamedBufferData(m_vboLines, gridLines.size() * sizeof(float), gridLines.data(), GL_STATIC_DRAW);
-  glDrawArrays(GL_LINES, 0, indices.size());
+  glNamedBufferSubData(m_vboLines, 0, renderPos.size() * 3 * sizeof(float), renderPos.data());
+  glDrawElements(GL_LINES, m_latticeIndices.size(), GL_UNSIGNED_SHORT, 0);
 
   static bool start = false;
   if (start && !m_lattice->isFinished()) {
@@ -143,7 +127,7 @@ MainWindow::initializeGL()
   auto const stride = 3 * sizeof(float);
   glCreateBuffers(1, &m_vbo);
   glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, stride);
-  glVertexArrayVertexBuffer(m_vao, 1, m_vbo, m_model->vertexRenderSize() * stride, stride);
+  glVertexArrayVertexBuffer(m_vao, 1, m_vbo, m_model->drawArrayCount() * stride, stride);
   glNamedBufferStorage(m_vbo, buffer.size() * sizeof(float), buffer.data(), GL_DYNAMIC_STORAGE_BIT);
 
   glEnableVertexAttribArray(0);
@@ -159,10 +143,28 @@ MainWindow::initializeGL()
 
   /** Grid Lines **********************************************************/
   glCreateVertexArrays(1, &m_vaoLines);
+  glCreateBuffers(1, &m_vboLines);
+  glCreateBuffers(1, &m_iboLines);
   glBindVertexArray(m_vaoLines);
   glVertexArrayAttribFormat(m_vaoLines, 0, 3, GL_FLOAT, GL_FALSE, 0);
-  glCreateBuffers(1, &m_vboLines);
   glVertexArrayVertexBuffer(m_vaoLines, 0, m_vboLines, 0, 3 * sizeof(float));
+  glNamedBufferStorage(m_vboLines, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboLines);
+  auto const size = m_lattice->dimension();
+  for (int i = 0; i < size - 1; ++i) {
+    for (int j = 0; j < size - 1; ++j) {
+      m_latticeIndices.push_back(i * size + j);
+      m_latticeIndices.push_back(i * size + j + 1);
+      m_latticeIndices.push_back(i * size + j + 1);
+      m_latticeIndices.push_back((i + 1) * size + j + 1);
+      m_latticeIndices.push_back((i + 1) * size + j + 1);
+      m_latticeIndices.push_back((i + 1) * size + j);
+      m_latticeIndices.push_back((i + 1) * size + j);
+      m_latticeIndices.push_back(i * size + j);
+    }
+  }
+  glNamedBufferStorage(
+    m_iboLines, m_latticeIndices.size() * sizeof(unsigned short), m_latticeIndices.data(), GL_DYNAMIC_STORAGE_BIT);
   glEnableVertexAttribArray(0); // IMPORTANT!
 
   m_shaderLines = new Shader();

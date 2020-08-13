@@ -22,6 +22,7 @@ class MainWindow : public SDLOpenGLWindow
   GLuint m_vbo;
   GLuint m_vaoLines;
   GLuint m_vboLines;
+  GLuint m_iboLines;
   float m_scale;
   Shader* m_shader;
   Shader* m_shaderLines;
@@ -29,6 +30,7 @@ class MainWindow : public SDLOpenGLWindow
   Lattice* m_lattice;
   Model* m_model;
   RandomIntNumber<unsigned int>* m_random;
+  std::vector<unsigned short> m_latticeIndices;
 
 public:
   MainWindow(std::string name, int width, int height);

@@ -73,7 +73,7 @@ Model::vertexCount() const
 }
 
 std::size_t
-Model::vertexRenderSize() const
+Model::drawArrayCount() const
 {
   return m_posIdx.size();
 }
