@@ -7,6 +7,7 @@ out vec4 outColor;
 uniform vec3 lightSrc;
 uniform vec3 lightColor;
 uniform vec3 viewPos;
+uniform float alpha;
 
 void main()
 {
@@ -24,5 +25,5 @@ void main()
   vec3 reflectDir = reflect(-lightDir, norm);
   vec3 specular = specularCoef * pow(max(dot(viewDir, reflectDir), 0.0), 32) * lightColor;
 
-  outColor = vec4((ambient + diffusion + specular), 1.0);
+  outColor = vec4((ambient + diffusion + specular), alpha);
 }

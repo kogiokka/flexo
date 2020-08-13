@@ -6,13 +6,16 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_vbo(0)
   , m_vaoLines(0)
   , m_scale(50.0f)
+  , m_showModel(true)
+  , m_showLines(true)
+  , m_startTraining(false)
   , m_shader(nullptr)
   , m_shaderLines(nullptr)
   , m_camera(nullptr)
   , m_lattice(nullptr)
   , m_model(nullptr)
 {
-  m_lattice = new Lattice(16, 1000, 0.1f);
+  m_lattice = new Lattice(32, 2000, 0.3f);
   m_camera = new Camera();
   m_camera->SetAspectRatio(m_width, m_height);
   m_camera->SetProjection(Camera::Projection::Orthographic);
@@ -35,12 +38,14 @@ void
 MainWindow::paintGL()
 {
   static auto const scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.6f);
+
   glViewport(0, 0, m_width, m_height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   m_shader->Use();
   m_shader->SetUniform3fv("viewPos", m_camera->Position());
+  m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
   m_shader->SetUniform3fv("lightSrc", m_camera->Position());
   m_shader->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
 
@@ -56,25 +61,29 @@ MainWindow::paintGL()
   }
 
   glBindVertexArray(m_vao);
+  m_shader->SetUniform1f("alpha", 1.0f);
   for (auto p : renderPos) {
     m_shader->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), glm::vec3{p[0], p[1], p[2]}) * scaleMat);
     glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
   }
 
-  glBindVertexArray(m_vaoLines);
-  m_shaderLines->Use();
-  m_shaderLines->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
-  m_shaderLines->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-  glNamedBufferSubData(m_vboLines, 0, renderPos.size() * 3 * sizeof(float), renderPos.data());
-  glDrawElements(GL_LINES, m_latticeIndices.size(), GL_UNSIGNED_SHORT, 0);
+  if (m_showModel) {
+    m_shader->SetUniform1f("alpha", 0.4f);
+    m_shader->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * m_scale));
+    glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
+  }
 
-  static bool start = false;
-  if (start && !m_lattice->isFinished()) {
-    std::vector<float> weights;
-    for (auto w : m_model->positions()[m_random->get()]) {
-      weights.push_back(w);
-    }
-    m_lattice->input(weights);
+  if (m_showLines) {
+    glBindVertexArray(m_vaoLines);
+    m_shaderLines->Use();
+    m_shaderLines->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
+    m_shaderLines->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
+    glNamedBufferSubData(m_vboLines, 0, renderPos.size() * 3 * sizeof(float), renderPos.data());
+    glDrawElements(GL_LINES, m_latticeIndices.size(), GL_UNSIGNED_SHORT, 0);
+  }
+
+  if (m_startTraining && !m_lattice->isFinished()) {
+    m_lattice->input<3>(m_model->positions()[m_random->get()]);
   }
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplSDL2_NewFrame(m_window);
@@ -82,7 +91,13 @@ MainWindow::paintGL()
   ImGui::Begin("Surface Fitting");
   ImGui::Text("Iterations: %d", m_lattice->iterations());
   if (ImGui::Button("Start")) {
-    start = true;
+    m_startTraining = true;
+  }
+  if (ImGui::Button("Toggle Model")) {
+    m_showModel = !m_showModel;
+  }
+  if (ImGui::Button("Toggle Lines")) {
+    m_showLines = !m_showLines;
   }
   ImGui::End();
   ImGui::Render();
@@ -137,8 +152,6 @@ MainWindow::initializeGL()
   m_shader->Attach(GL_VERTEX_SHADER, "shader/default.vert");
   m_shader->Attach(GL_FRAGMENT_SHADER, "shader/default.frag");
   m_shader->Link();
-  m_shader->Use();
-  m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
   /** Grid Nodes END **********************************************************/
 
   /** Grid Lines **********************************************************/
@@ -174,6 +187,8 @@ MainWindow::initializeGL()
   /** Grid Lines END ******************************************************/
 
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_BLEND);
+  glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
   IMGUI_CHECKVERSION();
   ImGui::CreateContext();

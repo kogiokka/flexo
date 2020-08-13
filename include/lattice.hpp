@@ -32,4 +32,15 @@ public:
   float neighborhoodRadius() const;
   float error() const;
   std::vector<Node> const& neurons() const;
+
+  template<std::size_t S>
+  bool input(std::array<float, S> in);
 };
+
+template<std::size_t S>
+bool
+Lattice::input(std::array<float, S> in)
+{
+  input(std::vector<float>(in.begin(), in.end()));
+  return true;
+}

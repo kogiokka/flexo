@@ -2,23 +2,23 @@
 
 #include <imgui.h>
 
-Lattice::Lattice(int size, int iterations, float rate)
-  : m_dimen(size)
+Lattice::Lattice(int dimen, int iterations, float learningRate)
+  : m_dimen(dimen)
   , m_currIteration(0)
   , m_leftIteration(iterations)
-  , m_currRate(rate)
-  , m_beginRate(rate)
-  , m_neighborhoodRadius(size)
+  , m_currRate(learningRate)
+  , m_beginRate(learningRate)
+  , m_neighborhoodRadius(dimen)
   , m_error(0.0f)
 {
   RandomRealNumber<float> random(0.0f, 1.0f);
-  for (int i = 0; i < size; ++i) {
-    for (int j = 0; j < size; ++j) {
+  for (int i = 0; i < dimen; ++i) {
+    for (int j = 0; j < dimen; ++j) {
       auto const& w = random.vector(3);
       m_neurons.emplace_back(i, j, std::vector<float>(w.begin(), w.end()));
     }
   }
-  m_timeConstant = iterations / log(size);
+  m_timeConstant = iterations / log(dimen);
 }
 
 bool
