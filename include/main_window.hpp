@@ -26,6 +26,7 @@ class MainWindow : public SDLOpenGLWindow
   GLuint m_iboLines;
   float m_scale;
   bool m_showModel;
+  bool m_showPoints;
   bool m_showLines;
   bool m_startTraining;
   Shader* m_shader;
