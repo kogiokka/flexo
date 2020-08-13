@@ -19,7 +19,8 @@ class Lattice
   float m_currRate;
   float m_beginRate;
   float m_neighborhoodRadius;
-  float m_error;
+  RandomRealNumber<float> m_random;
+  std::array<float, 3> m_center;
   std::vector<Node> m_neurons;
 
 public:
@@ -30,7 +31,6 @@ public:
   int iterations() const;
   float learningRate() const;
   float neighborhoodRadius() const;
-  float error() const;
   std::vector<Node> const& neurons() const;
 
   template<std::size_t S>

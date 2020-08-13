@@ -9,12 +9,11 @@ Lattice::Lattice(int dimen, int iterations, float learningRate)
   , m_currRate(learningRate)
   , m_beginRate(learningRate)
   , m_neighborhoodRadius(dimen)
-  , m_error(0.0f)
+  , m_random(-1.0f, 1.0f)
 {
-  RandomRealNumber<float> random(0.0f, 1.0f);
   for (int i = 0; i < dimen; ++i) {
     for (int j = 0; j < dimen; ++j) {
-      auto const& w = random.vector(3);
+      auto w = m_random.vector(3);
       m_neurons.emplace_back(i, j, std::vector<float>(w.begin(), w.end()));
     }
   }
@@ -64,12 +63,6 @@ Lattice::input(std::vector<float> in)
   --m_leftIteration;
 
   return true;
-}
-
-float
-Lattice::error() const
-{
-  return m_error;
 }
 
 int
