@@ -22,7 +22,6 @@ MainWindow::MainWindow(std::string name, int width, int height)
   m_camera->SetProjection(Camera::Projection::Orthographic);
   // Some lighting problem with Perspective mode
   // m_camera->SetProjection(Camera::Projection::Perspective);
-  m_camera->SetCenter(m_scale / 2, m_scale / 2, m_scale / 2);
 }
 
 MainWindow::~MainWindow()
@@ -224,7 +223,6 @@ MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
     }
     break;
   case SDLK_r:
-    m_camera->SetCenter(m_scale / 2, m_scale / 2, m_scale / 2);
     break;
   }
 }
