@@ -4,7 +4,6 @@ MainWindow::MainWindow(std::string name, int width, int height)
   : SDLOpenGLWindow(name, width, height)
   , m_vao(0)
   , m_vbo(0)
-  , m_vaoLines(0)
   , m_vboPos(0)
   , m_scale(50.0f)
   , m_showModel(true)
@@ -65,9 +64,8 @@ MainWindow::paintGL()
     m_shaderNodes->SetUniform3fv("lightSrc", m_camera->Position());
     m_shaderNodes->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
     m_shaderNodes->SetUniformMatrix4fv("modelMat", scaleMat);
+    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, 3 * sizeof(float));
     glEnableVertexArrayAttrib(m_vao, 2);
-    glVertexArrayBindingDivisor(m_vao, 2, 1);
-    glBindVertexArray(m_vao);
     glDrawArraysInstanced(GL_TRIANGLES, 0, m_model->drawArrayCount(), renderPos.size());
     glDisableVertexArrayAttrib(m_vao, 2);
   }
@@ -76,8 +74,10 @@ MainWindow::paintGL()
     m_shaderLines->Use();
     m_shaderLines->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
     m_shaderLines->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-    glBindVertexArray(m_vaoLines);
+    glVertexArrayVertexBuffer(m_vao, 0, m_vboPos, 0, 3 * sizeof(float));
+    glDisableVertexArrayAttrib(m_vao, 1);
     glDrawElements(GL_LINES, m_latticeIndices.size(), GL_UNSIGNED_SHORT, 0);
+    glEnableVertexArrayAttrib(m_vao, 1);
   }
 
   if (m_showModel) {
@@ -88,7 +88,7 @@ MainWindow::paintGL()
     m_shader->SetUniform3fv("lightSrc", m_camera->Position());
     m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     m_shader->SetUniform1f("alpha", 0.6f);
-    glBindVertexArray(m_vao);
+    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, 3 * sizeof(float));
     glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
   }
 
@@ -158,15 +158,14 @@ MainWindow::paintGL()
 
         glCreateBuffers(1, &m_vboPos);
         glCreateBuffers(1, &m_iboLines);
-        glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
-        glVertexArrayVertexBuffer(m_vaoLines, 0, m_vboPos, 0, 3 * sizeof(float));
-        glVertexArrayElementBuffer(m_vaoLines, m_iboLines);
         glNamedBufferStorage(
           m_vboPos, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
         glNamedBufferStorage(m_iboLines,
                              m_latticeIndices.size() * sizeof(unsigned short),
                              m_latticeIndices.data(),
                              GL_DYNAMIC_STORAGE_BIT);
+        glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
+        glVertexArrayElementBuffer(m_vao, m_iboLines);
       }
     }
     ImGui::TreePop();
@@ -243,15 +242,10 @@ MainWindow::initializeGL()
   /** Grid Lines **********************************************************/
   m_latticeIndices = m_lattice->indices();
 
-  glCreateVertexArrays(1, &m_vaoLines);
-  glVertexArrayAttribFormat(m_vaoLines, 0, 3, GL_FLOAT, GL_FALSE, 0);
-
   glCreateBuffers(1, &m_vboPos);
-  glVertexArrayVertexBuffer(m_vaoLines, 0, m_vboPos, 0, 3 * sizeof(float));
   glNamedBufferStorage(m_vboPos, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
   glCreateBuffers(1, &m_iboLines);
-  glVertexArrayElementBuffer(m_vaoLines, m_iboLines);
   glNamedBufferStorage(
     m_iboLines, m_latticeIndices.size() * sizeof(unsigned short), m_latticeIndices.data(), GL_DYNAMIC_STORAGE_BIT);
 
@@ -260,7 +254,6 @@ MainWindow::initializeGL()
   m_shaderLines->Attach(GL_FRAGMENT_SHADER, "shader/lines.frag");
   m_shaderLines->Link();
 
-  glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
   m_shaderNodes = new Shader();
   m_shaderNodes->Attach(GL_VERTEX_SHADER, "shader/nodes.vert");
   m_shaderNodes->Attach(GL_FRAGMENT_SHADER, "shader/nodes.frag");
@@ -269,7 +262,10 @@ MainWindow::initializeGL()
 
   glEnableVertexArrayAttrib(m_vao, 0);
   glEnableVertexArrayAttrib(m_vao, 1);
-  glEnableVertexArrayAttrib(m_vaoLines, 0);
+  glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
+  glVertexArrayElementBuffer(m_vao, m_iboLines);
+  glVertexArrayBindingDivisor(m_vao, 2, 1);
+  glBindVertexArray(m_vao);
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);

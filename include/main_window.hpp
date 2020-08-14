@@ -21,7 +21,6 @@ class MainWindow : public SDLOpenGLWindow
 {
   GLuint m_vao;
   GLuint m_vbo;
-  GLuint m_vaoLines;
   GLuint m_vboPos;
   GLuint m_iboLines;
   float m_scale;
