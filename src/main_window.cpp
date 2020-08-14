@@ -96,9 +96,6 @@ MainWindow::paintGL()
   ImGui::Begin("Surface Fitting");
 
   ImVec2 const btnSize(120, 30);
-  ImGuiStyle& style = ImGui::GetStyle();
-  style.FrameRounding = 3.0f;
-  style.FrameBorderSize = 1.0f;
 
   if (ImGui::TreeNodeEx("SOM Control", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::Text("Iterations: %d", m_lattice->currentIteration());
@@ -269,6 +266,9 @@ MainWindow::initializeGL()
   ImGui::CreateContext();
   ImGui_ImplOpenGL3_Init();
   ImGui_ImplSDL2_InitForOpenGL(m_window, m_glContext);
+  ImGuiStyle& style = ImGui::GetStyle();
+  style.FrameRounding = 3.0f;
+  style.FrameBorderSize = 1.0f;
 
   importFonts("res/fonts");
 }
