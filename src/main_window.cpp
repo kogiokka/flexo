@@ -113,16 +113,6 @@ MainWindow::paintGL()
     if (ImGui::Button("Stop", btnSize)) {
       m_isTraining = false;
     }
-    ImGui::SameLine();
-    if (ImGui::Button("Reset", btnSize)) {
-      m_isTraining = false;
-      delete m_lattice;
-      m_lattice = new Lattice(s_dimen, s_iterNum, s_rate);
-      m_latticeIndices = m_lattice->indices();
-      s_iterNum = m_lattice->maxIterations();
-      s_dimen = m_lattice->dimension();
-      s_rate = m_lattice->initialRate();
-    }
     ImGui::TreePop();
   }
 
@@ -152,26 +142,35 @@ MainWindow::paintGL()
 
     if (ImGui::Button("Confirm and Reset##lattice")) {
       m_isTraining = false;
+      bool const isSameIter = (s_iterNum == m_lattice->maxIterations());
+      bool const isSameDimen = (s_dimen == m_lattice->dimension());
+      bool const isSameRate = (s_rate == m_lattice->initialRate());
+      bool const changed = !(isSameIter && isSameDimen && isSameRate);
       delete m_lattice;
       m_lattice = new Lattice(s_dimen, s_iterNum, s_rate);
       m_latticeIndices = m_lattice->indices();
-      s_iterNum = m_lattice->maxIterations();
-      s_dimen = m_lattice->dimension();
-      s_rate = m_lattice->initialRate();
 
-      glDeleteBuffers(1, &m_vboPos);
-      glDeleteBuffers(1, &m_iboLines);
-      glCreateBuffers(1, &m_vboPos);
-      glCreateBuffers(1, &m_iboLines);
-      glNamedBufferStorage(m_vboPos, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
-      glNamedBufferStorage(
-        m_iboLines, m_latticeIndices.size() * sizeof(unsigned short), m_latticeIndices.data(), GL_DYNAMIC_STORAGE_BIT);
+      if (changed) {
+        s_iterNum = m_lattice->maxIterations();
+        s_dimen = m_lattice->dimension();
+        s_rate = m_lattice->initialRate();
+        glDeleteBuffers(1, &m_vboPos);
+        glDeleteBuffers(1, &m_iboLines);
+        glCreateBuffers(1, &m_vboPos);
+        glCreateBuffers(1, &m_iboLines);
+        glNamedBufferStorage(
+          m_vboPos, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+        glNamedBufferStorage(m_iboLines,
+                             m_latticeIndices.size() * sizeof(unsigned short),
+                             m_latticeIndices.data(),
+                             GL_DYNAMIC_STORAGE_BIT);
 
-      glBindVertexArray(m_vaoLines);
-      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboLines); // IMPORTANT: Bind the element buffer to the VAO again!
-      glVertexArrayVertexBuffer(m_vaoLines, 0, m_vboPos, 0, 3 * sizeof(float));
-      glBindVertexArray(m_vao);
-      glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
+        glBindVertexArray(m_vaoLines);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboLines); // IMPORTANT: Bind the element buffer to the VAO again!
+        glVertexArrayVertexBuffer(m_vaoLines, 0, m_vboPos, 0, 3 * sizeof(float));
+        glBindVertexArray(m_vao);
+        glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
+      }
     }
     ImGui::TreePop();
   }
