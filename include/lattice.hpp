@@ -17,7 +17,7 @@ class Lattice
   int m_remainingIter;
   float m_timeConst;
   float m_currRate;
-  float m_beginRate;
+  float m_initialRate;
   float m_neighborhoodRadius;
   RandomRealNumber<float> m_random;
   std::array<float, 3> m_center;
@@ -26,16 +26,16 @@ class Lattice
 public:
   Lattice(int size, int iterations, float rate);
   bool input(std::vector<float> in);
-  bool isFinished() const;
   int dimension() const;
   int maxIterations() const;
   int currentIteration() const;
-  float learningRate() const;
+  float currentRate() const;
+  float initialRate() const;
   float neighborhoodRadius() const;
-  std::vector<Node> const& neurons() const;
   template<std::size_t S>
   bool input(std::array<float, S> in);
-  void setIterations(unsigned int num);
+  std::vector<Node> const& neurons() const;
+  std::vector<unsigned short> indices() const;
 };
 
 template<std::size_t S>

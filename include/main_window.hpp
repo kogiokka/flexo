@@ -23,7 +23,7 @@ class MainWindow : public SDLOpenGLWindow
   GLuint m_vbo;
   GLuint m_vaoLines;
   GLuint m_vboLines;
-  GLuint m_iboLines;
+  GLuint m_ibo;
   float m_scale;
   bool m_showModel;
   bool m_showPoints;

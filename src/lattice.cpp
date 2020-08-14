@@ -7,7 +7,7 @@ Lattice::Lattice(int dimen, int iterations, float learningRate)
   , m_maxIter(iterations)
   , m_remainingIter(iterations)
   , m_currRate(learningRate)
-  , m_beginRate(learningRate)
+  , m_initialRate(learningRate)
   , m_neighborhoodRadius(dimen)
   , m_random(-1.0f, 1.0f)
 {
@@ -60,19 +60,11 @@ Lattice::input(std::vector<float> in)
     }
   }
 
-  m_currRate = m_beginRate * expf(-currentIter / m_remainingIter); // iteration_left_ > 0
+  m_currRate = m_initialRate * expf(-currentIter / m_remainingIter); // iteration_left_ > 0
 
   --m_remainingIter;
 
   return true;
-}
-
-void
-Lattice::setIterations(unsigned int num)
-{
-  m_maxIter = num;
-  m_remainingIter = num;
-  m_timeConst = m_remainingIter / log(m_dimen);
 }
 
 int
@@ -106,13 +98,34 @@ Lattice::neurons() const
 }
 
 float
-Lattice::learningRate() const
+Lattice::initialRate() const
+{
+  return m_initialRate;
+}
+
+float
+Lattice::currentRate() const
 {
   return m_currRate;
 }
 
-bool
-Lattice::isFinished() const
+std::vector<unsigned short>
+Lattice::indices() const
 {
-  return (m_remainingIter <= 0);
+  std::vector<unsigned short> indices;
+
+  for (int i = 0; i < m_dimen - 1; ++i) {
+    for (int j = 0; j < m_dimen - 1; ++j) {
+      indices.push_back(i * m_dimen + j);
+      indices.push_back(i * m_dimen + j + 1);
+      indices.push_back(i * m_dimen + j + 1);
+      indices.push_back((i + 1) * m_dimen + j + 1);
+      indices.push_back((i + 1) * m_dimen + j + 1);
+      indices.push_back((i + 1) * m_dimen + j);
+      indices.push_back((i + 1) * m_dimen + j);
+      indices.push_back(i * m_dimen + j);
+    }
+  }
+
+  return indices;
 }

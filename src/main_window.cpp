@@ -36,12 +36,15 @@ void
 MainWindow::paintGL()
 {
   static auto const scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.4f);
+  static auto s_iterNum = m_lattice->maxIterations();
+  static auto s_dimen = m_lattice->dimension();
+  static auto s_rate = m_lattice->initialRate();
 
   glViewport(0, 0, m_width, m_height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  auto const& neurons = m_lattice->neurons();
 
+  auto const& neurons = m_lattice->neurons();
   std::vector<std::array<float, 3>> renderPos;
   renderPos.reserve(neurons.size());
   for (auto const& n : neurons) {
@@ -86,49 +89,102 @@ MainWindow::paintGL()
   if (m_isTraining) {
     m_isTraining = m_lattice->input<3>(m_model->positions()[m_random->get()]);
   }
+
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplSDL2_NewFrame(m_window);
   ImGui::NewFrame();
   ImGui::Begin("Surface Fitting");
 
-  ImGui::Text("Iterations: %d", m_lattice->currentIteration());
-  static int inputIterNum = m_lattice->maxIterations();
-  ImGui::Text("Max Iterations: %d", m_lattice->maxIterations());
-  ImGui::SetNextItemWidth(200);
-  if (!m_isTraining) {
-    ImGui::InputInt("", &inputIterNum, 500, 2000);
-    if (inputIterNum < 0) {
-      inputIterNum = 0;
+  ImVec2 const btnSize(120, 30);
+  ImGuiStyle& style = ImGui::GetStyle();
+  style.FrameRounding = 3.0f;
+  style.FrameBorderSize = 1.0f;
+
+  if (ImGui::TreeNodeEx("SOM Control", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Text("Iterations: %d", m_lattice->currentIteration());
+    if (ImGui::Button("Start", btnSize)) {
+      m_isTraining = true;
     }
     ImGui::SameLine();
-    if (ImGui::Button("Confirm")) {
-      m_lattice->setIterations(inputIterNum);
+    if (ImGui::Button("Stop", btnSize)) {
+      m_isTraining = false;
     }
+    ImGui::SameLine();
+    if (ImGui::Button("Reset", btnSize)) {
+      m_isTraining = false;
+      delete m_lattice;
+      m_lattice = new Lattice(s_dimen, s_iterNum, s_rate);
+      m_latticeIndices = m_lattice->indices();
+      s_iterNum = m_lattice->maxIterations();
+      s_dimen = m_lattice->dimension();
+      s_rate = m_lattice->initialRate();
+    }
+    ImGui::TreePop();
   }
 
-  if (ImGui::Button("Start")) {
-    m_isTraining = true;
+  if (ImGui::TreeNodeEx("SOM Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::SetNextItemWidth(200);
+    if (ImGui::InputInt("Max Iterations##iter", &s_iterNum, 500, 2000)) {
+      if (s_iterNum < 0) {
+        s_iterNum = 0;
+      }
+    }
+    ImGui::SetNextItemWidth(200);
+    if (ImGui::InputInt("Lattice Dimensions##dimen", &s_dimen, 1, 5)) {
+      if (s_dimen < 2) {
+        s_dimen = 2;
+      } else if (s_dimen > 128) {
+        s_dimen = 128;
+      }
+    }
+    ImGui::SetNextItemWidth(200);
+    if (ImGui::InputFloat("Learning Rate##rate", &s_rate, 0.05f, 0.1f)) {
+      if (s_rate < 0.0f) {
+        s_rate = 0.0f;
+      } else if (s_rate > 1.0f) {
+        s_rate = 1.0f;
+      }
+    }
+
+    if (ImGui::Button("Confirm and Reset##lattice")) {
+      m_isTraining = false;
+      delete m_lattice;
+      m_lattice = new Lattice(s_dimen, s_iterNum, s_rate);
+      m_latticeIndices = m_lattice->indices();
+      s_iterNum = m_lattice->maxIterations();
+      s_dimen = m_lattice->dimension();
+      s_rate = m_lattice->initialRate();
+
+      glDeleteBuffers(1, &m_vboLines);
+      glDeleteBuffers(1, &m_ibo);
+      glCreateBuffers(1, &m_vboLines);
+      glCreateBuffers(1, &m_ibo);
+      glBindVertexArray(m_vaoLines);
+      glVertexArrayVertexBuffer(m_vaoLines, 0, m_vboLines, 0, 3 * sizeof(float));
+      glNamedBufferStorage(
+        m_vboLines, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+      glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+      glNamedBufferStorage(
+        m_ibo, m_latticeIndices.size() * sizeof(unsigned short), m_latticeIndices.data(), GL_DYNAMIC_STORAGE_BIT);
+    }
+    ImGui::TreePop();
   }
-  ImGui::SameLine();
-  if (ImGui::Button("Stop")) {
-    m_isTraining = false;
+
+  if (ImGui::TreeNodeEx("Render Options", ImGuiTreeNodeFlags_DefaultOpen)) {
+    if (ImGui::Button("Toggle Model", btnSize)) {
+      m_showModel = !m_showModel;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Toggle Points", btnSize)) {
+      m_showPoints = !m_showPoints;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Toggle Lines", btnSize)) {
+      m_showLines = !m_showLines;
+    }
+    ImGui::TreePop();
   }
-  ImGui::SameLine();
-  if (ImGui::Button("Reset")) {
-    m_isTraining = false;
-    delete m_lattice;
-    m_lattice = new Lattice(64, 50000, 0.1f);
-    inputIterNum = m_lattice->maxIterations();
-  }
-  if (ImGui::Button("Toggle Model")) {
-    m_showModel = !m_showModel;
-  }
-  if (ImGui::Button("Toggle Points")) {
-    m_showPoints = !m_showPoints;
-  }
-  if (ImGui::Button("Toggle Lines")) {
-    m_showLines = !m_showLines;
-  }
+
   ImGui::End();
 
   ImGui::Render();
@@ -188,27 +244,15 @@ MainWindow::initializeGL()
   /** Grid Lines **********************************************************/
   glCreateVertexArrays(1, &m_vaoLines);
   glCreateBuffers(1, &m_vboLines);
-  glCreateBuffers(1, &m_iboLines);
   glBindVertexArray(m_vaoLines);
   glVertexArrayAttribFormat(m_vaoLines, 0, 3, GL_FLOAT, GL_FALSE, 0);
   glVertexArrayVertexBuffer(m_vaoLines, 0, m_vboLines, 0, 3 * sizeof(float));
   glNamedBufferStorage(m_vboLines, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_iboLines);
-  auto const size = m_lattice->dimension();
-  for (int i = 0; i < size - 1; ++i) {
-    for (int j = 0; j < size - 1; ++j) {
-      m_latticeIndices.push_back(i * size + j);
-      m_latticeIndices.push_back(i * size + j + 1);
-      m_latticeIndices.push_back(i * size + j + 1);
-      m_latticeIndices.push_back((i + 1) * size + j + 1);
-      m_latticeIndices.push_back((i + 1) * size + j + 1);
-      m_latticeIndices.push_back((i + 1) * size + j);
-      m_latticeIndices.push_back((i + 1) * size + j);
-      m_latticeIndices.push_back(i * size + j);
-    }
-  }
+  glCreateBuffers(1, &m_ibo);
+  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, m_ibo);
+  m_latticeIndices = m_lattice->indices();
   glNamedBufferStorage(
-    m_iboLines, m_latticeIndices.size() * sizeof(unsigned short), m_latticeIndices.data(), GL_DYNAMIC_STORAGE_BIT);
+    m_ibo, m_latticeIndices.size() * sizeof(unsigned short), m_latticeIndices.data(), GL_DYNAMIC_STORAGE_BIT);
   glEnableVertexAttribArray(0); // IMPORTANT!
 
   m_shaderLines = new Shader();
