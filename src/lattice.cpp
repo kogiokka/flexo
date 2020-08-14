@@ -1,11 +1,11 @@
 #include "lattice.hpp"
 
-#include <imgui.h>
+#include <cassert>
 
 Lattice::Lattice(int dimen, int iterations, float learningRate)
   : m_dimen(dimen)
-  , m_currIteration(0)
-  , m_leftIteration(iterations)
+  , m_maxIter(iterations)
+  , m_remainingIter(iterations)
   , m_currRate(learningRate)
   , m_beginRate(learningRate)
   , m_neighborhoodRadius(dimen)
@@ -17,16 +17,19 @@ Lattice::Lattice(int dimen, int iterations, float learningRate)
       m_neurons.emplace_back(i, j, std::vector<float>(w.begin(), w.end()));
     }
   }
-  m_timeConstant = iterations / log(dimen);
+  m_timeConst = iterations / log(dimen);
 }
+
+#include <iostream>
 
 bool
 Lattice::input(std::vector<float> in)
 {
-  if (m_leftIteration <= 0)
+  if (m_remainingIter <= 0)
     return false;
 
-  m_neighborhoodRadius = m_dimen * exp(-m_currIteration / m_timeConstant);
+  int const currentIter = (m_maxIter - m_remainingIter);
+  m_neighborhoodRadius = m_dimen * exp(-currentIter / m_timeConst);
 
   std::unique_ptr<Node> bmu;
   float dist_min = std::numeric_limits<float>::max();
@@ -57,12 +60,19 @@ Lattice::input(std::vector<float> in)
     }
   }
 
-  m_currRate = m_beginRate * expf(-m_currIteration / m_leftIteration); // iteration_left_ > 0
+  m_currRate = m_beginRate * expf(-currentIter / m_remainingIter); // iteration_left_ > 0
 
-  ++m_currIteration;
-  --m_leftIteration;
+  --m_remainingIter;
 
   return true;
+}
+
+void
+Lattice::setIterations(unsigned int num)
+{
+  m_maxIter = num;
+  m_remainingIter = num;
+  m_timeConst = m_remainingIter / log(m_dimen);
 }
 
 int
@@ -72,9 +82,15 @@ Lattice::dimension() const
 }
 
 int
-Lattice::iterations() const
+Lattice::maxIterations() const
 {
-  return m_currIteration;
+  return m_maxIter;
+}
+
+int
+Lattice::currentIteration() const
+{
+  return m_maxIter - m_remainingIter;
 }
 
 float
@@ -98,5 +114,5 @@ Lattice::learningRate() const
 bool
 Lattice::isFinished() const
 {
-  return (m_leftIteration <= 0);
+  return (m_remainingIter <= 0);
 }

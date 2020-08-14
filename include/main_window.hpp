@@ -28,7 +28,7 @@ class MainWindow : public SDLOpenGLWindow
   bool m_showModel;
   bool m_showPoints;
   bool m_showLines;
-  bool m_startTraining;
+  bool m_isTraining;
   Shader* m_shader;
   Shader* m_shaderLines;
   Camera* m_camera;

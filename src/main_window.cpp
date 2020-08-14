@@ -9,7 +9,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_showModel(true)
   , m_showPoints(true)
   , m_showLines(true)
-  , m_startTraining(false)
+  , m_isTraining(false)
   , m_shader(nullptr)
   , m_shaderLines(nullptr)
   , m_camera(nullptr)
@@ -17,9 +17,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_model(nullptr)
 {
   m_lattice = new Lattice(64, 50000, 0.1f);
-  m_camera = new Camera();
-  m_camera->SetAspectRatio(m_width, m_height);
-  m_camera->SetProjection(Camera::Projection::Orthographic);
+  m_camera = new Camera(width, height);
   // Some lighting problem with Perspective mode
   // m_camera->SetProjection(Camera::Projection::Perspective);
 }
@@ -85,16 +83,42 @@ MainWindow::paintGL()
     glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
   }
 
-  if (m_startTraining && !m_lattice->isFinished()) {
-    m_lattice->input<3>(m_model->positions()[m_random->get()]);
+  if (m_isTraining) {
+    m_isTraining = m_lattice->input<3>(m_model->positions()[m_random->get()]);
   }
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplSDL2_NewFrame(m_window);
   ImGui::NewFrame();
   ImGui::Begin("Surface Fitting");
-  ImGui::Text("Iterations: %d", m_lattice->iterations());
+
+  ImGui::Text("Iterations: %d", m_lattice->currentIteration());
+  static int inputIterNum = m_lattice->maxIterations();
+  ImGui::Text("Max Iterations: %d", m_lattice->maxIterations());
+  ImGui::SetNextItemWidth(200);
+  if (!m_isTraining) {
+    ImGui::InputInt("", &inputIterNum, 500, 2000);
+    if (inputIterNum < 0) {
+      inputIterNum = 0;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Confirm")) {
+      m_lattice->setIterations(inputIterNum);
+    }
+  }
+
   if (ImGui::Button("Start")) {
-    m_startTraining = true;
+    m_isTraining = true;
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Stop")) {
+    m_isTraining = false;
+  }
+  ImGui::SameLine();
+  if (ImGui::Button("Reset")) {
+    m_isTraining = false;
+    delete m_lattice;
+    m_lattice = new Lattice(64, 50000, 0.1f);
+    inputIterNum = m_lattice->maxIterations();
   }
   if (ImGui::Button("Toggle Model")) {
     m_showModel = !m_showModel;
@@ -106,6 +130,7 @@ MainWindow::paintGL()
     m_showLines = !m_showLines;
   }
   ImGui::End();
+
   ImGui::Render();
   ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
@@ -234,6 +259,8 @@ MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
     }
     break;
   case SDLK_r:
+    delete m_camera;
+    m_camera = new Camera(m_width, m_height);
     break;
   }
 }

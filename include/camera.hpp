@@ -49,7 +49,7 @@ public:
     Orthographic,
     Perspective,
   };
-  Camera();
+  Camera(int width, int height, Camera::Projection projection = Camera::Projection::Orthographic);
   ~Camera();
   void SetAspectRatio(float ratio);
   void SetAspectRatio(int width, int height);

@@ -1,12 +1,11 @@
 #include "camera.hpp"
 
-Camera::Camera()
+Camera::Camera(int width, int height, Camera::Projection projection)
   : m_worldUp{0.0f, 1.0f, 0.0f}
   , m_center{0.0f, 0.0f, 0.0f}
   , m_theta(0.0f)
   , m_phi(1.5707f)
   , m_radius(100.f)
-  , m_aspectRatio(0.0f)
   , m_viewVolumeSize(100.f)
   , m_moveRate(0.4f)
   , m_rotateRate(0.005f)
@@ -14,6 +13,8 @@ Camera::Camera()
   , m_horizontalCoef(1)
   , m_projection(Projection::Perspective)
 {
+  m_projection = projection;
+  SetAspectRatio(width, height);
   UpdateViewCoord();
 }
 

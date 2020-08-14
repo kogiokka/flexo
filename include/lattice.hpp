@@ -13,9 +13,9 @@
 class Lattice
 {
   int m_dimen;
-  int m_currIteration;
-  int m_leftIteration;
-  float m_timeConstant;
+  int m_maxIter;
+  int m_remainingIter;
+  float m_timeConst;
   float m_currRate;
   float m_beginRate;
   float m_neighborhoodRadius;
@@ -28,19 +28,19 @@ public:
   bool input(std::vector<float> in);
   bool isFinished() const;
   int dimension() const;
-  int iterations() const;
+  int maxIterations() const;
+  int currentIteration() const;
   float learningRate() const;
   float neighborhoodRadius() const;
   std::vector<Node> const& neurons() const;
-
   template<std::size_t S>
   bool input(std::array<float, S> in);
+  void setIterations(unsigned int num);
 };
 
 template<std::size_t S>
-bool
+inline bool
 Lattice::input(std::array<float, S> in)
 {
-  input(std::vector<float>(in.begin(), in.end()));
-  return true;
+  return input(std::vector<float>(in.begin(), in.end()));
 }
