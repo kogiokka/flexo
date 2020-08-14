@@ -2,6 +2,7 @@
 
 SDLOpenGLWindow::SDLOpenGLWindow(std::string name, int width, int height)
   : m_alive(true)
+  , m_skipEventHandling(false)
   , m_width(width)
   , m_height(height)
   , m_window(nullptr)
@@ -53,6 +54,12 @@ void
 SDLOpenGLWindow::handleEvent(SDL_Event event)
 {
   while (SDL_PollEvent(&event)) {
+
+    onProcessEvent(event);
+
+    if (m_skipEventHandling)
+      continue;
+
     switch (event.type) {
     case SDL_KEYDOWN:
       onKeyDown(event.key);
@@ -85,6 +92,11 @@ SDLOpenGLWindow::handleEvent(SDL_Event event)
       break;
     }
   }
+}
+
+void SDLOpenGLWindow::onProcessEvent(SDL_Event)
+{
+  return; // Override this function to do things.
 }
 
 void SDLOpenGLWindow::onKeyDown(SDL_KeyboardEvent)

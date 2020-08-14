@@ -205,6 +205,20 @@ MainWindow::initializeGL()
 }
 
 void
+MainWindow::onProcessEvent(SDL_Event event)
+{
+  ImGui_ImplSDL2_ProcessEvent(&event);
+
+  auto const& io = ImGui::GetIO();
+  if (io.WantCaptureMouse || io.WantCaptureKeyboard) {
+    m_skipEventHandling = true;
+    return;
+  }
+
+  m_skipEventHandling = false;
+}
+
+void
 MainWindow::onWindowResized()
 {
   m_camera->SetAspectRatio(m_width, m_height);
@@ -213,9 +227,6 @@ MainWindow::onWindowResized()
 void
 MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
 {
-  auto const& io = ImGui::GetIO();
-  if (io.WantCaptureKeyboard)
-    return;
   switch (keyEvent.keysym.sym) {
   case SDLK_q:
     if (keyEvent.keysym.mod & KMOD_CTRL) {
@@ -230,8 +241,6 @@ MainWindow::onKeyDown(SDL_KeyboardEvent keyEvent)
 void
 MainWindow::onMouseButtonDown(SDL_MouseButtonEvent buttonEvent)
 {
-  if (ImGui::GetIO().WantCaptureMouse)
-    return;
   switch (buttonEvent.button) {
   case SDL_BUTTON_LEFT:
     m_camera->InitDragTranslation(buttonEvent.x, buttonEvent.y);
@@ -245,8 +254,6 @@ MainWindow::onMouseButtonDown(SDL_MouseButtonEvent buttonEvent)
 void
 MainWindow::onMouseMotion(SDL_MouseMotionEvent motionEvent)
 {
-  if (ImGui::GetIO().WantCaptureMouse)
-    return;
   switch (motionEvent.state) {
   case SDL_BUTTON_LMASK:
     m_camera->DragTranslation(motionEvent.x, motionEvent.y);

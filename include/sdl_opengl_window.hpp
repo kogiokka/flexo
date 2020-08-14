@@ -9,6 +9,7 @@ class SDLOpenGLWindow
 {
 protected:
   bool m_alive;
+  bool m_skipEventHandling;
   int m_width;
   int m_height;
   SDL_Window* m_window;
@@ -21,6 +22,7 @@ protected:
   virtual void onMouseMotion(SDL_MouseMotionEvent motionEvent);
   virtual void onMouseWheel(SDL_MouseWheelEvent wheelEvent);
   virtual void onWindowResized();
+  virtual void onProcessEvent(SDL_Event event);
 
 public:
   SDLOpenGLWindow(std::string name, int width, int height);
