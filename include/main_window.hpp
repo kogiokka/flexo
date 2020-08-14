@@ -22,8 +22,8 @@ class MainWindow : public SDLOpenGLWindow
   GLuint m_vao;
   GLuint m_vbo;
   GLuint m_vaoLines;
-  GLuint m_vboLines;
-  GLuint m_ibo;
+  GLuint m_vboPos;
+  GLuint m_iboLines;
   float m_scale;
   bool m_showModel;
   bool m_showPoints;
@@ -31,6 +31,7 @@ class MainWindow : public SDLOpenGLWindow
   bool m_isTraining;
   Shader* m_shader;
   Shader* m_shaderLines;
+  Shader* m_shaderNodes;
   Camera* m_camera;
   Lattice* m_lattice;
   Model* m_model;
