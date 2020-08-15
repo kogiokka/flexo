@@ -10,8 +10,14 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "-g -D_GLIBCXX_DEBUG")
 endif()
 
+find_package(SDL2 REQUIRED)
+if (SDL2_FOUND)
+    message(STATUS "SDL2 Include Path: ${SDL2_INCLUDE_DIRS}")
+    message(STATUS "SDL2 Libraries: ${SDL2_LIBRARIES}")
+endif()
+
+include_directories(${SDL2_INCLUDE_DIRS})
 include_directories(include/)
-include_directories(ext/SDL2/include)
 include_directories(ext/glad/include)
 include_directories(ext/glm/include)
 include_directories(ext/imgui)
@@ -19,11 +25,6 @@ include_directories(ext/imgui)
 add_subdirectory(ext/glad)
 add_subdirectory(ext/glm)
 add_subdirectory(ext/imgui)
-
-add_library(SDL2-static INTERFACE IMPORTED)
-add_library(SDL2main INTERFACE IMPORTED)
-set_property(TARGET SDL2-static PROPERTY INTERFACE_LINK_LIBRARIES "${PROJECT_SOURCE_DIR}/lib/libSDL2.a")
-set_property(TARGET SDL2main PROPERTY INTERFACE_LINK_LIBRARIES "${PROJECT_SOURCE_DIR}/lib/libSDL2main.a")
 
 file(GLOB SOURCE CONFIGURE_DEPENDS
     src/*.cpp
@@ -37,10 +38,8 @@ target_link_libraries(${PROJECT_NAME}
     glad
     glm
     imgui
-    pthread
-    m
-    SDL2-static
-    SDL2main
+    SDL2::SDL2-static
+    SDL2::SDL2main
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
