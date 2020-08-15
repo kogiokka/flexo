@@ -17,7 +17,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_lattice(nullptr)
   , m_model(nullptr)
 {
-  m_lattice = new Lattice(32, 50000, 0.1f);
+  m_lattice = new Lattice(32, 20000, 0.15f);
   m_camera = new Camera(width, height);
   // Some lighting problem with Perspective mode
   // m_camera->SetProjection(Camera::Projection::Perspective);
@@ -103,18 +103,6 @@ MainWindow::paintGL()
 
   ImVec2 const btnSize(120, 30);
 
-  if (ImGui::TreeNodeEx("SOM Control", ImGuiTreeNodeFlags_DefaultOpen)) {
-    ImGui::Text("Iterations: %d", m_lattice->currentIteration());
-    if (ImGui::Button("Start", btnSize)) {
-      m_isTraining = true;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Stop", btnSize)) {
-      m_isTraining = false;
-    }
-    ImGui::TreePop();
-  }
-
   if (ImGui::TreeNodeEx("SOM Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::SetNextItemWidth(200);
     if (ImGui::InputInt("Max Iterations##iter", &s_iterNum, 500, 2000)) {
@@ -126,7 +114,7 @@ MainWindow::paintGL()
     if (ImGui::InputInt("Lattice Dimensions##dimen", &s_dimen, 1, 5)) {
       if (s_dimen < 2) {
         s_dimen = 2;
-      } else if (s_dimen > 128) {
+      } else if (s_dimen > 256) {
         s_dimen = 128;
       }
     }
@@ -167,6 +155,18 @@ MainWindow::paintGL()
         glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
         glVertexArrayElementBuffer(m_vao, m_iboLines);
       }
+    }
+    ImGui::TreePop();
+  }
+
+  if (ImGui::TreeNodeEx("SOM Control", ImGuiTreeNodeFlags_DefaultOpen)) {
+    ImGui::Text("Iterations: %d", m_lattice->currentIteration());
+    if (ImGui::Button("Start", btnSize)) {
+      m_isTraining = true;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Pause", btnSize)) {
+      m_isTraining = false;
     }
     ImGui::TreePop();
   }
