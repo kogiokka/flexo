@@ -1,7 +1,5 @@
 #include "lattice.hpp"
 
-#include <cassert>
-
 Lattice::Lattice(int dimen, int iterations, float learningRate)
   : m_dimen(dimen)
   , m_maxIter(iterations)
@@ -19,8 +17,6 @@ Lattice::Lattice(int dimen, int iterations, float learningRate)
   }
   m_timeConst = iterations / log(dimen);
 }
-
-#include <iostream>
 
 bool
 Lattice::input(std::vector<float> in)
