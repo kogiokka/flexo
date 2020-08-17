@@ -99,10 +99,21 @@ MainWindow::paintGL()
   ImGui_ImplOpenGL3_NewFrame();
   ImGui_ImplSDL2_NewFrame(m_window);
   ImGui::NewFrame();
-  ImGui::Begin("Surface Fitting");
-
   ImVec2 const btnSize(120, 30);
 
+  if (ImGui::BeginMainMenuBar()) {
+    if (ImGui::BeginMenu("Camera")) {
+      if (ImGui::MenuItem("Reset")) {
+        delete m_camera;
+        m_camera = new Camera(m_width, m_height);
+      }
+      ImGui::EndMenu();
+    }
+    ImGui::EndMainMenuBar();
+  }
+
+  ImGui::SetNextWindowSize(ImVec2(450, 450));
+  ImGui::Begin("Surface Fitting", nullptr, ImGuiWindowFlags_NoResize);
   if (ImGui::TreeNodeEx("SOM Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::SetNextItemWidth(200);
     if (ImGui::InputInt("Max Iterations##iter", &s_iterNum, 500, 2000)) {
