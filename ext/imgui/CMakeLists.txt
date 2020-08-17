@@ -1,10 +1,11 @@
-include_directories(.)
+cmake_minimum_required(VERSION 3.12)
 
-file(GLOB SOURCE CONFIGURE_DEPENDS
+file(GLOB sourceFiles CONFIGURE_DEPENDS
     *.h
     *.cpp
 )
 
 add_library(imgui STATIC
-    ${SOURCE}
+    ${sourceFiles}
 )
+
