@@ -67,7 +67,7 @@ MainWindow::paintGL()
     m_shaderNodes->SetUniform3fv("lightSrc", m_camera->Position());
     m_shaderNodes->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
     m_shaderNodes->SetUniformMatrix4fv("modelMat", scaleMat);
-    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 3 * sizeof(float));
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 6 * sizeof(float));
     glDrawArraysInstanced(GL_TRIANGLES, 0, m_model->drawArrayCount(), renderPos.size());
     m_vao->disable("instanced");
   }
@@ -104,7 +104,7 @@ MainWindow::paintGL()
     m_shader->SetUniform3fv("lightSrc", m_camera->Position());
     m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     m_shader->SetUniform1f("alpha", 0.6f);
-    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 3 * sizeof(float));
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 6 * sizeof(float));
     glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
   }
 
@@ -264,12 +264,12 @@ MainWindow::initializeGL()
 
   m_model = new Model();
   m_model->readOBJ("res/models/Icosphere.obj");
-  m_random = new RandomIntNumber<unsigned int>(0, m_model->vertexCount() - 1);
+  m_random = new RandomIntNumber<unsigned int>(0, m_model->positions().size() - 1);
   auto const buffer = m_model->vertexBuffer();
-  auto const stride = 3 * sizeof(float);
+  auto const stride = 6 * sizeof(float);
   glCreateBuffers(1, &m_vbo);
   glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, stride);
-  glVertexArrayVertexBuffer(m_vao->id(), 1, m_vbo, m_model->drawArrayCount() * stride, stride);
+  glVertexArrayVertexBuffer(m_vao->id(), 1, m_vbo, 3 * sizeof(float), stride);
   glNamedBufferStorage(m_vbo, buffer.size() * sizeof(float), buffer.data(), GL_DYNAMIC_STORAGE_BIT);
 
   m_shader = new Shader();

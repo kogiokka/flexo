@@ -3,8 +3,6 @@
 Model::Model()
   : m_positions(0)
   , m_normals(0)
-  , m_posIdx(0)
-  , m_normIdx(0)
 {
 }
 
@@ -33,8 +31,11 @@ Model::readOBJ(std::string path)
         return false;
       for (int v = 1; v < group.size(); ++v) {
         vector<string> const idx = util::str::split(group[v], R"(/)");
-        m_posIdx.push_back(stoi(idx[0]) - 1);
-        m_normIdx.push_back(stoi(idx[2]) - 1);
+        auto const pos = m_positions[stoi(idx[0]) - 1];
+        auto const norm = m_normals[stoi(idx[2]) - 1];
+        m_vertexBuffer.insert(m_vertexBuffer.end(), pos.begin(), pos.end());
+        m_vertexBuffer.insert(m_vertexBuffer.end(), norm.begin(), norm.end());
+        m_drawArrayCount += 3;
       }
     }
   }
@@ -49,31 +50,20 @@ Model::positions() const
   return m_positions;
 }
 
-std::vector<float>
-Model::vertexBuffer() const
+std::vector<std::array<float, 3>> const&
+Model::normals() const
 {
-  std::vector<float> buffer;
-
-  for (auto i : m_posIdx) {
-    auto const pos = m_positions[i];
-    buffer.insert(buffer.end(), pos.begin(), pos.end());
-  }
-  for (auto i : m_normIdx) {
-    auto const norm = m_normals[i];
-    buffer.insert(buffer.end(), norm.begin(), norm.end());
-  }
-
-  return buffer;
+  return m_normals;
 }
 
-std::size_t
-Model::vertexCount() const
+std::vector<float> const&
+Model::vertexBuffer() const
 {
-  return m_positions.size();
+  return m_vertexBuffer;
 }
 
 std::size_t
 Model::drawArrayCount() const
 {
-  return m_posIdx.size();
+  return m_drawArrayCount;
 }
