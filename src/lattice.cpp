@@ -106,7 +106,7 @@ Lattice::currentRate() const
 }
 
 std::vector<unsigned short>
-Lattice::indices() const
+Lattice::lineIndices() const
 {
   std::vector<unsigned short> indices;
 
@@ -120,6 +120,26 @@ Lattice::indices() const
       indices.push_back((i + 1) * m_dimen + j);
       indices.push_back((i + 1) * m_dimen + j);
       indices.push_back(i * m_dimen + j);
+    }
+  }
+
+  return indices;
+}
+
+
+std::vector<unsigned short>
+Lattice::triangleIndices() const
+{
+  std::vector<unsigned short> indices;
+
+  for (int i = 0; i < m_dimen - 1; ++i) {
+    for (int j = 0; j < m_dimen - 1; ++j) {
+      indices.push_back(i * m_dimen + j);
+      indices.push_back((i + 1) * m_dimen + j);
+      indices.push_back(i * m_dimen + j + 1);
+      indices.push_back(i * m_dimen + j + 1);
+      indices.push_back((i + 1) * m_dimen + j);
+      indices.push_back((i + 1) * m_dimen + j + 1);
     }
   }
 

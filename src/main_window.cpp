@@ -2,14 +2,15 @@
 
 MainWindow::MainWindow(std::string name, int width, int height)
   : SDLOpenGLWindow(name, width, height)
-  , m_vao(0)
   , m_vbo(0)
   , m_vboPos(0)
   , m_scale(50.0f)
   , m_showModel(true)
   , m_showPoints(true)
   , m_showLines(true)
+  , m_showSurfs(true)
   , m_isTraining(false)
+  , m_vao(nullptr)
   , m_shader(nullptr)
   , m_shaderLines(nullptr)
   , m_shaderNodes(nullptr)
@@ -25,6 +26,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
 
 MainWindow::~MainWindow()
 {
+  delete m_vao;
   delete m_random;
   delete m_model;
   delete m_lattice;
@@ -58,26 +60,40 @@ MainWindow::paintGL()
   glNamedBufferSubData(m_vboPos, 0, renderPos.size() * 3 * sizeof(float), renderPos.data());
 
   if (m_showPoints) {
+    m_vao->enable("instanced");
     m_shaderNodes->Use();
     m_shaderNodes->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     m_shaderNodes->SetUniform3fv("viewPos", m_camera->Position());
     m_shaderNodes->SetUniform3fv("lightSrc", m_camera->Position());
     m_shaderNodes->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
     m_shaderNodes->SetUniformMatrix4fv("modelMat", scaleMat);
-    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, 3 * sizeof(float));
-    glEnableVertexArrayAttrib(m_vao, 2);
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 3 * sizeof(float));
     glDrawArraysInstanced(GL_TRIANGLES, 0, m_model->drawArrayCount(), renderPos.size());
-    glDisableVertexArrayAttrib(m_vao, 2);
+    m_vao->disable("instanced");
   }
 
-  if (m_showLines) {
+  if (m_showSurfs) {
+    m_vao->disable("normal");
     m_shaderLines->Use();
     m_shaderLines->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
     m_shaderLines->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-    glVertexArrayVertexBuffer(m_vao, 0, m_vboPos, 0, 3 * sizeof(float));
-    glDisableVertexArrayAttrib(m_vao, 1);
-    glDrawElements(GL_LINES, m_latticeIndices.size(), GL_UNSIGNED_SHORT, 0);
-    glEnableVertexArrayAttrib(m_vao, 1);
+    m_shaderLines->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vboPos, 0, 3 * sizeof(float));
+    glVertexArrayElementBuffer(m_vao->id(), m_iboSurfs);
+    glDrawElements(GL_TRIANGLES, m_surfsIdx.size(), GL_UNSIGNED_SHORT, 0);
+    m_vao->enable("normal");
+  }
+
+  if (m_showLines) {
+    m_vao->disable("normal");
+    m_shaderLines->Use();
+    m_shaderLines->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
+    m_shaderLines->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
+    m_shaderLines->SetUniform3f("color", 1.0f, 1.0f, 1.0f);
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vboPos, 0, 3 * sizeof(float));
+    glVertexArrayElementBuffer(m_vao->id(), m_iboLines);
+    glDrawElements(GL_LINES, m_linesIdx.size(), GL_UNSIGNED_SHORT, 0);
+    m_vao->enable("normal");
   }
 
   if (m_showModel) {
@@ -88,7 +104,7 @@ MainWindow::paintGL()
     m_shader->SetUniform3fv("lightSrc", m_camera->Position());
     m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     m_shader->SetUniform1f("alpha", 0.6f);
-    glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, 3 * sizeof(float));
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 3 * sizeof(float));
     glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
   }
 
@@ -146,25 +162,29 @@ MainWindow::paintGL()
       bool const changed = !(isSameIter && isSameDimen && isSameRate);
       delete m_lattice;
       m_lattice = new Lattice(s_dimen, s_iterNum, s_rate);
-      m_latticeIndices = m_lattice->indices();
 
       if (changed) {
         s_iterNum = m_lattice->maxIterations();
         s_dimen = m_lattice->dimension();
         s_rate = m_lattice->initialRate();
-        glDeleteBuffers(1, &m_vboPos);
-        glDeleteBuffers(1, &m_iboLines);
+        m_linesIdx = m_lattice->lineIndices();
+        m_surfsIdx = m_lattice->triangleIndices();
 
-        glCreateBuffers(1, &m_vboPos);
+        glDeleteBuffers(1, &m_iboLines);
+        glDeleteBuffers(1, &m_iboSurfs);
+
         glCreateBuffers(1, &m_iboLines);
+        glCreateBuffers(1, &m_iboSurfs);
+        glNamedBufferStorage(
+          m_iboLines, m_linesIdx.size() * sizeof(unsigned short), m_linesIdx.data(), GL_DYNAMIC_STORAGE_BIT);
+        glNamedBufferStorage(
+          m_iboSurfs, m_surfsIdx.size() * sizeof(unsigned short), m_surfsIdx.data(), GL_DYNAMIC_STORAGE_BIT);
+
+        glDeleteBuffers(1, &m_vboPos);
+        glCreateBuffers(1, &m_vboPos);
         glNamedBufferStorage(
           m_vboPos, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
-        glNamedBufferStorage(m_iboLines,
-                             m_latticeIndices.size() * sizeof(unsigned short),
-                             m_latticeIndices.data(),
-                             GL_DYNAMIC_STORAGE_BIT);
-        glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
-        glVertexArrayElementBuffer(m_vao, m_iboLines);
+        glVertexArrayVertexBuffer(m_vao->id(), 2, m_vboPos, 0, 3 * sizeof(float));
       }
     }
     ImGui::TreePop();
@@ -190,9 +210,12 @@ MainWindow::paintGL()
     if (ImGui::Button("Toggle Points", btnSize)) {
       m_showPoints = !m_showPoints;
     }
-    ImGui::SameLine();
     if (ImGui::Button("Toggle Lines", btnSize)) {
       m_showLines = !m_showLines;
+    }
+    ImGui::SameLine();
+    if (ImGui::Button("Toggle Surfaces", btnSize)) {
+      m_showSurfs = !m_showSurfs;
     }
     ImGui::TreePop();
   }
@@ -229,10 +252,15 @@ MainWindow::initializeGL()
 #endif
 
   /** Grid nodes (Icosphere model) ********************************************/
-  glCreateVertexArrays(1, &m_vao);
-  glVertexArrayAttribFormat(m_vao, 0, 3, GL_FLOAT, GL_FALSE, 0);
-  glVertexArrayAttribFormat(m_vao, 1, 3, GL_FLOAT, GL_FALSE, 0);
-  glVertexArrayAttribFormat(m_vao, 2, 3, GL_FLOAT, GL_FALSE, 0);
+  m_vao = new VertexArray();
+  AttribFormat format;
+  format.count = 3;
+  format.type = GL_FLOAT;
+  format.normalized = GL_FALSE;
+
+  m_vao->addAttrib("position", 0, format);
+  m_vao->addAttrib("normal", 1, format);
+  m_vao->addAttrib("instanced", 2, format);
 
   m_model = new Model();
   m_model->readOBJ("res/models/Icosphere.obj");
@@ -240,8 +268,8 @@ MainWindow::initializeGL()
   auto const buffer = m_model->vertexBuffer();
   auto const stride = 3 * sizeof(float);
   glCreateBuffers(1, &m_vbo);
-  glVertexArrayVertexBuffer(m_vao, 0, m_vbo, 0, stride);
-  glVertexArrayVertexBuffer(m_vao, 1, m_vbo, m_model->drawArrayCount() * stride, stride);
+  glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, stride);
+  glVertexArrayVertexBuffer(m_vao->id(), 1, m_vbo, m_model->drawArrayCount() * stride, stride);
   glNamedBufferStorage(m_vbo, buffer.size() * sizeof(float), buffer.data(), GL_DYNAMIC_STORAGE_BIT);
 
   m_shader = new Shader();
@@ -251,14 +279,17 @@ MainWindow::initializeGL()
   /** Grid Nodes END **********************************************************/
 
   /** Grid Lines **********************************************************/
-  m_latticeIndices = m_lattice->indices();
+  m_linesIdx = m_lattice->lineIndices();
+  m_surfsIdx = m_lattice->triangleIndices();
 
   glCreateBuffers(1, &m_vboPos);
-  glNamedBufferStorage(m_vboPos, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
-
   glCreateBuffers(1, &m_iboLines);
+  glCreateBuffers(1, &m_iboSurfs);
+  glNamedBufferStorage(m_vboPos, m_lattice->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
   glNamedBufferStorage(
-    m_iboLines, m_latticeIndices.size() * sizeof(unsigned short), m_latticeIndices.data(), GL_DYNAMIC_STORAGE_BIT);
+    m_iboLines, m_linesIdx.size() * sizeof(unsigned short), m_linesIdx.data(), GL_DYNAMIC_STORAGE_BIT);
+  glNamedBufferStorage(
+    m_iboSurfs, m_surfsIdx.size() * sizeof(unsigned short), m_surfsIdx.data(), GL_DYNAMIC_STORAGE_BIT);
 
   m_shaderLines = new Shader();
   m_shaderLines->Attach(GL_VERTEX_SHADER, "shader/lines.vert");
@@ -271,12 +302,12 @@ MainWindow::initializeGL()
   m_shaderNodes->Link();
   /** Grid Lines END ******************************************************/
 
-  glEnableVertexArrayAttrib(m_vao, 0);
-  glEnableVertexArrayAttrib(m_vao, 1);
-  glVertexArrayVertexBuffer(m_vao, 2, m_vboPos, 0, 3 * sizeof(float));
-  glVertexArrayElementBuffer(m_vao, m_iboLines);
-  glVertexArrayBindingDivisor(m_vao, 2, 1);
-  glBindVertexArray(m_vao);
+  glVertexArrayVertexBuffer(m_vao->id(), 2, m_vboPos, 0, 3 * sizeof(float));
+  glVertexArrayBindingDivisor(m_vao->id(), 2, 1);
+
+  m_vao->enable("position");
+  m_vao->enable("normal");
+  m_vao->bind();
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);

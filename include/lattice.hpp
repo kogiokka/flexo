@@ -35,7 +35,8 @@ public:
   template<std::size_t S>
   bool input(std::array<float, S> in);
   std::vector<Node> const& neurons() const;
-  std::vector<unsigned short> indices() const;
+  std::vector<unsigned short> lineIndices() const;
+  std::vector<unsigned short> triangleIndices() const;
 };
 
 template<std::size_t S>

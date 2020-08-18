@@ -6,6 +6,7 @@
 #include "random_int_number.hpp"
 #include "sdl_opengl_window.hpp"
 #include "shader.hpp"
+#include "vertex_array.hpp"
 
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
@@ -19,15 +20,18 @@
 
 class MainWindow : public SDLOpenGLWindow
 {
-  GLuint m_vao;
+  ;
   GLuint m_vbo;
   GLuint m_vboPos;
   GLuint m_iboLines;
+  GLuint m_iboSurfs;
   float m_scale;
   bool m_showModel;
   bool m_showPoints;
   bool m_showLines;
+  bool m_showSurfs;
   bool m_isTraining;
+  VertexArray* m_vao;
   Shader* m_shader;
   Shader* m_shaderLines;
   Shader* m_shaderNodes;
@@ -35,7 +39,8 @@ class MainWindow : public SDLOpenGLWindow
   Lattice* m_lattice;
   Model* m_model;
   RandomIntNumber<unsigned int>* m_random;
-  std::vector<unsigned short> m_latticeIndices;
+  std::vector<unsigned short> m_linesIdx;
+  std::vector<unsigned short> m_surfsIdx;
 
   void importFonts(std::filesystem::path dir_path);
 
