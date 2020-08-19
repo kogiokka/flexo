@@ -18,16 +18,16 @@ typedef enum {
 
 class OBJModel
 {
-  using Vec3 = std::array<float, 3>;
+  using Vec = std::vector<float>;
   using Triplet = std::array<int, 3>;
   using Face = std::vector<Triplet>;
 
   std::size_t drawArraysCount_;
   std::size_t stride_;
   std::vector<float> vertexBuffer_;
-  std::vector<Vec3> v_;
-  std::vector<Vec3> vt_;
-  std::vector<Vec3> vn_;
+  std::vector<Vec> v_;
+  std::vector<Vec> vt_;
+  std::vector<Vec> vn_;
   std::vector<Face> f_;
 
 public:
@@ -37,8 +37,8 @@ public:
   void genVertexBuffer(std::uint16_t flag);
   std::size_t drawArraysCount() const;
   std::size_t stride() const;
-  std::vector<Vec3> const& v() const;
-  std::vector<Vec3> const& vt() const;
-  std::vector<Vec3> const& vn() const;
+  std::vector<Vec> const& v() const;
+  std::vector<Vec> const& vt() const;
+  std::vector<Vec> const& vn() const;
   std::vector<float> const& vertexBuffer() const;
 };

@@ -28,48 +28,75 @@ OBJModel::read(std::filesystem::path const& path)
   while (getline(file, line)) {
     using namespace util::str;
 
-    if (startsWith(line, "v ")) { // Position
+    if (startsWith(line, "v ")) {
 
-      auto const tokens = split(line, R"(\s+)");
-      assert(tokens.size() > 0 && tokens.size() <= 4);
-      v_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+      assert(dimen > 0 && dimen <= 4);
 
-    } else if (startsWith(line, "vt ")) { // Position
-
-      auto const tokens = split(line, R"(\s+)");
-      assert(tokens.size() > 0 && tokens.size() <= 4);
-      auto const dimen = tokens.size() - 1;
-      switch (dimen) {
-      case 1:
-        vt_.emplace_back(Vec3{stof(tokens[1]), 0, 0});
-        break;
-      case 2:
-        vt_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), 0});
-        break;
-      case 3:
-        vt_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
-        break;
+      std::vector<float> v;
+      v.reserve(dimen);
+      for (auto t : tokens) {
+        v.push_back(stof(t));
       }
+      v_.push_back(v);
 
-    } else if (startsWith(line, "vn ")) { // Vector
+    } else if (startsWith(line, "vt ")) {
 
-      auto const tokens = split(line, R"(\s+)");
-      assert(tokens.size() > 0 && tokens.size() <= 4);
-      vn_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+
+      assert(dimen > 0 && dimen <= 3);
+
+      std::vector<float> vt;
+      vt.reserve(dimen);
+      for (auto t : tokens) {
+        vt.push_back(stof(t));
+      }
+      vt_.push_back(vt);
+
+    } else if (startsWith(line, "vn ")) {
+
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+
+      assert(dimen > 0 && dimen <= 3);
+
+      std::vector<float> vn;
+      vn.reserve(dimen);
+      for (auto t : tokens) {
+        vn.push_back(stof(t));
+      }
+      vn_.push_back(vn);
 
     } else if (startsWith(line, "f ")) { // Grouping
 
-      auto const tokens = split(line, R"(\s+)");
-      assert(tokens.size() >= 3);
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+
+      assert(dimen >= 3);
+
       Face face;
-      for (int t = 1; t < tokens.size(); ++t) {
-        auto refs = split(tokens[t], R"(/)");
-        assert(refs.size() <= 3);
-        for (std::string& s : refs) {
-          if (s.empty())
-            s = "0";
+      face.reserve(dimen);
+      for (auto const& t : tokens) {
+        auto const refNums = split(t, R"(/)");
+
+        assert(refNums.size() <= 3);
+
+        Triplet tri;
+        for (int i = 0; i < 3; ++i) {
+          if (refNums[i].empty()) {
+            tri[i] = -1;
+          } else {
+            tri[i] = stoi(refNums[i]);
+          }
         }
-        face.emplace_back(Triplet{stoi(refs[0]), stoi(refs[1]), stoi(refs[2])});
+
+        face.push_back(tri);
       }
       f_.push_back(face);
     }
@@ -89,74 +116,41 @@ OBJModel::genVertexBuffer(std::uint16_t flag)
   bool const flagVT = (flag & OBJ_VT);
   bool const flagVN = (flag & OBJ_VN);
 
-  stride += flagV ? 3 : 0;
-  stride += flagVT ? 3 : 0;
-  stride += flagVN ? 3 : 0;
+  stride += flagV ? v_[0].size() : 0;
+  stride += flagVT ? vt_[0].size() : 0;
+  stride += flagVN ? vn_[0].size() : 0;
 
   buf.reserve(f_.size() * stride);
 
-  for (auto const& group : f_) {
-    int const size = group.size();
-    switch (size) {
-    case 3: {
-      for (auto const& vert : group) {
-        if (flagV) {
-          Vec3 const v = v_[vert[0] - 1];
-          buf.insert(buf.end(), v.begin(), v.end());
-        }
-        if (flagVT) {
-          Vec3 const vt = vt_[vert[1] - 1];
-          buf.insert(buf.end(), vt.begin(), vt.end());
-        }
-        if (flagVN) {
-          Vec3 const vn = vn_[vert[2] - 1];
-          buf.insert(buf.end(), vn.begin(), vn.end());
-        }
+  std::vector<int> indices;
+
+  for (auto const& face : f_) {
+    switch (face.size()) { // Number of vertices of the face
+    case 3:
+      indices = {0, 1, 2};
+      break;
+    case 4:
+      indices = {0, 1, 2, 0, 2, 3};
+      break;
+    }
+
+    for (int i : indices) {
+      if (flagV) {
+        auto const idx = face[i][0] - 1;
+        assert(idx >= 0);
+        buf.insert(buf.end(), v_[idx].begin(), v_[idx].end());
+      }
+      if (flagVT) {
+        auto const idx = face[i][1] - 1;
+        assert(idx >= 0);
+        buf.insert(buf.end(), vt_[idx].begin(), vt_[idx].end());
+      }
+      if (flagVN) {
+        auto const idx = face[i][2] - 1;
+        assert(idx >= 0);
+        buf.insert(buf.end(), vn_[idx].begin(), vn_[idx].end());
       }
       drawArraysCount_ += 3;
-    } break;
-    case 4: {
-      auto const vert0 = group[0];
-      for (int i = 0; i < 3; ++i) {
-        drawArraysCount_ += 3;
-        if (flagV) {
-          Vec3 const v = v_[vert0[0] - 1];
-          buf.insert(buf.end(), v.begin(), v.end());
-        }
-        if (flagVT) {
-          Vec3 const vt = vt_[vert0[1] - 1];
-          buf.insert(buf.end(), vt.begin(), vt.end());
-        }
-        if (flagVN) {
-          Vec3 const vn = vn_[vert0[2] - 1];
-          buf.insert(buf.end(), vn.begin(), vn.end());
-        }
-        if (flagV) {
-          Vec3 const v = v_[group[i][0] - 1];
-          buf.insert(buf.end(), v.begin(), v.end());
-        }
-        if (flagVT) {
-          Vec3 const vt = vt_[group[i][1] - 1];
-          buf.insert(buf.end(), vt.begin(), vt.end());
-        }
-        if (flagVN) {
-          Vec3 const vn = vn_[group[i][2] - 1];
-          buf.insert(buf.end(), vn.begin(), vn.end());
-        }
-        if (flagV) {
-          Vec3 const v = v_[group[i + 1][0] - 1];
-          buf.insert(buf.end(), v.begin(), v.end());
-        }
-        if (flagVT) {
-          Vec3 const vt = vt_[group[i + 1][1] - 1];
-          buf.insert(buf.end(), vt.begin(), vt.end());
-        }
-        if (flagVN) {
-          Vec3 const vn = vn_[group[i + 1][2] - 1];
-          buf.insert(buf.end(), vn.begin(), vn.end());
-        }
-      }
-    } break;
     }
   }
 
@@ -183,19 +177,19 @@ OBJModel::drawArraysCount() const
   return drawArraysCount_;
 }
 
-std::vector<std::array<float, 3>> const&
+std::vector<std::vector<float>> const&
 OBJModel::v() const
 {
   return v_;
 }
 
-std::vector<std::array<float, 3>> const&
+std::vector<std::vector<float>> const&
 OBJModel::vt() const
 {
   return vt_;
 }
 
-std::vector<std::array<float, 3>> const&
+std::vector<std::vector<float>> const&
 OBJModel::vn() const
 {
   return vn_;
