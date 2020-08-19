@@ -4,6 +4,7 @@
 
 OBJModel::OBJModel()
   : drawArraysCount_(0)
+  , stride_(0)
   , vertexBuffer_(0)
   , v_(0)
   , vt_(0)
@@ -28,37 +29,42 @@ OBJModel::read(std::filesystem::path const& path)
     using namespace util::str;
 
     if (startsWith(line, "v ")) { // Position
-      auto const tokens = split(line, R"(\s+)");
-      auto const dimen = tokens.size();
-      if (dimen == 4) {
-        v_.emplace_back(Vec4{stof(tokens[1]), stof(tokens[2]), stof(tokens[3]), 1});
-      } else if (dimen == 5) {
-        v_.emplace_back(Vec4{stof(tokens[1]), stof(tokens[2]), stof(tokens[3]), stof(tokens[4])});
-      }
-    } else if (startsWith(line, "vt ")) { // Position
-      auto const tokens = split(line, R"(\s+)");
-      auto const dimen = tokens.size();
-      if (dimen == 3) {
-        vt_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), 1});
-      } else if (dimen == 4) {
-        vt_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
-      }
-    } else if (startsWith(line, "vn ")) { // Vector
-      auto const tokens = split(line, R"(\s+)");
-      auto const dimen = tokens.size();
-      if (dimen == 3) {
-        vn_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), 0});
-      } else if (dimen == 4) {
-        vn_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
-      }
-    } else if (startsWith(line, "f ")) { // Grouping
-      auto const tokens = split(line, R"(\s+)");
-      if (tokens.size() > 4)
-        return false;
 
+      auto const tokens = split(line, R"(\s+)");
+      assert(tokens.size() > 0 && tokens.size() <= 4);
+      v_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
+
+    } else if (startsWith(line, "vt ")) { // Position
+
+      auto const tokens = split(line, R"(\s+)");
+      assert(tokens.size() > 0 && tokens.size() <= 4);
+      auto const dimen = tokens.size() - 1;
+      switch (dimen) {
+      case 1:
+        vt_.emplace_back(Vec3{stof(tokens[1]), 0, 0});
+        break;
+      case 2:
+        vt_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), 0});
+        break;
+      case 3:
+        vt_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
+        break;
+      }
+
+    } else if (startsWith(line, "vn ")) { // Vector
+
+      auto const tokens = split(line, R"(\s+)");
+      assert(tokens.size() > 0 && tokens.size() <= 4);
+      vn_.emplace_back(Vec3{stof(tokens[1]), stof(tokens[2]), stof(tokens[3])});
+
+    } else if (startsWith(line, "f ")) { // Grouping
+
+      auto const tokens = split(line, R"(\s+)");
+      assert(tokens.size() >= 3);
       Face face;
       for (int t = 1; t < tokens.size(); ++t) {
         auto const refs = split(tokens[t], R"(/)");
+        assert(refs.size() <= 3);
         face.emplace_back(Triplet{stoi(refs[0]), stoi(refs[1]), stoi(refs[2])});
       }
       f_.push_back(face);
@@ -72,33 +78,38 @@ OBJModel::read(std::filesystem::path const& path)
 void
 OBJModel::genVertexBuffer(std::uint16_t flag)
 {
+  unsigned int stride = 0;
   std::vector<float> buf;
-  buf.reserve(f_.size() * 6);
+
+  bool const flagV = (flag & OBJ_V);
+  bool const flagVT = (flag & OBJ_VT);
+  bool const flagVN = (flag & OBJ_VN);
+
+  stride += flagV ? 3 : 0;
+  stride += flagVT ? 3 : 0;
+  stride += flagVN ? 3 : 0;
+
+  buf.reserve(f_.size() * stride);
 
   for (auto const& group : f_) {
     for (auto const& triplet : group) {
-      if (flag & OBJ_V) {
-        Vec4 const v = v_[triplet[0] - 1];
-        buf.push_back(v[0]);
-        buf.push_back(v[1]);
-        buf.push_back(v[2]);
+      if (flagV) {
+        Vec3 const v = v_[triplet[0] - 1];
+        buf.insert(buf.end(), v.begin(), v.end());
       }
-      if (flag & OBJ_VT) {
+      if (flagVT) {
         Vec3 const vt = vt_[triplet[1] - 1];
-        buf.push_back(vt[0]);
-        buf.push_back(vt[1]);
-        buf.push_back(vt[2]);
+        buf.insert(buf.end(), vt.begin(), vt.end());
       }
-      if (flag & OBJ_VN) {
+      if (flagVN) {
         Vec3 const vn = vn_[triplet[2] - 1];
-        buf.push_back(vn[0]);
-        buf.push_back(vn[1]);
-        buf.push_back(vn[2]);
+        buf.insert(buf.end(), vn.begin(), vn.end());
       }
     }
     drawArraysCount_ += group.size();
   }
 
+  stride_ = stride * sizeof(float);
   vertexBuffer_ = std::move(buf);
 }
 
@@ -110,12 +121,18 @@ OBJModel::vertexBuffer() const
 }
 
 std::size_t
+OBJModel::stride() const
+{
+  return stride_;
+}
+
+std::size_t
 OBJModel::drawArraysCount() const
 {
   return drawArraysCount_;
 }
 
-std::vector<std::array<float, 4>> const&
+std::vector<std::array<float, 3>> const&
 OBJModel::v() const
 {
   return v_;

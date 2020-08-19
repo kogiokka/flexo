@@ -67,7 +67,7 @@ MainWindow::paintGL()
     m_shaderNodes->SetUniform3fv("lightSrc", m_camera->Position());
     m_shaderNodes->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
     m_shaderNodes->SetUniformMatrix4fv("modelMat", scaleMat);
-    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 6 * sizeof(float));
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, m_obj->stride());
     glDrawArraysInstanced(GL_TRIANGLES, 0, m_obj->drawArraysCount(), renderPos.size());
     m_vao->disable("instanced");
   }
@@ -104,7 +104,7 @@ MainWindow::paintGL()
     m_shader->SetUniform3fv("lightSrc", m_camera->Position());
     m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     m_shader->SetUniform1f("alpha", 0.6f);
-    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 6 * sizeof(float));
+    glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, m_obj->stride());
     glDrawArrays(GL_TRIANGLES, 0, m_obj->drawArraysCount());
   }
 
@@ -267,10 +267,9 @@ MainWindow::initializeGL()
   m_obj->genVertexBuffer(OBJ_V | OBJ_VN);
   m_random = new RandomIntNumber<unsigned int>(0, m_obj->v().size() - 1);
   auto const buffer = m_obj->vertexBuffer();
-  auto const stride = 6 * sizeof(float);
   glCreateBuffers(1, &m_vbo);
-  glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, stride);
-  glVertexArrayVertexBuffer(m_vao->id(), 1, m_vbo, 3 * sizeof(float), stride);
+  glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, m_obj->stride());
+  glVertexArrayVertexBuffer(m_vao->id(), 1, m_vbo, 3 * sizeof(float), m_obj->stride());
   glNamedBufferStorage(m_vbo, buffer.size() * sizeof(float), buffer.data(), GL_DYNAMIC_STORAGE_BIT);
 
   m_shader = new Shader();
