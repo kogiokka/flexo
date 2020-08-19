@@ -20,11 +20,11 @@
 
 class MainWindow : public SDLOpenGLWindow
 {
-  ;
-  GLuint m_vbo;
-  GLuint m_vboPos;
-  GLuint m_iboLines;
-  GLuint m_iboSurfs;
+  GLuint m_vboSurf;
+  GLuint m_vboPosModel;
+  GLuint m_vboLatPos;
+  GLuint m_iboLatLines;
+  GLuint m_iboLatSurf;
   float m_scale;
   bool m_showModel;
   bool m_showPoints;
@@ -37,7 +37,8 @@ class MainWindow : public SDLOpenGLWindow
   Shader* m_shaderNodes;
   Camera* m_camera;
   Lattice* m_lattice;
-  OBJModel* m_obj;
+  OBJModel* m_surface;
+  OBJModel* m_posModel;
   RandomIntNumber<unsigned int>* m_random;
   std::vector<unsigned short> m_linesIdx;
   std::vector<unsigned short> m_surfsIdx;
@@ -56,3 +57,4 @@ public:
   virtual void onWindowResized() override;
   virtual void onProcessEvent(SDL_Event event) override;
 };
+

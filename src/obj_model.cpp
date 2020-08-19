@@ -63,8 +63,12 @@ OBJModel::read(std::filesystem::path const& path)
       assert(tokens.size() >= 3);
       Face face;
       for (int t = 1; t < tokens.size(); ++t) {
-        auto const refs = split(tokens[t], R"(/)");
+        auto refs = split(tokens[t], R"(/)");
         assert(refs.size() <= 3);
+        for (std::string& s : refs) {
+          if (s.empty())
+            s = "0";
+        }
         face.emplace_back(Triplet{stoi(refs[0]), stoi(refs[1]), stoi(refs[2])});
       }
       f_.push_back(face);
@@ -92,21 +96,68 @@ OBJModel::genVertexBuffer(std::uint16_t flag)
   buf.reserve(f_.size() * stride);
 
   for (auto const& group : f_) {
-    for (auto const& triplet : group) {
-      if (flagV) {
-        Vec3 const v = v_[triplet[0] - 1];
-        buf.insert(buf.end(), v.begin(), v.end());
+    int const size = group.size();
+    switch (size) {
+    case 3: {
+      for (auto const& vert : group) {
+        if (flagV) {
+          Vec3 const v = v_[vert[0] - 1];
+          buf.insert(buf.end(), v.begin(), v.end());
+        }
+        if (flagVT) {
+          Vec3 const vt = vt_[vert[1] - 1];
+          buf.insert(buf.end(), vt.begin(), vt.end());
+        }
+        if (flagVN) {
+          Vec3 const vn = vn_[vert[2] - 1];
+          buf.insert(buf.end(), vn.begin(), vn.end());
+        }
       }
-      if (flagVT) {
-        Vec3 const vt = vt_[triplet[1] - 1];
-        buf.insert(buf.end(), vt.begin(), vt.end());
+      drawArraysCount_ += 3;
+    } break;
+    case 4: {
+      auto const vert0 = group[0];
+      for (int i = 0; i < 3; ++i) {
+        drawArraysCount_ += 3;
+        if (flagV) {
+          Vec3 const v = v_[vert0[0] - 1];
+          buf.insert(buf.end(), v.begin(), v.end());
+        }
+        if (flagVT) {
+          Vec3 const vt = vt_[vert0[1] - 1];
+          buf.insert(buf.end(), vt.begin(), vt.end());
+        }
+        if (flagVN) {
+          Vec3 const vn = vn_[vert0[2] - 1];
+          buf.insert(buf.end(), vn.begin(), vn.end());
+        }
+        if (flagV) {
+          Vec3 const v = v_[group[i][0] - 1];
+          buf.insert(buf.end(), v.begin(), v.end());
+        }
+        if (flagVT) {
+          Vec3 const vt = vt_[group[i][1] - 1];
+          buf.insert(buf.end(), vt.begin(), vt.end());
+        }
+        if (flagVN) {
+          Vec3 const vn = vn_[group[i][2] - 1];
+          buf.insert(buf.end(), vn.begin(), vn.end());
+        }
+        if (flagV) {
+          Vec3 const v = v_[group[i + 1][0] - 1];
+          buf.insert(buf.end(), v.begin(), v.end());
+        }
+        if (flagVT) {
+          Vec3 const vt = vt_[group[i + 1][1] - 1];
+          buf.insert(buf.end(), vt.begin(), vt.end());
+        }
+        if (flagVN) {
+          Vec3 const vn = vn_[group[i + 1][2] - 1];
+          buf.insert(buf.end(), vn.begin(), vn.end());
+        }
       }
-      if (flagVN) {
-        Vec3 const vn = vn_[triplet[2] - 1];
-        buf.insert(buf.end(), vn.begin(), vn.end());
-      }
+    } break;
     }
-    drawArraysCount_ += group.size();
   }
 
   stride_ = stride * sizeof(float);
