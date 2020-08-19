@@ -2,7 +2,7 @@
 
 #include "camera.hpp"
 #include "lattice.hpp"
-#include "model.hpp"
+#include "obj_model.hpp"
 #include "random_int_number.hpp"
 #include "sdl_opengl_window.hpp"
 #include "shader.hpp"
@@ -37,7 +37,7 @@ class MainWindow : public SDLOpenGLWindow
   Shader* m_shaderNodes;
   Camera* m_camera;
   Lattice* m_lattice;
-  Model* m_model;
+  OBJModel* m_obj;
   RandomIntNumber<unsigned int>* m_random;
   std::vector<unsigned short> m_linesIdx;
   std::vector<unsigned short> m_surfsIdx;

@@ -16,7 +16,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_shaderNodes(nullptr)
   , m_camera(nullptr)
   , m_lattice(nullptr)
-  , m_model(nullptr)
+  , m_obj(nullptr)
 {
   m_lattice = new Lattice(32, 20000, 0.15f);
   m_camera = new Camera(width, height);
@@ -28,7 +28,7 @@ MainWindow::~MainWindow()
 {
   delete m_vao;
   delete m_random;
-  delete m_model;
+  delete m_obj;
   delete m_lattice;
   delete m_camera;
   delete m_shader;
@@ -68,7 +68,7 @@ MainWindow::paintGL()
     m_shaderNodes->SetUniformMatrix4fv("viewProjMat", m_camera->ViewProjectionMatrix());
     m_shaderNodes->SetUniformMatrix4fv("modelMat", scaleMat);
     glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 6 * sizeof(float));
-    glDrawArraysInstanced(GL_TRIANGLES, 0, m_model->drawArrayCount(), renderPos.size());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, m_obj->drawArraysCount(), renderPos.size());
     m_vao->disable("instanced");
   }
 
@@ -105,11 +105,11 @@ MainWindow::paintGL()
     m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     m_shader->SetUniform1f("alpha", 0.6f);
     glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, 6 * sizeof(float));
-    glDrawArrays(GL_TRIANGLES, 0, m_model->drawArrayCount());
+    glDrawArrays(GL_TRIANGLES, 0, m_obj->drawArraysCount());
   }
 
   if (m_isTraining) {
-    m_isTraining = m_lattice->input<3>(m_model->positions()[m_random->get()]);
+    m_isTraining = m_lattice->input(m_obj->v()[m_random->get()]);
   }
 
   ImGui_ImplOpenGL3_NewFrame();
@@ -262,10 +262,11 @@ MainWindow::initializeGL()
   m_vao->addAttrib("normal", 1, format);
   m_vao->addAttrib("instanced", 2, format);
 
-  m_model = new Model();
-  m_model->readOBJ("res/models/Icosphere.obj");
-  m_random = new RandomIntNumber<unsigned int>(0, m_model->positions().size() - 1);
-  auto const buffer = m_model->vertexBuffer();
+  m_obj = new OBJModel();
+  m_obj->read("res/models/Icosphere.obj");
+  m_obj->genVertexBuffer(OBJ_V | OBJ_VN);
+  m_random = new RandomIntNumber<unsigned int>(0, m_obj->v().size() - 1);
+  auto const buffer = m_obj->vertexBuffer();
   auto const stride = 6 * sizeof(float);
   glCreateBuffers(1, &m_vbo);
   glVertexArrayVertexBuffer(m_vao->id(), 0, m_vbo, 0, stride);
