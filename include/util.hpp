@@ -11,9 +11,9 @@ namespace util
 namespace str
 {
 std::vector<std::string>
-split(std::string target, std::string pattern);
+split(std::string const& target, std::string const& pattern);
 
 bool
-startsWith(std::string target, std::string prefix);
+startsWith(std::string const& target, std::string const& prefix);
 }
 }
