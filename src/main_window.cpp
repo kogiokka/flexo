@@ -200,7 +200,7 @@ MainWindow::paintGL()
 
   if (ImGui::TreeNodeEx("SOM Control", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::Text("Iterations: %d", m_lattice->currentIteration());
-    ImGui::SetNextItemWidth(200);
+    ImGui::SetNextItemWidth(160);
     if (ImGui::InputInt("Iterations Per Frame", &s_iterPerFrame, 10, 100)) {
       if (s_iterPerFrame < 1) {
         s_iterPerFrame = 1;
@@ -220,9 +220,9 @@ MainWindow::paintGL()
 
   if (ImGui::TreeNodeEx("Render Options", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::TreeNodeEx("Target Surface##renderOptions", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::SetNextItemWidth(200);
-      ImGui::SliderFloat("Transparency", &s_modelAlpha, 0.1f, 1.0f);
       ImGui::Checkbox("Show model", &m_showModel);
+      ImGui::SetNextItemWidth(160);
+      ImGui::SliderFloat("Transparency", &s_modelAlpha, 0.1f, 1.0f);
       ImGui::TreePop();
     }
     if (ImGui::TreeNodeEx("Lattice##renderOptions", ImGuiTreeNodeFlags_DefaultOpen)) {
