@@ -45,6 +45,7 @@ MainWindow::paintGL()
   static auto s_iterNum = m_lattice->maxIterations();
   static auto s_dimen = m_lattice->dimension();
   static auto s_rate = m_lattice->initialRate();
+  static float s_modelAlpha = 0.8f;
 
   glViewport(0, 0, m_width, m_height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -106,7 +107,7 @@ MainWindow::paintGL()
     m_shader->SetUniform3fv("viewPos", m_camera->Position());
     m_shader->SetUniform3fv("lightSrc", m_camera->Position());
     m_shader->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-    m_shader->SetUniform1f("alpha", 0.6f);
+    m_shader->SetUniform1f("alpha", s_modelAlpha);
     glVertexArrayVertexBuffer(m_vao->id(), 0, m_vboSurf, 0, m_surface->stride());
     glVertexArrayVertexBuffer(m_vao->id(), 1, m_vboSurf, 3 * sizeof(float), m_surface->stride());
     glDrawArrays(GL_TRIANGLES, 0, m_surface->drawArraysCount());
@@ -132,7 +133,7 @@ MainWindow::paintGL()
     ImGui::EndMainMenuBar();
   }
 
-  ImGui::SetNextWindowSize(ImVec2(450, 450));
+  ImGui::SetNextWindowSize(ImVec2(450, 500));
   ImGui::Begin("Surface Fitting", nullptr, ImGuiWindowFlags_NoResize);
   if (ImGui::TreeNodeEx("SOM Settings", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::SetNextItemWidth(200);
@@ -208,13 +209,15 @@ MainWindow::paintGL()
 
   if (ImGui::TreeNodeEx("Render Options", ImGuiTreeNodeFlags_DefaultOpen)) {
     if (ImGui::TreeNodeEx("Target Surface##renderOptions", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::Checkbox("Model", &m_showModel);
+      ImGui::SetNextItemWidth(200);
+      ImGui::SliderFloat("Transparency", &s_modelAlpha, 0.1f, 1.0f);
+      ImGui::Checkbox("Show model", &m_showModel);
       ImGui::TreePop();
     }
     if (ImGui::TreeNodeEx("Lattice##renderOptions", ImGuiTreeNodeFlags_DefaultOpen)) {
-      ImGui::Checkbox("Vertex Positions", &m_showPoints);
-      ImGui::Checkbox("Grid Lines", &m_showLines);
-      ImGui::Checkbox("Surface", &m_showSurfs);
+      ImGui::Checkbox("Show Vertex Positions", &m_showPoints);
+      ImGui::Checkbox("Show Grid Lines", &m_showLines);
+      ImGui::Checkbox("Show Surface", &m_showSurfs);
       ImGui::TreePop();
     }
     ImGui::TreePop();
