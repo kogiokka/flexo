@@ -7,7 +7,7 @@ util::str::split(std::string const& target, std::string const& pattern)
   regex re(pattern);
   vector<std::string> tokens;
 
-  copy(sregex_token_iterator(begin(target), end(target), re, -1), sregex_token_iterator(), back_inserter(tokens));
+  tokens.insert(end(tokens), sregex_token_iterator(begin(target), end(target), re, -1), sregex_token_iterator());
 
   return tokens;
 }
