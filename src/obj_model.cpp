@@ -21,8 +21,10 @@ OBJModel::read(std::filesystem::path const& path)
   using namespace std;
 
   ifstream file(path);
-  if (file.fail())
+  if (file.fail()) {
+    cerr << "Failed to open file:" << path << endl;
     return false;
+  }
 
   string line;
   while (getline(file, line)) {
