@@ -207,19 +207,15 @@ MainWindow::paintGL()
   }
 
   if (ImGui::TreeNodeEx("Render Options", ImGuiTreeNodeFlags_DefaultOpen)) {
-    if (ImGui::Button("Toggle Model", btnSize)) {
-      m_showModel = !m_showModel;
+    if (ImGui::TreeNodeEx("Target Surface##renderOptions", ImGuiTreeNodeFlags_DefaultOpen)) {
+      ImGui::Checkbox("Model", &m_showModel);
+      ImGui::TreePop();
     }
-    ImGui::SameLine();
-    if (ImGui::Button("Toggle Points", btnSize)) {
-      m_showPoints = !m_showPoints;
-    }
-    if (ImGui::Button("Toggle Lines", btnSize)) {
-      m_showLines = !m_showLines;
-    }
-    ImGui::SameLine();
-    if (ImGui::Button("Toggle Surfaces", btnSize)) {
-      m_showSurfs = !m_showSurfs;
+    if (ImGui::TreeNodeEx("Lattice##renderOptions", ImGuiTreeNodeFlags_DefaultOpen)) {
+      ImGui::Checkbox("Vertex Positions", &m_showPoints);
+      ImGui::Checkbox("Grid Lines", &m_showLines);
+      ImGui::Checkbox("Surface", &m_showSurfs);
+      ImGui::TreePop();
     }
     ImGui::TreePop();
   }
