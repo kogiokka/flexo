@@ -19,7 +19,7 @@ MainWindow::MainWindow(std::string name, int width, int height)
   , m_surface(nullptr)
   , m_posModel(nullptr)
 {
-  m_lattice = new Lattice(32, 20000, 0.15f);
+  m_lattice = new Lattice(64, 50000, 0.15f);
   m_camera = new Camera(width, height);
   // Some lighting problem with Perspective mode
   // m_camera->SetProjection(Camera::Projection::Perspective);
@@ -46,6 +46,7 @@ MainWindow::paintGL()
   static auto s_dimen = m_lattice->dimension();
   static auto s_rate = m_lattice->initialRate();
   static float s_modelAlpha = 0.8f;
+  static int s_iterPerFrame = 10;
 
   glViewport(0, 0, m_width, m_height);
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -113,8 +114,10 @@ MainWindow::paintGL()
     glDrawArrays(GL_TRIANGLES, 0, m_surface->drawArraysCount());
   }
 
-  if (m_isTraining) {
-    m_isTraining = m_lattice->input(m_surface->v()[m_random->get()]);
+  for (int i = 0; i < s_iterPerFrame; ++i) {
+    if (m_isTraining) {
+      m_isTraining = m_lattice->input(m_surface->v()[m_random->get()]);
+    }
   }
 
   ImGui_ImplOpenGL3_NewFrame();
@@ -197,6 +200,14 @@ MainWindow::paintGL()
 
   if (ImGui::TreeNodeEx("SOM Control", ImGuiTreeNodeFlags_DefaultOpen)) {
     ImGui::Text("Iterations: %d", m_lattice->currentIteration());
+    ImGui::SetNextItemWidth(200);
+    if (ImGui::InputInt("Iterations Per Frame", &s_iterPerFrame, 10, 100)) {
+      if (s_iterPerFrame < 1) {
+        s_iterPerFrame = 1;
+      } else if (s_iterPerFrame > 1000) {
+        s_iterPerFrame = 1000;
+      }
+    }
     if (ImGui::Button("Start", btnSize)) {
       m_isTraining = true;
     }
