@@ -111,32 +111,38 @@ OBJModel::read(std::filesystem::path const& path)
 void
 OBJModel::genVertexBuffer(std::uint16_t flag)
 {
-  unsigned int stride = 0;
-  std::vector<float> buf;
+  using namespace std;
+
+  vector<float> buf;
+  size_t stride = 0;
 
   bool const flagV = (flag & OBJ_V);
   bool const flagVT = (flag & OBJ_VT);
   bool const flagVN = (flag & OBJ_VN);
 
-  stride += flagV ? v_[0].size() : 0;
-  stride += flagVT ? vt_[0].size() : 0;
-  stride += flagVN ? vn_[0].size() : 0;
+  stride += flagV ? v_.front().size() : 0;
+  stride += flagVT ? vt_.front().size() : 0;
+  stride += flagVN ? vn_.front().size() : 0;
 
   buf.reserve(f_.size() * stride);
 
-  std::vector<int> indices;
+  unordered_map<size_t, vector<float>> faceIdxMap;
 
   for (auto const& face : f_) {
-    switch (face.size()) { // Number of vertices of the face
-    case 3:
-      indices = {0, 1, 2};
-      break;
-    case 4:
-      indices = {0, 1, 2, 0, 2, 3};
-      break;
+    auto const vertNum = face.size();
+    // Convex polygon triangulation
+    if (faceIdxMap.find(vertNum) == faceIdxMap.end()) {
+      vector<float> idx;
+      idx.reserve(3 * (vertNum - 2));
+      for (int j = 1; j <= vertNum - 2; ++j) {
+        idx.push_back(0);
+        idx.push_back(j);
+        idx.push_back(j + 1);
+      }
+      faceIdxMap.insert({vertNum, idx});
     }
 
-    for (int i : indices) {
+    for (int i : faceIdxMap[vertNum]) {
       if (flagV) {
         auto const idx = face[i][0] - 1;
         assert(idx >= 0);
@@ -157,7 +163,7 @@ OBJModel::genVertexBuffer(std::uint16_t flag)
   }
 
   stride_ = stride * sizeof(float);
-  vertexBuffer_ = std::move(buf);
+  vertexBuffer_ = move(buf);
 }
 
 std::vector<float> const&
