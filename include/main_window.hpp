@@ -6,6 +6,7 @@
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/menu.h>
+#include <wx/glcanvas.h>
 
 class MainWindow : public wxFrame
 {

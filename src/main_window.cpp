@@ -3,7 +3,9 @@
 MainWindow::MainWindow(wxWindow* parent)
   : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(800, 800))
 {
-  canvas_ = new OpenGLWindow(this, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSUNKEN_BORDER);
+  wxGLAttributes attrs;
+  attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
+  canvas_ = new OpenGLWindow(this, attrs, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSUNKEN_BORDER);
 
   Center();
 

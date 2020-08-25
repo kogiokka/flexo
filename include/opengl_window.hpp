@@ -38,6 +38,7 @@ class OpenGLWindow : public wxGLCanvas
 
 public:
   OpenGLWindow(wxWindow* parent,
+               wxGLAttributes const& dispAttrs,
                wxWindowID id = wxID_ANY,
                wxPoint const& pos = wxDefaultPosition,
                wxSize const& size = wxDefaultSize,

@@ -4,12 +4,13 @@
 #include <wx/dcclient.h>
 
 OpenGLWindow::OpenGLWindow(wxWindow* parent,
+                           wxGLAttributes const& dispAttrs,
                            wxWindowID id,
                            wxPoint const& pos,
                            wxSize const& size,
                            long style,
                            wxString const& name)
-  : wxGLCanvas(parent, id, nullptr, pos, size, style, name)
+  : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
   , isGLLoaded_(false)
   , vboSurf_(0)
   , vboPosModel_(0)
