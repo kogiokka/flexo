@@ -263,39 +263,49 @@ OpenGLWindow::OnSize(wxSizeEvent& event)
 }
 
 void
-OpenGLWindow::OnMouse(wxMouseEvent& event)
+OpenGLWindow::OnMouseWheel(wxMouseEvent& event)
 {
-  wxCoord const x = event.GetX();
-  wxCoord const y = event.GetY();
-
-  if (event.Dragging()) {
-    if (event.LeftIsDown()) {
-      camera_->DragTranslation(event.GetX(), event.GetY());
-    }
-    if (event.RightIsDown()) {
-      camera_->DragRotation(event.GetX(), event.GetY());
-    }
-  } else {
-    if (event.LeftDown()) {
-      camera_->InitDragTranslation(x, y);
-    }
-    if (event.RightDown()) {
-      camera_->InitDragRotation(x, y);
-    }
-  }
-
   camera_->WheelZoom(-event.GetWheelRotation() * 0.05f);
   Refresh();
 }
 
 void
-OpenGLWindow::OnMouseWheel(wxMouseEvent& event)
+OpenGLWindow::OnMouseLeftDown(wxMouseEvent& event)
 {
+  wxCoord const x = event.GetX();
+  wxCoord const y = event.GetY();
+  camera_->InitDragTranslation(x, y);
+  Refresh();
+}
+
+void
+OpenGLWindow::OnMouseRightDown(wxMouseEvent& event)
+{
+  wxCoord const x = event.GetX();
+  wxCoord const y = event.GetY();
+  camera_->InitDragRotation(x, y);
+  Refresh();
+}
+
+void
+OpenGLWindow::OnMouseMotion(wxMouseEvent& event)
+{
+  wxCoord const x = event.GetX();
+  wxCoord const y = event.GetY();
+  if (event.LeftIsDown()) {
+    camera_->DragTranslation(x, y);
+  }
+  if (event.RightIsDown()) {
+    camera_->DragRotation(x, y);
+  }
+  Refresh();
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLWindow, wxGLCanvas)
   EVT_PAINT(OpenGLWindow::OnPaint)
   EVT_SIZE(OpenGLWindow::OnSize)
-  EVT_MOUSE_EVENTS(OpenGLWindow::OnMouse)
+  EVT_MOTION(OpenGLWindow::OnMouseMotion)
+  EVT_LEFT_DOWN(OpenGLWindow::OnMouseLeftDown)
+  EVT_RIGHT_DOWN(OpenGLWindow::OnMouseRightDown)
   EVT_MOUSEWHEEL(OpenGLWindow::OnMouseWheel)
 wxEND_EVENT_TABLE()

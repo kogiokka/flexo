@@ -47,8 +47,10 @@ public:
   ~OpenGLWindow();
   void OnPaint(wxPaintEvent& event);
   void OnSize(wxSizeEvent& event);
-  void OnMouse(wxMouseEvent& event);
+  void OnMouseMotion(wxMouseEvent& event);
   void OnMouseWheel(wxMouseEvent& event);
+  void OnMouseLeftDown(wxMouseEvent& event);
+  void OnMouseRightDown(wxMouseEvent& event);
   void InitGL();
 
   wxDECLARE_EVENT_TABLE();
