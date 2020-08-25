@@ -1,60 +1,21 @@
 #pragma once
 
-#include "camera.hpp"
-#include "lattice.hpp"
-#include "obj_model.hpp"
-#include "random_int_number.hpp"
-#include "sdl_opengl_window.hpp"
-#include "shader.hpp"
-#include "vertex_array.hpp"
+#include "opengl_window.hpp"
 
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
-#include <imgui.h>
-#include <imgui_impl_opengl3.h>
-#include <imgui_impl_sdl.h>
+#include <wx/dcclient.h>
+#include <wx/event.h>
+#include <wx/frame.h>
+#include <wx/menu.h>
 
-#include <filesystem>
-#include <iostream>
-#include <string>
-
-class MainWindow : public SDLOpenGLWindow
+class MainWindow : public wxFrame
 {
-  GLuint m_vboSurf;
-  GLuint m_vboPosModel;
-  GLuint m_vboLatPos;
-  GLuint m_iboLatLines;
-  GLuint m_iboLatSurf;
-  float m_scale;
-  bool m_showModel;
-  bool m_showPoints;
-  bool m_showLines;
-  bool m_showSurfs;
-  bool m_isTraining;
-  VertexArray* m_vao;
-  Shader* m_shader;
-  Shader* m_shaderLines;
-  Shader* m_shaderNodes;
-  Camera* m_camera;
-  Lattice* m_lattice;
-  OBJModel* m_surface;
-  OBJModel* m_posModel;
-  RandomIntNumber<unsigned int>* m_random;
-  std::vector<unsigned short> m_linesIdx;
-  std::vector<unsigned short> m_surfsIdx;
-
-  void importFonts(std::filesystem::path dir_path);
+  OpenGLWindow* canvas_;
 
 public:
-  MainWindow(std::string name, int width, int height);
-  ~MainWindow();
-  virtual void initializeGL() override;
-  virtual void paintGL() override;
-  virtual void onMouseButtonDown(SDL_MouseButtonEvent buttonEvent) override;
-  virtual void onMouseMotion(SDL_MouseMotionEvent motionEvent) override;
-  virtual void onMouseWheel(SDL_MouseWheelEvent wheelEvent) override;
-  virtual void onKeyDown(SDL_KeyboardEvent keyEvent) override;
-  virtual void onWindowResized() override;
-  virtual void onProcessEvent(SDL_Event event) override;
-};
+  MainWindow(wxWindow* parent = 0);
+  virtual ~MainWindow();
+  void InitializeGL();
+  void OnExit(wxCommandEvent& event);
 
+  wxDECLARE_EVENT_TABLE();
+};

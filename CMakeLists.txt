@@ -10,21 +10,15 @@ if (CMAKE_COMPILER_IS_GNUCXX)
     set(CMAKE_CXX_FLAGS_DEBUG "-g -D_GLIBCXX_DEBUG")
 endif()
 
-find_package(SDL2 REQUIRED)
-if (SDL2_FOUND)
-    message(STATUS "SDL2 Include Path: ${SDL2_INCLUDE_DIRS}")
-    message(STATUS "SDL2 Libraries: ${SDL2_LIBRARIES}")
-endif()
+find_package(wxWidgets REQUIRED COMPONENTS gl core)
 
-include_directories(${SDL2_INCLUDE_DIRS})
+include(${wxWidgets_USE_FILE})
 include_directories(include/)
 include_directories(ext/glad/include)
 include_directories(ext/glm/include)
-include_directories(ext/imgui)
 
 add_subdirectory(ext/glad)
 add_subdirectory(ext/glm)
-add_subdirectory(ext/imgui)
 
 file(GLOB SOURCE CONFIGURE_DEPENDS
     src/*.cpp
@@ -37,9 +31,7 @@ add_executable(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
     glad
     glm
-    imgui
-    SDL2::SDL2-static
-    SDL2::SDL2main
+    ${wxWidgets_LIBRARIES}
 )
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
