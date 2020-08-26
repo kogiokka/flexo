@@ -2,12 +2,11 @@
 
 MainWindow::MainWindow(wxWindow* parent)
   : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(800, 800))
+  , canvas_(nullptr)
 {
-  wxGLAttributes attrs;
-  attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-  canvas_ = new OpenGLWindow(this, attrs, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSUNKEN_BORDER);
-
+  SetMinSize(wxSize(400, 400));
   Center();
+  // CreateStatusBar();
 
   wxMenu* fileMenu = new wxMenu;
   fileMenu->Append(wxID_OPEN, "Open");
@@ -22,7 +21,18 @@ MainWindow::MainWindow(wxWindow* parent)
 
   SetMenuBar(menubar);
 
-  CreateStatusBar();
+  wxGLAttributes attrs;
+  attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
+  canvas_ = new OpenGLWindow(this, attrs, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSUNKEN_BORDER);
+
+  wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition);
+  wxBoxSizer* rootLayout = new wxBoxSizer(wxHORIZONTAL);
+  this->SetSizer(rootLayout);
+  this->Layout();
+  this->Center(wxBOTH);
+
+  rootLayout->Add(panel, 1, wxEXPAND | wxALL, 0);
+  rootLayout->Add(canvas_, 1, wxEXPAND | wxALL, 0);
 };
 
 MainWindow::~MainWindow()
@@ -37,13 +47,13 @@ MainWindow::InitializeGL()
 }
 
 void
-MainWindow::ResetCamera(wxCommandEvent& event)
+MainWindow::ResetCamera(wxCommandEvent& evt)
 {
   canvas_->ResetCamera();
 }
 
 void
-MainWindow::OnExit(wxCommandEvent& event)
+MainWindow::OnExit(wxCommandEvent& evt)
 {
   Close(true);
 }
