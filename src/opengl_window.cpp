@@ -249,12 +249,20 @@ OpenGLWindow::InitGL()
 }
 
 void
+OpenGLWindow::ResetCamera()
+{
+  delete camera_;
+
+  wxSize const size = GetClientSize() * GetContentScaleFactor();
+  camera_ = new Camera(size.x, size.y);
+  Refresh();
+}
+
+void
 OpenGLWindow::OnSize(wxSizeEvent& event)
 {
   if (!IsShownOnScreen() || !isGLLoaded_)
     return;
-
-  assert(isGLLoaded_);
 
   SetCurrent(*context_);
   wxSize const size = GetClientSize() * GetContentScaleFactor();

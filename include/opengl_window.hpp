@@ -52,6 +52,7 @@ public:
   void OnMouseLeftDown(wxMouseEvent& event);
   void OnMouseRightDown(wxMouseEvent& event);
   void InitGL();
+  void ResetCamera();
 
   wxDECLARE_EVENT_TABLE();
 };

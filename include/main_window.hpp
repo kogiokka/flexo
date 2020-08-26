@@ -16,6 +16,7 @@ public:
   MainWindow(wxWindow* parent = 0);
   virtual ~MainWindow();
   void InitializeGL();
+  void ResetCamera(wxCommandEvent& event);
   void OnExit(wxCommandEvent& event);
 
   wxDECLARE_EVENT_TABLE();

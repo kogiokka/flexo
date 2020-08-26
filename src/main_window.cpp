@@ -9,10 +9,16 @@ MainWindow::MainWindow(wxWindow* parent)
 
   Center();
 
-  wxMenu* menu = new wxMenu;
-  menu->Append(wxID_EXIT, "Exit");
+  wxMenu* fileMenu = new wxMenu;
+  fileMenu->Append(wxID_OPEN, "Open");
+  fileMenu->Append(wxID_EXIT, "Exit");
+
+  wxMenu* cameraMenu = new wxMenu;
+  cameraMenu->Append(wxID_REFRESH, "Reset");
+
   wxMenuBar* menubar = new wxMenuBar;
-  menubar->Append(menu, "&Menu");
+  menubar->Append(fileMenu, "&File");
+  menubar->Append(cameraMenu, "&Camera");
 
   SetMenuBar(menubar);
 
@@ -31,6 +37,12 @@ MainWindow::InitializeGL()
 }
 
 void
+MainWindow::ResetCamera(wxCommandEvent& event)
+{
+  canvas_->ResetCamera();
+}
+
+void
 MainWindow::OnExit(wxCommandEvent& event)
 {
   Close(true);
@@ -38,4 +50,5 @@ MainWindow::OnExit(wxCommandEvent& event)
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
+  EVT_MENU(wxID_REFRESH, MainWindow::ResetCamera)
 wxEND_EVENT_TABLE()
