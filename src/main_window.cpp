@@ -21,18 +21,22 @@ MainWindow::MainWindow(wxWindow* parent)
 
   SetMenuBar(menubar);
 
+  wxPanel* panel = new wxPanel(this, wxID_ANY);
   wxGLAttributes attrs;
   attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-  canvas_ = new OpenGLWindow(this, attrs, wxID_ANY, wxDefaultPosition, GetClientSize(), wxSUNKEN_BORDER);
+  canvas_ = new OpenGLWindow(this, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
 
-  wxPanel* panel = new wxPanel(this, wxID_ANY, wxDefaultPosition);
   wxBoxSizer* rootLayout = new wxBoxSizer(wxHORIZONTAL);
-  this->SetSizer(rootLayout);
-  this->Layout();
-  this->Center(wxBOTH);
+  SetSizer(rootLayout);
+  Layout();
 
-  rootLayout->Add(panel, 1, wxEXPAND | wxALL, 0);
+  rootLayout->Add(panel, 0, wxEXPAND | wxALL, 0);
   rootLayout->Add(canvas_, 1, wxEXPAND | wxALL, 0);
+
+  wxBoxSizer* panelLayout = new wxBoxSizer(wxVERTICAL);
+  panel->SetSizer(panelLayout);
+  wxButton* btn = new wxButton(panel, wxID_ANY, "I'm a wxButton");
+  panelLayout->Add(btn, 0, wxEXPAND | wxALL, 10);
 };
 
 MainWindow::~MainWindow()

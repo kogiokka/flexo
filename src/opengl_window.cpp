@@ -162,10 +162,9 @@ OpenGLWindow::InitGL()
        GLsizei length,
        GLchar const* message,
        void const* userParam) noexcept {
-      std::cerr << std::hex;
-      std::cerr << "[Type " << type << "]";
-      std::cerr << "[Severity " << severity << "]";
-      std::cerr << " Message: " << message << "\n";
+      std::cerr << std::hex << "[Type " << type << "]"
+                << "[Severity " << severity << "]"
+                << " Message: " << message << "\n";
     },
     nullptr);
   glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
@@ -242,7 +241,7 @@ OpenGLWindow::InitGL()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
-  std::cerr << "Version:      " << glGetString(GL_VERSION) << "\n"
+  std::cout << "Version:      " << glGetString(GL_VERSION) << "\n"
             << "Renderer:     " << glGetString(GL_RENDERER) << "\n"
             << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
             << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
@@ -261,12 +260,15 @@ OpenGLWindow::ResetCamera()
 void
 OpenGLWindow::OnSize(wxSizeEvent& event)
 {
+  // Adjust aspect ratio of the camera before GLCanvas is displayed, in response to any resizing of the canvas.
+  wxSize const size = GetClientSize() * GetContentScaleFactor();
+  camera_->SetAspectRatio(size.x, size.y);
+
+  // Guard for SetCurrent and calling GL functions
   if (!IsShownOnScreen() || !isGLLoaded_)
     return;
 
   SetCurrent(*context_);
-  wxSize const size = GetClientSize() * GetContentScaleFactor();
-  camera_->SetAspectRatio(size.x, size.y);
   glViewport(0, 0, size.x, size.y);
 }
 
