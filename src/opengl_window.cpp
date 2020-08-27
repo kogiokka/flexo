@@ -142,6 +142,7 @@ OpenGLWindow::OnPaint(wxPaintEvent& event)
   }
 
   SwapBuffers();
+  Refresh();
 }
 
 void
@@ -254,7 +255,6 @@ OpenGLWindow::ResetCamera()
 
   wxSize const size = GetClientSize() * GetContentScaleFactor();
   camera_ = new Camera(size.x, size.y);
-  Refresh();
 }
 
 void
@@ -276,7 +276,6 @@ void
 OpenGLWindow::OnMouseWheel(wxMouseEvent& event)
 {
   camera_->WheelZoom(-event.GetWheelRotation() * 0.05f);
-  Refresh();
 }
 
 void
@@ -285,7 +284,6 @@ OpenGLWindow::OnMouseLeftDown(wxMouseEvent& event)
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
   camera_->InitDragTranslation(x, y);
-  Refresh();
 }
 
 void
@@ -294,7 +292,6 @@ OpenGLWindow::OnMouseRightDown(wxMouseEvent& event)
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
   camera_->InitDragRotation(x, y);
-  Refresh();
 }
 
 void
@@ -308,7 +305,6 @@ OpenGLWindow::OnMouseMotion(wxMouseEvent& event)
   if (event.RightIsDown()) {
     camera_->DragRotation(x, y);
   }
-  Refresh();
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLWindow, wxGLCanvas)
