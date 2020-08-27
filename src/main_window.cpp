@@ -35,8 +35,8 @@ MainWindow::MainWindow(wxWindow* parent)
 
   wxBoxSizer* panelLayout = new wxBoxSizer(wxVERTICAL);
   panel->SetSizer(panelLayout);
-  wxButton* btn = new wxButton(panel, wxID_ANY, "I'm a wxButton");
-  panelLayout->Add(btn, 0, wxEXPAND | wxALL, 10);
+  btnStartPause_ = new wxButton(panel, BTN_STARTPAUSE, "Start");
+  panelLayout->Add(btnStartPause_, 0, wxEXPAND | wxALL , 5);
 };
 
 MainWindow::~MainWindow()
@@ -48,6 +48,18 @@ void
 MainWindow::InitializeGL()
 {
   canvas_->InitGL();
+}
+
+void
+MainWindow::OnButtonStartPause(wxCommandEvent& evt)
+{
+  bool const training = canvas_->GetTrainPause();
+  if (training) {
+    btnStartPause_->SetLabel("Start");
+  } else {
+    btnStartPause_->SetLabel("Pause");
+  }
+  canvas_->ToggleTrainPause(!training);
 }
 
 void
@@ -65,4 +77,5 @@ MainWindow::OnExit(wxCommandEvent& evt)
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
   EVT_MENU(wxID_REFRESH, MainWindow::ResetCamera)
+  EVT_BUTTON(BTN_STARTPAUSE, MainWindow::OnButtonStartPause)
 wxEND_EVENT_TABLE()

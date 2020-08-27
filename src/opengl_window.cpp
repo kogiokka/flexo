@@ -12,6 +12,7 @@ OpenGLWindow::OpenGLWindow(wxWindow* parent,
                            wxString const& name)
   : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
   , isGLLoaded_(false)
+  , toTrain_(false)
   , vboSurf_(0)
   , vboPosModel_(0)
   , vboLatPos_(0)
@@ -57,7 +58,6 @@ OpenGLWindow::OnPaint(wxPaintEvent& event)
   wxPaintDC dc(this);
   SetCurrent(*context_);
 
-  static bool s_isTraining = false;
   static bool s_showSurfs = false;
   static bool s_showLines = true;
   static bool s_showPoints = true;
@@ -136,8 +136,8 @@ OpenGLWindow::OnPaint(wxPaintEvent& event)
   }
 
   for (int i = 0; i < s_iterPerFrame; ++i) {
-    if (s_isTraining) {
-      s_isTraining = lattice_->input(surface_->v()[random_->get()]);
+    if (toTrain_) {
+      toTrain_ = lattice_->input(surface_->v()[random_->get()]);
     }
   }
 
@@ -249,15 +249,6 @@ OpenGLWindow::InitGL()
 }
 
 void
-OpenGLWindow::ResetCamera()
-{
-  delete camera_;
-
-  wxSize const size = GetClientSize() * GetContentScaleFactor();
-  camera_ = new Camera(size.x, size.y);
-}
-
-void
 OpenGLWindow::OnSize(wxSizeEvent& event)
 {
   // Adjust aspect ratio of the camera before GLCanvas is displayed, in response to any resizing of the canvas.
@@ -305,6 +296,27 @@ OpenGLWindow::OnMouseMotion(wxMouseEvent& event)
   if (event.RightIsDown()) {
     camera_->DragRotation(x, y);
   }
+}
+
+void
+OpenGLWindow::ResetCamera()
+{
+  delete camera_;
+
+  wxSize const size = GetClientSize() * GetContentScaleFactor();
+  camera_ = new Camera(size.x, size.y);
+}
+
+void
+OpenGLWindow::ToggleTrainPause(bool toTrain)
+{
+  toTrain_ = toTrain;
+}
+
+bool
+OpenGLWindow::GetTrainPause() const
+{
+  return toTrain_;
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLWindow, wxGLCanvas)

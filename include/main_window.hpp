@@ -11,8 +11,13 @@
 #include <wx/panel.h>
 #include <wx/sizer.h>
 
+enum {
+  BTN_STARTPAUSE = wxID_HIGHEST + 1,
+};
+
 class MainWindow : public wxFrame
 {
+  wxButton* btnStartPause_;
   OpenGLWindow* canvas_;
 
 public:
@@ -20,6 +25,7 @@ public:
   virtual ~MainWindow();
   void InitializeGL();
   void ResetCamera(wxCommandEvent& evt);
+  void OnButtonStartPause(wxCommandEvent& evt);
   void OnExit(wxCommandEvent& evt);
 
   wxDECLARE_EVENT_TABLE();

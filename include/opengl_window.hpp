@@ -18,6 +18,7 @@
 class OpenGLWindow : public wxGLCanvas
 {
   bool isGLLoaded_;
+  bool toTrain_;
   GLuint vboSurf_;
   GLuint vboPosModel_;
   GLuint vboLatPos_;
@@ -53,6 +54,8 @@ public:
   void OnMouseRightDown(wxMouseEvent& event);
   void InitGL();
   void ResetCamera();
+  void ToggleTrainPause(bool toTrain);
+  bool GetTrainPause() const;
 
   wxDECLARE_EVENT_TABLE();
 };
