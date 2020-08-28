@@ -1,10 +1,12 @@
 #include "main_window.hpp"
 
 MainWindow::MainWindow(wxWindow* parent)
-  : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(800, 800))
+  : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(1200, 800))
+  , panel_(nullptr)
+  , btnStartPause_(nullptr)
   , canvas_(nullptr)
 {
-  SetMinSize(wxSize(400, 400));
+  SetMinSize(wxSize(600, 400));
   Center();
   // CreateStatusBar();
 
@@ -19,28 +21,33 @@ MainWindow::MainWindow(wxWindow* parent)
   menubar->Append(fileMenu, "&File");
   menubar->Append(cameraMenu, "&Camera");
 
-  SetMenuBar(menubar);
+  this->SetMenuBar(menubar);
 
-  wxPanel* panel = new wxPanel(this, wxID_ANY);
+  panel_ = new wxPanel(this, wxID_ANY);
   wxGLAttributes attrs;
   attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
   canvas_ = new OpenGLWindow(this, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
 
   wxBoxSizer* rootLayout = new wxBoxSizer(wxHORIZONTAL);
-  SetSizer(rootLayout);
-  Layout();
+  // Proportion: Panel 1 to GLCanvas 3
+  rootLayout->Add(panel_, 1, wxGROW | wxALL, 0);
+  rootLayout->Add(canvas_, 3, wxGROW | wxALL, 0);
+  this->SetSizer(rootLayout);
+  this->Layout();
 
-  rootLayout->Add(panel, 0, wxEXPAND | wxALL, 0);
-  rootLayout->Add(canvas_, 1, wxEXPAND | wxALL, 0);
+  wxStaticBoxSizer* rowLayout1 = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Control");
+  btnStartPause_ = new wxButton(rowLayout1->GetStaticBox(), BTN_STARTPAUSE, "Start");
+  rowLayout1->Add(btnStartPause_, 1, wxGROW | wxALL, 10);
 
   wxBoxSizer* panelLayout = new wxBoxSizer(wxVERTICAL);
-  panel->SetSizer(panelLayout);
-  btnStartPause_ = new wxButton(panel, BTN_STARTPAUSE, "Start");
-  panelLayout->Add(btnStartPause_, 0, wxEXPAND | wxALL , 5);
+  panelLayout->Add(rowLayout1, 0, wxGROW | wxALL, 10);
+  panel_->SetSizer(panelLayout);
 };
 
 MainWindow::~MainWindow()
 {
+  // It seems that manually deleting widgets is unnecessary.
+  // Using delete on wxPanel will cause some delay when the frame closes.
   delete canvas_;
 }
 

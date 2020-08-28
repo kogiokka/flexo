@@ -10,6 +10,7 @@
 #include <wx/menu.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
+#include <wx/statbox.h>
 
 enum {
   BTN_STARTPAUSE = wxID_HIGHEST + 1,
@@ -17,6 +18,7 @@ enum {
 
 class MainWindow : public wxFrame
 {
+  wxPanel* panel_;
   wxButton* btnStartPause_;
   OpenGLWindow* canvas_;
 
