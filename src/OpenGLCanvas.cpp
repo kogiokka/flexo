@@ -328,6 +328,12 @@ OpenGLCanvas::GetRenderOptionState(RenderOpt opt) const
   return renderOpt_[opt];
 }
 
+int
+OpenGLCanvas::GetCurrentIterations() const
+{
+  return lattice_->currentIteration();
+}
+
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
   EVT_PAINT(OpenGLCanvas::OnPaint)
   EVT_SIZE(OpenGLCanvas::OnSize)

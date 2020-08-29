@@ -64,6 +64,7 @@ public:
   bool GetPlayPause() const;
   void ToggleRenderOption(RenderOpt opt);
   bool GetRenderOptionState(RenderOpt opt) const;
+  int GetCurrentIterations() const;
 
   wxDECLARE_EVENT_TABLE();
 };
