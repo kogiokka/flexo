@@ -35,6 +35,8 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   lattice_ = new Lattice(64, 50000, 0.15f);
   wxSize clientSize = GetClientSize() * GetContentScaleFactor();
   camera_ = new Camera(clientSize.x, clientSize.y);
+
+  renderOpt_ = {true, true, true, false};
 };
 
 OpenGLCanvas::~OpenGLCanvas()
@@ -57,10 +59,6 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   wxPaintDC dc(this);
   SetCurrent(*context_);
 
-  static bool s_showSurfs = false;
-  static bool s_showLines = true;
-  static bool s_showPoints = true;
-  static bool s_showModel = true;
   static float s_modelAlpha = 0.8f;
   static int s_iterPerFrame = 10;
   static float s_scale = 50.0f;
@@ -83,7 +81,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   }
   glNamedBufferSubData(vboLatPos_, 0, renderPos.size() * 3 * sizeof(float), renderPos.data());
 
-  if (s_showPoints) {
+  if (renderOpt_[POINTS]) {
     vao_->enable("instanced");
     shaderNodes_->Use();
     shaderNodes_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
@@ -97,7 +95,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     vao_->disable("instanced");
   }
 
-  if (s_showSurfs) {
+  if (renderOpt_[SURFACE]) {
     vao_->disable("normal");
     shaderLines_->Use();
     shaderLines_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
@@ -109,7 +107,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     vao_->enable("normal");
   }
 
-  if (s_showLines) {
+  if (renderOpt_[LINES]) {
     vao_->disable("normal");
     shaderLines_->Use();
     shaderLines_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
@@ -121,7 +119,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     vao_->enable("normal");
   }
 
-  if (s_showModel) {
+  if (renderOpt_[MODEL]) {
     shader_->Use();
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
@@ -307,15 +305,27 @@ OpenGLCanvas::ResetCamera()
 }
 
 void
-OpenGLCanvas::ToggleTrainPause(bool toTrain)
+OpenGLCanvas::TogglePlayPause(bool toTrain)
 {
   toTrain_ = toTrain;
 }
 
 bool
-OpenGLCanvas::GetTrainPause() const
+OpenGLCanvas::GetPlayPause() const
 {
   return toTrain_;
+}
+
+void
+OpenGLCanvas::ToggleRenderOption(RenderOpt opt)
+{
+  renderOpt_[opt] = !renderOpt_[opt];
+}
+
+bool
+OpenGLCanvas::GetRenderOptionState(RenderOpt opt) const
+{
+  return renderOpt_[opt];
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)

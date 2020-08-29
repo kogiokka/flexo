@@ -35,11 +35,25 @@ MainWindow::MainWindow(wxWindow* parent)
   this->Layout();
 
   wxStaticBoxSizer* rowLayout1 = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Control");
+  wxStaticBoxSizer* rowLayout2 = new wxStaticBoxSizer(wxVERTICAL, panel_, "Rendering Options");
   btnStartPause_ = new wxButton(rowLayout1->GetStaticBox(), BTN_STARTPAUSE, "Start");
   rowLayout1->Add(btnStartPause_, 1, wxGROW | wxALL, 10);
+  wxCheckBox* chkBox1 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_MODEL, "Toggle Model");
+  wxCheckBox* chkBox2 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_POINTS, "Toggle Grid Points");
+  wxCheckBox* chkBox3 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_LINES, "Toggle Grid Lines");
+  wxCheckBox* chkBox4 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_SURFACES, "Toggle Grid Surface");
+  chkBox1->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::MODEL));
+  chkBox2->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::POINTS));
+  chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LINES));
+  chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::SURFACE));
+  rowLayout2->Add(chkBox1, 1, wxGROW | wxALL, 10);
+  rowLayout2->Add(chkBox2, 1, wxGROW | wxALL, 10);
+  rowLayout2->Add(chkBox3, 1, wxGROW | wxALL, 10);
+  rowLayout2->Add(chkBox4, 1, wxGROW | wxALL, 10);
 
   wxBoxSizer* panelLayout = new wxBoxSizer(wxVERTICAL);
   panelLayout->Add(rowLayout1, 0, wxGROW | wxALL, 10);
+  panelLayout->Add(rowLayout2, 0, wxGROW | wxALL, 10);
   panel_->SetSizer(panelLayout);
 };
 
@@ -67,13 +81,37 @@ MainWindow::InitializeGL()
 void
 MainWindow::OnButtonStartPause(wxCommandEvent& evt)
 {
-  bool const training = canvas_->GetTrainPause();
+  bool const training = canvas_->GetPlayPause();
   if (training) {
     btnStartPause_->SetLabel("Start");
   } else {
     btnStartPause_->SetLabel("Pause");
   }
-  canvas_->ToggleTrainPause(!training);
+  canvas_->TogglePlayPause(!training);
+}
+
+void
+MainWindow::OnCheckBoxToggleModel(wxCommandEvent& evt)
+{
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::MODEL);
+}
+
+void
+MainWindow::OnCheckBoxTogglePoints(wxCommandEvent& evt)
+{
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::POINTS);
+}
+
+void
+MainWindow::OnCheckBoxToggleLines(wxCommandEvent& evt)
+{
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LINES);
+}
+
+void
+MainWindow::OnCheckBoxToggleSurfaces(wxCommandEvent& evt)
+{
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::SURFACE);
 }
 
 void
@@ -92,4 +130,8 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
   EVT_MENU(wxID_REFRESH, MainWindow::ResetCamera)
   EVT_BUTTON(BTN_STARTPAUSE, MainWindow::OnButtonStartPause)
+  EVT_CHECKBOX(CB_TOGGLE_MODEL, MainWindow::OnCheckBoxToggleModel)
+  EVT_CHECKBOX(CB_TOGGLE_POINTS, MainWindow::OnCheckBoxTogglePoints)
+  EVT_CHECKBOX(CB_TOGGLE_LINES, MainWindow::OnCheckBoxToggleLines)
+  EVT_CHECKBOX(CB_TOGGLE_SURFACES, MainWindow::OnCheckBoxToggleSurfaces)
 wxEND_EVENT_TABLE()

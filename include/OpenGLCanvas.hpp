@@ -36,8 +36,12 @@ class OpenGLCanvas : public wxGLCanvas
   Lattice* lattice_;
   ObjModel* surface_;
   ObjModel* posModel_;
+  std::vector<bool> renderOpt_;
   std::vector<unsigned short> linesIdx_;
   std::vector<unsigned short> surfsIdx_;
+
+public:
+  enum RenderOpt { MODEL = 0, POINTS, LINES, SURFACE };
 
 public:
   OpenGLCanvas(wxWindow* parent,
@@ -56,8 +60,10 @@ public:
   void OnMouseRightDown(wxMouseEvent& event);
   void InitGL();
   void ResetCamera();
-  void ToggleTrainPause(bool toTrain);
-  bool GetTrainPause() const;
+  void TogglePlayPause(bool toTrain);
+  bool GetPlayPause() const;
+  void ToggleRenderOption(RenderOpt opt);
+  bool GetRenderOptionState(RenderOpt opt) const;
 
   wxDECLARE_EVENT_TABLE();
 };
