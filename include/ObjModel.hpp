@@ -1,15 +1,10 @@
 #pragma once
 
-#include "util.hpp"
+#include "Util.hpp"
 
-#include <cassert>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
-#include <iostream>
-#include <string>
-#include <unordered_map>
-#include <utility>
 #include <vector>
 
 typedef enum {
@@ -18,7 +13,7 @@ typedef enum {
   OBJ_VN = 0b0100,
 } OBJ_Attr;
 
-class OBJModel
+class ObjModel
 {
   using Vec = std::vector<float>;
   using Triplet = std::array<int, 3>;
@@ -33,8 +28,8 @@ class OBJModel
   std::vector<Face> f_;
 
 public:
-  OBJModel();
-  ~OBJModel();
+  ObjModel();
+  ~ObjModel();
   bool read(std::filesystem::path const& path);
   void genVertexBuffer(std::uint16_t flag);
   std::size_t drawArraysCount() const;

@@ -1,4 +1,4 @@
-#include "main_window.hpp"
+#include "MainWindow.hpp"
 
 MainWindow::MainWindow(wxWindow* parent)
   : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(1200, 800))
@@ -23,10 +23,9 @@ MainWindow::MainWindow(wxWindow* parent)
 
   this->SetMenuBar(menubar);
 
+  CreateOpenGLCanvas();
+
   panel_ = new wxPanel(this, wxID_ANY);
-  wxGLAttributes attrs;
-  attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-  canvas_ = new OpenGLWindow(this, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
 
   wxBoxSizer* rootLayout = new wxBoxSizer(wxHORIZONTAL);
   // Proportion: Panel 1 to GLCanvas 3
@@ -49,6 +48,14 @@ MainWindow::~MainWindow()
   // It seems that manually deleting widgets is unnecessary.
   // Using delete on wxPanel will cause some delay when the frame closes.
   delete canvas_;
+}
+
+inline void
+MainWindow::CreateOpenGLCanvas()
+{
+  wxGLAttributes attrs;
+  attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
+  canvas_ = new OpenGLCanvas(this, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
 }
 
 void

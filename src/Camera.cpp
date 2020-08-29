@@ -1,4 +1,4 @@
-#include "camera.hpp"
+#include "Camera.hpp"
 
 Camera::Camera(int width, int height, Camera::Projection projection)
   : m_worldUp{0.0f, 1.0f, 0.0f}

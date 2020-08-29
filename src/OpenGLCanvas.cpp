@@ -1,9 +1,8 @@
-#include "opengl_window.hpp"
+#include "OpenGLCanvas.hpp"
 
 #include <iostream>
-#include <wx/dcclient.h>
 
-OpenGLWindow::OpenGLWindow(wxWindow* parent,
+OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
                            wxGLAttributes const& dispAttrs,
                            wxWindowID id,
                            wxPoint const& pos,
@@ -38,7 +37,7 @@ OpenGLWindow::OpenGLWindow(wxWindow* parent,
   camera_ = new Camera(clientSize.x, clientSize.y);
 };
 
-OpenGLWindow::~OpenGLWindow()
+OpenGLCanvas::~OpenGLCanvas()
 {
   delete random_;
   delete vao_;
@@ -53,7 +52,7 @@ OpenGLWindow::~OpenGLWindow()
 }
 
 void
-OpenGLWindow::OnPaint(wxPaintEvent& event)
+OpenGLCanvas::OnPaint(wxPaintEvent& event)
 {
   wxPaintDC dc(this);
   SetCurrent(*context_);
@@ -146,7 +145,7 @@ OpenGLWindow::OnPaint(wxPaintEvent& event)
 }
 
 void
-OpenGLWindow::InitGL()
+OpenGLCanvas::InitGL()
 {
   SetCurrent(*context_);
 
@@ -184,7 +183,7 @@ OpenGLWindow::InitGL()
   vao_->addAttrib("normal", 1, format);
   vao_->addAttrib("instanced", 2, format);
 
-  surface_ = new OBJModel();
+  surface_ = new ObjModel();
   surface_->read("res/models/NurbsSurface.obj");
   surface_->genVertexBuffer(OBJ_V | OBJ_VN);
   random_ = new RandomIntNumber<unsigned int>(0, surface_->v().size() - 1);
@@ -194,7 +193,7 @@ OpenGLWindow::InitGL()
   /** Surface END **********************************************************/
 
   /** Lattice **********************************************************/
-  posModel_ = new OBJModel();
+  posModel_ = new ObjModel();
   posModel_->read("res/models/Icosphere.obj");
   posModel_->genVertexBuffer(OBJ_V | OBJ_VN);
   glCreateBuffers(1, &vboPosModel_);
@@ -249,7 +248,7 @@ OpenGLWindow::InitGL()
 }
 
 void
-OpenGLWindow::OnSize(wxSizeEvent& event)
+OpenGLCanvas::OnSize(wxSizeEvent& event)
 {
   // Adjust aspect ratio of the camera before GLCanvas is displayed, in response to any resizing of the canvas.
   wxSize const size = GetClientSize() * GetContentScaleFactor();
@@ -264,13 +263,13 @@ OpenGLWindow::OnSize(wxSizeEvent& event)
 }
 
 void
-OpenGLWindow::OnMouseWheel(wxMouseEvent& event)
+OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
   camera_->WheelZoom(-event.GetWheelRotation() * 0.05f);
 }
 
 void
-OpenGLWindow::OnMouseLeftDown(wxMouseEvent& event)
+OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
@@ -278,7 +277,7 @@ OpenGLWindow::OnMouseLeftDown(wxMouseEvent& event)
 }
 
 void
-OpenGLWindow::OnMouseRightDown(wxMouseEvent& event)
+OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 {
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
@@ -286,7 +285,7 @@ OpenGLWindow::OnMouseRightDown(wxMouseEvent& event)
 }
 
 void
-OpenGLWindow::OnMouseMotion(wxMouseEvent& event)
+OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
 {
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
@@ -299,7 +298,7 @@ OpenGLWindow::OnMouseMotion(wxMouseEvent& event)
 }
 
 void
-OpenGLWindow::ResetCamera()
+OpenGLCanvas::ResetCamera()
 {
   delete camera_;
 
@@ -308,22 +307,22 @@ OpenGLWindow::ResetCamera()
 }
 
 void
-OpenGLWindow::ToggleTrainPause(bool toTrain)
+OpenGLCanvas::ToggleTrainPause(bool toTrain)
 {
   toTrain_ = toTrain;
 }
 
 bool
-OpenGLWindow::GetTrainPause() const
+OpenGLCanvas::GetTrainPause() const
 {
   return toTrain_;
 }
 
-wxBEGIN_EVENT_TABLE(OpenGLWindow, wxGLCanvas)
-  EVT_PAINT(OpenGLWindow::OnPaint)
-  EVT_SIZE(OpenGLWindow::OnSize)
-  EVT_MOTION(OpenGLWindow::OnMouseMotion)
-  EVT_LEFT_DOWN(OpenGLWindow::OnMouseLeftDown)
-  EVT_RIGHT_DOWN(OpenGLWindow::OnMouseRightDown)
-  EVT_MOUSEWHEEL(OpenGLWindow::OnMouseWheel)
+wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
+  EVT_PAINT(OpenGLCanvas::OnPaint)
+  EVT_SIZE(OpenGLCanvas::OnSize)
+  EVT_MOTION(OpenGLCanvas::OnMouseMotion)
+  EVT_LEFT_DOWN(OpenGLCanvas::OnMouseLeftDown)
+  EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
+  EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
 wxEND_EVENT_TABLE()

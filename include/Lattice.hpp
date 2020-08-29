@@ -1,14 +1,10 @@
 #pragma once
 
-#include <cmath>
-#include <fstream>
-#include <limits>
-#include <memory>
-#include <sstream>
-#include <vector>
+#include "Node.hpp"
+#include "RandomRealNumber.hpp"
 
-#include "node.hpp"
-#include "random_real_number.hpp"
+#include <array>
+#include <vector>
 
 class Lattice
 {

@@ -1,4 +1,10 @@
-#include "lattice.hpp"
+#include "Lattice.hpp"
+
+#include <cmath>
+#include <fstream>
+#include <limits>
+#include <memory>
+#include <sstream>
 
 Lattice::Lattice(int dimen, int iterations, float learningRate)
   : m_dimen(dimen)
@@ -125,7 +131,6 @@ Lattice::lineIndices() const
 
   return indices;
 }
-
 
 std::vector<unsigned short>
 Lattice::triangleIndices() const

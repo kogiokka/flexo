@@ -1,6 +1,6 @@
 #pragma once
 
-#include "opengl_window.hpp"
+#include "OpenGLCanvas.hpp"
 
 #include <wx/button.h>
 #include <wx/dcclient.h>
@@ -20,7 +20,9 @@ class MainWindow : public wxFrame
 {
   wxPanel* panel_;
   wxButton* btnStartPause_;
-  OpenGLWindow* canvas_;
+  OpenGLCanvas* canvas_;
+
+  void CreateOpenGLCanvas();
 
 public:
   MainWindow(wxWindow* parent = 0);

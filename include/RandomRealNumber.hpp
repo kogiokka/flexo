@@ -1,6 +1,6 @@
 #pragma once
 
-#include "random_number.hpp"
+#include "RandomNumber.hpp"
 
 #include <type_traits>
 

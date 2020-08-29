@@ -1,13 +1,15 @@
 #pragma once
 
-#include "camera.hpp"
 #include "glad/glad.h"
-#include "lattice.hpp"
-#include "obj_model.hpp"
-#include "random_int_number.hpp"
-#include "shader.hpp"
-#include "vertex_array.hpp"
 
+#include "Camera.hpp"
+#include "Lattice.hpp"
+#include "ObjModel.hpp"
+#include "RandomIntNumber.hpp"
+#include "Shader.hpp"
+#include "VertexArray.hpp"
+
+#include <wx/dcclient.h>
 #include <wx/gdicmn.h>
 #include <wx/glcanvas.h>
 
@@ -15,7 +17,7 @@
 #include <cstddef>
 #include <string>
 
-class OpenGLWindow : public wxGLCanvas
+class OpenGLCanvas : public wxGLCanvas
 {
   bool isGLLoaded_;
   bool toTrain_;
@@ -32,20 +34,20 @@ class OpenGLWindow : public wxGLCanvas
   Shader* shaderNodes_;
   Camera* camera_;
   Lattice* lattice_;
-  OBJModel* surface_;
-  OBJModel* posModel_;
+  ObjModel* surface_;
+  ObjModel* posModel_;
   std::vector<unsigned short> linesIdx_;
   std::vector<unsigned short> surfsIdx_;
 
 public:
-  OpenGLWindow(wxWindow* parent,
+  OpenGLCanvas(wxWindow* parent,
                wxGLAttributes const& dispAttrs,
                wxWindowID id = wxID_ANY,
                wxPoint const& pos = wxDefaultPosition,
                wxSize const& size = wxDefaultSize,
                long style = 0,
                wxString const& name = wxEmptyString);
-  ~OpenGLWindow();
+  ~OpenGLCanvas();
   void OnPaint(wxPaintEvent& event);
   void OnSize(wxSizeEvent& event);
   void OnMouseMotion(wxMouseEvent& event);

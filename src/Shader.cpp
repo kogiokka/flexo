@@ -1,5 +1,6 @@
-#include "shader.hpp"
-#include <glm/gtc/type_ptr.hpp>
+#include "glm/gtc/type_ptr.hpp"
+
+#include "Shader.hpp"
 
 Shader::Shader()
   : m_id(glCreateProgram())

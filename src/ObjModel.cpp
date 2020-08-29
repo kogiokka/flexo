@@ -1,8 +1,13 @@
-#include "obj_model.hpp"
+#include "ObjModel.hpp"
 
+#include <cassert>
 #include <fstream>
+#include <iostream>
+#include <string>
+#include <unordered_map>
+#include <utility>
 
-OBJModel::OBJModel()
+ObjModel::ObjModel()
   : drawArraysCount_(0)
   , stride_(0)
   , vertexBuffer_(0)
@@ -13,10 +18,10 @@ OBJModel::OBJModel()
 {
 }
 
-OBJModel::~OBJModel() {}
+ObjModel::~ObjModel() {}
 
 bool
-OBJModel::read(std::filesystem::path const& path)
+ObjModel::read(std::filesystem::path const& path)
 {
   using namespace std;
 
@@ -109,7 +114,7 @@ OBJModel::read(std::filesystem::path const& path)
 }
 
 void
-OBJModel::genVertexBuffer(std::uint16_t flag)
+ObjModel::genVertexBuffer(std::uint16_t flag)
 {
   using namespace std;
 
@@ -167,38 +172,38 @@ OBJModel::genVertexBuffer(std::uint16_t flag)
 }
 
 std::vector<float> const&
-OBJModel::vertexBuffer() const
+ObjModel::vertexBuffer() const
 {
   assert(!vertexBuffer_.empty());
   return vertexBuffer_;
 }
 
 std::size_t
-OBJModel::stride() const
+ObjModel::stride() const
 {
   return stride_;
 }
 
 std::size_t
-OBJModel::drawArraysCount() const
+ObjModel::drawArraysCount() const
 {
   return drawArraysCount_;
 }
 
 std::vector<std::vector<float>> const&
-OBJModel::v() const
+ObjModel::v() const
 {
   return v_;
 }
 
 std::vector<std::vector<float>> const&
-OBJModel::vt() const
+ObjModel::vt() const
 {
   return vt_;
 }
 
 std::vector<std::vector<float>> const&
-OBJModel::vn() const
+ObjModel::vn() const
 {
   return vn_;
 }

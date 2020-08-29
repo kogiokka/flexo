@@ -1,4 +1,4 @@
-#include "node.hpp"
+#include "Node.hpp"
 
 Node::Node(int x, int y, std::vector<float> init_weights)
   : m_x(x)
