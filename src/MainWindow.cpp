@@ -38,18 +38,18 @@ MainWindow::MainWindow(wxWindow* parent)
   wxStaticBoxSizer* rowLayout2 = new wxStaticBoxSizer(wxVERTICAL, panel_, "Rendering Options");
   btnStartPause_ = new wxButton(rowLayout1->GetStaticBox(), BTN_STARTPAUSE, "Start");
   rowLayout1->Add(btnStartPause_, 1, wxGROW | wxALL, 10);
-  wxCheckBox* chkBox1 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_MODEL, "Toggle Model");
-  wxCheckBox* chkBox2 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_POINTS, "Toggle Grid Points");
-  wxCheckBox* chkBox3 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_LINES, "Toggle Grid Lines");
-  wxCheckBox* chkBox4 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_TOGGLE_SURFACES, "Toggle Grid Surface");
-  chkBox1->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::MODEL));
-  chkBox2->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::POINTS));
-  chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LINES));
-  chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::SURFACE));
-  rowLayout2->Add(chkBox1, 1, wxGROW | wxALL, 10);
-  rowLayout2->Add(chkBox2, 1, wxGROW | wxALL, 10);
-  rowLayout2->Add(chkBox3, 1, wxGROW | wxALL, 10);
-  rowLayout2->Add(chkBox4, 1, wxGROW | wxALL, 10);
+  wxCheckBox* chkBox1 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_RENDEROPT_SURFACE, "Surface");
+  wxCheckBox* chkBox2 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_RENDEROPT_LAT_VERTEX, "Lattice Vertex");
+  wxCheckBox* chkBox3 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
+  wxCheckBox* chkBox4 = new wxCheckBox(rowLayout2->GetStaticBox(), CB_RENDEROPT_LAT_FACE, "Lattice Face");
+  chkBox1->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::SURFACE));
+  chkBox2->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_VERTEX));
+  chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_EDGE));
+  chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_FACE));
+  rowLayout2->Add(chkBox1, 1, wxGROW | wxALL, 5);
+  rowLayout2->Add(chkBox2, 1, wxGROW | wxALL, 5);
+  rowLayout2->Add(chkBox3, 1, wxGROW | wxALL, 5);
+  rowLayout2->Add(chkBox4, 1, wxGROW | wxALL, 5);
 
   wxBoxSizer* panelLayout = new wxBoxSizer(wxVERTICAL);
   panelLayout->Add(rowLayout1, 0, wxGROW | wxALL, 10);
@@ -93,25 +93,25 @@ MainWindow::OnButtonStartPause(wxCommandEvent& evt)
 void
 MainWindow::OnCheckBoxToggleModel(wxCommandEvent& evt)
 {
-  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::MODEL);
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::SURFACE);
 }
 
 void
 MainWindow::OnCheckBoxTogglePoints(wxCommandEvent& evt)
 {
-  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::POINTS);
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_VERTEX);
 }
 
 void
 MainWindow::OnCheckBoxToggleLines(wxCommandEvent& evt)
 {
-  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LINES);
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_EDGE);
 }
 
 void
 MainWindow::OnCheckBoxToggleSurfaces(wxCommandEvent& evt)
 {
-  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::SURFACE);
+  canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_FACE);
 }
 
 void
@@ -130,8 +130,8 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
   EVT_MENU(wxID_REFRESH, MainWindow::ResetCamera)
   EVT_BUTTON(BTN_STARTPAUSE, MainWindow::OnButtonStartPause)
-  EVT_CHECKBOX(CB_TOGGLE_MODEL, MainWindow::OnCheckBoxToggleModel)
-  EVT_CHECKBOX(CB_TOGGLE_POINTS, MainWindow::OnCheckBoxTogglePoints)
-  EVT_CHECKBOX(CB_TOGGLE_LINES, MainWindow::OnCheckBoxToggleLines)
-  EVT_CHECKBOX(CB_TOGGLE_SURFACES, MainWindow::OnCheckBoxToggleSurfaces)
+  EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckBoxToggleModel)
+  EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckBoxTogglePoints)
+  EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckBoxToggleLines)
+  EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckBoxToggleSurfaces)
 wxEND_EVENT_TABLE()

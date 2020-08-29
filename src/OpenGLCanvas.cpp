@@ -81,7 +81,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   }
   glNamedBufferSubData(vboLatPos_, 0, renderPos.size() * 3 * sizeof(float), renderPos.data());
 
-  if (renderOpt_[POINTS]) {
+  if (renderOpt_[LAT_VERTEX]) {
     vao_->enable("instanced");
     shaderNodes_->Use();
     shaderNodes_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
@@ -95,7 +95,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     vao_->disable("instanced");
   }
 
-  if (renderOpt_[SURFACE]) {
+  if (renderOpt_[LAT_FACE]) {
     vao_->disable("normal");
     shaderLines_->Use();
     shaderLines_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
@@ -107,7 +107,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     vao_->enable("normal");
   }
 
-  if (renderOpt_[LINES]) {
+  if (renderOpt_[LAT_EDGE]) {
     vao_->disable("normal");
     shaderLines_->Use();
     shaderLines_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
@@ -119,7 +119,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     vao_->enable("normal");
   }
 
-  if (renderOpt_[MODEL]) {
+  if (renderOpt_[SURFACE]) {
     shader_->Use();
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));

@@ -41,7 +41,7 @@ class OpenGLCanvas : public wxGLCanvas
   std::vector<unsigned short> surfsIdx_;
 
 public:
-  enum RenderOpt { MODEL = 0, POINTS, LINES, SURFACE };
+  enum RenderOpt { SURFACE = 0, LAT_VERTEX, LAT_EDGE, LAT_FACE };
 
 public:
   OpenGLCanvas(wxWindow* parent,
