@@ -17,6 +17,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   , vboLatPos_(0)
   , iboLatLines_(0)
   , iboLatSurf_(0)
+  , surfaceTransparency_(0.8f)
   , random_(nullptr)
   , vao_(nullptr)
   , context_(nullptr)
@@ -59,13 +60,9 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   wxPaintDC dc(this);
   SetCurrent(*context_);
 
-  static float s_modelAlpha = 0.8f;
   static int s_iterPerFrame = 10;
   static float s_scale = 50.0f;
   static auto const s_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.4f);
-  static auto s_iterNum = lattice_->maxIterations();
-  static auto s_dimen = lattice_->dimension();
-  static auto s_rate = lattice_->initialRate();
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -126,7 +123,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shader_->SetUniform3fv("viewPos", camera_->Position());
     shader_->SetUniform3fv("lightSrc", camera_->Position());
     shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-    shader_->SetUniform1f("alpha", s_modelAlpha);
+    shader_->SetUniform1f("alpha", surfaceTransparency_);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboSurf_, 0, surface_->stride());
     glVertexArrayVertexBuffer(vao_->id(), 1, vboSurf_, 3 * sizeof(float), surface_->stride());
     glDrawArrays(GL_TRIANGLES, 0, surface_->drawArraysCount());
@@ -382,6 +379,24 @@ int
 OpenGLCanvas::GetLatticeDimension() const
 {
   return lattice_->dimension();
+}
+
+void
+OpenGLCanvas::SetSurfaceTransparency(float alpha)
+{
+  if (alpha > 1.0f) {
+    surfaceTransparency_ = 1.0f;
+  } else if (alpha < 0.0f) {
+    surfaceTransparency_ = 0.0f;
+  } else {
+    surfaceTransparency_ = alpha;
+  }
+}
+
+float
+OpenGLCanvas::GetSurfaceTransparency() const
+{
+  return surfaceTransparency_;
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)

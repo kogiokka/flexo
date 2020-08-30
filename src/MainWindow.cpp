@@ -5,6 +5,8 @@
 #include <wx/menu.h>
 #include <wx/statbox.h>
 #include <wx/stattext.h>
+#include <wx/string.h>
+#include <wx/textctrl.h>
 #include <wx/valnum.h>
 
 #include <string>
@@ -128,10 +130,10 @@ MainWindow::CreatePanelStaticBox2()
 
   btnStartPause_ = new wxButton(box, BTN_STARTPAUSE, "Start");
   auto currIterSizer = new wxBoxSizer(wxHORIZONTAL);
-  auto stCurrIter = new wxStaticText(box, wxID_ANY, "Iterations: ");
+  auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
   tcCurrIter_ = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
   tcCurrIter_->SetCanFocus(false);
-  currIterSizer->Add(stCurrIter, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
+  currIterSizer->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
   currIterSizer->Add(tcCurrIter_, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
   boxLayout->Add(currIterSizer, 1, wxGROW | wxALL, 10);
   boxLayout->Add(btnStartPause_, 1, wxGROW | wxALL, 10);
@@ -145,6 +147,8 @@ MainWindow::CreatePanelStaticBox3()
   auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "Rendering Options");
   auto const box = boxLayout->GetStaticBox();
 
+  auto row1 = new wxBoxSizer(wxVERTICAL);
+  auto row2 = new wxBoxSizer(wxVERTICAL);
   auto chkBox1 = new wxCheckBox(box, CB_RENDEROPT_SURFACE, "Surface");
   auto chkBox2 = new wxCheckBox(box, CB_RENDEROPT_LAT_VERTEX, "Lattice Vertex");
   auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
@@ -153,10 +157,18 @@ MainWindow::CreatePanelStaticBox3()
   chkBox2->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_VERTEX));
   chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_EDGE));
   chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_FACE));
-  boxLayout->Add(chkBox1, 1, wxGROW | wxALL, 5);
-  boxLayout->Add(chkBox2, 1, wxGROW | wxALL, 5);
-  boxLayout->Add(chkBox3, 1, wxGROW | wxALL, 5);
-  boxLayout->Add(chkBox4, 1, wxGROW | wxALL, 5);
+  auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Surface Transparency");
+  int const sliderInit = canvas_->GetSurfaceTransparency() * 100;
+  slider_ = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize);
+  slider_->SetToolTip(wxString::Format("%.2f", canvas_->GetSurfaceTransparency()));
+  row1->Add(chkBox1, 1, wxGROW | wxALL, 5);
+  row1->Add(chkBox2, 1, wxGROW | wxALL, 5);
+  row1->Add(chkBox3, 1, wxGROW | wxALL, 5);
+  row1->Add(chkBox4, 1, wxGROW | wxALL, 5);
+  row2->Add(surfAlphaLabel, 0, wxGROW);
+  row2->Add(slider_, 0, wxGROW);
+  boxLayout->Add(row1, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
+  boxLayout->Add(row2, 0, wxGROW | wxLEFT | wxRIGHT | wxTOP, 10);
 
   return boxLayout;
 }
@@ -207,7 +219,7 @@ MainWindow::OnButtonConfirmAndReset(wxCommandEvent& evt)
 void
 MainWindow::OnEnterIterationCap(wxCommandEvent& evt)
 {
-  auto const& text = tcIterCap_->GetValue();
+  auto const& text = evt.GetString();
   if (text.IsEmpty())
     return;
   iterationCap_ = std::stoi(text.ToStdString());
@@ -216,7 +228,7 @@ MainWindow::OnEnterIterationCap(wxCommandEvent& evt)
 void
 MainWindow::OnEnterLearningRate(wxCommandEvent& evt)
 {
-  auto const& text = tcLearnRate_->GetValue();
+  auto const& text = evt.GetString();
   if (text.IsEmpty())
     return;
   initLearningRate_ = std::stof(text.ToStdString());
@@ -225,7 +237,7 @@ MainWindow::OnEnterLearningRate(wxCommandEvent& evt)
 void
 MainWindow::OnEnterDimension(wxCommandEvent& evt)
 {
-  auto const& text = tcDimen_->GetValue();
+  auto const& text = evt.GetString();
   if (text.IsEmpty())
     return;
   dimension_ = std::stoi(text.ToStdString());
@@ -256,6 +268,16 @@ MainWindow::OnCheckBoxToggleSurfaces(wxCommandEvent& evt)
 }
 
 void
+MainWindow::OnSliderTransparency(wxCommandEvent& evt)
+{
+  float const range = static_cast<float>(slider_->GetMax() - slider_->GetMin());
+  float const value = static_cast<float>(slider_->GetValue());
+  float const alpha = value / range;
+  canvas_->SetSurfaceTransparency(alpha);
+  slider_->SetToolTip(wxString::Format("%.2f", alpha));
+}
+
+void
 MainWindow::ResetCamera(wxCommandEvent& evt)
 {
   canvas_->ResetCamera();
@@ -279,5 +301,6 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckBoxTogglePoints)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckBoxToggleLines)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckBoxToggleSurfaces)
+  EVT_SLIDER(SLIDER_TRANSPARENCY, MainWindow::OnSliderTransparency)
   EVT_TIMER(TIMER_UI_UPDATE, MainWindow::OnUpdateTimer)
 wxEND_EVENT_TABLE()
