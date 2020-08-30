@@ -334,6 +334,56 @@ OpenGLCanvas::GetCurrentIterations() const
   return lattice_->currentIteration();
 }
 
+void
+OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimension)
+{
+  toTrain_ = false;
+  bool const isSameIter = (iterationCap == lattice_->maxIterations());
+  bool const isSameRate = (initLearningRate == lattice_->initialRate());
+  bool const isSameDimen = (dimension == lattice_->dimension());
+  bool const changed = !(isSameIter && isSameDimen && isSameRate);
+  delete lattice_;
+  lattice_ = new Lattice(dimension, iterationCap, initLearningRate);
+
+  if (changed) {
+    linesIdx_ = lattice_->lineIndices();
+    surfsIdx_ = lattice_->triangleIndices();
+
+    glDeleteBuffers(1, &iboLatLines_);
+    glDeleteBuffers(1, &iboLatSurf_);
+
+    glCreateBuffers(1, &iboLatLines_);
+    glCreateBuffers(1, &iboLatSurf_);
+    glNamedBufferStorage(
+      iboLatLines_, linesIdx_.size() * sizeof(unsigned short), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+    glNamedBufferStorage(
+      iboLatSurf_, surfsIdx_.size() * sizeof(unsigned short), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+
+    glDeleteBuffers(1, &vboLatPos_);
+    glCreateBuffers(1, &vboLatPos_);
+    glNamedBufferStorage(vboLatPos_, lattice_->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    glVertexArrayVertexBuffer(vao_->id(), 2, vboLatPos_, 0, 3 * sizeof(float));
+  }
+}
+
+int
+OpenGLCanvas::GetIterationCap() const
+{
+  return lattice_->maxIterations();
+}
+
+float
+OpenGLCanvas::GetInitialLearningRate() const
+{
+  return lattice_->initialRate();
+}
+
+int
+OpenGLCanvas::GetLatticeDimension() const
+{
+  return lattice_->dimension();
+}
+
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
   EVT_PAINT(OpenGLCanvas::OnPaint)
   EVT_SIZE(OpenGLCanvas::OnSize)

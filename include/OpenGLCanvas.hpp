@@ -65,6 +65,10 @@ public:
   void ToggleRenderOption(RenderOpt opt);
   bool GetRenderOptionState(RenderOpt opt) const;
   int GetCurrentIterations() const;
+  void ResetLattice(int iterationCap, float initLearningRate, int dimension);
+  int GetIterationCap() const;
+  float GetInitialLearningRate() const;
+  int GetLatticeDimension() const;
 
   wxDECLARE_EVENT_TABLE();
 };
