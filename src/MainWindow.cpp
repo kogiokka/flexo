@@ -2,6 +2,7 @@
 
 #include <wx/button.h>
 #include <wx/checkbox.h>
+#include <wx/filedlg.h>
 #include <wx/glcanvas.h>
 #include <wx/menu.h>
 #include <wx/statbox.h>
@@ -23,7 +24,7 @@ MainWindow::MainWindow(wxWindow* parent)
   // CreateStatusBar();
 
   auto fileMenu = new wxMenu;
-  fileMenu->Append(wxID_OPEN, "Open");
+  fileMenu->Append(wxID_OPEN, "Open surface");
   fileMenu->Append(wxID_EXIT, "Exit");
 
   auto cameraMenu = new wxMenu;
@@ -309,12 +310,24 @@ MainWindow::ResetCamera(wxCommandEvent& evt)
 }
 
 void
+MainWindow::OnOpen(wxCommandEvent& evt)
+{
+  wxFileDialog dialog(this, "Import Wavefront .obj file", wxEmptyString, wxEmptyString, "*.obj");
+  dialog.SetDirectory(wxGetCwd());
+  dialog.CenterOnParent();
+  if (dialog.ShowModal() == wxID_OK) {
+    canvas_->OpenSurface(dialog.GetPath().ToStdString());
+  }
+}
+
+void
 MainWindow::OnExit(wxCommandEvent& evt)
 {
   Close(true);
 }
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
+  EVT_MENU(wxID_OPEN, MainWindow::OnOpen)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
   EVT_MENU(wxID_REFRESH, MainWindow::ResetCamera)
   EVT_TEXT(TC_SET_ITERATION_CAP, MainWindow::OnEnterIterationCap)

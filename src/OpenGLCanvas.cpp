@@ -302,6 +302,20 @@ OpenGLCanvas::ResetCamera()
 }
 
 void
+OpenGLCanvas::OpenSurface(const std::string& path)
+{
+  delete surface_;
+  surface_ = new ObjModel();
+  surface_->read(path);
+  surface_->genVertexBuffer(OBJ_V | OBJ_VN);
+  random_ = new RandomIntNumber<unsigned int>(0, surface_->v().size() - 1);
+  glDeleteBuffers(1, &vboSurf_);
+  glCreateBuffers(1, &vboSurf_);
+  glNamedBufferStorage(
+    vboSurf_, surface_->vertexBuffer().size() * sizeof(float), surface_->vertexBuffer().data(), GL_DYNAMIC_STORAGE_BIT);
+}
+
+void
 OpenGLCanvas::SetPlayOrPause(bool toTrain)
 {
   toTrain_ = toTrain;

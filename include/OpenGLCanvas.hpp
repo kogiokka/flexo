@@ -67,6 +67,7 @@ public:
   void SetPlayOrPause(bool toTrain);
   void SetSurfaceTransparency(float alpha);
   void SetIterationsPerFrame(int times);
+  void OpenSurface(std::string const& path);
   int GetIterationCap() const;
   int GetLatticeDimension() const;
   int GetCurrentIterations() const;

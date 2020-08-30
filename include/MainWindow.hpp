@@ -61,6 +61,7 @@ class MainWindow : public wxFrame
   void OnCheckBoxToggleLines(wxCommandEvent& evt);
   void OnCheckBoxToggleSurfaces(wxCommandEvent& evt);
   void OnSliderTransparency(wxCommandEvent& evt);
+  void OnOpen(wxCommandEvent& evt);
   void OnExit(wxCommandEvent& evt);
 
 public:
