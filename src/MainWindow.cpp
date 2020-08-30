@@ -178,10 +178,16 @@ MainWindow::CreatePanelStaticBox3()
   chkBox2->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_VERTEX));
   chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_EDGE));
   chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_FACE));
-  auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Surface Transparency");
-  int const sliderInit = canvas_->GetSurfaceTransparency() * 100;
-  slider_ = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize);
-  slider_->SetToolTip(wxString::Format("%.2f", canvas_->GetSurfaceTransparency()));
+  auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Surface Transparency (%)");
+  int const sliderInit = (100 - canvas_->GetSurfaceTransparency() * 100);
+  slider_ = new wxSlider(box,
+                         SLIDER_TRANSPARENCY,
+                         sliderInit,
+                         0,
+                         100,
+                         wxDefaultPosition,
+                         wxDefaultSize,
+                         wxSL_HORIZONTAL | wxSL_LABELS | wxSL_INVERSE);
   row1->Add(chkBox1, 0, wxGROW | wxALL, 5);
   row1->Add(chkBox2, 0, wxGROW | wxALL, 5);
   row1->Add(chkBox3, 0, wxGROW | wxALL, 5);
@@ -298,9 +304,8 @@ MainWindow::OnSliderTransparency(wxCommandEvent& evt)
 {
   float const range = static_cast<float>(slider_->GetMax() - slider_->GetMin());
   float const value = static_cast<float>(slider_->GetValue());
-  float const alpha = value / range;
+  float const alpha = (range - value) / range;
   canvas_->SetSurfaceTransparency(alpha);
-  slider_->SetToolTip(wxString::Format("%.2f", alpha));
 }
 
 void
