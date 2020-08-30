@@ -39,8 +39,8 @@ class OpenGLCanvas : public wxGLCanvas
   ObjModel* surface_;
   ObjModel* posModel_;
   std::vector<bool> renderOpt_;
-  std::vector<unsigned short> linesIdx_;
-  std::vector<unsigned short> surfsIdx_;
+  std::vector<unsigned int> linesIdx_;
+  std::vector<unsigned int> surfsIdx_;
 
 public:
   enum RenderOpt { SURFACE = 0, LAT_VERTEX, LAT_EDGE, LAT_FACE };

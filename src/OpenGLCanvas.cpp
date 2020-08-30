@@ -100,7 +100,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shaderLines_->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboLatPos_, 0, 3 * sizeof(float));
     glVertexArrayElementBuffer(vao_->id(), iboLatSurf_);
-    glDrawElements(GL_TRIANGLES, surfsIdx_.size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_TRIANGLES, surfsIdx_.size(), GL_UNSIGNED_INT, 0);
     vao_->enable("normal");
   }
 
@@ -112,7 +112,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shaderLines_->SetUniform3f("color", 1.0f, 1.0f, 1.0f);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboLatPos_, 0, 3 * sizeof(float));
     glVertexArrayElementBuffer(vao_->id(), iboLatLines_);
-    glDrawElements(GL_LINES, linesIdx_.size(), GL_UNSIGNED_SHORT, 0);
+    glDrawElements(GL_LINES, linesIdx_.size(), GL_UNSIGNED_INT, 0);
     vao_->enable("normal");
   }
 
@@ -205,9 +205,9 @@ OpenGLCanvas::InitGL()
   glCreateBuffers(1, &iboLatSurf_);
   glNamedBufferStorage(vboLatPos_, lattice_->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
   glNamedBufferStorage(
-    iboLatLines_, linesIdx_.size() * sizeof(unsigned short), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+    iboLatLines_, linesIdx_.size() * sizeof(unsigned int), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
   glNamedBufferStorage(
-    iboLatSurf_, surfsIdx_.size() * sizeof(unsigned short), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+    iboLatSurf_, surfsIdx_.size() * sizeof(unsigned int), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
 
   shaderLines_ = new Shader();
   shaderLines_->Attach(GL_VERTEX_SHADER, "shader/lines.vert");
@@ -360,9 +360,9 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
     glCreateBuffers(1, &iboLatLines_);
     glCreateBuffers(1, &iboLatSurf_);
     glNamedBufferStorage(
-      iboLatLines_, linesIdx_.size() * sizeof(unsigned short), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+      iboLatLines_, linesIdx_.size() * sizeof(unsigned int), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
     glNamedBufferStorage(
-      iboLatSurf_, surfsIdx_.size() * sizeof(unsigned short), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+      iboLatSurf_, surfsIdx_.size() * sizeof(unsigned int), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
 
     glDeleteBuffers(1, &vboLatPos_);
     glCreateBuffers(1, &vboLatPos_);
