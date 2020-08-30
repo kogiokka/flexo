@@ -1,5 +1,6 @@
 #include "MainWindow.hpp"
 
+#include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/glcanvas.h>
 #include <wx/menu.h>
@@ -14,7 +15,6 @@
 MainWindow::MainWindow(wxWindow* parent)
   : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(1200, 800))
   , panel_(nullptr)
-  , btnStartPause_(nullptr)
   , tcCurrIter_(nullptr)
   , canvas_(nullptr)
 {
@@ -114,10 +114,10 @@ MainWindow::CreatePanelStaticBox1()
   row2->Add(tcLearnRate_, 1, sizerFlag, 5);
   row3->Add(dimenLabel, 1, sizerFlag, 5);
   row3->Add(tcDimen_, 1, sizerFlag, 5);
-  boxLayout->Add(row1, 1, wxGROW | wxALL, 5);
-  boxLayout->Add(row2, 1, wxGROW | wxALL, 5);
-  boxLayout->Add(row3, 1, wxGROW | wxALL, 5);
-  boxLayout->Add(btnConfirm, 1, wxGROW | wxALL, 5);
+  boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
+  boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
+  boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
+  boxLayout->Add(btnConfirm, 0, wxGROW | wxALL, 10);
 
   return boxLayout;
 }
@@ -128,15 +128,35 @@ MainWindow::CreatePanelStaticBox2()
   auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Control");
   auto const box = boxLayout->GetStaticBox();
 
-  btnStartPause_ = new wxButton(box, BTN_STARTPAUSE, "Start");
-  auto currIterSizer = new wxBoxSizer(wxHORIZONTAL);
+  auto row3 = new wxBoxSizer(wxHORIZONTAL);
+  auto row2 = new wxBoxSizer(wxHORIZONTAL);
+  auto row1 = new wxBoxSizer(wxHORIZONTAL);
+
+  auto btnStart = new wxButton(box, BTN_START, "Start");
+  auto btnPause = new wxButton(box, BTN_PAUSE, "Pause");
+  auto spctrlIPFLabel = new wxStaticText(box, wxID_ANY, "Iterations Per Frame: ");
+  auto spctrlIPF = new wxSpinCtrl(box,
+                                  SPCTRL_ITERATION_PER_FRAME,
+                                  wxEmptyString,
+                                  wxDefaultPosition,
+                                  wxDefaultSize,
+                                  wxALIGN_CENTER_HORIZONTAL,
+                                  1,
+                                  500,
+                                  canvas_->GetIterationsPerFrame());
   auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
   tcCurrIter_ = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
   tcCurrIter_->SetCanFocus(false);
-  currIterSizer->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-  currIterSizer->Add(tcCurrIter_, 1, wxALIGN_CENTER_VERTICAL | wxALL, 5);
-  boxLayout->Add(currIterSizer, 1, wxGROW | wxALL, 10);
-  boxLayout->Add(btnStartPause_, 1, wxGROW | wxALL, 10);
+
+  row1->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+  row1->Add(tcCurrIter_, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+  row2->Add(spctrlIPFLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+  row2->Add(spctrlIPF, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+  row3->Add(btnStart, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+  row3->Add(btnPause, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+  boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
+  boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
+  boxLayout->Add(row3, 0, wxGROW | wxALL, 10);
 
   return boxLayout;
 }
@@ -161,14 +181,14 @@ MainWindow::CreatePanelStaticBox3()
   int const sliderInit = canvas_->GetSurfaceTransparency() * 100;
   slider_ = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize);
   slider_->SetToolTip(wxString::Format("%.2f", canvas_->GetSurfaceTransparency()));
-  row1->Add(chkBox1, 1, wxGROW | wxALL, 5);
-  row1->Add(chkBox2, 1, wxGROW | wxALL, 5);
-  row1->Add(chkBox3, 1, wxGROW | wxALL, 5);
-  row1->Add(chkBox4, 1, wxGROW | wxALL, 5);
+  row1->Add(chkBox1, 0, wxGROW | wxALL, 5);
+  row1->Add(chkBox2, 0, wxGROW | wxALL, 5);
+  row1->Add(chkBox3, 0, wxGROW | wxALL, 5);
+  row1->Add(chkBox4, 0, wxGROW | wxALL, 5);
   row2->Add(surfAlphaLabel, 0, wxGROW);
   row2->Add(slider_, 0, wxGROW);
-  boxLayout->Add(row1, 0, wxGROW | wxLEFT | wxRIGHT | wxBOTTOM, 10);
-  boxLayout->Add(row2, 0, wxGROW | wxLEFT | wxRIGHT | wxTOP, 10);
+  boxLayout->Add(row1, 0, wxGROW | wxALL, 10);
+  boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
 
   return boxLayout;
 }
@@ -189,15 +209,21 @@ MainWindow::OnUpdateTimer(wxTimerEvent& evt)
 }
 
 void
-MainWindow::OnButtonStartPause(wxCommandEvent& evt)
+MainWindow::OnButtonStart(wxCommandEvent& evt)
 {
-  bool const training = canvas_->GetPlayPause();
-  if (training) {
-    btnStartPause_->SetLabel("Start");
-  } else {
-    btnStartPause_->SetLabel("Pause");
-  }
-  canvas_->TogglePlayPause(!training);
+  canvas_->TogglePlayPause(true);
+}
+
+void
+MainWindow::OnButtonPause(wxCommandEvent& evt)
+{
+  canvas_->TogglePlayPause(false);
+}
+
+void
+MainWindow::OnSpinCtrlIterationPerFrame(wxSpinEvent& evt)
+{
+  canvas_->SetIterationsPerFrame(evt.GetInt());
 }
 
 void
@@ -213,7 +239,6 @@ MainWindow::OnButtonConfirmAndReset(wxCommandEvent& evt)
     *tcDimen_ << canvas_->GetLatticeDimension();
   }
   canvas_->ResetLattice(iterationCap_, initLearningRate_, dimension_);
-  btnStartPause_->SetLabel("Start");
 }
 
 void
@@ -295,8 +320,10 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_TEXT(TC_SET_ITERATION_CAP, MainWindow::OnEnterIterationCap)
   EVT_TEXT(TC_SET_LEARNING_RATE, MainWindow::OnEnterLearningRate)
   EVT_TEXT(TC_SET_DIMENSION, MainWindow::OnEnterDimension)
-  EVT_BUTTON(BTN_STARTPAUSE, MainWindow::OnButtonStartPause)
+  EVT_BUTTON(BTN_START, MainWindow::OnButtonStart)
+  EVT_BUTTON(BTN_PAUSE, MainWindow::OnButtonPause)
   EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainWindow::OnButtonConfirmAndReset)
+  EVT_SPINCTRL(SPCTRL_ITERATION_PER_FRAME, MainWindow::OnSpinCtrlIterationPerFrame)
   EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckBoxToggleModel)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckBoxTogglePoints)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckBoxToggleLines)

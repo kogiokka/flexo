@@ -18,6 +18,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   , iboLatLines_(0)
   , iboLatSurf_(0)
   , surfaceTransparency_(0.8f)
+  , iterPerFrame_(10)
   , random_(nullptr)
   , vao_(nullptr)
   , context_(nullptr)
@@ -60,7 +61,6 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   wxPaintDC dc(this);
   SetCurrent(*context_);
 
-  static int s_iterPerFrame = 10;
   static float s_scale = 50.0f;
   static auto const s_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.4f);
 
@@ -129,7 +129,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     glDrawArrays(GL_TRIANGLES, 0, surface_->drawArraysCount());
   }
 
-  for (int i = 0; i < s_iterPerFrame; ++i) {
+  for (int i = 0; i < iterPerFrame_; ++i) {
     if (toTrain_) {
       toTrain_ = lattice_->input(surface_->v()[random_->get()]);
     }
@@ -384,19 +384,26 @@ OpenGLCanvas::GetLatticeDimension() const
 void
 OpenGLCanvas::SetSurfaceTransparency(float alpha)
 {
-  if (alpha > 1.0f) {
-    surfaceTransparency_ = 1.0f;
-  } else if (alpha < 0.0f) {
-    surfaceTransparency_ = 0.0f;
-  } else {
-    surfaceTransparency_ = alpha;
-  }
+  // The range between 0.0 and 1.0 should be handled by UI
+  surfaceTransparency_ = alpha;
 }
 
 float
 OpenGLCanvas::GetSurfaceTransparency() const
 {
   return surfaceTransparency_;
+}
+
+void
+OpenGLCanvas::SetIterationsPerFrame(int times)
+{
+  iterPerFrame_ = times;
+}
+
+int
+OpenGLCanvas::GetIterationsPerFrame() const
+{
+  return iterPerFrame_;
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)

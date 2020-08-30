@@ -2,7 +2,6 @@
 
 #include "OpenGLCanvas.hpp"
 
-#include <wx/button.h>
 #include <wx/dcclient.h>
 #include <wx/event.h>
 #include <wx/frame.h>
@@ -11,10 +10,13 @@
 #include <wx/slider.h>
 #include <wx/textctrl.h>
 #include <wx/timer.h>
+#include <wx/spinctrl.h>
 
 enum {
-  BTN_STARTPAUSE = wxID_HIGHEST + 1,
+  BTN_START = wxID_HIGHEST + 1,
+  BTN_PAUSE,
   BTN_CONFIRM_AND_RESET,
+  SPCTRL_ITERATION_PER_FRAME,
   CB_RENDEROPT_SURFACE,
   CB_RENDEROPT_LAT_VERTEX,
   CB_RENDEROPT_LAT_EDGE,
@@ -34,7 +36,6 @@ class MainWindow : public wxFrame
 
   wxTimer* updateTimer_;
   wxPanel* panel_;
-  wxButton* btnStartPause_;
   wxTextCtrl* tcCurrIter_;
   wxTextCtrl* tcIterCap_;
   wxTextCtrl* tcLearnRate_;
@@ -47,14 +48,11 @@ class MainWindow : public wxFrame
   wxStaticBoxSizer* const CreatePanelStaticBox2();
   wxStaticBoxSizer* const CreatePanelStaticBox3();
 
-public:
-  MainWindow(wxWindow* parent = 0);
-  virtual ~MainWindow();
-  void InitializeGL();
-  void ResetCamera(wxCommandEvent& evt);
   void OnUpdateTimer(wxTimerEvent& evt);
-  void OnButtonStartPause(wxCommandEvent& evt);
+  void OnButtonStart(wxCommandEvent& evt);
+  void OnButtonPause(wxCommandEvent& evt);
   void OnButtonConfirmAndReset(wxCommandEvent& evt);
+  void OnSpinCtrlIterationPerFrame(wxSpinEvent& evt);
   void OnEnterIterationCap(wxCommandEvent& evt);
   void OnEnterLearningRate(wxCommandEvent& evt);
   void OnEnterDimension(wxCommandEvent& evt);
@@ -64,6 +62,12 @@ public:
   void OnCheckBoxToggleSurfaces(wxCommandEvent& evt);
   void OnSliderTransparency(wxCommandEvent& evt);
   void OnExit(wxCommandEvent& evt);
+
+public:
+  MainWindow(wxWindow* parent = 0);
+  virtual ~MainWindow();
+  void InitializeGL();
+  void ResetCamera(wxCommandEvent& evt);
 
   wxDECLARE_EVENT_TABLE();
 };

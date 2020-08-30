@@ -27,6 +27,7 @@ class OpenGLCanvas : public wxGLCanvas
   GLuint iboLatLines_;
   GLuint iboLatSurf_;
   float surfaceTransparency_;
+  int iterPerFrame_;
   RandomIntNumber<unsigned int>* random_;
   VertexArray* vao_;
   wxGLContext* context_;
@@ -72,6 +73,8 @@ public:
   int GetLatticeDimension() const;
   void SetSurfaceTransparency(float alpha);
   float GetSurfaceTransparency() const;
+  void SetIterationsPerFrame(int times);
+  int GetIterationsPerFrame() const;
 
   wxDECLARE_EVENT_TABLE();
 };
