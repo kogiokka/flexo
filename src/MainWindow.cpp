@@ -211,13 +211,13 @@ MainWindow::OnUpdateTimer(wxTimerEvent& evt)
 void
 MainWindow::OnButtonStart(wxCommandEvent& evt)
 {
-  canvas_->TogglePlayPause(true);
+  canvas_->SetPlayOrPause(true);
 }
 
 void
 MainWindow::OnButtonPause(wxCommandEvent& evt)
 {
-  canvas_->TogglePlayPause(false);
+  canvas_->SetPlayOrPause(false);
 }
 
 void

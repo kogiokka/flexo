@@ -302,15 +302,9 @@ OpenGLCanvas::ResetCamera()
 }
 
 void
-OpenGLCanvas::TogglePlayPause(bool toTrain)
+OpenGLCanvas::SetPlayOrPause(bool toTrain)
 {
   toTrain_ = toTrain;
-}
-
-bool
-OpenGLCanvas::GetPlayPause() const
-{
-  return toTrain_;
 }
 
 void

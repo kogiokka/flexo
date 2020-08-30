@@ -62,19 +62,18 @@ public:
   void OnMouseRightDown(wxMouseEvent& event);
   void InitGL();
   void ResetCamera();
-  void TogglePlayPause(bool toTrain);
-  bool GetPlayPause() const;
-  void ToggleRenderOption(RenderOpt opt);
-  bool GetRenderOptionState(RenderOpt opt) const;
-  int GetCurrentIterations() const;
   void ResetLattice(int iterationCap, float initLearningRate, int dimension);
-  int GetIterationCap() const;
-  float GetInitialLearningRate() const;
-  int GetLatticeDimension() const;
+  void ToggleRenderOption(RenderOpt opt);
+  void SetPlayOrPause(bool toTrain);
   void SetSurfaceTransparency(float alpha);
-  float GetSurfaceTransparency() const;
   void SetIterationsPerFrame(int times);
+  int GetIterationCap() const;
+  int GetLatticeDimension() const;
+  int GetCurrentIterations() const;
   int GetIterationsPerFrame() const;
+  bool GetRenderOptionState(RenderOpt opt) const;
+  float GetInitialLearningRate() const;
+  float GetSurfaceTransparency() const;
 
   wxDECLARE_EVENT_TABLE();
 };
