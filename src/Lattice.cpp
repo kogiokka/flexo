@@ -112,7 +112,7 @@ Lattice::currentRate() const
 }
 
 std::vector<unsigned int>
-Lattice::lineIndices() const
+Lattice::edgeIndices() const
 {
   std::vector<unsigned int> indices;
 
@@ -133,7 +133,7 @@ Lattice::lineIndices() const
 }
 
 std::vector<unsigned int>
-Lattice::triangleIndices() const
+Lattice::faceIndices() const
 {
   std::vector<unsigned int> indices;
 

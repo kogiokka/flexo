@@ -14,10 +14,10 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   , isGLLoaded_(false)
   , toTrain_(false)
   , vboSurf_(0)
-  , vboPosModel_(0)
+  , vboLatFace_(0)
   , vboLatPos_(0)
-  , iboLatLines_(0)
-  , iboLatSurf_(0)
+  , iboLatEdge_(0)
+  , vboVertModel_(0)
   , surfaceTransparency_(0.8f)
   , iterPerFrame_(10)
   , random_(nullptr)
@@ -28,8 +28,8 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   , shaderNodes_(nullptr)
   , camera_(nullptr)
   , lattice_(nullptr)
-  , linesIdx_(0)
-  , surfsIdx_(0)
+  , latEdgeIndices_(0)
+  , latFaceIndices_(0)
 {
   wxGLContextAttrs attrs;
   attrs.CoreProfile().OGLVersion(4, 5).Robust().EndList();
@@ -69,15 +69,15 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   auto const& neurons = lattice_->neurons();
-  std::vector<std::array<float, 3>> renderPos;
-  renderPos.reserve(neurons.size());
+  std::vector<std::array<float, 3>> latPos;
+  latPos.reserve(neurons.size());
   for (auto const& n : neurons) {
     float const x = n[0] * s_scale;
     float const y = n[1] * s_scale;
     float const z = n[2] * s_scale;
-    renderPos.push_back({x, y, z});
+    latPos.push_back({x, y, z});
   }
-  glNamedBufferSubData(vboLatPos_, 0, renderPos.size() * 3 * sizeof(float), renderPos.data());
+  glNamedBufferSubData(vboLatPos_, 0, latPos.size() * 3 * sizeof(float), latPos.data());
 
   if (renderOpt_[LAT_VERTEX]) {
     vao_->enable("instanced");
@@ -87,21 +87,26 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shaderNodes_->SetUniform3fv("lightSrc", camera_->Position());
     shaderNodes_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderNodes_->SetUniformMatrix4fv("modelMat", s_scaleMat);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboPosModel_, 0, posModel_->stride());
-    glVertexArrayVertexBuffer(vao_->id(), 1, vboPosModel_, 3 * sizeof(float), posModel_->stride());
-    glDrawArraysInstanced(GL_TRIANGLES, 0, posModel_->drawArraysCount(), renderPos.size());
+    glVertexArrayVertexBuffer(vao_->id(), 0, vboVertModel_, 0, posModel_->stride());
+    glVertexArrayVertexBuffer(vao_->id(), 1, vboVertModel_, 3 * sizeof(float), posModel_->stride());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, posModel_->drawArraysCount(), latPos.size());
     vao_->disable("instanced");
   }
 
   if (renderOpt_[LAT_FACE]) {
+    std::vector<std::array<float, 3>> latFace;
+    latFace.reserve(latFaceIndices_.size());
+    for (auto i : latFaceIndices_) {
+      latFace.push_back(latPos[i]);
+    }
+    glNamedBufferSubData(vboLatFace_, 0, latFace.size() * 3 * sizeof(float), latFace.data());
     vao_->disable("normal");
     shaderLines_->Use();
     shaderLines_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderLines_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
     shaderLines_->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboLatPos_, 0, 3 * sizeof(float));
-    glVertexArrayElementBuffer(vao_->id(), iboLatSurf_);
-    glDrawElements(GL_TRIANGLES, surfsIdx_.size(), GL_UNSIGNED_INT, 0);
+    glVertexArrayVertexBuffer(vao_->id(), 0, vboLatFace_, 0, 3 * sizeof(float));
+    glDrawArrays(GL_TRIANGLES, 0, latFace.size() * 3);
     vao_->enable("normal");
   }
 
@@ -112,8 +117,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shaderLines_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
     shaderLines_->SetUniform3f("color", 1.0f, 1.0f, 1.0f);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboLatPos_, 0, 3 * sizeof(float));
-    glVertexArrayElementBuffer(vao_->id(), iboLatLines_);
-    glDrawElements(GL_LINES, linesIdx_.size(), GL_UNSIGNED_INT, 0);
+    glVertexArrayElementBuffer(vao_->id(), iboLatEdge_);
+    glDrawElements(GL_LINES, latEdgeIndices_.size(), GL_UNSIGNED_INT, 0);
     vao_->enable("normal");
   }
 
@@ -192,21 +197,26 @@ OpenGLCanvas::InitGL()
   posModel_ = new ObjModel();
   posModel_->read("res/models/Icosphere.obj");
   posModel_->genVertexBuffer(OBJ_V | OBJ_VN);
-  glCreateBuffers(1, &vboPosModel_);
-  glNamedBufferStorage(vboPosModel_,
+  glCreateBuffers(1, &vboVertModel_);
+  glNamedBufferStorage(vboVertModel_,
                        posModel_->vertexBuffer().size() * sizeof(float),
                        posModel_->vertexBuffer().data(),
                        GL_DYNAMIC_STORAGE_BIT);
 
-  linesIdx_ = lattice_->lineIndices();
-  surfsIdx_ = lattice_->triangleIndices();
+  latEdgeIndices_ = lattice_->edgeIndices();
+  latFaceIndices_ = lattice_->faceIndices();
 
+  glCreateBuffers(1, &vboLatFace_);
+  glNamedBufferStorage(vboLatFace_, latFaceIndices_.size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+
+  // An Vertex Buffer Object storing the positions of neurons on the lattice.
   glCreateBuffers(1, &vboLatPos_);
-  glCreateBuffers(1, &iboLatLines_);
-  glCreateBuffers(1, &iboLatSurf_);
   glNamedBufferStorage(vboLatPos_, lattice_->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferStorage(iboLatLines_, linesIdx_.size() * sizeof(unsigned int), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferStorage(iboLatSurf_, surfsIdx_.size() * sizeof(unsigned int), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+
+  // An Index Buffer that holds indices referencing the positions of neurons to draw the edges between them.
+  glCreateBuffers(1, &iboLatEdge_);
+  glNamedBufferStorage(
+    iboLatEdge_, latEdgeIndices_.size() * sizeof(unsigned int), latEdgeIndices_.data(), GL_DYNAMIC_STORAGE_BIT);
 
   shaderLines_ = new Shader();
   shaderLines_->Attach(GL_VERTEX_SHADER, "shader/lines.vert");
@@ -219,6 +229,9 @@ OpenGLCanvas::InitGL()
   shaderNodes_->Link();
   /** Lattice END ******************************************************/
 
+  /** OpenGL Instancing
+   *  Use glDrawArraysInstanced to render tens of thousands of objects that represent the lattice vertices.
+   */
   glVertexArrayVertexBuffer(vao_->id(), 2, vboLatPos_, 0, 3 * sizeof(float));
   glVertexArrayBindingDivisor(vao_->id(), 2, 1);
 
@@ -350,18 +363,17 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
   lattice_ = new Lattice(dimension, iterationCap, initLearningRate);
 
   if (changed) {
-    linesIdx_ = lattice_->lineIndices();
-    surfsIdx_ = lattice_->triangleIndices();
+    latEdgeIndices_ = lattice_->edgeIndices();
+    latFaceIndices_ = lattice_->faceIndices();
 
-    glDeleteBuffers(1, &iboLatLines_);
-    glDeleteBuffers(1, &iboLatSurf_);
+    glDeleteBuffers(1, &iboLatEdge_);
+    glCreateBuffers(1, &iboLatEdge_);
+    glNamedBufferStorage(
+      iboLatEdge_, latEdgeIndices_.size() * sizeof(unsigned int), latEdgeIndices_.data(), GL_DYNAMIC_STORAGE_BIT);
 
-    glCreateBuffers(1, &iboLatLines_);
-    glCreateBuffers(1, &iboLatSurf_);
-    glNamedBufferStorage(
-      iboLatLines_, linesIdx_.size() * sizeof(unsigned int), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
-    glNamedBufferStorage(
-      iboLatSurf_, surfsIdx_.size() * sizeof(unsigned int), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+    glDeleteBuffers(1, &vboLatFace_);
+    glCreateBuffers(1, &vboLatFace_);
+    glNamedBufferStorage(vboLatFace_, latFaceIndices_.size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     glDeleteBuffers(1, &vboLatPos_);
     glCreateBuffers(1, &vboLatPos_);

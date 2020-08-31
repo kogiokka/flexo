@@ -22,10 +22,10 @@ class OpenGLCanvas : public wxGLCanvas
   bool isGLLoaded_;
   bool toTrain_;
   GLuint vboSurf_;
-  GLuint vboPosModel_;
+  GLuint vboLatFace_;
   GLuint vboLatPos_;
-  GLuint iboLatLines_;
-  GLuint iboLatSurf_;
+  GLuint iboLatEdge_;
+  GLuint vboVertModel_;
   float surfaceTransparency_;
   int iterPerFrame_;
   RandomIntNumber<unsigned int>* random_;
@@ -39,8 +39,8 @@ class OpenGLCanvas : public wxGLCanvas
   ObjModel* surface_;
   ObjModel* posModel_;
   std::vector<bool> renderOpt_;
-  std::vector<unsigned int> linesIdx_;
-  std::vector<unsigned int> surfsIdx_;
+  std::vector<unsigned int> latEdgeIndices_;
+  std::vector<unsigned int> latFaceIndices_;
 
 public:
   enum RenderOpt { SURFACE = 0, LAT_VERTEX, LAT_EDGE, LAT_FACE };
