@@ -4,7 +4,7 @@
 
 #include <cstddef>
 #include <cstdint>
-#include <filesystem>
+#include <string>
 #include <vector>
 
 typedef enum {
@@ -30,7 +30,7 @@ class ObjModel
 public:
   ObjModel();
   ~ObjModel();
-  bool read(std::filesystem::path const& path);
+  void read(std::string const& path);
   void genVertexBuffer(std::uint16_t flag);
   std::size_t drawArraysCount() const;
   std::size_t stride() const;

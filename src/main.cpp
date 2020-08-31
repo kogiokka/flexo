@@ -7,6 +7,7 @@ class SurfaceSOM : public wxApp
 public:
   virtual bool OnInit() override;
   virtual int OnExit() override;
+  virtual void OnUnhandledException() override;
 };
 
 bool
@@ -21,6 +22,12 @@ SurfaceSOM::OnInit()
   window->InitializeGL();
 
   return true;
+}
+
+void
+SurfaceSOM::OnUnhandledException()
+{
+  throw;
 }
 
 int

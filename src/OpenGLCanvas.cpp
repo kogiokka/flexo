@@ -1,5 +1,6 @@
 #include "OpenGLCanvas.hpp"
 
+#include <fstream>
 #include <iostream>
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
@@ -204,10 +205,8 @@ OpenGLCanvas::InitGL()
   glCreateBuffers(1, &iboLatLines_);
   glCreateBuffers(1, &iboLatSurf_);
   glNamedBufferStorage(vboLatPos_, lattice_->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferStorage(
-    iboLatLines_, linesIdx_.size() * sizeof(unsigned int), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
-  glNamedBufferStorage(
-    iboLatSurf_, surfsIdx_.size() * sizeof(unsigned int), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+  glNamedBufferStorage(iboLatLines_, linesIdx_.size() * sizeof(unsigned int), linesIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
+  glNamedBufferStorage(iboLatSurf_, surfsIdx_.size() * sizeof(unsigned int), surfsIdx_.data(), GL_DYNAMIC_STORAGE_BIT);
 
   shaderLines_ = new Shader();
   shaderLines_->Attach(GL_VERTEX_SHADER, "shader/lines.vert");
