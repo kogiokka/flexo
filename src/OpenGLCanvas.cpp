@@ -62,7 +62,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   wxPaintDC dc(this);
   SetCurrent(*context_);
 
-  static float s_scale = 50.0f;
+  static float s_scale = 30.0f;
   static auto const s_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.4f);
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
@@ -259,7 +259,7 @@ OpenGLCanvas::OnSize(wxSizeEvent& event)
 void
 OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
-  camera_->WheelZoom(-event.GetWheelRotation() * 0.05f);
+  camera_->WheelZoom(-event.GetWheelRotation() * 0.01f);
 }
 
 void
