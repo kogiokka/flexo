@@ -127,7 +127,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shader_->SetUniform3fv("viewPos", camera_->Position());
     shader_->SetUniform3fv("lightSrc", camera_->Position());
     shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-    shader_->SetUniform1f("alpha", 0.7f);
+    shader_->SetUniform1f("alpha", 1.0f);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboLatFace_, 0, 6 * sizeof(float));
     glVertexArrayVertexBuffer(vao_->id(), 1, vboLatFace_, 3 * sizeof(float), 6 * sizeof(float));
     glDrawArrays(GL_TRIANGLES, 0, drawArraysCount);
