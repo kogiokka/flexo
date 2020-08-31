@@ -37,7 +37,7 @@ class OpenGLCanvas : public wxGLCanvas
   Camera* camera_;
   Lattice* lattice_;
   ObjModel* surface_;
-  ObjModel* posModel_;
+  ObjModel* vertModel_;
   std::vector<bool> renderOpt_;
   std::vector<unsigned int> latEdgeIndices_;
   std::vector<unsigned int> latFaceIndices_;

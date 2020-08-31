@@ -1,5 +1,6 @@
 #include "OpenGLCanvas.hpp"
 
+#include <cmath>
 #include <fstream>
 #include <iostream>
 
@@ -53,7 +54,7 @@ OpenGLCanvas::~OpenGLCanvas()
   delete camera_;
   delete lattice_;
   delete surface_;
-  delete posModel_;
+  delete vertModel_;
 }
 
 void
@@ -77,9 +78,10 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     float const z = n[2] * s_scale;
     latPos.push_back({x, y, z});
   }
-  glNamedBufferSubData(vboLatPos_, 0, latPos.size() * 3 * sizeof(float), latPos.data());
+  glNamedBufferSubData(vboLatPos_, 0, neurons.size() * 3 * sizeof(float), latPos.data());
 
   if (renderOpt_[LAT_VERTEX]) {
+    vao_->enable("normal");
     vao_->enable("instanced");
     shaderVertModel_->Use();
     shaderVertModel_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
@@ -87,31 +89,53 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shaderVertModel_->SetUniform3fv("lightSrc", camera_->Position());
     shaderVertModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderVertModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboVertModel_, 0, posModel_->stride());
-    glVertexArrayVertexBuffer(vao_->id(), 1, vboVertModel_, 3 * sizeof(float), posModel_->stride());
-    glDrawArraysInstanced(GL_TRIANGLES, 0, posModel_->drawArraysCount(), latPos.size());
-    vao_->disable("instanced");
+    glVertexArrayVertexBuffer(vao_->id(), 0, vboVertModel_, 0, vertModel_->stride());
+    glVertexArrayVertexBuffer(vao_->id(), 1, vboVertModel_, 3 * sizeof(float), vertModel_->stride());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_->drawArraysCount(), latPos.size());
   }
 
   if (renderOpt_[LAT_FACE]) {
-    std::vector<std::array<float, 3>> latFace;
+    std::vector<glm::vec3> latFace;
+    std::size_t drawArraysCount = 0;
     latFace.reserve(latFaceIndices_.size());
-    for (auto i : latFaceIndices_) {
-      latFace.push_back(latPos[i]);
+    for (auto i = 0; i < latFaceIndices_.size(); i += 3) {
+      auto const idx1 = latFaceIndices_[i];
+      auto const idx2 = latFaceIndices_[i + 1];
+      auto const idx3 = latFaceIndices_[i + 2];
+      auto const p1 = glm::vec3{latPos[idx1][0], latPos[idx1][1], latPos[idx1][2]};
+      auto const p2 = glm::vec3{latPos[idx2][0], latPos[idx2][1], latPos[idx2][2]};
+      auto const p3 = glm::vec3{latPos[idx3][0], latPos[idx3][1], latPos[idx3][2]};
+
+      glm::vec3 normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+      if (std::isnan(normal.x) || std::isnan(normal.y) || std::isnan(normal.z)) {
+        normal = glm::vec3(0.0f, 0.0f, 0.0f);
+      }
+      latFace.push_back(p1);
+      latFace.push_back(normal);
+      latFace.push_back(p2);
+      latFace.push_back(normal);
+      latFace.push_back(p3);
+      latFace.push_back(normal);
+      drawArraysCount += 3; // Added 3 vertices
     }
-    glNamedBufferSubData(vboLatFace_, 0, latFace.size() * 3 * sizeof(float), latFace.data());
-    vao_->disable("normal");
-    shaderEdge_->Use();
-    shaderEdge_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-    shaderEdge_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-    shaderEdge_->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboLatFace_, 0, 3 * sizeof(float));
-    glDrawArrays(GL_TRIANGLES, 0, latFace.size() * 3);
+    glNamedBufferSubData(vboLatFace_, 0, latFaceIndices_.size() * 6 * sizeof(float), latFace.data());
     vao_->enable("normal");
+    vao_->disable("instanced");
+    shader_->Use();
+    shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
+    shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
+    shader_->SetUniform3fv("viewPos", camera_->Position());
+    shader_->SetUniform3fv("lightSrc", camera_->Position());
+    shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
+    shader_->SetUniform1f("alpha", 0.7f);
+    glVertexArrayVertexBuffer(vao_->id(), 0, vboLatFace_, 0, 6 * sizeof(float));
+    glVertexArrayVertexBuffer(vao_->id(), 1, vboLatFace_, 3 * sizeof(float), 6 * sizeof(float));
+    glDrawArrays(GL_TRIANGLES, 0, drawArraysCount);
   }
 
   if (renderOpt_[LAT_EDGE]) {
     vao_->disable("normal");
+    vao_->disable("instanced");
     shaderEdge_->Use();
     shaderEdge_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderEdge_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
@@ -119,10 +143,11 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     glVertexArrayVertexBuffer(vao_->id(), 0, vboLatPos_, 0, 3 * sizeof(float));
     glVertexArrayElementBuffer(vao_->id(), iboLatEdge_);
     glDrawElements(GL_LINES, latEdgeIndices_.size(), GL_UNSIGNED_INT, 0);
-    vao_->enable("normal");
   }
 
   if (renderOpt_[SURFACE]) {
+    vao_->enable("normal");
+    vao_->enable("instanced");
     shader_->Use();
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
@@ -194,20 +219,20 @@ OpenGLCanvas::InitGL()
   /** Surface END **********************************************************/
 
   /** Lattice **********************************************************/
-  posModel_ = new ObjModel();
-  posModel_->read("res/models/Icosphere.obj");
-  posModel_->genVertexBuffer(OBJ_V | OBJ_VN);
+  vertModel_ = new ObjModel();
+  vertModel_->read("res/models/Icosphere.obj");
+  vertModel_->genVertexBuffer(OBJ_V | OBJ_VN);
   glCreateBuffers(1, &vboVertModel_);
   glNamedBufferStorage(vboVertModel_,
-                       posModel_->vertexBuffer().size() * sizeof(float),
-                       posModel_->vertexBuffer().data(),
+                       vertModel_->vertexBuffer().size() * sizeof(float),
+                       vertModel_->vertexBuffer().data(),
                        GL_DYNAMIC_STORAGE_BIT);
 
   latEdgeIndices_ = lattice_->edgeIndices();
   latFaceIndices_ = lattice_->faceIndices();
 
   glCreateBuffers(1, &vboLatFace_);
-  glNamedBufferStorage(vboLatFace_, latFaceIndices_.size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+  glNamedBufferStorage(vboLatFace_, latFaceIndices_.size() * 6 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
   // An Vertex Buffer Object storing the positions of neurons on the lattice.
   glCreateBuffers(1, &vboLatPos_);
@@ -373,7 +398,7 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
 
     glDeleteBuffers(1, &vboLatFace_);
     glCreateBuffers(1, &vboLatFace_);
-    glNamedBufferStorage(vboLatFace_, latFaceIndices_.size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    glNamedBufferStorage(vboLatFace_, latFaceIndices_.size() * 6 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
     glDeleteBuffers(1, &vboLatPos_);
     glCreateBuffers(1, &vboLatPos_);
