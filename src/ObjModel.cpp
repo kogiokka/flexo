@@ -1,6 +1,7 @@
 #include "ObjModel.hpp"
 
 #include <cassert>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -25,89 +26,88 @@ ObjModel::read(std::string const& path)
 {
   using namespace std;
 
-  try {
-    ifstream file(path);
-    file.exceptions(ifstream::failbit | ifstream::badbit);
+  ifstream file(path);
+  if (file.fail()) {
+    cerr << "Failed to open OBJ file: " << path << endl;
+    exit(EXIT_FAILURE);
+  }
 
-    string line;
-    while (getline(file, line)) {
-      using namespace util::str;
+  string line;
+  while (getline(file, line)) {
+    using namespace util::str;
 
-      if (startsWith(line, "v ")) {
+    if (startsWith(line, "v ")) {
 
-        auto tokens = split(line, R"(\s+)");
-        tokens.erase(tokens.begin());
-        auto const dimen = tokens.size();
-        assert(dimen > 0 && dimen <= 4);
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+      assert(dimen > 0 && dimen <= 4);
 
-        std::vector<float> v;
-        v.reserve(dimen);
-        for (auto t : tokens) {
-          v.push_back(stof(t));
-        }
-        v_.push_back(v);
-
-      } else if (startsWith(line, "vt ")) {
-
-        auto tokens = split(line, R"(\s+)");
-        tokens.erase(tokens.begin());
-        auto const dimen = tokens.size();
-
-        assert(dimen > 0 && dimen <= 3);
-
-        std::vector<float> vt;
-        vt.reserve(dimen);
-        for (auto t : tokens) {
-          vt.push_back(stof(t));
-        }
-        vt_.push_back(vt);
-
-      } else if (startsWith(line, "vn ")) {
-
-        auto tokens = split(line, R"(\s+)");
-        tokens.erase(tokens.begin());
-        auto const dimen = tokens.size();
-
-        assert(dimen > 0 && dimen <= 3);
-
-        std::vector<float> vn;
-        vn.reserve(dimen);
-        for (auto t : tokens) {
-          vn.push_back(stof(t));
-        }
-        vn_.push_back(vn);
-
-      } else if (startsWith(line, "f ")) { // Grouping
-
-        auto tokens = split(line, R"(\s+)");
-        tokens.erase(tokens.begin());
-        auto const dimen = tokens.size();
-
-        assert(dimen >= 3);
-
-        Face face;
-        face.reserve(dimen);
-        for (auto const& t : tokens) {
-          auto const refNums = split(t, R"(/)");
-
-          assert(refNums.size() <= 3);
-
-          Triplet tri;
-          for (int i = 0; i < 3; ++i) {
-            if (refNums[i].empty()) {
-              tri[i] = -1;
-            } else {
-              tri[i] = stoi(refNums[i]);
-            }
-          }
-
-          face.push_back(tri);
-        }
-        f_.push_back(face);
+      std::vector<float> v;
+      v.reserve(dimen);
+      for (auto t : tokens) {
+        v.push_back(stof(t));
       }
+      v_.push_back(v);
+
+    } else if (startsWith(line, "vt ")) {
+
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+
+      assert(dimen > 0 && dimen <= 3);
+
+      std::vector<float> vt;
+      vt.reserve(dimen);
+      for (auto t : tokens) {
+        vt.push_back(stof(t));
+      }
+      vt_.push_back(vt);
+
+    } else if (startsWith(line, "vn ")) {
+
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+
+      assert(dimen > 0 && dimen <= 3);
+
+      std::vector<float> vn;
+      vn.reserve(dimen);
+      for (auto t : tokens) {
+        vn.push_back(stof(t));
+      }
+      vn_.push_back(vn);
+
+    } else if (startsWith(line, "f ")) { // Grouping
+
+      auto tokens = split(line, R"(\s+)");
+      tokens.erase(tokens.begin());
+      auto const dimen = tokens.size();
+
+      assert(dimen >= 3);
+
+      Face face;
+      face.reserve(dimen);
+      for (auto const& t : tokens) {
+        auto const refNums = split(t, R"(/)");
+
+        assert(refNums.size() <= 3);
+
+        Triplet tri;
+        for (int i = 0; i < 3; ++i) {
+          if (refNums[i].empty()) {
+            tri[i] = -1;
+          } else {
+            tri[i] = stoi(refNums[i]);
+          }
+        }
+
+        face.push_back(tri);
+      }
+      f_.push_back(face);
     }
-  } catch (ifstream::failure& e) {
-    cerr << "Failed to read OBJ file. (" << e.what() << ")" << endl;
   }
 }
 
