@@ -87,7 +87,7 @@ MainWindow::CreatePanelStaticBox1()
   wxIntegerValidator<int> validDimen;
   wxFloatingPointValidator<float> validLearnRate(2, nullptr);
   validIterCap.SetMin(0);
-  validDimen.SetRange(2, 512);
+  validDimen.SetRange(1, 512);
   validLearnRate.SetRange(0.0f, 1.0f);
 
   tcIterCap_ = new wxTextCtrl(
