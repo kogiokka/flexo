@@ -32,8 +32,8 @@ class OpenGLCanvas : public wxGLCanvas
   VertexArray* vao_;
   wxGLContext* context_;
   Shader* shader_;
-  Shader* shaderLines_;
-  Shader* shaderNodes_;
+  Shader* shaderEdge_;
+  Shader* shaderVertModel_;
   Camera* camera_;
   Lattice* lattice_;
   ObjModel* surface_;

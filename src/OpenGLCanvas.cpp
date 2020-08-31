@@ -24,8 +24,8 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   , vao_(nullptr)
   , context_(nullptr)
   , shader_(nullptr)
-  , shaderLines_(nullptr)
-  , shaderNodes_(nullptr)
+  , shaderEdge_(nullptr)
+  , shaderVertModel_(nullptr)
   , camera_(nullptr)
   , lattice_(nullptr)
   , latEdgeIndices_(0)
@@ -48,8 +48,8 @@ OpenGLCanvas::~OpenGLCanvas()
   delete vao_;
   delete context_;
   delete shader_;
-  delete shaderLines_;
-  delete shaderNodes_;
+  delete shaderEdge_;
+  delete shaderVertModel_;
   delete camera_;
   delete lattice_;
   delete surface_;
@@ -81,12 +81,12 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
 
   if (renderOpt_[LAT_VERTEX]) {
     vao_->enable("instanced");
-    shaderNodes_->Use();
-    shaderNodes_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-    shaderNodes_->SetUniform3fv("viewPos", camera_->Position());
-    shaderNodes_->SetUniform3fv("lightSrc", camera_->Position());
-    shaderNodes_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-    shaderNodes_->SetUniformMatrix4fv("modelMat", s_scaleMat);
+    shaderVertModel_->Use();
+    shaderVertModel_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
+    shaderVertModel_->SetUniform3fv("viewPos", camera_->Position());
+    shaderVertModel_->SetUniform3fv("lightSrc", camera_->Position());
+    shaderVertModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
+    shaderVertModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboVertModel_, 0, posModel_->stride());
     glVertexArrayVertexBuffer(vao_->id(), 1, vboVertModel_, 3 * sizeof(float), posModel_->stride());
     glDrawArraysInstanced(GL_TRIANGLES, 0, posModel_->drawArraysCount(), latPos.size());
@@ -101,10 +101,10 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     }
     glNamedBufferSubData(vboLatFace_, 0, latFace.size() * 3 * sizeof(float), latFace.data());
     vao_->disable("normal");
-    shaderLines_->Use();
-    shaderLines_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-    shaderLines_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-    shaderLines_->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
+    shaderEdge_->Use();
+    shaderEdge_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
+    shaderEdge_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
+    shaderEdge_->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboLatFace_, 0, 3 * sizeof(float));
     glDrawArrays(GL_TRIANGLES, 0, latFace.size() * 3);
     vao_->enable("normal");
@@ -112,10 +112,10 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
 
   if (renderOpt_[LAT_EDGE]) {
     vao_->disable("normal");
-    shaderLines_->Use();
-    shaderLines_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-    shaderLines_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-    shaderLines_->SetUniform3f("color", 1.0f, 1.0f, 1.0f);
+    shaderEdge_->Use();
+    shaderEdge_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
+    shaderEdge_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
+    shaderEdge_->SetUniform3f("color", 1.0f, 1.0f, 1.0f);
     glVertexArrayVertexBuffer(vao_->id(), 0, vboLatPos_, 0, 3 * sizeof(float));
     glVertexArrayElementBuffer(vao_->id(), iboLatEdge_);
     glDrawElements(GL_LINES, latEdgeIndices_.size(), GL_UNSIGNED_INT, 0);
@@ -218,15 +218,15 @@ OpenGLCanvas::InitGL()
   glNamedBufferStorage(
     iboLatEdge_, latEdgeIndices_.size() * sizeof(unsigned int), latEdgeIndices_.data(), GL_DYNAMIC_STORAGE_BIT);
 
-  shaderLines_ = new Shader();
-  shaderLines_->Attach(GL_VERTEX_SHADER, "shader/lines.vert");
-  shaderLines_->Attach(GL_FRAGMENT_SHADER, "shader/lines.frag");
-  shaderLines_->Link();
+  shaderEdge_ = new Shader();
+  shaderEdge_->Attach(GL_VERTEX_SHADER, "shader/Edge.vert");
+  shaderEdge_->Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
+  shaderEdge_->Link();
 
-  shaderNodes_ = new Shader();
-  shaderNodes_->Attach(GL_VERTEX_SHADER, "shader/nodes.vert");
-  shaderNodes_->Attach(GL_FRAGMENT_SHADER, "shader/nodes.frag");
-  shaderNodes_->Link();
+  shaderVertModel_ = new Shader();
+  shaderVertModel_->Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
+  shaderVertModel_->Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
+  shaderVertModel_->Link();
   /** Lattice END ******************************************************/
 
   /** OpenGL Instancing
