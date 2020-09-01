@@ -17,8 +17,7 @@ Lattice::Lattice(int dimen, int iterations, float learningRate)
 {
   for (int i = 0; i < dimen; ++i) {
     for (int j = 0; j < dimen; ++j) {
-      auto w = randomDevice_.vector(3);
-      neurons_.emplace_back(i, j, std::vector<float>(w.begin(), w.end()));
+      neurons_.emplace_back(i, j, randomDevice_.vector(3));
     }
   }
   timeConstant_ = iterations / log(dimen);

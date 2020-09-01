@@ -162,7 +162,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
 
   for (int i = 0; i < iterPerFrame_; ++i) {
     if (toTrain_) {
-      toTrain_ = lattice_->input(surface_->v()[random_->get()]);
+      toTrain_ = lattice_->input(surface_->v()[random_->scalar()]);
     }
   }
 

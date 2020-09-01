@@ -1,5 +1,6 @@
 #pragma once
 
+#include <array>
 #include <cstddef>
 #include <random>
 #include <vector>
@@ -14,8 +15,10 @@ protected:
 public:
   RandomNumber();
   virtual ~RandomNumber();
-  virtual T get() = 0;
+  virtual T scalar() = 0;
   virtual std::vector<T> vector(std::size_t dimension) = 0;
+  template<std::size_t S>
+  std::array<T, S> vector();
 };
 
 template<typename T>

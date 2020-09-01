@@ -2,7 +2,10 @@
 
 #include "RandomNumber.hpp"
 
+#include <array>
+#include <random>
 #include <type_traits>
+#include <vector>
 
 template<typename T>
 class RandomRealNumber : public RandomNumber<T>
@@ -11,8 +14,10 @@ class RandomRealNumber : public RandomNumber<T>
 
 public:
   RandomRealNumber(T min, T max);
-  virtual T get() override;
+  virtual T scalar() override;
   virtual std::vector<T> vector(std::size_t dimension) override;
+  template<std::size_t S>
+  std::array<T, S> vector();
 };
 
 template<typename T>
@@ -30,7 +35,7 @@ RandomRealNumber<T>::RandomRealNumber(T min, T max)
 
 template<typename T>
 T
-RandomRealNumber<T>::get()
+RandomRealNumber<T>::scalar()
 {
   return m_range(this->m_engine);
 }
@@ -46,5 +51,17 @@ RandomRealNumber<T>::vector(std::size_t dimension)
     vec.push_back(m_range(this->m_engine));
   }
 
+  return vec;
+}
+
+template<typename T>
+template<std::size_t S>
+std::array<T, S>
+RandomRealNumber<T>::vector()
+{
+  std::array<T, S> vec;
+  for (auto i = 0; i < S; ++i) {
+    vec[i] = m_range(this->m_engine);
+  }
   return vec;
 }
