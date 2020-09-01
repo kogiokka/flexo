@@ -20,23 +20,23 @@ class Lattice
 
 public:
   Lattice(int size, int iterations, float rate);
-  bool input(std::vector<float> in);
-  int dimension() const;
-  int iterationCap() const;
-  int currentIteration() const;
-  float currentRate() const;
-  float initialRate() const;
-  float neighborhoodRadius() const;
+  bool Input(std::vector<float> in);
+  int Dimension() const;
+  int IterationCap() const;
+  int CurrentIteration() const;
+  float CurrentRate() const;
+  float InitialRate() const;
+  float NeighborhoodRadius() const;
   template<std::size_t S>
-  bool input(std::array<float, S> in);
-  std::vector<Node> const& neurons() const;
-  std::vector<unsigned int> edgeIndices() const;
-  std::vector<unsigned int> faceIndices() const;
+  bool Input(std::array<float, S> in);
+  std::vector<Node> const& Neurons() const;
+  std::vector<unsigned int> EdgeIndices() const;
+  std::vector<unsigned int> FaceIndices() const;
 };
 
 template<std::size_t S>
 inline bool
-Lattice::input(std::array<float, S> in)
+Lattice::Input(std::array<float, S> in)
 {
-  return input(std::vector<float>(in.begin(), in.end()));
+  return Input(std::vector<float>(in.begin(), in.end()));
 }

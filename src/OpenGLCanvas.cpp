@@ -69,7 +69,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  auto const& neurons = lattice_->neurons();
+  auto const& neurons = lattice_->Neurons();
   std::vector<std::array<float, 3>> latPos;
   latPos.reserve(neurons.size());
   for (auto const& n : neurons) {
@@ -162,7 +162,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
 
   for (int i = 0; i < iterPerFrame_; ++i) {
     if (toTrain_) {
-      toTrain_ = lattice_->input(surface_->v()[random_->scalar()]);
+      toTrain_ = lattice_->Input(surface_->v()[random_->scalar()]);
     }
   }
 
@@ -228,15 +228,15 @@ OpenGLCanvas::InitGL()
                        vertModel_->vertexBuffer().data(),
                        GL_DYNAMIC_STORAGE_BIT);
 
-  latEdgeIndices_ = lattice_->edgeIndices();
-  latFaceIndices_ = lattice_->faceIndices();
+  latEdgeIndices_ = lattice_->EdgeIndices();
+  latFaceIndices_ = lattice_->FaceIndices();
 
   glCreateBuffers(1, &vboLatFace_);
   glNamedBufferStorage(vboLatFace_, latFaceIndices_.size() * 6 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
   // An Vertex Buffer Object storing the positions of neurons on the lattice.
   glCreateBuffers(1, &vboLatPos_);
-  glNamedBufferStorage(vboLatPos_, lattice_->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+  glNamedBufferStorage(vboLatPos_, lattice_->Neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
 
   // An Index Buffer that holds indices referencing the positions of neurons to draw the edges between them.
   glCreateBuffers(1, &iboLatEdge_);
@@ -373,23 +373,23 @@ OpenGLCanvas::GetRenderOptionState(RenderOpt opt) const
 int
 OpenGLCanvas::GetCurrentIterations() const
 {
-  return lattice_->currentIteration();
+  return lattice_->CurrentIteration();
 }
 
 void
 OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimension)
 {
   toTrain_ = false;
-  bool const isSameIter = (iterationCap == lattice_->iterationCap());
-  bool const isSameRate = (initLearningRate == lattice_->initialRate());
-  bool const isSameDimen = (dimension == lattice_->dimension());
+  bool const isSameIter = (iterationCap == lattice_->IterationCap());
+  bool const isSameRate = (initLearningRate == lattice_->InitialRate());
+  bool const isSameDimen = (dimension == lattice_->Dimension());
   bool const changed = !(isSameIter && isSameDimen && isSameRate);
   delete lattice_;
   lattice_ = new Lattice(dimension, iterationCap, initLearningRate);
 
   if (changed) {
-    latEdgeIndices_ = lattice_->edgeIndices();
-    latFaceIndices_ = lattice_->faceIndices();
+    latEdgeIndices_ = lattice_->EdgeIndices();
+    latFaceIndices_ = lattice_->FaceIndices();
 
     glDeleteBuffers(1, &iboLatEdge_);
     glCreateBuffers(1, &iboLatEdge_);
@@ -402,7 +402,7 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
 
     glDeleteBuffers(1, &vboLatPos_);
     glCreateBuffers(1, &vboLatPos_);
-    glNamedBufferStorage(vboLatPos_, lattice_->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
+    glNamedBufferStorage(vboLatPos_, lattice_->Neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
     glVertexArrayVertexBuffer(vao_->Id(), 2, vboLatPos_, 0, 3 * sizeof(float));
   }
 }
@@ -410,19 +410,19 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
 int
 OpenGLCanvas::GetIterationCap() const
 {
-  return lattice_->iterationCap();
+  return lattice_->IterationCap();
 }
 
 float
 OpenGLCanvas::GetInitialLearningRate() const
 {
-  return lattice_->initialRate();
+  return lattice_->InitialRate();
 }
 
 int
 OpenGLCanvas::GetLatticeDimension() const
 {
-  return lattice_->dimension();
+  return lattice_->Dimension();
 }
 
 void

@@ -24,7 +24,7 @@ Lattice::Lattice(int dimen, int iterations, float learningRate)
 }
 
 bool
-Lattice::input(std::vector<float> in)
+Lattice::Input(std::vector<float> in)
 {
   if (iterRemained_ <= 0)
     return false;
@@ -69,49 +69,49 @@ Lattice::input(std::vector<float> in)
 }
 
 int
-Lattice::dimension() const
+Lattice::Dimension() const
 {
   return dimen_;
 }
 
 int
-Lattice::iterationCap() const
+Lattice::IterationCap() const
 {
   return iterCap_;
 }
 
 int
-Lattice::currentIteration() const
+Lattice::CurrentIteration() const
 {
   return iterCap_ - iterRemained_;
 }
 
 float
-Lattice::neighborhoodRadius() const
+Lattice::NeighborhoodRadius() const
 {
   return neighborhoodRadius_;
 }
 
 std::vector<Node> const&
-Lattice::neurons() const
+Lattice::Neurons() const
 {
   return neurons_;
 }
 
 float
-Lattice::initialRate() const
+Lattice::InitialRate() const
 {
   return rateInitial_;
 }
 
 float
-Lattice::currentRate() const
+Lattice::CurrentRate() const
 {
   return rateCurrent_;
 }
 
 std::vector<unsigned int>
-Lattice::edgeIndices() const
+Lattice::EdgeIndices() const
 {
   std::vector<unsigned int> indices;
 
@@ -132,7 +132,7 @@ Lattice::edgeIndices() const
 }
 
 std::vector<unsigned int>
-Lattice::faceIndices() const
+Lattice::FaceIndices() const
 {
   std::vector<unsigned int> indices;
 
