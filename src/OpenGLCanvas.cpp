@@ -380,7 +380,7 @@ void
 OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimension)
 {
   toTrain_ = false;
-  bool const isSameIter = (iterationCap == lattice_->maxIterations());
+  bool const isSameIter = (iterationCap == lattice_->iterationCap());
   bool const isSameRate = (initLearningRate == lattice_->initialRate());
   bool const isSameDimen = (dimension == lattice_->dimension());
   bool const changed = !(isSameIter && isSameDimen && isSameRate);
@@ -410,7 +410,7 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
 int
 OpenGLCanvas::GetIterationCap() const
 {
-  return lattice_->maxIterations();
+  return lattice_->iterationCap();
 }
 
 float

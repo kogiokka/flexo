@@ -8,22 +8,21 @@
 
 class Lattice
 {
-  int m_dimen;
-  int m_maxIter;
-  int m_remainingIter;
-  float m_timeConst;
-  float m_currRate;
-  float m_initialRate;
-  float m_neighborhoodRadius;
-  RandomRealNumber<float> m_random;
-  std::array<float, 3> m_center;
-  std::vector<Node> m_neurons;
+  int dimen_;
+  int iterCap_;
+  int iterRemained_;
+  float timeConstant_;
+  float rateCurrent_;
+  float rateInitial_;
+  float neighborhoodRadius_;
+  RandomRealNumber<float> randomDevice_;
+  std::vector<Node> neurons_;
 
 public:
   Lattice(int size, int iterations, float rate);
   bool input(std::vector<float> in);
   int dimension() const;
-  int maxIterations() const;
+  int iterationCap() const;
   int currentIteration() const;
   float currentRate() const;
   float initialRate() const;
