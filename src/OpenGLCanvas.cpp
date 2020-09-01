@@ -64,7 +64,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   SetCurrent(*context_);
 
   static float s_scale = 30.0f;
-  static auto const s_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.4f);
+  static auto const s_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -153,7 +153,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
     shader_->SetUniform3fv("viewPos", camera_->Position());
     shader_->SetUniform3fv("lightSrc", camera_->Position());
-    shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
+    shader_->SetUniform3f("lightColor", 0.67f, 0.8f, 1.0f);
     shader_->SetUniform1f("alpha", surfaceTransparency_);
     glVertexArrayVertexBuffer(vao_->Id(), 0, vboSurf_, 0, surface_->stride());
     glVertexArrayVertexBuffer(vao_->Id(), 1, vboSurf_, 3 * sizeof(float), surface_->stride());
