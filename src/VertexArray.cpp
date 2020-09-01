@@ -2,45 +2,45 @@
 
 VertexArray::VertexArray()
 {
-  glCreateVertexArrays(1, &m_id);
+  glCreateVertexArrays(1, &id_);
 }
 
 VertexArray::~VertexArray()
 {
-  glDeleteVertexArrays(1, &m_id);
+  glDeleteVertexArrays(1, &id_);
 }
 
 void
-VertexArray::bind() const
+VertexArray::Bind() const
 {
-  glBindVertexArray(m_id);
+  glBindVertexArray(id_);
 }
 
 GLuint
-VertexArray::id()
+VertexArray::Id()
 {
-  return m_id;
+  return id_;
 }
 
 bool
-VertexArray::addAttrib(std::string const& attribName, GLuint index, AttribFormat const& format)
+VertexArray::AddAttribFormat(std::string const& attribName, GLuint index, AttribFormat const& format)
 {
-  if (m_indexTable.find(attribName) != m_indexTable.end()) {
+  if (attribTable_.find(attribName) != attribTable_.end()) {
     return false;
   }
-  m_indexTable.insert({attribName, index});
-  glVertexArrayAttribFormat(m_id, index, format.count, format.type, format.normalized, 0);
+  attribTable_.insert({attribName, index});
+  glVertexArrayAttribFormat(id_, index, format.count, format.type, format.normalized, 0);
   return true;
 }
 
 void
-VertexArray::enable(std::string const& attribName)
+VertexArray::Enable(std::string const& attribName)
 {
-  glEnableVertexArrayAttrib(m_id, m_indexTable[attribName]);
+  glEnableVertexArrayAttrib(id_, attribTable_[attribName]);
 }
 
 void
-VertexArray::disable(std::string const& attribName)
+VertexArray::Disable(std::string const& attribName)
 {
-  glDisableVertexArrayAttrib(m_id, m_indexTable[attribName]);
+  glDisableVertexArrayAttrib(id_, attribTable_[attribName]);
 }

@@ -81,16 +81,16 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
   glNamedBufferSubData(vboLatPos_, 0, neurons.size() * 3 * sizeof(float), latPos.data());
 
   if (renderOpt_[LAT_VERTEX]) {
-    vao_->enable("normal");
-    vao_->enable("instanced");
+    vao_->Enable("normal");
+    vao_->Enable("instanced");
     shaderVertModel_->Use();
     shaderVertModel_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     shaderVertModel_->SetUniform3fv("viewPos", camera_->Position());
     shaderVertModel_->SetUniform3fv("lightSrc", camera_->Position());
     shaderVertModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderVertModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboVertModel_, 0, vertModel_->stride());
-    glVertexArrayVertexBuffer(vao_->id(), 1, vboVertModel_, 3 * sizeof(float), vertModel_->stride());
+    glVertexArrayVertexBuffer(vao_->Id(), 0, vboVertModel_, 0, vertModel_->stride());
+    glVertexArrayVertexBuffer(vao_->Id(), 1, vboVertModel_, 3 * sizeof(float), vertModel_->stride());
     glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_->drawArraysCount(), latPos.size());
   }
 
@@ -119,8 +119,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
       drawArraysCount += 3; // Added 3 vertices
     }
     glNamedBufferSubData(vboLatFace_, 0, latFaceIndices_.size() * 6 * sizeof(float), latFace.data());
-    vao_->enable("normal");
-    vao_->disable("instanced");
+    vao_->Enable("normal");
+    vao_->Disable("instanced");
     shader_->Use();
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
@@ -128,26 +128,26 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shader_->SetUniform3fv("lightSrc", camera_->Position());
     shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     shader_->SetUniform1f("alpha", 1.0f);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboLatFace_, 0, 6 * sizeof(float));
-    glVertexArrayVertexBuffer(vao_->id(), 1, vboLatFace_, 3 * sizeof(float), 6 * sizeof(float));
+    glVertexArrayVertexBuffer(vao_->Id(), 0, vboLatFace_, 0, 6 * sizeof(float));
+    glVertexArrayVertexBuffer(vao_->Id(), 1, vboLatFace_, 3 * sizeof(float), 6 * sizeof(float));
     glDrawArrays(GL_TRIANGLES, 0, drawArraysCount);
   }
 
   if (renderOpt_[LAT_EDGE]) {
-    vao_->disable("normal");
-    vao_->disable("instanced");
+    vao_->Disable("normal");
+    vao_->Disable("instanced");
     shaderEdge_->Use();
     shaderEdge_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderEdge_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
     shaderEdge_->SetUniform3f("color", 1.0f, 1.0f, 1.0f);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboLatPos_, 0, 3 * sizeof(float));
-    glVertexArrayElementBuffer(vao_->id(), iboLatEdge_);
+    glVertexArrayVertexBuffer(vao_->Id(), 0, vboLatPos_, 0, 3 * sizeof(float));
+    glVertexArrayElementBuffer(vao_->Id(), iboLatEdge_);
     glDrawElements(GL_LINES, latEdgeIndices_.size(), GL_UNSIGNED_INT, 0);
   }
 
   if (renderOpt_[SURFACE]) {
-    vao_->enable("normal");
-    vao_->enable("instanced");
+    vao_->Enable("normal");
+    vao_->Disable("instanced");
     shader_->Use();
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
@@ -155,8 +155,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shader_->SetUniform3fv("lightSrc", camera_->Position());
     shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     shader_->SetUniform1f("alpha", surfaceTransparency_);
-    glVertexArrayVertexBuffer(vao_->id(), 0, vboSurf_, 0, surface_->stride());
-    glVertexArrayVertexBuffer(vao_->id(), 1, vboSurf_, 3 * sizeof(float), surface_->stride());
+    glVertexArrayVertexBuffer(vao_->Id(), 0, vboSurf_, 0, surface_->stride());
+    glVertexArrayVertexBuffer(vao_->Id(), 1, vboSurf_, 3 * sizeof(float), surface_->stride());
     glDrawArrays(GL_TRIANGLES, 0, surface_->drawArraysCount());
   }
 
@@ -205,9 +205,9 @@ OpenGLCanvas::InitGL()
   format.type = GL_FLOAT;
   format.normalized = GL_FALSE;
 
-  vao_->addAttrib("position", 0, format);
-  vao_->addAttrib("normal", 1, format);
-  vao_->addAttrib("instanced", 2, format);
+  vao_->AddAttribFormat("position", 0, format);
+  vao_->AddAttribFormat("normal", 1, format);
+  vao_->AddAttribFormat("instanced", 2, format);
 
   surface_ = new ObjModel();
   surface_->read("res/models/NurbsSurface.obj");
@@ -257,12 +257,12 @@ OpenGLCanvas::InitGL()
   /** OpenGL Instancing
    *  Use glDrawArraysInstanced to render tens of thousands of objects that represent the lattice vertices.
    */
-  glVertexArrayVertexBuffer(vao_->id(), 2, vboLatPos_, 0, 3 * sizeof(float));
-  glVertexArrayBindingDivisor(vao_->id(), 2, 1);
+  glVertexArrayVertexBuffer(vao_->Id(), 2, vboLatPos_, 0, 3 * sizeof(float));
+  glVertexArrayBindingDivisor(vao_->Id(), 2, 1);
 
-  vao_->enable("position");
-  vao_->enable("normal");
-  vao_->bind();
+  vao_->Enable("position");
+  vao_->Enable("normal");
+  vao_->Bind();
 
   shader_ = new Shader();
   shader_->Attach(GL_VERTEX_SHADER, "shader/default.vert");
@@ -403,7 +403,7 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
     glDeleteBuffers(1, &vboLatPos_);
     glCreateBuffers(1, &vboLatPos_);
     glNamedBufferStorage(vboLatPos_, lattice_->neurons().size() * 3 * sizeof(float), nullptr, GL_DYNAMIC_STORAGE_BIT);
-    glVertexArrayVertexBuffer(vao_->id(), 2, vboLatPos_, 0, 3 * sizeof(float));
+    glVertexArrayVertexBuffer(vao_->Id(), 2, vboLatPos_, 0, 3 * sizeof(float));
   }
 }
 

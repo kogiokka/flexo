@@ -13,15 +13,15 @@ struct AttribFormat {
 
 class VertexArray
 {
-  GLuint m_id;
-  std::unordered_map<std::string, GLuint> m_indexTable;
+  GLuint id_;
+  std::unordered_map<std::string, GLuint> attribTable_;
 
 public:
   VertexArray();
   ~VertexArray();
-  GLuint id();
-  void bind() const;
-  bool addAttrib(std::string const& attribName, GLuint index, AttribFormat const& format);
-  void enable(std::string const& attribName);
-  void disable(std::string const& attribName);
+  GLuint Id();
+  void Bind() const;
+  bool AddAttribFormat(std::string const& attribName, GLuint index, AttribFormat const& format);
+  void Enable(std::string const& attribName);
+  void Disable(std::string const& attribName);
 };
