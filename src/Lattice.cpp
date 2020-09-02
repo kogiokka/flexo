@@ -30,38 +30,39 @@ Lattice::Input(std::vector<float> in)
     return false;
 
   int const iterCurrent = (iterCap_ - iterRemained_);
+
+  // Decay of neighborhood and learning rate
   neighborhoodRadius_ = dimen_ * exp(-iterCurrent / timeConstant_);
+  rateCurrent_ = rateInitial_ * expf(-iterCurrent / iterRemained_);
 
   std::unique_ptr<Node> bmu;
-  float dist_min = std::numeric_limits<float>::max();
+  float distMin = std::numeric_limits<float>::max();
 
-  // Find Best Matching Unit
+  // Find the Best Matching Unit
   for (Node& node : neurons_) {
     float sum = 0;
     for (int i = 0; i < node.dimen(); ++i) {
       float const diff = node[i] - in[i];
       sum += diff * diff;
     }
-    if (dist_min > sum) {
+    if (distMin > sum) {
       bmu = std::make_unique<Node>(node);
-      dist_min = sum;
+      distMin = sum;
     }
   }
 
   for (Node& node : neurons_) {
     float const dx = bmu->x() - node.x();
     float const dy = bmu->y() - node.y();
-    float const dist_to_bmu_sq = dx * dx + dy * dy;
-    float const radius_sq = (neighborhoodRadius_ * neighborhoodRadius_);
-    if (dist_to_bmu_sq < radius_sq) {
-      float const influence = expf(-dist_to_bmu_sq / (2.0f * radius_sq)); // Why does (2.0f * radius_sq) need parens?
+    float const distToBmuSqr = dx * dx + dy * dy;
+    float const radiusSqr = (neighborhoodRadius_ * neighborhoodRadius_);
+    if (distToBmuSqr < radiusSqr) {
+      float const influence = expf(-distToBmuSqr / (2.0f * radiusSqr)); // Why does (2.0f * radiusSqr) need parens?
       for (int i = 0; i < node.dimen(); ++i) {
         node[i] += rateCurrent_ * influence * (in[i] - node[i]);
       }
     }
   }
-
-  rateCurrent_ = rateInitial_ * expf(-iterCurrent / iterRemained_); // iteration_left_ > 0
 
   --iterRemained_;
 
