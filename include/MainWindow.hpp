@@ -34,12 +34,12 @@ class MainWindow : public wxFrame
   float initLearningRate_;
   int dimension_;
 
-  wxTimer* updateTimer_;
+  wxTimer* timerUIUpdate_;
   wxPanel* panel_;
-  wxTextCtrl* tcCurrIter_;
-  wxTextCtrl* tcIterCap_;
-  wxTextCtrl* tcLearnRate_;
-  wxTextCtrl* tcDimen_;
+  wxTextCtrl* txtCtrlIterCurr;
+  wxTextCtrl* txtCtrlIterCap_;
+  wxTextCtrl* txtCtrlLearningRate;
+  wxTextCtrl* txtCtrlDimension_;
   wxSlider* slider_;
   OpenGLCanvas* canvas_;
 
@@ -48,18 +48,18 @@ class MainWindow : public wxFrame
   wxStaticBoxSizer* const CreatePanelStaticBox2();
   wxStaticBoxSizer* const CreatePanelStaticBox3();
 
-  void OnUpdateTimer(wxTimerEvent& evt);
+  void OnTimerUIUpdate(wxTimerEvent& evt);
   void OnButtonStart(wxCommandEvent& evt);
   void OnButtonPause(wxCommandEvent& evt);
   void OnButtonConfirmAndReset(wxCommandEvent& evt);
   void OnSpinCtrlIterationPerFrame(wxSpinEvent& evt);
-  void OnEnterIterationCap(wxCommandEvent& evt);
-  void OnEnterLearningRate(wxCommandEvent& evt);
-  void OnEnterDimension(wxCommandEvent& evt);
-  void OnCheckBoxToggleModel(wxCommandEvent& evt);
-  void OnCheckBoxTogglePoints(wxCommandEvent& evt);
-  void OnCheckBoxToggleLines(wxCommandEvent& evt);
-  void OnCheckBoxToggleSurfaces(wxCommandEvent& evt);
+  void OnTextCtrlIterationCap(wxCommandEvent& evt);
+  void OnTextCtrlLearningRate(wxCommandEvent& evt);
+  void OnTextCtrlDimension(wxCommandEvent& evt);
+  void OnCheckboxLatticeSurface(wxCommandEvent& evt);
+  void OnCheckboxLatticeVertex(wxCommandEvent& evt);
+  void OnCheckboxLatticeEdge(wxCommandEvent& evt);
+  void OnCheckboxLatticeFace(wxCommandEvent& evt);
   void OnSliderTransparency(wxCommandEvent& evt);
   void OnOpen(wxCommandEvent& evt);
   void OnExit(wxCommandEvent& evt);
@@ -68,7 +68,7 @@ public:
   MainWindow(wxWindow* parent = 0);
   virtual ~MainWindow();
   void InitializeGL();
-  void ResetCamera(wxCommandEvent& evt);
+  void OnMenuCameraReset(wxCommandEvent& evt);
 
   wxDECLARE_EVENT_TABLE();
 };

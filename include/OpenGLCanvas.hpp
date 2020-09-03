@@ -20,13 +20,13 @@
 class OpenGLCanvas : public wxGLCanvas
 {
   bool isGLLoaded_;
-  bool toTrain_;
+  bool isAcceptingInput_;
   GLuint vboSurf_;
   GLuint vboLatFace_;
   GLuint vboLatPos_;
   GLuint iboLatEdge_;
   GLuint vboVertModel_;
-  float surfaceTransparency_;
+  float surfaceColorAlpha_;
   int iterPerFrame_;
   RandomIntNumber<unsigned int>* random_;
   VertexArray* vao_;
@@ -64,8 +64,8 @@ public:
   void ResetCamera();
   void ResetLattice(int iterationCap, float initLearningRate, int dimension);
   void ToggleRenderOption(RenderOpt opt);
-  void SetPlayOrPause(bool toTrain);
-  void SetSurfaceTransparency(float alpha);
+  void SetPlayOrPause(bool isAcceptingInput);
+  void SetSurfaceColorAlpha(float alpha);
   void SetIterationsPerFrame(int times);
   void OpenSurface(std::string const& path);
   int GetIterationCap() const;

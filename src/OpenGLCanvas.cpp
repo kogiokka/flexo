@@ -13,13 +13,13 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
                            wxString const& name)
   : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
   , isGLLoaded_(false)
-  , toTrain_(false)
+  , isAcceptingInput_(false)
   , vboSurf_(0)
   , vboLatFace_(0)
   , vboLatPos_(0)
   , iboLatEdge_(0)
   , vboVertModel_(0)
-  , surfaceTransparency_(0.8f)
+  , surfaceColorAlpha_(0.8f)
   , iterPerFrame_(10)
   , random_(nullptr)
   , vao_(nullptr)
@@ -154,15 +154,15 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     shader_->SetUniform3fv("viewPos", camera_->Position());
     shader_->SetUniform3fv("lightSrc", camera_->Position());
     shader_->SetUniform3f("lightColor", 0.67f, 0.8f, 1.0f);
-    shader_->SetUniform1f("alpha", surfaceTransparency_);
+    shader_->SetUniform1f("alpha", surfaceColorAlpha_);
     glVertexArrayVertexBuffer(vao_->Id(), 0, vboSurf_, 0, surface_->stride());
     glVertexArrayVertexBuffer(vao_->Id(), 1, vboSurf_, 3 * sizeof(float), surface_->stride());
     glDrawArrays(GL_TRIANGLES, 0, surface_->drawArraysCount());
   }
 
   for (int i = 0; i < iterPerFrame_; ++i) {
-    if (toTrain_) {
-      toTrain_ = lattice_->Input(surface_->v()[random_->scalar()]);
+    if (isAcceptingInput_) {
+      isAcceptingInput_ = lattice_->Input(surface_->v()[random_->scalar()]);
     }
   }
 
@@ -353,9 +353,9 @@ OpenGLCanvas::OpenSurface(const std::string& path)
 }
 
 void
-OpenGLCanvas::SetPlayOrPause(bool toTrain)
+OpenGLCanvas::SetPlayOrPause(bool isAcceptingInput)
 {
-  toTrain_ = toTrain;
+  isAcceptingInput_ = isAcceptingInput;
 }
 
 void
@@ -379,7 +379,7 @@ OpenGLCanvas::GetCurrentIterations() const
 void
 OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimension)
 {
-  toTrain_ = false;
+  isAcceptingInput_ = false;
   bool const isSameIter = (iterationCap == lattice_->IterationCap());
   bool const isSameRate = (initLearningRate == lattice_->InitialRate());
   bool const isSameDimen = (dimension == lattice_->Dimension());
@@ -426,16 +426,16 @@ OpenGLCanvas::GetLatticeDimension() const
 }
 
 void
-OpenGLCanvas::SetSurfaceTransparency(float alpha)
+OpenGLCanvas::SetSurfaceColorAlpha(float alpha)
 {
   // The range between 0.0 and 1.0 should be handled by UI
-  surfaceTransparency_ = alpha;
+  surfaceColorAlpha_ = alpha;
 }
 
 float
 OpenGLCanvas::GetSurfaceTransparency() const
 {
-  return surfaceTransparency_;
+  return surfaceColorAlpha_;
 }
 
 void

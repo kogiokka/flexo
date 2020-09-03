@@ -15,8 +15,13 @@
 
 MainWindow::MainWindow(wxWindow* parent)
   : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(1200, 800))
+  , timerUIUpdate_(nullptr)
   , panel_(nullptr)
-  , tcCurrIter_(nullptr)
+  , txtCtrlIterCurr(nullptr)
+  , txtCtrlIterCap_(nullptr)
+  , txtCtrlLearningRate(nullptr)
+  , txtCtrlDimension_(nullptr)
+  , slider_(nullptr)
   , canvas_(nullptr)
 {
   SetMinSize(wxSize(600, 400));
@@ -53,8 +58,8 @@ MainWindow::MainWindow(wxWindow* parent)
   panelLayout->Add(CreatePanelStaticBox3(), 0, wxGROW | wxALL, 10);
   panel_->SetSizer(panelLayout);
 
-  updateTimer_ = new wxTimer(this, TIMER_UI_UPDATE);
-  updateTimer_->Start(16); // 16 ms (60 fps)
+  timerUIUpdate_ = new wxTimer(this, TIMER_UI_UPDATE);
+  timerUIUpdate_->Start(16); // 16 ms (60 fps)
 };
 
 MainWindow::~MainWindow()
@@ -62,7 +67,7 @@ MainWindow::~MainWindow()
   // It seems that manually deleting widgets is unnecessary.
   // Using delete on wxPanel will cause some delay when the frame closes.
   delete canvas_;
-  delete updateTimer_;
+  delete timerUIUpdate_;
 }
 
 inline void
@@ -90,18 +95,18 @@ MainWindow::CreatePanelStaticBox1()
   validDimen.SetRange(1, 512);
   validLearnRate.SetRange(0.0f, 1.0f);
 
-  tcIterCap_ = new wxTextCtrl(
+  txtCtrlIterCap_ = new wxTextCtrl(
     box, TC_SET_ITERATION_CAP, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validIterCap);
-  tcLearnRate_ = new wxTextCtrl(
+  txtCtrlLearningRate = new wxTextCtrl(
     box, TC_SET_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validLearnRate);
-  tcDimen_ =
+  txtCtrlDimension_ =
     new wxTextCtrl(box, TC_SET_DIMENSION, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validDimen);
   iterationCap_ = canvas_->GetIterationCap();
   initLearningRate_ = canvas_->GetInitialLearningRate();
   dimension_ = canvas_->GetLatticeDimension();
-  *tcIterCap_ << iterationCap_;
-  *tcLearnRate_ << initLearningRate_;
-  *tcDimen_ << dimension_;
+  *txtCtrlIterCap_ << iterationCap_;
+  *txtCtrlLearningRate << initLearningRate_;
+  *txtCtrlDimension_ << dimension_;
 
   auto btnConfirm = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
 
@@ -110,11 +115,11 @@ MainWindow::CreatePanelStaticBox1()
   auto row3 = new wxBoxSizer(wxHORIZONTAL);
   auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
   row1->Add(iterCapLabel, 1, sizerFlag, 5);
-  row1->Add(tcIterCap_, 1, sizerFlag, 5);
+  row1->Add(txtCtrlIterCap_, 1, sizerFlag, 5);
   row2->Add(learnRateLabel, 1, sizerFlag, 5);
-  row2->Add(tcLearnRate_, 1, sizerFlag, 5);
+  row2->Add(txtCtrlLearningRate, 1, sizerFlag, 5);
   row3->Add(dimenLabel, 1, sizerFlag, 5);
-  row3->Add(tcDimen_, 1, sizerFlag, 5);
+  row3->Add(txtCtrlDimension_, 1, sizerFlag, 5);
   boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
   boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
   boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
@@ -146,11 +151,11 @@ MainWindow::CreatePanelStaticBox2()
                                   500,
                                   canvas_->GetIterationsPerFrame());
   auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
-  tcCurrIter_ = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
-  tcCurrIter_->SetCanFocus(false);
+  txtCtrlIterCurr = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+  txtCtrlIterCurr->SetCanFocus(false);
 
   row1->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-  row1->Add(tcCurrIter_, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+  row1->Add(txtCtrlIterCurr, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
   row2->Add(spctrlIPFLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
   row2->Add(spctrlIPF, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
   row3->Add(btnStart, 1, wxGROW | wxLEFT | wxRIGHT, 5);
@@ -207,11 +212,11 @@ MainWindow::InitializeGL()
 }
 
 void
-MainWindow::OnUpdateTimer(wxTimerEvent& evt)
+MainWindow::OnTimerUIUpdate(wxTimerEvent& evt)
 {
-  if (tcCurrIter_ != nullptr) {
-    tcCurrIter_->Clear();
-    *tcCurrIter_ << canvas_->GetCurrentIterations();
+  if (txtCtrlIterCurr != nullptr) {
+    txtCtrlIterCurr->Clear();
+    *txtCtrlIterCurr << canvas_->GetCurrentIterations();
   }
 }
 
@@ -236,20 +241,20 @@ MainWindow::OnSpinCtrlIterationPerFrame(wxSpinEvent& evt)
 void
 MainWindow::OnButtonConfirmAndReset(wxCommandEvent& evt)
 {
-  if (tcIterCap_->GetValue().IsEmpty()) {
-    *tcIterCap_ << canvas_->GetIterationCap();
+  if (txtCtrlIterCap_->GetValue().IsEmpty()) {
+    *txtCtrlIterCap_ << canvas_->GetIterationCap();
   }
-  if (tcLearnRate_->GetValue().IsEmpty()) {
-    *tcLearnRate_ << canvas_->GetInitialLearningRate();
+  if (txtCtrlLearningRate->GetValue().IsEmpty()) {
+    *txtCtrlLearningRate << canvas_->GetInitialLearningRate();
   }
-  if (tcDimen_->GetValue().IsEmpty()) {
-    *tcDimen_ << canvas_->GetLatticeDimension();
+  if (txtCtrlDimension_->GetValue().IsEmpty()) {
+    *txtCtrlDimension_ << canvas_->GetLatticeDimension();
   }
   canvas_->ResetLattice(iterationCap_, initLearningRate_, dimension_);
 }
 
 void
-MainWindow::OnEnterIterationCap(wxCommandEvent& evt)
+MainWindow::OnTextCtrlIterationCap(wxCommandEvent& evt)
 {
   auto const& text = evt.GetString();
   if (text.IsEmpty())
@@ -258,7 +263,7 @@ MainWindow::OnEnterIterationCap(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnEnterLearningRate(wxCommandEvent& evt)
+MainWindow::OnTextCtrlLearningRate(wxCommandEvent& evt)
 {
   auto const& text = evt.GetString();
   if (text.IsEmpty())
@@ -267,7 +272,7 @@ MainWindow::OnEnterLearningRate(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnEnterDimension(wxCommandEvent& evt)
+MainWindow::OnTextCtrlDimension(wxCommandEvent& evt)
 {
   auto const& text = evt.GetString();
   if (text.IsEmpty())
@@ -276,25 +281,25 @@ MainWindow::OnEnterDimension(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnCheckBoxToggleModel(wxCommandEvent& evt)
+MainWindow::OnCheckboxLatticeSurface(wxCommandEvent& evt)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::SURFACE);
 }
 
 void
-MainWindow::OnCheckBoxTogglePoints(wxCommandEvent& evt)
+MainWindow::OnCheckboxLatticeVertex(wxCommandEvent& evt)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_VERTEX);
 }
 
 void
-MainWindow::OnCheckBoxToggleLines(wxCommandEvent& evt)
+MainWindow::OnCheckboxLatticeEdge(wxCommandEvent& evt)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_EDGE);
 }
 
 void
-MainWindow::OnCheckBoxToggleSurfaces(wxCommandEvent& evt)
+MainWindow::OnCheckboxLatticeFace(wxCommandEvent& evt)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_FACE);
 }
@@ -305,11 +310,11 @@ MainWindow::OnSliderTransparency(wxCommandEvent& evt)
   float const range = static_cast<float>(slider_->GetMax() - slider_->GetMin());
   float const value = static_cast<float>(slider_->GetValue());
   float const alpha = (range - value) / range;
-  canvas_->SetSurfaceTransparency(alpha);
+  canvas_->SetSurfaceColorAlpha(alpha);
 }
 
 void
-MainWindow::ResetCamera(wxCommandEvent& evt)
+MainWindow::OnMenuCameraReset(wxCommandEvent& evt)
 {
   canvas_->ResetCamera();
 }
@@ -334,18 +339,18 @@ MainWindow::OnExit(wxCommandEvent& evt)
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_MENU(wxID_OPEN, MainWindow::OnOpen)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
-  EVT_MENU(wxID_REFRESH, MainWindow::ResetCamera)
-  EVT_TEXT(TC_SET_ITERATION_CAP, MainWindow::OnEnterIterationCap)
-  EVT_TEXT(TC_SET_LEARNING_RATE, MainWindow::OnEnterLearningRate)
-  EVT_TEXT(TC_SET_DIMENSION, MainWindow::OnEnterDimension)
+  EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
+  EVT_TEXT(TC_SET_ITERATION_CAP, MainWindow::OnTextCtrlIterationCap)
+  EVT_TEXT(TC_SET_LEARNING_RATE, MainWindow::OnTextCtrlLearningRate)
+  EVT_TEXT(TC_SET_DIMENSION, MainWindow::OnTextCtrlDimension)
   EVT_BUTTON(BTN_START, MainWindow::OnButtonStart)
   EVT_BUTTON(BTN_PAUSE, MainWindow::OnButtonPause)
   EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainWindow::OnButtonConfirmAndReset)
   EVT_SPINCTRL(SPCTRL_ITERATION_PER_FRAME, MainWindow::OnSpinCtrlIterationPerFrame)
-  EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckBoxToggleModel)
-  EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckBoxTogglePoints)
-  EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckBoxToggleLines)
-  EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckBoxToggleSurfaces)
+  EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckboxLatticeSurface)
+  EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckboxLatticeVertex)
+  EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckboxLatticeEdge)
+  EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckboxLatticeFace)
   EVT_SLIDER(SLIDER_TRANSPARENCY, MainWindow::OnSliderTransparency)
-  EVT_TIMER(TIMER_UI_UPDATE, MainWindow::OnUpdateTimer)
+  EVT_TIMER(TIMER_UI_UPDATE, MainWindow::OnTimerUIUpdate)
 wxEND_EVENT_TABLE()
