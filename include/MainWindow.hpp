@@ -36,9 +36,9 @@ class MainWindow : public wxFrame
 
   wxTimer* timerUIUpdate_;
   wxPanel* panel_;
-  wxTextCtrl* txtCtrlIterCurr;
+  wxTextCtrl* txtCtrlIterCurr_;
   wxTextCtrl* txtCtrlIterCap_;
-  wxTextCtrl* txtCtrlLearningRate;
+  wxTextCtrl* txtCtrlLearningRate_;
   wxTextCtrl* txtCtrlDimension_;
   wxSlider* slider_;
   OpenGLCanvas* canvas_;

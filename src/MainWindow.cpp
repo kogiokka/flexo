@@ -17,9 +17,9 @@ MainWindow::MainWindow(wxWindow* parent)
   : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(1200, 800))
   , timerUIUpdate_(nullptr)
   , panel_(nullptr)
-  , txtCtrlIterCurr(nullptr)
+  , txtCtrlIterCurr_(nullptr)
   , txtCtrlIterCap_(nullptr)
-  , txtCtrlLearningRate(nullptr)
+  , txtCtrlLearningRate_(nullptr)
   , txtCtrlDimension_(nullptr)
   , slider_(nullptr)
   , canvas_(nullptr)
@@ -97,7 +97,7 @@ MainWindow::CreatePanelStaticBox1()
 
   txtCtrlIterCap_ = new wxTextCtrl(
     box, TC_SET_ITERATION_CAP, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validIterCap);
-  txtCtrlLearningRate = new wxTextCtrl(
+  txtCtrlLearningRate_ = new wxTextCtrl(
     box, TC_SET_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validLearnRate);
   txtCtrlDimension_ =
     new wxTextCtrl(box, TC_SET_DIMENSION, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validDimen);
@@ -105,7 +105,7 @@ MainWindow::CreatePanelStaticBox1()
   initLearningRate_ = canvas_->GetInitialLearningRate();
   dimension_ = canvas_->GetLatticeDimension();
   *txtCtrlIterCap_ << iterationCap_;
-  *txtCtrlLearningRate << initLearningRate_;
+  *txtCtrlLearningRate_ << initLearningRate_;
   *txtCtrlDimension_ << dimension_;
 
   auto btnConfirm = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
@@ -117,7 +117,7 @@ MainWindow::CreatePanelStaticBox1()
   row1->Add(iterCapLabel, 1, sizerFlag, 5);
   row1->Add(txtCtrlIterCap_, 1, sizerFlag, 5);
   row2->Add(learnRateLabel, 1, sizerFlag, 5);
-  row2->Add(txtCtrlLearningRate, 1, sizerFlag, 5);
+  row2->Add(txtCtrlLearningRate_, 1, sizerFlag, 5);
   row3->Add(dimenLabel, 1, sizerFlag, 5);
   row3->Add(txtCtrlDimension_, 1, sizerFlag, 5);
   boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
@@ -151,11 +151,11 @@ MainWindow::CreatePanelStaticBox2()
                                   500,
                                   canvas_->GetIterationsPerFrame());
   auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
-  txtCtrlIterCurr = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
-  txtCtrlIterCurr->SetCanFocus(false);
+  txtCtrlIterCurr_ = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+  txtCtrlIterCurr_->SetCanFocus(false);
 
   row1->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-  row1->Add(txtCtrlIterCurr, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+  row1->Add(txtCtrlIterCurr_, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
   row2->Add(spctrlIPFLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
   row2->Add(spctrlIPF, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
   row3->Add(btnStart, 1, wxGROW | wxLEFT | wxRIGHT, 5);
@@ -214,9 +214,9 @@ MainWindow::InitializeGL()
 void
 MainWindow::OnTimerUIUpdate(wxTimerEvent& evt)
 {
-  if (txtCtrlIterCurr != nullptr) {
-    txtCtrlIterCurr->Clear();
-    *txtCtrlIterCurr << canvas_->GetCurrentIterations();
+  if (txtCtrlIterCurr_ != nullptr) {
+    txtCtrlIterCurr_->Clear();
+    *txtCtrlIterCurr_ << canvas_->GetCurrentIterations();
   }
 }
 
@@ -244,8 +244,8 @@ MainWindow::OnButtonConfirmAndReset(wxCommandEvent& evt)
   if (txtCtrlIterCap_->GetValue().IsEmpty()) {
     *txtCtrlIterCap_ << canvas_->GetIterationCap();
   }
-  if (txtCtrlLearningRate->GetValue().IsEmpty()) {
-    *txtCtrlLearningRate << canvas_->GetInitialLearningRate();
+  if (txtCtrlLearningRate_->GetValue().IsEmpty()) {
+    *txtCtrlLearningRate_ << canvas_->GetInitialLearningRate();
   }
   if (txtCtrlDimension_->GetValue().IsEmpty()) {
     *txtCtrlDimension_ << canvas_->GetLatticeDimension();
