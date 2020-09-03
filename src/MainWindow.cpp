@@ -76,6 +76,7 @@ MainWindow::CreateOpenGLCanvas()
   wxGLAttributes attrs;
   attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
   canvas_ = new OpenGLCanvas(this, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
+  canvas_->SetFocus();
 }
 
 inline wxStaticBoxSizer* const
