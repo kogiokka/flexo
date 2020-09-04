@@ -5,6 +5,7 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <unordered_map>
 #include <utility>
 
@@ -34,79 +35,59 @@ ObjModel::read(std::string const& path)
 
   string line;
   while (getline(file, line)) {
-    using namespace util::str;
 
-    if (startsWith(line, "v ")) {
+    istringstream iss(line);
+    string type;
+    iss >> type;
 
-      auto tokens = split(line, R"(\s+)");
-      tokens.erase(tokens.begin());
-      auto const dimen = tokens.size();
-      assert(dimen > 0 && dimen <= 4);
-
+    if (type == "v") {
+      float num;
       std::vector<float> v;
-      v.reserve(dimen);
-      for (auto t : tokens) {
-        v.push_back(stof(t));
+      v.reserve(4);
+      while (!iss.eof()) {
+        iss >> num;
+        v.push_back(num);
       }
-      v_.push_back(v);
-
-    } else if (startsWith(line, "vt ")) {
-
-      auto tokens = split(line, R"(\s+)");
-      tokens.erase(tokens.begin());
-      auto const dimen = tokens.size();
-
-      assert(dimen > 0 && dimen <= 3);
-
+      v_.push_back(move(v));
+    } else if (type == "vt") {
+      float num;
       std::vector<float> vt;
-      vt.reserve(dimen);
-      for (auto t : tokens) {
-        vt.push_back(stof(t));
+      vt.reserve(3);
+      while (!iss.eof()) {
+        iss >> num;
+        vt.push_back(num);
       }
-      vt_.push_back(vt);
-
-    } else if (startsWith(line, "vn ")) {
-
-      auto tokens = split(line, R"(\s+)");
-      tokens.erase(tokens.begin());
-      auto const dimen = tokens.size();
-
-      assert(dimen > 0 && dimen <= 3);
-
+      vt_.push_back(move(vt));
+    } else if (type == "vn") {
+      float num;
       std::vector<float> vn;
-      vn.reserve(dimen);
-      for (auto t : tokens) {
-        vn.push_back(stof(t));
+      vn.reserve(3);
+      while (!iss.eof()) {
+        iss >> num;
+        vn.push_back(num);
       }
-      vn_.push_back(vn);
-
-    } else if (startsWith(line, "f ")) { // Grouping
-
-      auto tokens = split(line, R"(\s+)");
-      tokens.erase(tokens.begin());
-      auto const dimen = tokens.size();
-
-      assert(dimen >= 3);
-
+      vn_.push_back(move(vn));
+    } else if (type == "f") {
       Face face;
-      face.reserve(dimen);
-      for (auto const& t : tokens) {
-        auto const refNums = split(t, R"(/)");
+      face.reserve(4);
+      string token;
+      while (!iss.eof()) {
+        Triplet triplet;
+        iss >> token;
 
-        assert(refNums.size() <= 3);
-
-        Triplet tri;
+        istringstream refNums(token);
+        string num;
         for (int i = 0; i < 3; ++i) {
-          if (refNums[i].empty()) {
-            tri[i] = -1;
+          getline(refNums, num, '/');
+          if (num.empty()) {
+            triplet[i] = -1;
           } else {
-            tri[i] = stoi(refNums[i]);
+            triplet[i] = stoi(num);
           }
         }
-
-        face.push_back(tri);
+        face.push_back(move(triplet));
       }
-      f_.push_back(face);
+      f_.push_back(move(face));
     }
   }
 }
