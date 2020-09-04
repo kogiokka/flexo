@@ -9,6 +9,7 @@
 #include <wx/stattext.h>
 #include <wx/string.h>
 #include <wx/textctrl.h>
+#include <wx/utils.h>
 #include <wx/valnum.h>
 
 #include <string>
@@ -326,7 +327,11 @@ MainWindow::OnOpen(wxCommandEvent& evt)
   wxFileDialog dialog(this, "Import Wavefront .obj file", wxEmptyString, wxEmptyString, "*.obj");
   dialog.SetDirectory(wxGetCwd());
   dialog.CenterOnParent();
+
+  wxBusyCursor wait;
   if (dialog.ShowModal() == wxID_OK) {
+    // Why wxBusyCursor does not work here?
+    // wxBusyCursor wait;
     canvas_->OpenSurface(dialog.GetPath().ToStdString());
   }
 }
