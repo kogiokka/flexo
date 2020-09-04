@@ -56,7 +56,7 @@ class MainWindow : public wxFrame
   void OnTextCtrlIterationCap(wxCommandEvent& evt);
   void OnTextCtrlLearningRate(wxCommandEvent& evt);
   void OnTextCtrlDimension(wxCommandEvent& evt);
-  void OnCheckboxLatticeSurface(wxCommandEvent& evt);
+  void OnCheckboxSurface(wxCommandEvent& evt);
   void OnCheckboxLatticeVertex(wxCommandEvent& evt);
   void OnCheckboxLatticeEdge(wxCommandEvent& evt);
   void OnCheckboxLatticeFace(wxCommandEvent& evt);

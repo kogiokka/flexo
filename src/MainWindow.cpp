@@ -282,7 +282,7 @@ MainWindow::OnTextCtrlDimension(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnCheckboxLatticeSurface(wxCommandEvent& evt)
+MainWindow::OnCheckboxSurface(wxCommandEvent& evt)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::SURFACE);
 }
@@ -348,7 +348,7 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_BUTTON(BTN_PAUSE, MainWindow::OnButtonPause)
   EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainWindow::OnButtonConfirmAndReset)
   EVT_SPINCTRL(SPCTRL_ITERATION_PER_FRAME, MainWindow::OnSpinCtrlIterationPerFrame)
-  EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckboxLatticeSurface)
+  EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckboxSurface)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckboxLatticeVertex)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckboxLatticeEdge)
   EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckboxLatticeFace)
