@@ -36,57 +36,58 @@ ObjModel::read(std::string const& path)
   string line;
   while (getline(file, line)) {
 
-    istringstream iss(line);
+    istringstream lineStream(line);
     string type;
-    iss >> type;
+    lineStream >> type;
 
     if (type == "v") {
-      float num;
+      float value;
       std::vector<float> v;
       v.reserve(4);
-      while (!iss.eof()) {
-        iss >> num;
-        v.push_back(num);
+      while (!lineStream.eof()) {
+        lineStream >> value;
+        v.push_back(value);
       }
       v_.push_back(move(v));
     } else if (type == "vt") {
-      float num;
+      float value;
       std::vector<float> vt;
       vt.reserve(3);
-      while (!iss.eof()) {
-        iss >> num;
-        vt.push_back(num);
+      while (!lineStream.eof()) {
+        lineStream >> value;
+        vt.push_back(value);
       }
       vt_.push_back(move(vt));
     } else if (type == "vn") {
-      float num;
+      float value;
       std::vector<float> vn;
       vn.reserve(3);
-      while (!iss.eof()) {
-        iss >> num;
-        vn.push_back(num);
+      while (!lineStream.eof()) {
+        lineStream >> value;
+        vn.push_back(value);
       }
       vn_.push_back(move(vn));
     } else if (type == "f") {
       Face face;
       face.reserve(4);
-      string token;
-      while (!iss.eof()) {
-        Triplet triplet;
-        iss >> token;
+      string refTripletStr;
 
-        istringstream refNums(token);
-        string num;
+      while (!lineStream.eof()) {
+        Triplet refTriplet;
+        lineStream >> refTripletStr;
+        istringstream refTripletStream(refTripletStr);
+        string refStr;
         for (int i = 0; i < 3; ++i) {
-          getline(refNums, num, '/');
-          if (num.empty()) {
-            triplet[i] = -1;
+          getline(refTripletStream, refStr, '/');
+          if (refStr.empty()) {
+            refTriplet[i] = -1;
           } else {
-            triplet[i] = stoi(num);
+            refTriplet[i] = stoi(refStr);
           }
         }
-        face.push_back(move(triplet));
+        face.push_back(move(refTriplet));
       }
+
       f_.push_back(move(face));
     }
   }
