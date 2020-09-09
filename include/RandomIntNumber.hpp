@@ -11,7 +11,7 @@
 template<typename T>
 class RandomIntNumber : public RandomNumber<T>
 {
-  std::uniform_int_distribution<T> m_range;
+  std::uniform_int_distribution<T> range_;
 
 public:
   RandomIntNumber(T min, T max);
@@ -24,7 +24,7 @@ public:
 template<typename T>
 RandomIntNumber<T>::RandomIntNumber(T min, T max)
   : RandomNumber<T>()
-  , m_range{min, max}
+  , range_{min, max}
 {
   using namespace std;
 
@@ -45,7 +45,7 @@ template<typename T>
 T
 RandomIntNumber<T>::scalar()
 {
-  return m_range(this->m_engine);
+  return range_(this->engine_);
 }
 
 template<typename T>
@@ -56,7 +56,7 @@ RandomIntNumber<T>::vector(std::size_t dimension)
 
   vec.reserve(dimension);
   for (std::size_t i = 0; i < dimension; ++i) {
-    vec.push_back(m_range(this->m_engine));
+    vec.push_back(range_(this->engine_));
   }
 
   return vec;
@@ -69,7 +69,7 @@ RandomIntNumber<T>::vector()
 {
   std::array<T, S> vec;
   for (auto i = 0; i < S; ++i) {
-    vec[i] = m_range(this->m_engine);
+    vec[i] = range_(this->engine_);
   }
   return vec;
 }

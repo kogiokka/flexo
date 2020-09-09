@@ -9,8 +9,8 @@ template<typename T>
 class RandomNumber
 {
 protected:
-  std::random_device m_device;
-  std::mt19937_64 m_engine;
+  std::random_device device_;
+  std::mt19937_64 engine_;
 
 public:
   RandomNumber();
@@ -23,8 +23,8 @@ public:
 
 template<typename T>
 RandomNumber<T>::RandomNumber()
-  : m_device{}
-  , m_engine(m_device())
+  : device_{}
+  , engine_(device_())
 {
 }
 

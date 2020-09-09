@@ -10,7 +10,7 @@
 template<typename T>
 class RandomRealNumber : public RandomNumber<T>
 {
-  std::uniform_real_distribution<T> m_range;
+  std::uniform_real_distribution<T> range_;
 
 public:
   RandomRealNumber(T min, T max);
@@ -23,7 +23,7 @@ public:
 template<typename T>
 RandomRealNumber<T>::RandomRealNumber(T min, T max)
   : RandomNumber<T>()
-  , m_range{min, max}
+  , range_{min, max}
 {
   // The type must be RealType
   constexpr bool isFloat = std::is_same_v<float, T>;
@@ -37,7 +37,7 @@ template<typename T>
 T
 RandomRealNumber<T>::scalar()
 {
-  return m_range(this->m_engine);
+  return range_(this->engine_);
 }
 
 template<typename T>
@@ -48,7 +48,7 @@ RandomRealNumber<T>::vector(std::size_t dimension)
 
   vec.reserve(dimension);
   for (std::size_t i = 0; i < dimension; ++i) {
-    vec.push_back(m_range(this->m_engine));
+    vec.push_back(range_(this->engine_));
   }
 
   return vec;
@@ -61,7 +61,7 @@ RandomRealNumber<T>::vector()
 {
   std::array<T, S> vec;
   for (auto i = 0; i < S; ++i) {
-    vec[i] = m_range(this->m_engine);
+    vec[i] = range_(this->engine_);
   }
   return vec;
 }
