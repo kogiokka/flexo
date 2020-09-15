@@ -38,7 +38,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   attrs.CoreProfile().OGLVersion(4, 5).Robust().EndList();
   context_ = std::make_unique<wxGLContext>(this, nullptr, &attrs);
 
-  lattice_ = std::make_unique<Lattice>(64, 50000, 0.15f);
+  lattice_ = std::make_unique<Lattice>(64, 64, 50000, 0.15f);
   wxSize clientSize = GetClientSize() * GetContentScaleFactor();
   camera_ = std::make_unique<Camera>(clientSize.x, clientSize.y);
 
@@ -371,15 +371,16 @@ OpenGLCanvas::GetCurrentIterations() const
 }
 
 void
-OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimension)
+OpenGLCanvas::ResetLattice(int width, int height, int iterationCap, float initLearningRate)
 {
   isAcceptingInput_ = false;
+  bool const isSameWidth = (width == lattice_->Width());
+  bool const isSameHeight = (height == lattice_->Height());
   bool const isSameIter = (iterationCap == lattice_->IterationCap());
   bool const isSameRate = (initLearningRate == lattice_->InitialRate());
-  bool const isSameDimen = (dimension == lattice_->Dimension());
-  bool const changed = !(isSameIter && isSameDimen && isSameRate);
+  bool const changed = !(isSameWidth && isSameHeight && isSameIter && isSameRate);
   lattice_.release();
-  lattice_ = std::make_unique<Lattice>(dimension, iterationCap, initLearningRate);
+  lattice_ = std::make_unique<Lattice>(width, height, iterationCap, initLearningRate);
 
   if (changed) {
     latEdgeIndices_ = lattice_->EdgeIndices();
@@ -416,10 +417,17 @@ OpenGLCanvas::GetInitialLearningRate() const
 }
 
 int
-OpenGLCanvas::GetLatticeDimension() const
+OpenGLCanvas::GetLatticeWidth() const
 {
   assert(lattice_.get() != nullptr);
-  return lattice_->Dimension();
+  return lattice_->Width();
+}
+
+int
+OpenGLCanvas::GetLatticeHeight() const
+{
+  assert(lattice_.get() != nullptr);
+  return lattice_->Height();
 }
 
 void

@@ -8,7 +8,9 @@
 
 class Lattice
 {
-  int dimen_;
+  int width_;
+  int height_;
+  int lenDiag_;
   int iterCap_;
   int iterRemained_;
   float timeConstant_;
@@ -19,9 +21,10 @@ class Lattice
   std::vector<Node> neurons_;
 
 public:
-  Lattice(int size, int iterations, float rate);
+  Lattice(int width, int height, int iterations, float learningRate);
   bool Input(std::vector<float> in);
-  int Dimension() const;
+  int Width() const;
+  int Height() const;
   int IterationCap() const;
   int CurrentIteration() const;
   float CurrentRate() const;

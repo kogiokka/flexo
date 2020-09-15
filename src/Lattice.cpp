@@ -6,21 +6,23 @@
 #include <memory>
 #include <sstream>
 
-Lattice::Lattice(int dimen, int iterations, float learningRate)
-  : dimen_(dimen)
+Lattice::Lattice(int width, int height, int iterations, float learningRate)
+  : width_(width)
+  , height_(height)
+  , lenDiag_(sqrt(width * width + height * height))
   , iterCap_(iterations)
   , iterRemained_(iterations)
   , rateCurrent_(learningRate)
   , rateInitial_(learningRate)
-  , neighborhoodRadius_(dimen)
+  , neighborhoodRadius_(lenDiag_)
   , randomDevice_(-1.0f, 1.0f)
 {
-  for (int i = 0; i < dimen; ++i) {
-    for (int j = 0; j < dimen; ++j) {
+  for (int j = 0; j < height_; ++j) {
+    for (int i = 0; i < width_; ++i) {
       neurons_.emplace_back(i, j, randomDevice_.vector(3));
     }
   }
-  timeConstant_ = iterations / log(dimen);
+  timeConstant_ = iterations / log(neighborhoodRadius_);
 }
 
 bool
@@ -32,7 +34,7 @@ Lattice::Input(std::vector<float> in)
   int const iterCurrent = (iterCap_ - iterRemained_);
 
   // Decay of neighborhood and learning rate
-  neighborhoodRadius_ = dimen_ * exp(-iterCurrent / timeConstant_);
+  neighborhoodRadius_ = lenDiag_ * exp(-iterCurrent / timeConstant_);
   rateCurrent_ = rateInitial_ * expf(-iterCurrent / iterRemained_);
 
   std::unique_ptr<Node> bmu;
@@ -70,9 +72,15 @@ Lattice::Input(std::vector<float> in)
 }
 
 int
-Lattice::Dimension() const
+Lattice::Width() const
 {
-  return dimen_;
+  return width_;
+}
+
+int
+Lattice::Height() const
+{
+  return height_;
 }
 
 int
@@ -116,16 +124,16 @@ Lattice::EdgeIndices() const
 {
   std::vector<unsigned int> indices;
 
-  for (int i = 0; i < dimen_ - 1; ++i) {
-    for (int j = 0; j < dimen_ - 1; ++j) {
-      indices.push_back(i * dimen_ + j);
-      indices.push_back(i * dimen_ + j + 1);
-      indices.push_back(i * dimen_ + j + 1);
-      indices.push_back((i + 1) * dimen_ + j + 1);
-      indices.push_back((i + 1) * dimen_ + j + 1);
-      indices.push_back((i + 1) * dimen_ + j);
-      indices.push_back((i + 1) * dimen_ + j);
-      indices.push_back(i * dimen_ + j);
+  for (int i = 0; i < height_ - 1; ++i) {
+    for (int j = 0; j < width_ - 1; ++j) {
+      indices.push_back(i * width_ + j);
+      indices.push_back(i * width_ + j + 1);
+      indices.push_back(i * width_ + j + 1);
+      indices.push_back((i + 1) * width_ + j + 1);
+      indices.push_back((i + 1) * width_ + j + 1);
+      indices.push_back((i + 1) * width_ + j);
+      indices.push_back((i + 1) * width_ + j);
+      indices.push_back(i * width_ + j);
     }
   }
 
@@ -137,14 +145,14 @@ Lattice::FaceIndices() const
 {
   std::vector<unsigned int> indices;
 
-  for (int i = 0; i < dimen_ - 1; ++i) {
-    for (int j = 0; j < dimen_ - 1; ++j) {
-      indices.push_back(i * dimen_ + j);
-      indices.push_back((i + 1) * dimen_ + j);
-      indices.push_back(i * dimen_ + j + 1);
-      indices.push_back(i * dimen_ + j + 1);
-      indices.push_back((i + 1) * dimen_ + j);
-      indices.push_back((i + 1) * dimen_ + j + 1);
+  for (int i = 0; i < height_ - 1; ++i) {
+    for (int j = 0; j < width_ - 1; ++j) {
+      indices.push_back(i * width_ + j);
+      indices.push_back((i + 1) * width_ + j);
+      indices.push_back(i * width_ + j + 1);
+      indices.push_back(i * width_ + j + 1);
+      indices.push_back((i + 1) * width_ + j);
+      indices.push_back((i + 1) * width_ + j + 1);
     }
   }
 

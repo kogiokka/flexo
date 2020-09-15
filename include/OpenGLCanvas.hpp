@@ -61,14 +61,15 @@ public:
   void OnMouseRightDown(wxMouseEvent& event);
   void InitGL();
   void ResetCamera();
-  void ResetLattice(int iterationCap, float initLearningRate, int dimension);
+  void ResetLattice(int width, int height, int iterationCap, float initLearningRate);
   void ToggleRenderOption(RenderOpt opt);
   void SetPlayOrPause(bool isAcceptingInput);
   void SetSurfaceColorAlpha(float alpha);
   void SetIterationsPerFrame(int times);
   void OpenSurface(std::string const& path);
   int GetIterationCap() const;
-  int GetLatticeDimension() const;
+  int GetLatticeWidth() const;
+  int GetLatticeHeight() const;
   int GetCurrentIterations() const;
   int GetIterationsPerFrame() const;
   bool GetRenderOptionState(RenderOpt opt) const;
