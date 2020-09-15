@@ -12,6 +12,7 @@
 #include <wx/utils.h>
 #include <wx/valnum.h>
 
+#include <filesystem>
 #include <string>
 
 enum {
@@ -48,7 +49,7 @@ MainWindow::MainWindow(wxWindow* parent)
   // CreateStatusBar();
 
   auto fileMenu = new wxMenu;
-  fileMenu->Append(wxID_OPEN, "Open surface");
+  fileMenu->Append(wxID_OPEN, "Open Surface");
   fileMenu->Append(wxID_EXIT, "Exit");
 
   auto cameraMenu = new wxMenu;
@@ -357,18 +358,26 @@ MainWindow::OnMenuCameraReset(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnOpen(wxCommandEvent& evt)
+MainWindow::OnOpenSurface(wxCommandEvent& evt)
 {
-  wxFileDialog dialog(this, "Import Wavefront .obj file", wxEmptyString, wxEmptyString, "*.obj");
-  dialog.SetDirectory(wxGetCwd());
+  namespace fs = std::filesystem;
+  static wxString defaultDir = "";
+
+  wxFileDialog dialog(
+    this, "Import Surface", defaultDir, "", "Wavefront (*.obj)|*.obj", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
   dialog.CenterOnParent();
 
   wxBusyCursor wait;
-  if (dialog.ShowModal() == wxID_OK) {
-    // Why wxBusyCursor does not work here?
-    // wxBusyCursor wait;
-    canvas_->OpenSurface(dialog.GetPath().ToStdString());
+  if (dialog.ShowModal() == wxID_CANCEL) {
+    defaultDir = fs::path(dialog.GetPath().ToStdString()).parent_path().string();
+    return;
   }
+
+  // Why wxBusyCursor does not work here?
+  // wxBusyCursor wait;
+  auto const filepath = dialog.GetPath().ToStdString();
+  canvas_->OpenSurface(filepath);
+  defaultDir = fs::path(filepath).parent_path().string();
 }
 
 void
@@ -378,7 +387,7 @@ MainWindow::OnExit(wxCommandEvent& evt)
 }
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
-  EVT_MENU(wxID_OPEN, MainWindow::OnOpen)
+  EVT_MENU(wxID_OPEN, MainWindow::OnOpenSurface)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
   EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
   EVT_TEXT(TC_SET_ITERATION_CAP, MainWindow::OnTextCtrlIterationCap)
