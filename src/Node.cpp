@@ -1,62 +1,62 @@
 #include "Node.hpp"
 
-Node::Node(int x, int y, std::vector<float> init_weights)
-  : m_x(x)
-  , m_y(y)
+Node::Node(int x, int y, std::vector<float> initWeights)
+  : x_(x)
+  , y_(y)
 {
-  m_weights = init_weights;
+  weights_ = initWeights;
 }
 
 int&
-Node::x()
+Node::X()
 {
-  return m_x;
+  return x_;
 }
 
 int&
-Node::y()
+Node::Y()
 {
-  return m_y;
+  return y_;
 }
 
 int
-Node::x() const
+Node::X() const
 {
-  return m_x;
+  return x_;
 }
 
 int
-Node::y() const
+Node::Y() const
 {
-  return m_y;
+  return y_;
 }
 
 float&
 Node::operator[](int index)
 {
-  return m_weights[index];
+  return weights_[index];
 }
 
 float
 Node::operator[](int index) const
 {
-  return m_weights[index];
+  return weights_[index];
 }
 
 int
-Node::dimen() const
+Node::dimension() const
 {
-  return m_weights.size();
+  return weights_.size();
 }
 
 std::vector<float>&
-Node::weights()
+Node::Weights()
 {
-  return m_weights;
+  return weights_;
 }
 
 std::vector<float> const&
-Node::weights() const
+Node::Weights() const
 {
-  return m_weights;
+  return weights_;
 }

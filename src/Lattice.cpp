@@ -41,7 +41,7 @@ Lattice::Input(std::vector<float> in)
   // Find the Best Matching Unit
   for (Node& node : neurons_) {
     float sum = 0;
-    for (int i = 0; i < node.dimen(); ++i) {
+    for (int i = 0; i < node.dimension(); ++i) {
       float const diff = node[i] - in[i];
       sum += diff * diff;
     }
@@ -52,13 +52,13 @@ Lattice::Input(std::vector<float> in)
   }
 
   for (Node& node : neurons_) {
-    float const dx = bmu->x() - node.x();
-    float const dy = bmu->y() - node.y();
+    float const dx = bmu->X() - node.X();
+    float const dy = bmu->Y() - node.Y();
     float const distToBmuSqr = dx * dx + dy * dy;
     float const radiusSqr = (neighborhoodRadius_ * neighborhoodRadius_);
     if (distToBmuSqr < radiusSqr) {
       float const influence = expf(-distToBmuSqr / (2.0f * radiusSqr)); // Why does (2.0f * radiusSqr) need parens?
-      for (int i = 0; i < node.dimen(); ++i) {
+      for (int i = 0; i < node.dimension(); ++i) {
         node[i] += rateCurrent_ * influence * (in[i] - node[i]);
       }
     }
