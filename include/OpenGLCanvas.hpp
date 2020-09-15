@@ -13,8 +13,7 @@
 #include <wx/gdicmn.h>
 #include <wx/glcanvas.h>
 
-#include <cassert>
-#include <cstddef>
+#include <memory>
 #include <string>
 
 class OpenGLCanvas : public wxGLCanvas
@@ -28,16 +27,16 @@ class OpenGLCanvas : public wxGLCanvas
   GLuint vboVertModel_;
   float surfaceColorAlpha_;
   int iterPerFrame_;
-  RandomIntNumber<unsigned int>* random_;
-  VertexArray* vao_;
-  wxGLContext* context_;
-  Shader* shader_;
-  Shader* shaderEdge_;
-  Shader* shaderVertModel_;
-  Camera* camera_;
-  Lattice* lattice_;
-  ObjModel* surface_;
-  ObjModel* vertModel_;
+  std::unique_ptr<RandomIntNumber<unsigned int>> RNG_;
+  std::unique_ptr<VertexArray> vao_;
+  std::unique_ptr<wxGLContext> context_;
+  std::unique_ptr<Shader> shader_;
+  std::unique_ptr<Shader> shaderEdge_;
+  std::unique_ptr<Shader> shaderVertModel_;
+  std::unique_ptr<Camera> camera_;
+  std::unique_ptr<Lattice> lattice_;
+  std::unique_ptr<ObjModel> surface_;
+  std::unique_ptr<ObjModel> vertModel_;
   std::vector<bool> renderOpt_;
   std::vector<unsigned int> latEdgeIndices_;
   std::vector<unsigned int> latFaceIndices_;

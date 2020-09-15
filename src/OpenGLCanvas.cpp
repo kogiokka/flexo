@@ -1,6 +1,8 @@
 #include "OpenGLCanvas.hpp"
 
+#include <cassert>
 #include <cmath>
+#include <cstddef>
 #include <fstream>
 #include <iostream>
 
@@ -21,7 +23,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   , vboVertModel_(0)
   , surfaceColorAlpha_(0.8f)
   , iterPerFrame_(10)
-  , random_(nullptr)
+  , RNG_(nullptr)
   , vao_(nullptr)
   , context_(nullptr)
   , shader_(nullptr)
@@ -34,28 +36,16 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
 {
   wxGLContextAttrs attrs;
   attrs.CoreProfile().OGLVersion(4, 5).Robust().EndList();
-  context_ = new wxGLContext(this, nullptr, &attrs);
+  context_ = std::make_unique<wxGLContext>(this, nullptr, &attrs);
 
-  lattice_ = new Lattice(64, 50000, 0.15f);
+  lattice_ = std::make_unique<Lattice>(64, 50000, 0.15f);
   wxSize clientSize = GetClientSize() * GetContentScaleFactor();
-  camera_ = new Camera(clientSize.x, clientSize.y);
+  camera_ = std::make_unique<Camera>(clientSize.x, clientSize.y);
 
   renderOpt_ = {true, true, true, false};
 };
 
-OpenGLCanvas::~OpenGLCanvas()
-{
-  delete random_;
-  delete vao_;
-  delete context_;
-  delete shader_;
-  delete shaderEdge_;
-  delete shaderVertModel_;
-  delete camera_;
-  delete lattice_;
-  delete surface_;
-  delete vertModel_;
-}
+OpenGLCanvas::~OpenGLCanvas() {}
 
 void
 OpenGLCanvas::OnPaint(wxPaintEvent& event)
@@ -162,7 +152,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
 
   for (int i = 0; i < iterPerFrame_; ++i) {
     if (isAcceptingInput_) {
-      isAcceptingInput_ = lattice_->Input(surface_->v()[random_->scalar()]);
+      isAcceptingInput_ = lattice_->Input(surface_->v()[RNG_->scalar()]);
     }
   }
 
@@ -199,7 +189,7 @@ OpenGLCanvas::InitGL()
 #endif
 
   /** Surface **************************************************************/
-  vao_ = new VertexArray();
+  vao_ = std::make_unique<VertexArray>();
   AttribFormat format;
   format.count = 3;
   format.type = GL_FLOAT;
@@ -209,17 +199,17 @@ OpenGLCanvas::InitGL()
   vao_->AddAttribFormat("normal", 1, format);
   vao_->AddAttribFormat("instanced", 2, format);
 
-  surface_ = new ObjModel();
+  surface_ = std::make_unique<ObjModel>();
   surface_->read("res/models/NurbsSurface.obj");
   surface_->genVertexBuffer(OBJ_V | OBJ_VN);
-  random_ = new RandomIntNumber<unsigned int>(0, surface_->v().size() - 1);
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->v().size() - 1);
   glCreateBuffers(1, &vboSurf_);
   glNamedBufferStorage(
     vboSurf_, surface_->vertexBuffer().size() * sizeof(float), surface_->vertexBuffer().data(), GL_DYNAMIC_STORAGE_BIT);
   /** Surface END **********************************************************/
 
   /** Lattice **********************************************************/
-  vertModel_ = new ObjModel();
+  vertModel_ = std::make_unique<ObjModel>();
   vertModel_->read("res/models/Icosphere.obj");
   vertModel_->genVertexBuffer(OBJ_V | OBJ_VN);
   glCreateBuffers(1, &vboVertModel_);
@@ -243,12 +233,12 @@ OpenGLCanvas::InitGL()
   glNamedBufferStorage(
     iboLatEdge_, latEdgeIndices_.size() * sizeof(unsigned int), latEdgeIndices_.data(), GL_DYNAMIC_STORAGE_BIT);
 
-  shaderEdge_ = new Shader();
+  shaderEdge_ = std::make_unique<Shader>();
   shaderEdge_->Attach(GL_VERTEX_SHADER, "shader/Edge.vert");
   shaderEdge_->Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
   shaderEdge_->Link();
 
-  shaderVertModel_ = new Shader();
+  shaderVertModel_ = std::make_unique<Shader>();
   shaderVertModel_->Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
   shaderVertModel_->Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
   shaderVertModel_->Link();
@@ -264,7 +254,7 @@ OpenGLCanvas::InitGL()
   vao_->Enable("normal");
   vao_->Bind();
 
-  shader_ = new Shader();
+  shader_ = std::make_unique<Shader>();
   shader_->Attach(GL_VERTEX_SHADER, "shader/default.vert");
   shader_->Attach(GL_FRAGMENT_SHADER, "shader/default.frag");
   shader_->Link();
@@ -282,6 +272,9 @@ OpenGLCanvas::InitGL()
 void
 OpenGLCanvas::OnSize(wxSizeEvent& event)
 {
+  assert(camera_.get() != nullptr);
+  assert(context_.get() != nullptr);
+
   // Adjust aspect ratio of the camera before GLCanvas is displayed, in response to any resizing of the canvas.
   wxSize const size = GetClientSize() * GetContentScaleFactor();
   camera_->SetAspectRatio(size.x, size.y);
@@ -297,12 +290,14 @@ OpenGLCanvas::OnSize(wxSizeEvent& event)
 void
 OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
+  assert(camera_.get() != nullptr);
   camera_->WheelZoom(-event.GetWheelRotation() * 0.01f);
 }
 
 void
 OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
+  assert(camera_.get() != nullptr);
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
   camera_->InitDragTranslation(x, y);
@@ -311,6 +306,7 @@ OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 void
 OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 {
+  assert(camera_.get() != nullptr);
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
   camera_->InitDragRotation(x, y);
@@ -319,6 +315,7 @@ OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 void
 OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
 {
+  assert(camera_.get() != nullptr);
   wxCoord const x = event.GetX();
   wxCoord const y = event.GetY();
   if (event.LeftIsDown()) {
@@ -332,20 +329,17 @@ OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
 void
 OpenGLCanvas::ResetCamera()
 {
-  delete camera_;
-
   wxSize const size = GetClientSize() * GetContentScaleFactor();
-  camera_ = new Camera(size.x, size.y);
+  camera_ = std::make_unique<Camera>(size.x, size.y);
 }
 
 void
 OpenGLCanvas::OpenSurface(const std::string& path)
 {
-  delete surface_;
-  surface_ = new ObjModel();
+  surface_ = std::make_unique<ObjModel>();
   surface_->read(path);
   surface_->genVertexBuffer(OBJ_V | OBJ_VN);
-  random_ = new RandomIntNumber<unsigned int>(0, surface_->v().size() - 1);
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->v().size() - 1);
   glDeleteBuffers(1, &vboSurf_);
   glCreateBuffers(1, &vboSurf_);
   glNamedBufferStorage(
@@ -384,8 +378,8 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
   bool const isSameRate = (initLearningRate == lattice_->InitialRate());
   bool const isSameDimen = (dimension == lattice_->Dimension());
   bool const changed = !(isSameIter && isSameDimen && isSameRate);
-  delete lattice_;
-  lattice_ = new Lattice(dimension, iterationCap, initLearningRate);
+  lattice_.release();
+  lattice_ = std::make_unique<Lattice>(dimension, iterationCap, initLearningRate);
 
   if (changed) {
     latEdgeIndices_ = lattice_->EdgeIndices();
@@ -410,18 +404,21 @@ OpenGLCanvas::ResetLattice(int iterationCap, float initLearningRate, int dimensi
 int
 OpenGLCanvas::GetIterationCap() const
 {
+  assert(lattice_.get() != nullptr);
   return lattice_->IterationCap();
 }
 
 float
 OpenGLCanvas::GetInitialLearningRate() const
 {
+  assert(lattice_.get() != nullptr);
   return lattice_->InitialRate();
 }
 
 int
 OpenGLCanvas::GetLatticeDimension() const
 {
+  assert(lattice_.get() != nullptr);
   return lattice_->Dimension();
 }
 
