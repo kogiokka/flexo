@@ -7,24 +7,24 @@
 
 class Camera
 {
-  glm::vec3 m_position;
-  glm::vec3 m_worldUp;
-  glm::vec3 m_forward;
-  glm::vec3 m_side;
-  glm::vec3 m_up;
-  glm::vec3 m_center;
-  float m_theta;
-  float m_phi;
-  float m_radius;
-  float m_aspectRatio;
-  float m_viewVolumeSize;
-  float m_moveRate;
-  float m_rotateRate;
-  float m_zoom;
-  int m_horizontalCoef;
+  glm::vec3 position_;
+  glm::vec3 worldUp_;
+  glm::vec3 vecForward_;
+  glm::vec3 vecSide_;
+  glm::vec3 vecUp_;
+  glm::vec3 center_;
+  float phi_;
+  float theta_;
+  float radius_;
+  float aspectRatio_;
+  float viewVolumeWidth_;
+  float rateMove_;
+  float rateRotate_;
+  float zoom_;
+  int dirHorizontal_;
 
-  std::tuple<int, int, float, float> m_originRotation;
-  std::tuple<float, float, glm::vec3> m_originTranslation;
+  std::tuple<int, int, float, float> originRotate_;
+  std::tuple<float, float, glm::vec3> originTranslate_;
 
   Camera(Camera const&) = delete;
   Camera& operator=(Camera const&) = delete;
@@ -48,7 +48,7 @@ public:
     Orthographic,
     Perspective,
   };
-  Camera(int width, int height, Camera::Projection projection = Camera::Projection::Orthographic);
+  Camera(int width, int height, Projection projectionType = Camera::Projection::Orthographic);
   ~Camera();
   void SetAspectRatio(float ratio);
   void SetAspectRatio(int width, int height);
@@ -71,7 +71,7 @@ public:
   glm::vec3 const ForwardVector() const;
 
 private:
-  Projection m_projection;
+  Projection projectionType_;
   glm::vec3 CartesianCoord(float theta, float phi) const;
-  inline float NormRadian(float radian);
+  inline float RoundGuard(float radian);
 };
