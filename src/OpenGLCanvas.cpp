@@ -157,10 +157,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
   }
 
   SwapBuffers();
-
-  if (isAcceptingInput_) {
-    Refresh();
-  }
+  Refresh();
 }
 
 void
