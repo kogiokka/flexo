@@ -1,5 +1,7 @@
 #include "Camera.hpp"
 
+#include <cassert>
+
 Camera::Camera(int width, int height, Camera::Projection projection)
   : m_worldUp{0.0f, 1.0f, 0.0f}
   , m_center{0.0f, 0.0f, 0.0f}
@@ -11,9 +13,8 @@ Camera::Camera(int width, int height, Camera::Projection projection)
   , m_rotateRate(0.005f)
   , m_zoom(0.8f)
   , m_horizontalCoef(1)
-  , m_projection(Projection::Perspective)
+  , m_projection(projection)
 {
-  m_projection = projection;
   SetAspectRatio(width, height);
   UpdateViewCoord();
 }
@@ -125,9 +126,11 @@ Camera::SetTheta(float theta)
 void
 Camera::WheelZoom(int direction)
 {
+  assert(direction == 1 || direction == -1);
+
   switch (m_projection) {
   case Projection::Orthographic: {
-    float const tmp_zoom = m_zoom + direction * 0.02;
+    float const tmp_zoom = m_zoom + direction * -0.02f;
     constexpr float min = 0.01f;
     constexpr float max = 1.0f;
 
@@ -140,7 +143,7 @@ Camera::WheelZoom(int direction)
     }
   } break;
   case Projection::Perspective: {
-    m_radius += direction * 2.0f;
+    m_radius += direction * -2.0f;
     UpdateViewCoord();
   } break;
   }

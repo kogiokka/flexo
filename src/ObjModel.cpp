@@ -111,15 +111,15 @@ ObjModel::genVertexBuffer(std::uint16_t flag)
 
   buf.reserve(f_.size() * stride);
 
-  unordered_map<size_t, vector<float>> faceIdxMap;
+  unordered_map<size_t, vector<std::size_t>> faceIdxMap;
 
   for (auto const& face : f_) {
     auto const vertNum = face.size();
     // Convex polygon triangulation
     if (faceIdxMap.find(vertNum) == faceIdxMap.end()) {
-      vector<float> idx;
+      vector<std::size_t> idx;
       idx.reserve(3 * (vertNum - 2));
-      for (int j = 1; j <= vertNum - 2; ++j) {
+      for (std::size_t j = 1; j <= vertNum - 2; ++j) {
         idx.push_back(0);
         idx.push_back(j);
         idx.push_back(j + 1);
@@ -127,7 +127,7 @@ ObjModel::genVertexBuffer(std::uint16_t flag)
       faceIdxMap.insert({vertNum, idx});
     }
 
-    for (int i : faceIdxMap[vertNum]) {
+    for (std::size_t i : faceIdxMap[vertNum]) {
       if (flagV) {
         auto const idx = face[i][0] - 1;
         assert(idx >= 0);

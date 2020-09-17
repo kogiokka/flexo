@@ -43,12 +43,12 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   camera_ = std::make_unique<Camera>(clientSize.x, clientSize.y);
 
   renderOpt_ = {true, true, true, false};
-};
+}
 
 OpenGLCanvas::~OpenGLCanvas() {}
 
 void
-OpenGLCanvas::OnPaint(wxPaintEvent& event)
+OpenGLCanvas::OnPaint(wxPaintEvent&)
 {
   wxPaintDC dc(this);
   SetCurrent(*context_);
@@ -88,7 +88,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent& event)
     std::vector<glm::vec3> latFace;
     std::size_t drawArraysCount = 0;
     latFace.reserve(latFaceIndices_.size());
-    for (auto i = 0; i < latFaceIndices_.size(); i += 3) {
+    for (std::size_t i = 0; i < latFaceIndices_.size(); i += 3) {
       auto const idx1 = latFaceIndices_[i];
       auto const idx2 = latFaceIndices_[i + 1];
       auto const idx3 = latFaceIndices_[i + 2];
@@ -171,13 +171,13 @@ OpenGLCanvas::InitGL()
 
 #ifndef NDEBUG
   glDebugMessageCallback(
-    [](GLenum source,
-       GLenum type,
-       GLuint id,
-       GLenum severity,
-       GLsizei length,
-       GLchar const* message,
-       void const* userParam) noexcept {
+    []([[maybe_unused]] GLenum source,
+       [[maybe_unused]] GLenum type,
+       [[maybe_unused]] GLuint id,
+       [[maybe_unused]] GLenum severity,
+       [[maybe_unused]] GLsizei length,
+       [[maybe_unused]] GLchar const* message,
+       [[maybe_unused]] void const* userParam) noexcept {
       std::cerr << std::hex << "[Type " << type << "]"
                 << "[Severity " << severity << "]"
                 << " Message: " << message << "\n";
@@ -270,7 +270,7 @@ OpenGLCanvas::InitGL()
 }
 
 void
-OpenGLCanvas::OnSize(wxSizeEvent& event)
+OpenGLCanvas::OnSize(wxSizeEvent&)
 {
   assert(camera_.get() != nullptr);
   assert(context_.get() != nullptr);
@@ -291,7 +291,7 @@ void
 OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
   assert(camera_.get() != nullptr);
-  camera_->WheelZoom(-event.GetWheelRotation() * 0.01f);
+  camera_->WheelZoom(event.GetWheelRotation() / 120);
 }
 
 void

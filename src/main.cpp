@@ -36,4 +36,4 @@ SurfaceSOM::OnExit()
   return wxApp::OnExit();
 }
 
-IMPLEMENT_APP(SurfaceSOM);
+IMPLEMENT_APP(SurfaceSOM)

@@ -6,23 +6,23 @@
 #include <memory>
 #include <sstream>
 
-Lattice::Lattice(int width, int height, int iterations, float learningRate)
+Lattice::Lattice(int width, int height, int iterations, float initRate)
   : width_(width)
   , height_(height)
-  , lenDiag_(sqrt(width * width + height * height))
+  , lenDiag_(sqrtf(static_cast<float>(width * width + height * height)))
   , iterCap_(iterations)
   , iterRemained_(iterations)
-  , rateCurrent_(learningRate)
-  , rateInitial_(learningRate)
+  , rateCurrent_(initRate)
+  , rateInitial_(initRate)
   , neighborhoodRadius_(lenDiag_)
-  , randomDevice_(-1.0f, 1.0f)
+  , RNG_(-1.0f, 1.0f)
 {
   for (int j = 0; j < height_; ++j) {
     for (int i = 0; i < width_; ++i) {
-      neurons_.emplace_back(i, j, randomDevice_.vector(3));
+      neurons_.emplace_back(i, j, RNG_.vector(3));
     }
   }
-  timeConstant_ = iterations / log(neighborhoodRadius_);
+  timeConstant_ = iterations / logf(neighborhoodRadius_);
 }
 
 bool
@@ -31,11 +31,11 @@ Lattice::Input(std::vector<float> in)
   if (iterRemained_ <= 0)
     return false;
 
-  int const iterCurrent = (iterCap_ - iterRemained_);
+  float const progress = static_cast<float>(iterCap_ - iterRemained_);
 
   // Decay of neighborhood and learning rate
-  neighborhoodRadius_ = lenDiag_ * exp(-iterCurrent / timeConstant_);
-  rateCurrent_ = rateInitial_ * expf(-iterCurrent / iterRemained_);
+  neighborhoodRadius_ = lenDiag_ * expf(-progress / timeConstant_);
+  rateCurrent_ = rateInitial_ * expf(-progress / iterRemained_);
 
   std::unique_ptr<Node> bmu;
   float distMin = std::numeric_limits<float>::max();

@@ -80,7 +80,7 @@ MainWindow::MainWindow(wxWindow* parent)
 
   timerUIUpdate_ = new wxTimer(this, TIMER_UI_UPDATE);
   timerUIUpdate_->Start(16); // 16 ms (60 fps)
-};
+}
 
 MainWindow::~MainWindow()
 {
@@ -99,7 +99,7 @@ MainWindow::CreateOpenGLCanvas()
   canvas_->SetFocus();
 }
 
-inline wxStaticBoxSizer* const
+inline wxStaticBoxSizer*
 MainWindow::CreatePanelStaticBox1()
 {
   auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Settings");
@@ -154,7 +154,7 @@ MainWindow::CreatePanelStaticBox1()
   return boxLayout;
 }
 
-inline wxStaticBoxSizer* const
+inline wxStaticBoxSizer*
 MainWindow::CreatePanelStaticBox2()
 {
   auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Control");
@@ -193,7 +193,7 @@ MainWindow::CreatePanelStaticBox2()
   return boxLayout;
 }
 
-inline wxStaticBoxSizer* const
+inline wxStaticBoxSizer*
 MainWindow::CreatePanelStaticBox3()
 {
   auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "Rendering Options");
@@ -210,7 +210,7 @@ MainWindow::CreatePanelStaticBox3()
   chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_EDGE));
   chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_FACE));
   auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Surface Transparency (%)");
-  int const sliderInit = (100 - canvas_->GetSurfaceTransparency() * 100);
+  int const sliderInit = static_cast<int>(100.0f - canvas_->GetSurfaceTransparency() * 100.0f);
   slider_ = new wxSlider(box,
                          SLIDER_TRANSPARENCY,
                          sliderInit,
@@ -238,7 +238,7 @@ MainWindow::InitializeGL()
 }
 
 void
-MainWindow::OnTimerUIUpdate(wxTimerEvent& evt)
+MainWindow::OnTimerUIUpdate(wxTimerEvent&)
 {
   if (tcIterCurr_ != nullptr) {
     tcIterCurr_->Clear();
@@ -247,13 +247,13 @@ MainWindow::OnTimerUIUpdate(wxTimerEvent& evt)
 }
 
 void
-MainWindow::OnButtonStart(wxCommandEvent& evt)
+MainWindow::OnButtonStart(wxCommandEvent&)
 {
   canvas_->SetPlayOrPause(true);
 }
 
 void
-MainWindow::OnButtonPause(wxCommandEvent& evt)
+MainWindow::OnButtonPause(wxCommandEvent&)
 {
   canvas_->SetPlayOrPause(false);
 }
@@ -265,7 +265,7 @@ MainWindow::OnSpinCtrlIterationPerFrame(wxSpinEvent& evt)
 }
 
 void
-MainWindow::OnButtonConfirmAndReset(wxCommandEvent& evt)
+MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
 {
   if (tcIterCap_->GetValue().IsEmpty()) {
     *tcIterCap_ << canvas_->GetIterationCap();
@@ -319,31 +319,31 @@ MainWindow::OnTextCtrlLatticeHeight(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnCheckboxSurface(wxCommandEvent& evt)
+MainWindow::OnCheckboxSurface(wxCommandEvent&)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::SURFACE);
 }
 
 void
-MainWindow::OnCheckboxLatticeVertex(wxCommandEvent& evt)
+MainWindow::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_VERTEX);
 }
 
 void
-MainWindow::OnCheckboxLatticeEdge(wxCommandEvent& evt)
+MainWindow::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_EDGE);
 }
 
 void
-MainWindow::OnCheckboxLatticeFace(wxCommandEvent& evt)
+MainWindow::OnCheckboxLatticeFace(wxCommandEvent&)
 {
   canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_FACE);
 }
 
 void
-MainWindow::OnSliderTransparency(wxCommandEvent& evt)
+MainWindow::OnSliderTransparency(wxCommandEvent&)
 {
   float const range = static_cast<float>(slider_->GetMax() - slider_->GetMin());
   float const value = static_cast<float>(slider_->GetValue());
@@ -352,13 +352,13 @@ MainWindow::OnSliderTransparency(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnMenuCameraReset(wxCommandEvent& evt)
+MainWindow::OnMenuCameraReset(wxCommandEvent&)
 {
   canvas_->ResetCamera();
 }
 
 void
-MainWindow::OnOpenSurface(wxCommandEvent& evt)
+MainWindow::OnOpenSurface(wxCommandEvent&)
 {
   namespace fs = std::filesystem;
   static wxString defaultDir = "";
@@ -381,7 +381,7 @@ MainWindow::OnOpenSurface(wxCommandEvent& evt)
 }
 
 void
-MainWindow::OnExit(wxCommandEvent& evt)
+MainWindow::OnExit([[maybe_unused]] wxCommandEvent& evt)
 {
   Close(true);
 }

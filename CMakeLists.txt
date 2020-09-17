@@ -7,10 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 if (CMAKE_COMPILER_IS_GNUCXX)
-    set(CMAKE_CXX_FLAGS_DEBUG "-g -D_GLIBCXX_DEBUG")
+  set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wfloat-conversion")
+  set(CMAKE_CXX_FLAGS_DEBUG "-g -D_GLIBCXX_DEBUG")
 endif()
 
-find_package(wxWidgets REQUIRED COMPONENTS gl core)
+find_package(wxWidgets REQUIRED COMPONENTS gl core base)
 
 include(${wxWidgets_USE_FILE})
 include_directories(include/)
@@ -20,13 +21,15 @@ include_directories(ext/glm/include)
 add_subdirectory(ext/glad)
 add_subdirectory(ext/glm)
 
-file(GLOB SOURCE CONFIGURE_DEPENDS
-    src/*.cpp
-)
+file(GLOB sourceFiles CONFIGURE_DEPENDS "src/*.cpp")
 
 add_executable(${PROJECT_NAME}
-    ${SOURCE}
+    ${sourceFiles}
 )
+
+if (MSVC)
+  target_link_options(${PROJECT_NAME} PUBLIC /SUBSYSTEM:WINDOWS)
+endif()
 
 target_link_libraries(${PROJECT_NAME}
     glad

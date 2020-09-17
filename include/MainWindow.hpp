@@ -8,9 +8,9 @@
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
+#include <wx/spinctrl.h>
 #include <wx/textctrl.h>
 #include <wx/timer.h>
-#include <wx/spinctrl.h>
 
 class MainWindow : public wxFrame
 {
@@ -30,9 +30,9 @@ class MainWindow : public wxFrame
   OpenGLCanvas* canvas_;
 
   void CreateOpenGLCanvas();
-  wxStaticBoxSizer* const CreatePanelStaticBox1();
-  wxStaticBoxSizer* const CreatePanelStaticBox2();
-  wxStaticBoxSizer* const CreatePanelStaticBox3();
+  wxStaticBoxSizer* CreatePanelStaticBox1();
+  wxStaticBoxSizer* CreatePanelStaticBox2();
+  wxStaticBoxSizer* CreatePanelStaticBox3();
 
   void OnTimerUIUpdate(wxTimerEvent& evt);
   void OnButtonStart(wxCommandEvent& evt);
@@ -59,3 +59,4 @@ public:
 
   wxDECLARE_EVENT_TABLE();
 };
+

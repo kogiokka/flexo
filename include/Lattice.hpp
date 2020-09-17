@@ -10,18 +10,18 @@ class Lattice
 {
   int width_;
   int height_;
-  int lenDiag_;
+  float lenDiag_;
   int iterCap_;
   int iterRemained_;
   float timeConstant_;
   float rateCurrent_;
   float rateInitial_;
   float neighborhoodRadius_;
-  RandomRealNumber<float> randomDevice_;
+  RandomRealNumber<float> RNG_;
   std::vector<Node> neurons_;
 
 public:
-  Lattice(int width, int height, int iterations, float learningRate);
+  Lattice(int width, int height, int iterations, float initRate);
   bool Input(std::vector<float> in);
   int Width() const;
   int Height() const;
