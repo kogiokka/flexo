@@ -14,8 +14,8 @@ Camera::Camera(int width, int height, Camera::Projection projectionType)
   , vecUp_{}
   , center_{0.0f, 0.0f, 0.0f}
   , phi_(0.0f)
-  , theta_(1.5707f)
-  , radius_(100.f)
+  , theta_(1.25f)
+  , radius_(100.0f)
   , viewVolumeWidth_(100.f)
   , rateMove_(0.4f)
   , rateRotate_(0.005f)
@@ -39,7 +39,7 @@ Camera::CartesianCoord(float phi, float theta) const
   float const sinTheta = sinf(theta);
   float const cosTheta = cosf(theta);
 
-  return glm::vec3{sinTheta * cosPhi, cosTheta, sinTheta * sinPhi};
+  return glm::vec3{sinTheta * cosPhi, cosTheta, -sinTheta * sinPhi};
 }
 
 void
@@ -51,8 +51,8 @@ Camera::UpdateViewCoord()
   vecForward_ = normalize(center_ - position_);
   vecSide_ = normalize(cross(vecForward_, worldUp_));
   vecUp_ = cross(vecSide_, vecForward_);
-  // Rotate the world-up vector 45 degrees so gimbal lock will never happen.
-  worldUp_ = -CartesianCoord(phi_, theta_ + MATH_PI_DIV_4);
+  // A position vector pointing toward the origin
+  worldUp_ = -1.0f * CartesianCoord(phi_, theta_ + MATH_PI_DIV_4);
 }
 
 void
@@ -71,9 +71,9 @@ Camera::InitDragRotation(int x, int y)
 void
 Camera::DragRotation(int x, int y)
 {
-  auto const [oX, oY, oPhi, oTheta] = originRotate_;
+  auto const& [oX, oY, oPhi, oTheta] = originRotate_;
 
-  phi_ = RoundGuard(dirHorizontal_ * (x - oX) * rateRotate_ + oPhi);
+  phi_ = RoundGuard(dirHorizontal_ * -(x - oX) * rateRotate_ + oPhi);
   theta_ = RoundGuard(-(y - oY) * rateRotate_ + oTheta);
 
   UpdateViewCoord();
@@ -88,7 +88,7 @@ Camera::InitDragTranslation(int x, int y)
 void
 Camera::DragTranslation(int x, int y)
 {
-  auto const [oX, oY, oTarget] = originTranslate_;
+  auto const& [oX, oY, oTarget] = originTranslate_;
 
   center_ = oTarget + (-(x - oX) * vecSide_ + (y - oY) * vecUp_) * rateMove_ * zoom_;
 
