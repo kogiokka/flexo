@@ -16,7 +16,7 @@ public:
   int Y() const;
   float& operator[](int index);
   float operator[](int index) const;
-  int dimension() const;
+  int Dimension() const;
   std::vector<float>& Weights();
   std::vector<float> const& Weights() const;
 };

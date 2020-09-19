@@ -23,7 +23,7 @@ ObjModel::ObjModel()
 ObjModel::~ObjModel() {}
 
 void
-ObjModel::read(std::string const& path)
+ObjModel::Read(std::string const& path)
 {
   using namespace std;
 
@@ -94,7 +94,7 @@ ObjModel::read(std::string const& path)
 }
 
 void
-ObjModel::genVertexBuffer(std::uint16_t flag)
+ObjModel::GenVertexBuffer(std::uint16_t flag)
 {
   using namespace std;
 
@@ -152,38 +152,38 @@ ObjModel::genVertexBuffer(std::uint16_t flag)
 }
 
 std::vector<float> const&
-ObjModel::vertexBuffer() const
+ObjModel::VertexBuffer() const
 {
   assert(!vertexBuffer_.empty());
   return vertexBuffer_;
 }
 
 std::size_t
-ObjModel::stride() const
+ObjModel::Stride() const
 {
   return stride_;
 }
 
 std::size_t
-ObjModel::drawArraysCount() const
+ObjModel::DrawArraysCount() const
 {
   return drawArraysCount_;
 }
 
 std::vector<std::vector<float>> const&
-ObjModel::v() const
+ObjModel::V() const
 {
   return v_;
 }
 
 std::vector<std::vector<float>> const&
-ObjModel::vt() const
+ObjModel::Vt() const
 {
   return vt_;
 }
 
 std::vector<std::vector<float>> const&
-ObjModel::vn() const
+ObjModel::Vn() const
 {
   return vn_;
 }
