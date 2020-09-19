@@ -3,7 +3,6 @@
 #include <cmath>
 #include <fstream>
 #include <limits>
-#include <memory>
 #include <sstream>
 
 Lattice::Lattice(int width, int height, int iterations, float initRate)
@@ -37,18 +36,18 @@ Lattice::Input(std::vector<float> in)
   neighborhoodRadius_ = lenDiag_ * expf(-progress / timeConstant_);
   rateCurrent_ = rateInitial_ * expf(-progress / iterRemained_);
 
-  std::unique_ptr<Node> bmu;
+  auto bmu = neurons_.cbegin();
   float distMin = std::numeric_limits<float>::max();
 
   // Find the Best Matching Unit
-  for (Node& node : neurons_) {
+  for (auto it = neurons_.cbegin(); it != neurons_.cend(); ++it) {
     float sum = 0;
-    for (int i = 0; i < node.dimension(); ++i) {
-      float const diff = node[i] - in[i];
+    for (int i = 0; i < it->dimension(); ++i) {
+      float const diff = (*it)[i] - in[i];
       sum += diff * diff;
     }
     if (distMin > sum) {
-      bmu = std::make_unique<Node>(node);
+      bmu = it;
       distMin = sum;
     }
   }
