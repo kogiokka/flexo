@@ -44,7 +44,7 @@ Node::operator[](int index) const
 }
 
 int
-Node::dimension() const
+Node::Dimension() const
 {
   return weights_.size();
 }
