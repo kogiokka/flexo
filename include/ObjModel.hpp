@@ -29,12 +29,12 @@ class ObjModel
 public:
   ObjModel();
   ~ObjModel();
-  void Read(std::string const& path);
-  void GenVertexBuffer(std::uint16_t flag);
-  std::size_t DrawArraysCount() const;
-  std::size_t Stride() const;
-  std::vector<Vec> const& V() const;
-  std::vector<Vec> const& Vt() const;
-  std::vector<Vec> const& Vn() const;
-  std::vector<float> const& VertexBuffer() const;
+  void read(std::string const& path);
+  void genVertexBuffer(std::uint16_t flag);
+  std::size_t drawArraysCount() const;
+  std::size_t stride() const;
+  std::vector<Vec> const& v() const;
+  std::vector<Vec> const& vt() const;
+  std::vector<Vec> const& vn() const;
+  std::vector<float> const& vertexBuffer() const;
 };

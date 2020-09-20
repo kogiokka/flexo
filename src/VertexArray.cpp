@@ -28,7 +28,7 @@ VertexArray::AddAttribFormat(std::string const& attribName, GLuint index, Attrib
   if (attribTable_.find(attribName) != attribTable_.end()) {
     return false;
   }
-  attribTable_.emplace(attribName, index);
+  attribTable_.insert({attribName, index});
   glVertexArrayAttribFormat(id_, index, format.count, format.type, format.normalized, 0);
   return true;
 }

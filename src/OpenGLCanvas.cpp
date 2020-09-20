@@ -79,9 +79,9 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shaderVertModel_->SetUniform3fv("lightSrc", camera_->Position());
     shaderVertModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderVertModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
-    glVertexArrayVertexBuffer(vao_->Id(), 0, vboVertModel_, 0, vertModel_->Stride());
-    glVertexArrayVertexBuffer(vao_->Id(), 1, vboVertModel_, 3 * sizeof(float), vertModel_->Stride());
-    glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_->DrawArraysCount(), latPos.size());
+    glVertexArrayVertexBuffer(vao_->Id(), 0, vboVertModel_, 0, vertModel_->stride());
+    glVertexArrayVertexBuffer(vao_->Id(), 1, vboVertModel_, 3 * sizeof(float), vertModel_->stride());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_->drawArraysCount(), latPos.size());
   }
 
   if (renderOpt_[LAT_FACE]) {
@@ -145,14 +145,14 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shader_->SetUniform3fv("lightSrc", camera_->Position());
     shader_->SetUniform3f("lightColor", 0.67f, 0.8f, 1.0f);
     shader_->SetUniform1f("alpha", surfaceColorAlpha_);
-    glVertexArrayVertexBuffer(vao_->Id(), 0, vboSurf_, 0, surface_->Stride());
-    glVertexArrayVertexBuffer(vao_->Id(), 1, vboSurf_, 3 * sizeof(float), surface_->Stride());
-    glDrawArrays(GL_TRIANGLES, 0, surface_->DrawArraysCount());
+    glVertexArrayVertexBuffer(vao_->Id(), 0, vboSurf_, 0, surface_->stride());
+    glVertexArrayVertexBuffer(vao_->Id(), 1, vboSurf_, 3 * sizeof(float), surface_->stride());
+    glDrawArrays(GL_TRIANGLES, 0, surface_->drawArraysCount());
   }
 
   for (int i = 0; i < iterPerFrame_; ++i) {
     if (isAcceptingInput_) {
-      isAcceptingInput_ = lattice_->Input(surface_->V()[RNG_->scalar()]);
+      isAcceptingInput_ = lattice_->Input(surface_->v()[RNG_->scalar()]);
     }
   }
 
@@ -200,22 +200,22 @@ OpenGLCanvas::InitGL()
   vao_->AddAttribFormat("instanced", 2, format);
 
   surface_ = std::make_unique<ObjModel>();
-  surface_->Read("res/models/NurbsSurface.obj");
-  surface_->GenVertexBuffer(OBJ_V | OBJ_VN);
-  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->V().size() - 1);
+  surface_->read("res/models/NurbsSurface.obj");
+  surface_->genVertexBuffer(OBJ_V | OBJ_VN);
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->v().size() - 1);
   glCreateBuffers(1, &vboSurf_);
   glNamedBufferStorage(
-    vboSurf_, surface_->VertexBuffer().size() * sizeof(float), surface_->VertexBuffer().data(), GL_DYNAMIC_STORAGE_BIT);
+    vboSurf_, surface_->vertexBuffer().size() * sizeof(float), surface_->vertexBuffer().data(), GL_DYNAMIC_STORAGE_BIT);
   /** Surface END **********************************************************/
 
   /** Lattice **********************************************************/
   vertModel_ = std::make_unique<ObjModel>();
-  vertModel_->Read("res/models/Icosphere.obj");
-  vertModel_->GenVertexBuffer(OBJ_V | OBJ_VN);
+  vertModel_->read("res/models/Icosphere.obj");
+  vertModel_->genVertexBuffer(OBJ_V | OBJ_VN);
   glCreateBuffers(1, &vboVertModel_);
   glNamedBufferStorage(vboVertModel_,
-                       vertModel_->VertexBuffer().size() * sizeof(float),
-                       vertModel_->VertexBuffer().data(),
+                       vertModel_->vertexBuffer().size() * sizeof(float),
+                       vertModel_->vertexBuffer().data(),
                        GL_DYNAMIC_STORAGE_BIT);
 
   latEdgeIndices_ = lattice_->EdgeIndices();
@@ -337,13 +337,13 @@ void
 OpenGLCanvas::OpenSurface(const std::string& path)
 {
   surface_ = std::make_unique<ObjModel>();
-  surface_->Read(path);
-  surface_->GenVertexBuffer(OBJ_V | OBJ_VN);
-  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->V().size() - 1);
+  surface_->read(path);
+  surface_->genVertexBuffer(OBJ_V | OBJ_VN);
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->v().size() - 1);
   glDeleteBuffers(1, &vboSurf_);
   glCreateBuffers(1, &vboSurf_);
   glNamedBufferStorage(
-    vboSurf_, surface_->VertexBuffer().size() * sizeof(float), surface_->VertexBuffer().data(), GL_DYNAMIC_STORAGE_BIT);
+    vboSurf_, surface_->vertexBuffer().size() * sizeof(float), surface_->vertexBuffer().data(), GL_DYNAMIC_STORAGE_BIT);
 }
 
 void
