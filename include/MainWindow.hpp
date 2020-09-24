@@ -39,10 +39,6 @@ class MainWindow : public wxFrame
   void OnButtonPause(wxCommandEvent& evt);
   void OnButtonConfirmAndReset(wxCommandEvent& evt);
   void OnSpinCtrlIterationPerFrame(wxSpinEvent& evt);
-  void OnTextCtrlIterationCap(wxCommandEvent& evt);
-  void OnTextCtrlLearningRate(wxCommandEvent& evt);
-  void OnTextCtrlLatticeWidth(wxCommandEvent& evt);
-  void OnTextCtrlLatticeHeight(wxCommandEvent& evt);
   void OnCheckboxSurface(wxCommandEvent& evt);
   void OnCheckboxLatticeVertex(wxCommandEvent& evt);
   void OnCheckboxLatticeEdge(wxCommandEvent& evt);

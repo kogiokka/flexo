@@ -46,7 +46,7 @@ MainWindow::MainWindow(wxWindow* parent)
 {
   SetMinSize(wxSize(600, 400));
   Center();
-  // CreateStatusBar();
+  CreateStatusBar();
 
   auto fileMenu = new wxMenu;
   fileMenu->Append(wxID_OPEN, "Open Surface");
@@ -267,55 +267,36 @@ MainWindow::OnSpinCtrlIterationPerFrame(wxSpinEvent& evt)
 void
 MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
 {
-  if (tcIterCap_->GetValue().IsEmpty()) {
-    *tcIterCap_ << canvas_->GetIterationCap();
+  try {
+    widthLat_ = std::stoi(tcLatWidth_->GetValue().ToStdString());
+  } catch (...) {
+    tcLatWidth_->Clear();
+    SetStatusText("Invalid lattice width!");
+    return;
   }
-  if (tcInitLearningRate_->GetValue().IsEmpty()) {
-    *tcInitLearningRate_ << canvas_->GetInitialLearningRate();
+  try {
+    heightLat_ = std::stoi(tcLatHeight_->GetValue().ToStdString());
+  } catch (...) {
+    tcLatHeight_->Clear();
+    SetStatusText("Invalid lattice height!");
+    return;
   }
-  if (tcLatWidth_->GetValue().IsEmpty()) {
-    *tcLatWidth_ << canvas_->GetLatticeWidth();
+  try {
+    iterationCap_ = std::stoi(tcIterCap_->GetValue().ToStdString());
+  } catch (...) {
+    tcIterCap_->Clear();
+    SetStatusText("Invalid iteration cap!");
+    return;
   }
-  if (tcLatHeight_->GetValue().IsEmpty()) {
-    *tcLatHeight_ << canvas_->GetLatticeHeight();
+  try {
+    initLearningRate_ = std::stof(tcInitLearningRate_->GetValue().ToStdString());
+  } catch (...) {
+    tcInitLearningRate_->Clear();
+    SetStatusText("Invalid initial learning rate!");
+    return;
   }
+
   canvas_->ResetLattice(widthLat_, heightLat_, iterationCap_, initLearningRate_);
-}
-
-void
-MainWindow::OnTextCtrlIterationCap(wxCommandEvent& evt)
-{
-  auto const& text = evt.GetString();
-  if (text.IsEmpty())
-    return;
-  iterationCap_ = std::stoi(text.ToStdString());
-}
-
-void
-MainWindow::OnTextCtrlLearningRate(wxCommandEvent& evt)
-{
-  auto const& text = evt.GetString();
-  if (text.IsEmpty())
-    return;
-  initLearningRate_ = std::stof(text.ToStdString());
-}
-
-void
-MainWindow::OnTextCtrlLatticeWidth(wxCommandEvent& evt)
-{
-  auto const& text = evt.GetString();
-  if (text.IsEmpty())
-    return;
-  widthLat_ = std::stoi(text.ToStdString());
-}
-
-void
-MainWindow::OnTextCtrlLatticeHeight(wxCommandEvent& evt)
-{
-  auto const& text = evt.GetString();
-  if (text.IsEmpty())
-    return;
-  heightLat_ = std::stoi(text.ToStdString());
 }
 
 void
@@ -390,10 +371,6 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
   EVT_MENU(wxID_OPEN, MainWindow::OnOpenSurface)
   EVT_MENU(wxID_EXIT, MainWindow::OnExit)
   EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
-  EVT_TEXT(TC_SET_ITERATION_CAP, MainWindow::OnTextCtrlIterationCap)
-  EVT_TEXT(TC_SET_LEARNING_RATE, MainWindow::OnTextCtrlLearningRate)
-  EVT_TEXT(TC_SET_LAT_WIDTH, MainWindow::OnTextCtrlLatticeWidth)
-  EVT_TEXT(TC_SET_LAT_HEIGHT, MainWindow::OnTextCtrlLatticeHeight)
   EVT_BUTTON(BTN_START, MainWindow::OnButtonStart)
   EVT_BUTTON(BTN_PAUSE, MainWindow::OnButtonPause)
   EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainWindow::OnButtonConfirmAndReset)
