@@ -12,8 +12,8 @@
 
 class Shader
 {
-  GLuint m_id;
-  std::unordered_map<std::string, GLint> m_uniformLocations;
+  GLuint id_;
+  std::unordered_map<std::string, GLint> uniformLocations_;
 
 public:
   Shader();
@@ -23,7 +23,7 @@ public:
   Shader(Shader&&) = default;
 
   unsigned int Id() const;
-  bool Attach(GLenum shader_type, std::string_view const filepath);
+  bool Attach(GLenum shaderType, std::string_view const filepath);
   void Use() const;
   bool Link() const;
   void SetUniform1i(std::string_view const name, int value);
@@ -34,6 +34,6 @@ public:
   void SetUniform3fv(std::string_view const name, std::array<float, 3> const& vec);
 
 private:
-  bool IsCompiled(GLuint const shader_object);
-  int UniformLocation(std::string_view const uniform_name);
+  bool IsCompiled(GLuint const shaderObject);
+  int UniformLocation(std::string_view const uniformName);
 };

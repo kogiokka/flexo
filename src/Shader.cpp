@@ -3,24 +3,24 @@
 #include "Shader.hpp"
 
 Shader::Shader()
-  : m_id(glCreateProgram())
+  : id_(glCreateProgram())
 {
-  assert(m_id != 0);
+  assert(id_ != 0);
 }
 
 Shader::~Shader()
 {
-  glDeleteProgram(m_id);
+  glDeleteProgram(id_);
 }
 
 unsigned int
 Shader::Id() const
 {
-  return static_cast<unsigned int>(m_id);
+  return static_cast<unsigned int>(id_);
 }
 
 bool
-Shader::Attach(GLenum shader_type, std::string_view const filepath)
+Shader::Attach(GLenum shaderType, std::string_view const filepath)
 {
   using namespace std;
 
@@ -34,33 +34,33 @@ Shader::Attach(GLenum shader_type, std::string_view const filepath)
   file.read(source.data(), source.size());
   file.close();
 
-  char const* const shader_source_array[1] = {source.c_str()};
+  char const* const shaderSourceArray[1] = {source.c_str()};
 
-  GLuint shader_object = glCreateShader(shader_type);
-  glShaderSource(shader_object, 1, shader_source_array, nullptr);
-  glCompileShader(shader_object);
-  if (!IsCompiled(shader_object))
+  GLuint shaderObject = glCreateShader(shaderType);
+  glShaderSource(shaderObject, 1, shaderSourceArray, nullptr);
+  glCompileShader(shaderObject);
+  if (!IsCompiled(shaderObject))
     return false;
-  glAttachShader(m_id, shader_object);
-  glDeleteShader(shader_object);
+  glAttachShader(id_, shaderObject);
+  glDeleteShader(shaderObject);
 
   return true;
 }
 
 int
-Shader::UniformLocation(std::string_view const uniform_name)
+Shader::UniformLocation(std::string_view const uniformName)
 {
-  char const* name = uniform_name.data();
+  char const* name = uniformName.data();
 
-  if (m_uniformLocations.find(name) != m_uniformLocations.end()) {
-    return m_uniformLocations[name];
+  if (uniformLocations_.find(name) != uniformLocations_.end()) {
+    return uniformLocations_[name];
   }
 
-  int location = glGetUniformLocation(m_id, name);
+  int location = glGetUniformLocation(id_, name);
   if (location == -1) {
-    fprintf(stderr, "Uniform %s does not exist.\n", name);
+    std::fprintf(stderr, "Uniform %s does not exist.\n", name);
   }
-  m_uniformLocations[name] = location;
+  uniformLocations_[name] = location;
   return location;
 }
 
@@ -89,13 +89,13 @@ Shader::SetUniform3fv(std::string_view const name, std::array<float, 3> const& v
 }
 
 void
-Shader::SetUniform1f(const std::string_view name, float value)
+Shader::SetUniform1f(std::string_view const name, float value)
 {
   glUniform1f(UniformLocation(name), value);
 }
 
 void
-Shader::SetUniform1i(const std::string_view name, int value)
+Shader::SetUniform1i(std::string_view const name, int value)
 {
   glUniform1f(UniformLocation(name), value);
 }
@@ -103,49 +103,49 @@ Shader::SetUniform1i(const std::string_view name, int value)
 void
 Shader::Use() const
 {
-  glUseProgram(m_id);
+  glUseProgram(id_);
 }
 
 bool
 Shader::Link() const
 {
-  glLinkProgram(m_id);
+  glLinkProgram(id_);
 
   GLint success;
-  glGetProgramiv(m_id, GL_LINK_STATUS, &success);
+  glGetProgramiv(id_, GL_LINK_STATUS, &success);
 
   if (success == GL_TRUE)
     return true;
 
-  GLint log_length;
+  GLint lenLog;
   std::string log;
-  glGetProgramiv(m_id, GL_INFO_LOG_LENGTH, &log_length);
-  log.resize(log_length);
-  glGetProgramInfoLog(m_id, log_length, nullptr, log.data());
-  glDeleteProgram(m_id);
+  glGetProgramiv(id_, GL_INFO_LOG_LENGTH, &lenLog);
+  log.resize(lenLog);
+  glGetProgramInfoLog(id_, lenLog, nullptr, log.data());
+  glDeleteProgram(id_);
 
   fprintf(stderr, "%s\n", log.data());
   return false;
 }
 
 bool
-Shader::IsCompiled(GLuint const shader_object)
+Shader::IsCompiled(GLuint const shaderObject)
 {
   GLint success;
-  glGetShaderiv(shader_object, GL_COMPILE_STATUS, &success);
+  glGetShaderiv(shaderObject, GL_COMPILE_STATUS, &success);
 
   if (success == GL_TRUE)
     return true;
 
-  GLint log_length;
+  GLint lenLog;
   std::string log;
 
-  glGetShaderiv(shader_object, GL_INFO_LOG_LENGTH, &log_length);
-  log.resize(log_length);
-  glGetShaderInfoLog(shader_object, log_length, nullptr, log.data());
-  glDeleteShader(shader_object);
+  glGetShaderiv(shaderObject, GL_INFO_LOG_LENGTH, &lenLog);
+  log.resize(lenLog);
+  glGetShaderInfoLog(shaderObject, lenLog, nullptr, log.data());
+  glDeleteShader(shaderObject);
 
-  fprintf(stderr, "%s\n", log.data());
+  std::fprintf(stderr, "%s\n", log.data());
 
   return false;
 }
