@@ -41,11 +41,11 @@ VertexArray::Id() const
 inline void
 VertexArray::Enable(std::string const& attribName) const
 {
-  glEnableVertexArrayAttrib(id_, attribTable_.at(attribName));
+  glEnableVertexAttribArray(attribTable_.at(attribName));
 }
 
 inline void
 VertexArray::Disable(std::string const& attribName) const
 {
-  glDisableVertexArrayAttrib(id_, attribTable_.at(attribName));
+  glDisableVertexAttribArray(attribTable_.at(attribName));
 }

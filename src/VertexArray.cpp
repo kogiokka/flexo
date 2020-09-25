@@ -2,7 +2,7 @@
 
 VertexArray::VertexArray()
 {
-  glCreateVertexArrays(1, &id_);
+  glGenVertexArrays(1, &id_);
 }
 
 VertexArray::~VertexArray()
@@ -17,6 +17,6 @@ VertexArray::AddAttribFormat(std::string const& attribName, GLuint index, Attrib
     return false;
   }
   attribTable_.emplace(attribName, index);
-  glVertexArrayAttribFormat(id_, index, format.count, format.type, format.normalized, 0);
+  glVertexAttribFormat(index, format.count, format.type, format.normalized, 0);
   return true;
 }
