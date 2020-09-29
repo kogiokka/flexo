@@ -438,7 +438,6 @@ OpenGLCanvas::ResetLattice(int width, int height, int iterationCap, float initLe
   bool const isSameIter = (iterationCap == lattice_->IterationCap());
   bool const isSameRate = (initLearningRate == lattice_->InitialRate());
   bool const changed = !(isSameWidth && isSameHeight && isSameIter && isSameRate);
-  lattice_.release();
   lattice_ = std::make_unique<Lattice>(width, height, iterationCap, initLearningRate);
 
   if (changed) {
