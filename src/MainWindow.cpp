@@ -267,31 +267,29 @@ MainWindow::OnSpinCtrlIterationPerFrame(wxSpinEvent& evt)
 void
 MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
 {
-  try {
-    widthLat_ = std::stoi(tcLatWidth_->GetValue().ToStdString());
-  } catch (...) {
-    tcLatWidth_->Clear();
+  long tmpLong;
+  double tmpDouble;
+  if (tcLatWidth_->GetValue().ToLong(&tmpLong)) {
+    widthLat_ = tmpLong;
+  } else {
     SetStatusText("Invalid lattice width!");
     return;
   }
-  try {
-    heightLat_ = std::stoi(tcLatHeight_->GetValue().ToStdString());
-  } catch (...) {
-    tcLatHeight_->Clear();
+  if (tcLatHeight_->GetValue().ToLong(&tmpLong)) {
+    heightLat_ = tmpLong;
+  } else {
     SetStatusText("Invalid lattice height!");
     return;
   }
-  try {
-    iterationCap_ = std::stoi(tcIterCap_->GetValue().ToStdString());
-  } catch (...) {
-    tcIterCap_->Clear();
-    SetStatusText("Invalid iteration cap!");
+  if (tcIterCap_->GetValue().ToLong(&tmpLong)) {
+    iterationCap_ = tmpLong;
+  } else {
+    SetStatusText("Invalid lattice height!");
     return;
   }
-  try {
-    initLearningRate_ = std::stof(tcInitLearningRate_->GetValue().ToStdString());
-  } catch (...) {
-    tcInitLearningRate_->Clear();
+  if (tcInitLearningRate_->GetValue().ToDouble(&tmpDouble)) {
+    initLearningRate_ = static_cast<float>(tmpDouble);
+  } else {
     SetStatusText("Invalid initial learning rate!");
     return;
   }
