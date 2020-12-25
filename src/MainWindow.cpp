@@ -86,6 +86,7 @@ MainWindow::~MainWindow()
 {
   // It seems that manually deleting widgets is unnecessary.
   // Using delete on wxPanel will cause some delay when the frame closes.
+  timerUIUpdate_->Stop();
   delete canvas_;
   delete timerUIUpdate_;
 }
@@ -243,6 +244,9 @@ MainWindow::OnTimerUIUpdate(wxTimerEvent&)
   if (tcIterCurr_ != nullptr) {
     tcIterCurr_->Clear();
     *tcIterCurr_ << canvas_->GetCurrentIterations();
+  }
+  if (canvas_ != nullptr) {
+    canvas_->Refresh();
   }
 }
 
