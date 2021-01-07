@@ -47,12 +47,12 @@ Camera::UpdateViewCoord()
 {
   using namespace glm;
 
+  // Set world-up vector as an offsetted camera-to-origin vector.
+  worldUp_ = -1.0f * CartesianCoord(phi_, theta_ + MATH_PI_DIV_4);
   position_ = center_ + radius_ * CartesianCoord(phi_, theta_);
   vecForward_ = normalize(center_ - position_);
   vecSide_ = normalize(cross(vecForward_, worldUp_));
   vecUp_ = cross(vecSide_, vecForward_);
-  // A position vector pointing toward the origin
-  worldUp_ = -1.0f * CartesianCoord(phi_, theta_ + MATH_PI_DIV_4);
 }
 
 void

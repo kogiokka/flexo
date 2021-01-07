@@ -84,7 +84,10 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shaderVertModel_->Use();
     shaderVertModel_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     shaderVertModel_->SetUniform3fv("viewPos", camera_->Position());
-    shaderVertModel_->SetUniform3fv("lightSrc", camera_->Position());
+    shaderVertModel_->SetUniform3fv("light.direction", camera_->Position());
+    shaderVertModel_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
+    shaderVertModel_->SetUniform3f("light.diffuse", 0.6f, 0.6f, 0.6f);
+    shaderVertModel_->SetUniform3f("light.specular", 0.2f, 0.2f, 0.2f);
     shaderVertModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderVertModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
     // OpenGL 4.5
@@ -134,7 +137,10 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
     shader_->SetUniform3fv("viewPos", camera_->Position());
-    shader_->SetUniform3fv("lightSrc", camera_->Position());
+    shader_->SetUniform3fv("light.direction", camera_->Position());
+    shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
+    shader_->SetUniform3f("light.diffuse", 0.6f, 0.6f, 0.6f);
+    shader_->SetUniform3f("light.specular", 0.2f, 0.2f, 0.2f);
     shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
     shader_->SetUniform1f("alpha", 1.0f);
     // OpenGL 4.5
@@ -169,7 +175,10 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
     shader_->SetUniform3fv("viewPos", camera_->Position());
-    shader_->SetUniform3fv("lightSrc", camera_->Position());
+    shader_->SetUniform3fv("light.direction", camera_->Position());
+    shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
+    shader_->SetUniform3f("light.diffuse", 0.6f, 0.6f, 0.6f);
+    shader_->SetUniform3f("light.specular", 0.2f, 0.2f, 0.2f);
     shader_->SetUniform3f("lightColor", 0.67f, 0.8f, 1.0f);
     shader_->SetUniform1f("alpha", surfaceColorAlpha_);
     // OpenGL 4.5
@@ -537,3 +546,4 @@ wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
   EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
   EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
 wxEND_EVENT_TABLE()
+

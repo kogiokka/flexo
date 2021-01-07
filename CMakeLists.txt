@@ -19,7 +19,6 @@ find_package(wxWidgets REQUIRED COMPONENTS gl core base)
 include(${wxWidgets_USE_FILE})
 include_directories(include/)
 include_directories(ext/glad/include)
-include_directories(ext/glm/include)
 
 add_subdirectory(ext/glad)
 add_subdirectory(ext/glm)
