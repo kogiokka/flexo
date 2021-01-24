@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.12)
 
 project(SOMSurfaceFitting
-  VERSION 1.0.2
+  VERSION 1.0.3
   DESCRIPTION "A Self-Organizing Map Demo"
   LANGUAGES CXX C)
 

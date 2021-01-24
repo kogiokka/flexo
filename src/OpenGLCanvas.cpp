@@ -395,7 +395,7 @@ OpenGLCanvas::ResetCamera()
 }
 
 void
-OpenGLCanvas::OpenSurface(const std::string& path)
+OpenGLCanvas::OpenSurface(std::string const& path)
 {
   surface_ = std::make_unique<ObjModel>();
   surface_->Read(path);
