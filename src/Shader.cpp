@@ -97,7 +97,7 @@ Shader::SetUniform1f(std::string_view const name, float value)
 void
 Shader::SetUniform1i(std::string_view const name, int value)
 {
-  glUniform1f(UniformLocation(name), value);
+  glUniform1i(UniformLocation(name), value);
 }
 
 void

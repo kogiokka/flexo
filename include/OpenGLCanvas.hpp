@@ -32,7 +32,7 @@ class OpenGLCanvas : public wxGLCanvas
   std::unique_ptr<wxGLContext> context_;
   std::unique_ptr<Shader> shader_;
   std::unique_ptr<Shader> shaderEdge_;
-  std::unique_ptr<Shader> shaderVertModel_;
+  std::unique_ptr<Shader> shaderVertexModel_;
   std::unique_ptr<Camera> camera_;
   std::unique_ptr<Lattice> lattice_;
   std::unique_ptr<ObjModel> surface_;

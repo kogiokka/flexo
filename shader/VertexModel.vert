@@ -7,12 +7,12 @@ layout (location = 2) in vec3 translation;
 uniform mat4 viewProjMat;
 uniform mat4 modelMat;
 
-out vec3 v_pos;
-out vec3 v_norm;
+out vec3 posFrag;
+out vec3 normFrag;
 
 void main()
 {
   gl_Position = viewProjMat * (vec4(translation, 0.0) + modelMat * vec4(position, 1.0));
-  v_pos = position;
-  v_norm = normal;
+  posFrag = position;
+  normFrag= normal;
 }

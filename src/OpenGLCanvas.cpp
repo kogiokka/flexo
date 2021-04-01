@@ -31,7 +31,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent,
   , context_(nullptr)
   , shader_(nullptr)
   , shaderEdge_(nullptr)
-  , shaderVertModel_(nullptr)
+  , shaderVertexModel_(nullptr)
   , camera_(nullptr)
   , lattice_(nullptr)
   , latEdgeIndices_(0)
@@ -81,15 +81,19 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
   if (renderOpt_[LAT_VERTEX]) {
     vao_->Enable("normal");
     vao_->Enable("instanced");
-    shaderVertModel_->Use();
-    shaderVertModel_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-    shaderVertModel_->SetUniform3fv("viewPos", camera_->Position());
-    shaderVertModel_->SetUniform3fv("light.direction", camera_->Position());
-    shaderVertModel_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-    shaderVertModel_->SetUniform3f("light.diffuse", 0.6f, 0.6f, 0.6f);
-    shaderVertModel_->SetUniform3f("light.specular", 0.2f, 0.2f, 0.2f);
-    shaderVertModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-    shaderVertModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
+    shaderVertexModel_->Use();
+    shaderVertexModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
+    shaderVertexModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
+    shaderVertexModel_->SetUniform3fv("viewPos", camera_->Position());
+    shaderVertexModel_->SetUniform3fv("light.position", camera_->Position());
+    shaderVertexModel_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
+    shaderVertexModel_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
+    shaderVertexModel_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
+    shaderVertexModel_->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
+    shaderVertexModel_->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
+    shaderVertexModel_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
+    shaderVertexModel_->SetUniform1f("material.shininess", 32.0f);
+    shaderVertexModel_->SetUniform1f("alpha", 1.0f);
     // OpenGL 4.5
     // glVertexArrayVertexBuffer(vao_->Id(), 0, vboVertModel_, 0, vertModel_->Stride());
     // glVertexArrayVertexBuffer(vao_->Id(), 1, vboVertModel_, 3 * SIZE_FLOAT, vertModel_->Stride());
@@ -137,12 +141,15 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
     shader_->SetUniform3fv("viewPos", camera_->Position());
-    shader_->SetUniform3fv("light.direction", camera_->Position());
+    shader_->SetUniform3fv("light.position", camera_->Position());
     shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-    shader_->SetUniform3f("light.diffuse", 0.6f, 0.6f, 0.6f);
-    shader_->SetUniform3f("light.specular", 0.2f, 0.2f, 0.2f);
-    shader_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-    shader_->SetUniform1f("alpha", 1.0f);
+    shader_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
+    shader_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
+    shader_->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
+    shader_->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
+    shader_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
+    shader_->SetUniform1f("material.shininess", 32.0f);
+    shader_->SetUniform1f("alhpa", 1.0f);
     // OpenGL 4.5
     // glVertexArrayVertexBuffer(vao_->Id(), 0, vboLatFace_, 0, 6 * SIZE_FLOAT);
     // glVertexArrayVertexBuffer(vao_->Id(), 1, vboLatFace_, 3 * SIZE_FLOAT, 6 * SIZE_FLOAT);
@@ -175,11 +182,14 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
     shader_->SetUniform3fv("viewPos", camera_->Position());
-    shader_->SetUniform3fv("light.direction", camera_->Position());
+    shader_->SetUniform3fv("light.position", camera_->Position());
     shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-    shader_->SetUniform3f("light.diffuse", 0.6f, 0.6f, 0.6f);
-    shader_->SetUniform3f("light.specular", 0.2f, 0.2f, 0.2f);
-    shader_->SetUniform3f("lightColor", 0.67f, 0.8f, 1.0f);
+    shader_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
+    shader_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
+    shader_->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
+    shader_->SetUniform3f("material.diffusion", 0.67f, 0.8f, 1.0f);
+    shader_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
+    shader_->SetUniform1f("material.shininess", 32.0f);
     shader_->SetUniform1f("alpha", surfaceColorAlpha_);
     // OpenGL 4.5
     // glVertexArrayVertexBuffer(vao_->Id(), 0, vboSurf_, 0, surface_->Stride());
@@ -298,11 +308,6 @@ OpenGLCanvas::InitGL()
   shaderEdge_->Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
   shaderEdge_->Link();
 
-  shaderVertModel_ = std::make_unique<Shader>();
-  shaderVertModel_->Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
-  shaderVertModel_->Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
-  shaderVertModel_->Link();
-
   /** OpenGL Instancing
    *  Use glDrawArraysInstanced to render tens of thousands of objects that represent the lattice vertices.
    */
@@ -319,6 +324,11 @@ OpenGLCanvas::InitGL()
   shader_->Attach(GL_VERTEX_SHADER, "shader/default.vert");
   shader_->Attach(GL_FRAGMENT_SHADER, "shader/default.frag");
   shader_->Link();
+
+  shaderVertexModel_ = std::make_unique<Shader>();
+  shaderVertexModel_->Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
+  shaderVertexModel_->Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
+  shaderVertexModel_->Link();
 
   glEnable(GL_DEPTH_TEST);
   glEnable(GL_BLEND);
@@ -546,4 +556,3 @@ wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
   EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
   EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
 wxEND_EVENT_TABLE()
-
