@@ -28,7 +28,7 @@ void main()
   vec3 norm = normalize(normFrag);
   vec3 lightDir = normalize(light.position - posFrag);
 
-  float diffuseCoef = max(dot(norm, lightDir), 0.0);
+  float diffuseCoef = dot(norm, lightDir);
   if (diffuseCoef < 0.0) {
     diffuseCoef *= -1.0;
     norm *= -1.0;
