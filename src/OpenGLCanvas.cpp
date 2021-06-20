@@ -251,7 +251,7 @@ OpenGLCanvas::InitGL()
   vao_->AddAttribFormat("instanced", 2, format);
 
   surface_ = std::make_unique<ObjModel>();
-  surface_->Read("res/models/NurbsSurface.obj");
+  surface_->Read("res/models/surface2.obj");
   surface_->GenVertexBuffer(OBJ_V | OBJ_VN);
   RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->V().size() - 1);
 
