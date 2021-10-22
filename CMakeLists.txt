@@ -1,6 +1,6 @@
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-project(SOMSurfaceFitting
+project("SOM Demo"
   VERSION 1.0.3
   DESCRIPTION "A Self-Organizing Map Demo"
   LANGUAGES CXX C)
@@ -9,38 +9,49 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if (CMAKE_COMPILER_IS_GNUCXX)
-  set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wpedantic -Wfloat-conversion")
-  set(CMAKE_CXX_FLAGS_DEBUG "-g -D_GLIBCXX_DEBUG")
-endif()
-
-find_package(wxWidgets REQUIRED COMPONENTS gl core base)
-
+find_package(wxWidgets 3.1 COMPONENTS gl core REQUIRED)
+find_package(glm REQUIRED)
 include(${wxWidgets_USE_FILE})
-include_directories(include/)
-include_directories(ext/glad/include)
 
-add_subdirectory(ext/glad)
-add_subdirectory(ext/glm)
+add_executable(som-demo)
+add_library(glad STATIC)
+
+if (CMAKE_COMPILER_IS_GNUCXX)
+    target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
+    target_compile_definitions(som-demo PRIVATE _GLIBCXX_DEBUG)
+endif()
 
 file(GLOB sourceFiles CONFIGURE_DEPENDS "src/*.cpp")
 
-add_executable(${PROJECT_NAME}
-  ${sourceFiles}
-)
+target_sources(som-demo PRIVATE ${sourceFiles})
+target_sources(glad PRIVATE "ext/glad/src/glad.c")
+target_include_directories(som-demo PRIVATE include/)
+target_include_directories(glad PUBLIC ext/glad/include)
 
 if (MSVC)
-  target_link_options(${PROJECT_NAME} PUBLIC /SUBSYSTEM:WINDOWS)
+    target_link_options(som-demo PUBLIC /SUBSYSTEM:WINDOWS)
 endif()
 
-target_link_libraries(${PROJECT_NAME}
-  glad
-  glm
-  ${wxWidgets_LIBRARIES}
+target_link_libraries(som-demo PRIVATE
+    glad
+    glm::glm
+    ${wxWidgets_LIBRARIES}
+    ${CMAKE_DL_LIBS}
 )
 
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-  target_link_libraries(${PROJECT_NAME} dl)
-endif()
+add_custom_target(symlink-res
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+        "${CMAKE_SOURCE_DIR}/res"
+        "${CMAKE_BINARY_DIR}/res"
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+        "${CMAKE_SOURCE_DIR}/shader"
+        "${CMAKE_BINARY_DIR}/shader"
+    DEPENDS
+        "${CMAKE_SOURCE_DIR}/res"
+    COMMENT "Creating symlink from build tree to project resources..."
+    VERBATIM
+)
+
+add_dependencies(som-demo symlink-res)
 
 include(CPackConfig.cmake)
