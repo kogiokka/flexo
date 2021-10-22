@@ -39,4 +39,19 @@ target_link_libraries(som-demo PRIVATE
     ${CMAKE_DL_LIBS}
 )
 
+add_custom_target(symlink-res
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+        "${CMAKE_SOURCE_DIR}/res"
+        "${CMAKE_BINARY_DIR}/res"
+    COMMAND ${CMAKE_COMMAND} -E create_symlink
+        "${CMAKE_SOURCE_DIR}/shader"
+        "${CMAKE_BINARY_DIR}/shader"
+    DEPENDS
+        "${CMAKE_SOURCE_DIR}/res"
+    COMMENT "Creating symlink from build tree to project resources..."
+    VERBATIM
+)
+
+add_dependencies(som-demo symlink-res)
+
 include(CPackConfig.cmake)
