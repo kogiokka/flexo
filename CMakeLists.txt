@@ -5,10 +5,6 @@ project("SOM Demo"
   DESCRIPTION "A Self-Organizing Map Demo"
   LANGUAGES CXX C)
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
 find_package(wxWidgets 3.1 COMPONENTS gl core REQUIRED)
 find_package(glm REQUIRED)
 include(${wxWidgets_USE_FILE})
@@ -16,9 +12,16 @@ include(${wxWidgets_USE_FILE})
 add_executable(som-demo)
 add_library(glad STATIC)
 
-if (CMAKE_COMPILER_IS_GNUCXX)
+target_compile_features(som-demo PRIVATE cxx_std_17)
+set_target_properties(som-demo PROPERTIES CXX_EXTENSIONS OFF)
+
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
     target_compile_definitions(som-demo PRIVATE _GLIBCXX_DEBUG)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+    target_link_options(som-demo PUBLIC /SUBSYSTEM:WINDOWS)
 endif()
 
 file(GLOB sourceFiles CONFIGURE_DEPENDS "src/*.cpp")
@@ -27,10 +30,6 @@ target_sources(som-demo PRIVATE ${sourceFiles})
 target_sources(glad PRIVATE "ext/glad/src/glad.c")
 target_include_directories(som-demo PRIVATE include/)
 target_include_directories(glad PUBLIC ext/glad/include)
-
-if (MSVC)
-    target_link_options(som-demo PUBLIC /SUBSYSTEM:WINDOWS)
-endif()
 
 target_link_libraries(som-demo PRIVATE
     glad
