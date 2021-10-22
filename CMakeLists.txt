@@ -15,13 +15,13 @@ if (CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 find_package(wxWidgets REQUIRED COMPONENTS gl core base)
+find_package(glm REQUIRED)
 
 include(${wxWidgets_USE_FILE})
 include_directories(include/)
 include_directories(ext/glad/include)
 
 add_subdirectory(ext/glad)
-add_subdirectory(ext/glm)
 
 file(GLOB sourceFiles CONFIGURE_DEPENDS "src/*.cpp")
 
@@ -35,7 +35,7 @@ endif()
 
 target_link_libraries(${PROJECT_NAME}
   glad
-  glm
+  glm::glm
   ${wxWidgets_LIBRARIES}
 )
 
