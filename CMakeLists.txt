@@ -1,10 +1,11 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
 project("SOM Demo"
-  VERSION 1.0.3
-  DESCRIPTION "A Self-Organizing Map Demo"
-  LANGUAGES CXX C)
+    VERSION 1.0.3
+    DESCRIPTION "A Self-Organizing Map Demo"
+)
 
+find_package(OpenGL REQUIRED)
 find_package(wxWidgets 3.1 COMPONENTS gl core REQUIRED)
 find_package(glm REQUIRED)
 include(${wxWidgets_USE_FILE})
@@ -12,8 +13,12 @@ include(${wxWidgets_USE_FILE})
 add_executable(som-demo)
 add_library(glad STATIC)
 
-target_compile_features(som-demo PRIVATE cxx_std_17)
-set_target_properties(som-demo PROPERTIES CXX_EXTENSIONS OFF)
+set_target_properties(som-demo
+    PROPERTIES
+        CXX_STANDARD 17
+        CXX_STANDARD_REQUIRED ON
+        CXX_EXTENSIONS OFF
+)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
@@ -34,11 +39,12 @@ target_include_directories(glad PUBLIC ext/glad/include)
 target_link_libraries(som-demo PRIVATE
     glad
     glm::glm
+    OpenGL::GL
     ${wxWidgets_LIBRARIES}
     ${CMAKE_DL_LIBS}
 )
 
-add_custom_target(symlink-res
+add_custom_command(TARGET som-demo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink
         "${CMAKE_SOURCE_DIR}/res"
         "${CMAKE_BINARY_DIR}/res"
@@ -47,10 +53,9 @@ add_custom_target(symlink-res
         "${CMAKE_BINARY_DIR}/shader"
     DEPENDS
         "${CMAKE_SOURCE_DIR}/res"
+        "${CMAKE_SOURCE_DIR}/shader"
     COMMENT "Creating symlink from build tree to project resources..."
     VERBATIM
 )
-
-add_dependencies(som-demo symlink-res)
 
 include(CPackConfig.cmake)
