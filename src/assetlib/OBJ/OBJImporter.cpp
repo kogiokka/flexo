@@ -1,4 +1,4 @@
-#include "ObjModel.hpp"
+#include "assetlib/OBJ/OBJImporter.hpp"
 
 #include <cassert>
 #include <cstdlib>

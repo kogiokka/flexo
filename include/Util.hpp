@@ -1,8 +1,16 @@
 #pragma once
 
 #include <regex>
+#include <stdexcept>
 #include <string>
 #include <vector>
+
+class NotImplementedException : public std::logic_error
+{
+public:
+  NotImplementedException()
+    : std::logic_error("Not yet implemented"){};
+};
 
 namespace util
 {

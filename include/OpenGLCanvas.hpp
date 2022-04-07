@@ -4,10 +4,10 @@
 
 #include "Camera.hpp"
 #include "Lattice.hpp"
-#include "ObjModel.hpp"
 #include "RandomIntNumber.hpp"
 #include "Shader.hpp"
 #include "VertexArray.hpp"
+#include "assetlib/OBJ/OBJImporter.hpp"
 
 #include <wx/dcclient.h>
 #include <wx/gdicmn.h>

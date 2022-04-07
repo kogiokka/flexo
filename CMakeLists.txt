@@ -29,12 +29,24 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_link_options(som-demo PUBLIC /SUBSYSTEM:WINDOWS)
 endif()
 
-file(GLOB sourceFiles CONFIGURE_DEPENDS "src/*.cpp")
+target_sources(som-demo
+PRIVATE
+    "src/main.cpp"
+    "src/MainWindow.cpp"
+    "src/OpenGLCanvas.cpp"
+    "src/Camera.cpp"
+    "src/Shader.cpp"
+    "src/VertexArray.cpp"
+    "src/Lattice.cpp"
+    "src/Node.cpp"
+    "src/Util.cpp"
+    "src/assetlib/OBJ/OBJImporter.cpp"
+    "src/assetlib/STL/STLImporter.cpp"
+)
+target_include_directories(som-demo PRIVATE "include")
 
-target_sources(som-demo PRIVATE ${sourceFiles})
 target_sources(glad PRIVATE "ext/glad/src/glad.c")
-target_include_directories(som-demo PRIVATE include/)
-target_include_directories(glad PUBLIC ext/glad/include)
+target_include_directories(glad PUBLIC "ext/glad/include")
 
 target_link_libraries(som-demo PRIVATE
     glad
