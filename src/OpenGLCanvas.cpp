@@ -1,4 +1,5 @@
 #include "OpenGLCanvas.hpp"
+#include "assetlib/STL/STLImporter.hpp"
 
 #include <cassert>
 #include <cmath>
@@ -98,9 +99,9 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     // glVertexArrayVertexBuffer(vao_->Id(), 0, vboVertModel_, 0, vertModel_->Stride());
     // glVertexArrayVertexBuffer(vao_->Id(), 1, vboVertModel_, 3 * SIZE_FLOAT, vertModel_->Stride());
     // glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_->DrawArraysCount(), latPos.size());
-    glBindVertexBuffer(0, vboVertModel_, 0, vertModel_->Stride());
-    glBindVertexBuffer(1, vboVertModel_, 3 * SIZE_FLOAT, vertModel_->Stride());
-    glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_->DrawArraysCount(), latPos.size());
+    glBindVertexBuffer(0, vboVertModel_, offsetof(Vertex, position), sizeof(Vertex));
+    glBindVertexBuffer(1, vboVertModel_, offsetof(Vertex, normal), sizeof(Vertex));
+    glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_.size() * 3, latPos.size());
   }
 
   if (renderOpt_[LAT_FACE]) {
@@ -262,13 +263,16 @@ OpenGLCanvas::InitGL()
   /** Surface END **********************************************************/
 
   /** Lattice **********************************************************/
-  vertModel_ = std::make_unique<ObjModel>();
-  vertModel_->Read("res/models/Icosphere.obj");
-  vertModel_->GenVertexBuffer(OBJ_V | OBJ_VN);
-  auto const& vertModelBuffer = vertModel_->VertexBuffer();
+
+  STLImporter stl;
+  stl.Read("res/models/UVSphere.stl");
+  // vertModel_ = std::make_unique<ObjModel>();
+  // vertModel_->Read("res/models/Icosphere.obj");
+  // vertModel_->GenVertexBuffer(OBJ_V | OBJ_VN);
+  vertModel_ = stl.Vertices();
   glGenBuffers(1, &vboVertModel_);
   glBindBuffer(GL_ARRAY_BUFFER, vboVertModel_);
-  glBufferData(GL_ARRAY_BUFFER, vertModelBuffer.size() * SIZE_FLOAT, vertModelBuffer.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, vertModel_.size() * sizeof(Vertex), vertModel_.data(), GL_STATIC_DRAW);
 
   latEdgeIndices_ = lattice_->EdgeIndices();
   latFaceIndices_ = lattice_->FaceIndices();
