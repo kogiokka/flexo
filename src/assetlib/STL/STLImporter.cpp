@@ -8,7 +8,9 @@
 #include <string_view>
 
 STLImporter::STLImporter()
-  : buffer_{} {};
+  : name_("")
+  , buffer_{}
+  , vertices_{} {};
 
 STLImporter::~STLImporter(){};
 
