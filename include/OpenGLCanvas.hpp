@@ -8,7 +8,7 @@
 #include "Shader.hpp"
 #include "Vertex.hpp"
 #include "VertexArray.hpp"
-#include "assetlib/OBJ/OBJImporter.hpp"
+#include "Mesh.hpp"
 
 #include <wx/dcclient.h>
 #include <wx/gdicmn.h>
@@ -36,8 +36,8 @@ class OpenGLCanvas : public wxGLCanvas
   std::unique_ptr<Shader> shaderVertexModel_;
   std::unique_ptr<Camera> camera_;
   std::unique_ptr<Lattice> lattice_;
-  std::vector<Vertex> vertModel_;
-  std::vector<Vertex> surface_;
+  Mesh vertModel_;
+  Mesh surface_;
   std::vector<bool> renderOpt_;
   std::vector<unsigned int> latEdgeIndices_;
   std::vector<unsigned int> latFaceIndices_;

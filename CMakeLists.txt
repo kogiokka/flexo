@@ -38,6 +38,7 @@ PRIVATE
     "src/Shader.cpp"
     "src/VertexArray.cpp"
     "src/Lattice.cpp"
+    "src/Mesh.cpp"
     "src/Node.cpp"
     "src/Util.cpp"
     "src/assetlib/BaseImporter.cpp"

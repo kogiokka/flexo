@@ -1,4 +1,5 @@
 #include "OpenGLCanvas.hpp"
+#include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 
 #include <cassert>
@@ -101,7 +102,7 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     // glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_->DrawArraysCount(), latPos.size());
     glBindVertexBuffer(0, vboVertModel_, offsetof(Vertex, position), sizeof(Vertex));
     glBindVertexBuffer(1, vboVertModel_, offsetof(Vertex, normal), sizeof(Vertex));
-    glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_.size() * 3, latPos.size());
+    glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_.Vertices().size() * 3, latPos.size());
   }
 
   if (renderOpt_[LAT_FACE]) {
@@ -198,12 +199,12 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     // glDrawArrays(GL_TRIANGLES, 0, surface_->DrawArraysCount());
     glBindVertexBuffer(0, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
     glBindVertexBuffer(1, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
-    glDrawArrays(GL_TRIANGLES, 0, surface_.size());
+    glDrawArrays(GL_TRIANGLES, 0, surface_.Vertices().size());
   }
 
   for (int i = 0; i < iterPerFrame_; ++i) {
     if (isAcceptingInput_) {
-      auto const& [x, y, z] = surface_[RNG_->scalar()].position;
+      auto const& [x, y, z] = surface_.Vertices()[RNG_->scalar()].position;
       isAcceptingInput_ = lattice_->Input(std::vector{x, y, z});
     }
   }
@@ -254,25 +255,24 @@ OpenGLCanvas::InitGL()
 
   OBJImporter obj;
   obj.Read("res/models/surface2.obj");
-  surface_ = obj.GenVertexBuffer();
-  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.size() - 1);
+  surface_.Import(obj.Model());
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.Vertices().size() - 1);
 
   glGenBuffers(1, &vboSurf_);
   glBindBuffer(GL_ARRAY_BUFFER, vboSurf_);
-  glBufferData(GL_ARRAY_BUFFER, surface_.size() * sizeof(Vertex), surface_.data(), GL_STATIC_DRAW);
+  glBufferData(
+    GL_ARRAY_BUFFER, surface_.Vertices().size() * sizeof(Vertex), surface_.Vertices().data(), GL_STATIC_DRAW);
   /** Surface END **********************************************************/
 
   /** Lattice **********************************************************/
 
   STLImporter stl;
   stl.Read("res/models/UVSphere.stl");
-  // vertModel_ = std::make_unique<ObjModel>();
-  // vertModel_->Read("res/models/Icosphere.obj");
-  // vertModel_->GenVertexBuffer(OBJ_V | OBJ_VN);
-  vertModel_ = stl.Vertices();
+  vertModel_.Import(stl.Model());
   glGenBuffers(1, &vboVertModel_);
   glBindBuffer(GL_ARRAY_BUFFER, vboVertModel_);
-  glBufferData(GL_ARRAY_BUFFER, vertModel_.size() * sizeof(Vertex), vertModel_.data(), GL_STATIC_DRAW);
+  glBufferData(
+    GL_ARRAY_BUFFER, vertModel_.Vertices().size() * sizeof(Vertex), vertModel_.Vertices().data(), GL_STATIC_DRAW);
 
   latEdgeIndices_ = lattice_->EdgeIndices();
   latFaceIndices_ = lattice_->FaceIndices();
@@ -413,8 +413,8 @@ OpenGLCanvas::OpenSurface(std::string const& path)
 {
   OBJImporter obj;
   obj.Read(path);
-  surface_ = obj.GenVertexBuffer();
-  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.size() - 1);
+  surface_.Import(obj.Model());
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.Vertices().size() - 1);
   glDeleteBuffers(1, &vboSurf_);
   // OpenGL 4.5
   // glCreateBuffers(1, &vboSurf_);
@@ -423,7 +423,8 @@ OpenGLCanvas::OpenSurface(std::string const& path)
   //   GL_DYNAMIC_STORAGE_BIT);
   glGenBuffers(1, &vboSurf_);
   glBindBuffer(GL_ARRAY_BUFFER, vboSurf_);
-  glBufferData(GL_ARRAY_BUFFER, surface_.size() * sizeof(Vertex), surface_.data(), GL_STATIC_DRAW);
+  glBufferData(
+    GL_ARRAY_BUFFER, surface_.Vertices().size() * sizeof(Vertex), surface_.Vertices().data(), GL_STATIC_DRAW);
 }
 
 void

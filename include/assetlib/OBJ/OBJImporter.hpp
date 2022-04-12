@@ -3,32 +3,18 @@
 
 #include "Vertex.hpp"
 #include "assetlib/BaseImporter.hpp"
+#include "assetlib/ModelStructs.hpp"
 
-#include <array>
-#include <cstddef>
-#include <cstdint>
 #include <string>
 #include <vector>
 
 class OBJImporter : public BaseImporter
 {
-  struct VertexRef {
-    int v, vt, vn;
-  };
+  OBJModel model_;
 
-  using Vec = std::vector<float>;
-  using Face = std::vector<VertexRef>;
-
-  std::vector<Vertex::Position> v_;
-  std::vector<Vertex::Normal> vn_;
-  std::vector<Face> f_;
-
-private:
 public:
-  OBJImporter();
-  ~OBJImporter();
   virtual void Read(std::string const& filename) override;
-  std::vector<Vertex> GenVertexBuffer() const;
+  OBJModel const& Model() const;
 };
 
 #endif
