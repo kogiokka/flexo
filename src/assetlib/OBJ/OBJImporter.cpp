@@ -11,13 +11,6 @@ OBJImporter::Read(std::string const& filename)
 
   using namespace std;
 
-  vector<string> const keywords = {
-    "v",
-    "vt",
-    "vn",
-    "f",
-  };
-
   istringstream iss(string(buffer_.cbegin(), buffer_.cend()));
 
   string token;
