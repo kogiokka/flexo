@@ -40,6 +40,7 @@ PRIVATE
     "src/Lattice.cpp"
     "src/Node.cpp"
     "src/Util.cpp"
+    "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
     "src/assetlib/STL/STLImporter.cpp"
 )

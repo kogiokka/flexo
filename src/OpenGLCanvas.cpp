@@ -196,14 +196,15 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     // glVertexArrayVertexBuffer(vao_->Id(), 0, vboSurf_, 0, surface_->Stride());
     // glVertexArrayVertexBuffer(vao_->Id(), 1, vboSurf_, 3 * SIZE_FLOAT, surface_->Stride());
     // glDrawArrays(GL_TRIANGLES, 0, surface_->DrawArraysCount());
-    glBindVertexBuffer(0, vboSurf_, 0, surface_->Stride());
-    glBindVertexBuffer(1, vboSurf_, 3 * SIZE_FLOAT, surface_->Stride());
-    glDrawArrays(GL_TRIANGLES, 0, surface_->DrawArraysCount());
+    glBindVertexBuffer(0, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
+    glBindVertexBuffer(1, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
+    glDrawArrays(GL_TRIANGLES, 0, surface_.size());
   }
 
   for (int i = 0; i < iterPerFrame_; ++i) {
     if (isAcceptingInput_) {
-      isAcceptingInput_ = lattice_->Input(surface_->V()[RNG_->scalar()]);
+      auto const& [x, y, z] = surface_[RNG_->scalar()].position;
+      isAcceptingInput_ = lattice_->Input(std::vector{x, y, z});
     }
   }
 
@@ -251,15 +252,14 @@ OpenGLCanvas::InitGL()
   vao_->AddAttribFormat("normal", 1, format);
   vao_->AddAttribFormat("instanced", 2, format);
 
-  surface_ = std::make_unique<ObjModel>();
-  surface_->Read("res/models/surface2.obj");
-  surface_->GenVertexBuffer(OBJ_V | OBJ_VN);
-  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->V().size() - 1);
+  OBJImporter obj;
+  obj.Read("res/models/surface2.obj");
+  surface_ = obj.GenVertexBuffer();
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.size() - 1);
 
-  auto const& surfaceBuffer = surface_->VertexBuffer();
   glGenBuffers(1, &vboSurf_);
   glBindBuffer(GL_ARRAY_BUFFER, vboSurf_);
-  glBufferData(GL_ARRAY_BUFFER, surfaceBuffer.size() * SIZE_FLOAT, surfaceBuffer.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, surface_.size() * sizeof(Vertex), surface_.data(), GL_STATIC_DRAW);
   /** Surface END **********************************************************/
 
   /** Lattice **********************************************************/
@@ -411,10 +411,10 @@ OpenGLCanvas::ResetCamera()
 void
 OpenGLCanvas::OpenSurface(std::string const& path)
 {
-  surface_ = std::make_unique<ObjModel>();
-  surface_->Read(path);
-  surface_->GenVertexBuffer(OBJ_V | OBJ_VN);
-  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_->V().size() - 1);
+  OBJImporter obj;
+  obj.Read(path);
+  surface_ = obj.GenVertexBuffer();
+  RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.size() - 1);
   glDeleteBuffers(1, &vboSurf_);
   // OpenGL 4.5
   // glCreateBuffers(1, &vboSurf_);
@@ -423,8 +423,7 @@ OpenGLCanvas::OpenSurface(std::string const& path)
   //   GL_DYNAMIC_STORAGE_BIT);
   glGenBuffers(1, &vboSurf_);
   glBindBuffer(GL_ARRAY_BUFFER, vboSurf_);
-  auto const& buffer = surface_->VertexBuffer();
-  glBufferData(GL_ARRAY_BUFFER, buffer.size() * SIZE_FLOAT, buffer.data(), GL_STATIC_DRAW);
+  glBufferData(GL_ARRAY_BUFFER, surface_.size() * sizeof(Vertex), surface_.data(), GL_STATIC_DRAW);
 }
 
 void

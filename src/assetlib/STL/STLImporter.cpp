@@ -8,8 +8,8 @@
 #include <string_view>
 
 STLImporter::STLImporter()
-  : name_("")
-  , buffer_{}
+  : BaseImporter()
+  , name_("")
   , vertices_{} {};
 
 STLImporter::~STLImporter(){};
@@ -24,20 +24,7 @@ STLImporter::IsAsciiSTL() const
 void
 STLImporter::Read(std::string const& filename)
 {
-  using namespace std;
-  namespace fs = std::filesystem;
-
-  ifstream fh;
-  fh.open(filename, ios::binary);
-  if (fh.fail()) {
-    cerr << "Failed to open file: \"" << filename << "\"" << endl;
-    exit(EXIT_FAILURE);
-  }
-
-  size_t fileSize = fs::file_size(filename);
-  buffer_.resize(fileSize);
-  fh.read(buffer_.data(), fileSize);
-  fh.close();
+  Slurp(filename);
 
   if (IsAsciiSTL()) {
     ImportAsciiSTL();

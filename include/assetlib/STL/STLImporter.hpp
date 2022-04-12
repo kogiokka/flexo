@@ -2,20 +2,20 @@
 #define STL_IMPORTER_H
 
 #include "Vertex.hpp"
+#include "assetlib/BaseImporter.hpp"
 
 #include <string>
 #include <vector>
 
-class STLImporter
+class STLImporter : public BaseImporter
 {
   std::string name_;
-  std::vector<char> buffer_;
   std::vector<Vertex> vertices_;
 
 public:
   STLImporter();
   ~STLImporter();
-  void Read(std::string const& filename);
+  virtual void Read(std::string const& filename) override;
   std::vector<Vertex> const& Vertices() const;
 
 private:

@@ -1,4 +1,8 @@
-#pragma once
+#ifndef OBJ_IMPORTER_H
+#define OBJ_IMPORTER_H
+
+#include "Vertex.hpp"
+#include "assetlib/BaseImporter.hpp"
 
 #include <array>
 #include <cstddef>
@@ -6,35 +10,25 @@
 #include <string>
 #include <vector>
 
-typedef enum {
-  OBJ_V = 0b0001,
-  OBJ_VT = 0b0010,
-  OBJ_VN = 0b0100,
-} OBJ_Attr;
-
-class ObjModel
+class OBJImporter : public BaseImporter
 {
-  using Vec = std::vector<float>;
-  using Triplet = std::array<int, 3>;
-  using Face = std::vector<Triplet>;
+  struct VertexRef {
+    int v, vt, vn;
+  };
 
-  std::size_t drawArraysCount_;
-  std::size_t stride_;
-  std::vector<float> vertexBuffer_;
-  std::vector<Vec> v_;
-  std::vector<Vec> vt_;
-  std::vector<Vec> vn_;
+  using Vec = std::vector<float>;
+  using Face = std::vector<VertexRef>;
+
+  std::vector<Vertex::Position> v_;
+  std::vector<Vertex::Normal> vn_;
   std::vector<Face> f_;
 
+private:
 public:
-  ObjModel();
-  ~ObjModel();
-  void Read(std::string const& path);
-  void GenVertexBuffer(std::uint16_t flag);
-  std::size_t DrawArraysCount() const;
-  std::size_t Stride() const;
-  std::vector<Vec> const& V() const;
-  std::vector<Vec> const& Vt() const;
-  std::vector<Vec> const& Vn() const;
-  std::vector<float> const& VertexBuffer() const;
+  OBJImporter();
+  ~OBJImporter();
+  virtual void Read(std::string const& filename) override;
+  std::vector<Vertex> GenVertexBuffer() const;
 };
+
+#endif
