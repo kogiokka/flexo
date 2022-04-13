@@ -45,8 +45,12 @@ OBJImporter::Read(std::string const& filename)
       while (lineiss >> triref) {
         int ret = sscanf(triref.c_str(), "%d/%d/%d", &vref.v, &vref.vt, &vref.vn);
         if (ret != 3) {
-          cerr << "Wrong \"f\" format!" << endl;
-          exit(EXIT_FAILURE);
+          ret = sscanf(triref.c_str(), "%d//%d", &vref.v, &vref.vn);
+          vref.vt = 0;
+          if (ret != 2) {
+            cerr << "Wront \"f\" format!" << endl;
+            exit(EXIT_FAILURE);
+          }
         }
         face.push_back(vref);
       }
