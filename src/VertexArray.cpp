@@ -10,13 +10,8 @@ VertexArray::~VertexArray()
   glDeleteVertexArrays(1, &id_);
 }
 
-bool
-VertexArray::AddAttribFormat(std::string const& attribName, GLuint index, AttribFormat const& format)
+void
+VertexArray::AddAttribFormat(VertexAttrib attribIndex, AttribFormat const& format)
 {
-  if (attribTable_.find(attribName) != attribTable_.end()) {
-    return false;
-  }
-  attribTable_.emplace(attribName, index);
-  glVertexAttribFormat(index, format.count, format.type, format.normalized, 0);
-  return true;
+  glVertexAttribFormat(attribIndex, format.count, format.type, format.normalized, 0);
 }

@@ -78,8 +78,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
   glBufferSubData(GL_ARRAY_BUFFER, 0, neurons.size() * 3 * SIZE_FLOAT, latPos.data());
 
   if (renderOpt_[LAT_VERTEX]) {
-    vao_->Enable("normal");
-    vao_->Enable("instanced");
+    vao_->Enable(VertexAttrib_Normal);
+    vao_->Enable(VertexAttrib_Instanced);
     shaderVertexModel_->Use();
     shaderVertexModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderVertexModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
@@ -93,8 +93,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shaderVertexModel_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
     shaderVertexModel_->SetUniform1f("material.shininess", 32.0f);
     shaderVertexModel_->SetUniform1f("alpha", 1.0f);
-    glBindVertexBuffer(0, vboVertModel_, offsetof(Vertex, position), sizeof(Vertex));
-    glBindVertexBuffer(1, vboVertModel_, offsetof(Vertex, normal), sizeof(Vertex));
+    glBindVertexBuffer(VertexAttrib_Position, vboVertModel_, offsetof(Vertex, position), sizeof(Vertex));
+    glBindVertexBuffer(VertexAttrib_Normal, vboVertModel_, offsetof(Vertex, normal), sizeof(Vertex));
     glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_.Vertices().size() * 3, latPos.size());
   }
 
@@ -126,8 +126,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     glBindBuffer(GL_ARRAY_BUFFER, vboLatFace_);
     glBufferSubData(GL_ARRAY_BUFFER, 0, latFaceIndices_.size() * 6 * SIZE_FLOAT, latFace.data());
 
-    vao_->Enable("normal");
-    vao_->Disable("instanced");
+    vao_->Enable(VertexAttrib_Normal);
+    vao_->Disable(VertexAttrib_Instanced);
     shader_->Use();
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
@@ -141,14 +141,14 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shader_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
     shader_->SetUniform1f("material.shininess", 32.0f);
     shader_->SetUniform1f("alhpa", 1.0f);
-    glBindVertexBuffer(0, vboLatFace_, 0, 6 * SIZE_FLOAT);
-    glBindVertexBuffer(1, vboLatFace_, 3 * SIZE_FLOAT, 6 * SIZE_FLOAT);
+    glBindVertexBuffer(VertexAttrib_Position, vboLatFace_, 0, 6 * SIZE_FLOAT);
+    glBindVertexBuffer(VertexAttrib_Normal, vboLatFace_, 3 * SIZE_FLOAT, 6 * SIZE_FLOAT);
     glDrawArrays(GL_TRIANGLES, 0, drawArraysCount);
   }
 
   if (renderOpt_[LAT_EDGE]) {
-    vao_->Disable("normal");
-    vao_->Disable("instanced");
+    vao_->Disable(VertexAttrib_Normal);
+    vao_->Disable(VertexAttrib_Instanced);
     shaderEdge_->Use();
     shaderEdge_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shaderEdge_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
@@ -159,8 +159,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
   }
 
   if (renderOpt_[SURFACE]) {
-    vao_->Enable("normal");
-    vao_->Disable("instanced");
+    vao_->Enable(VertexAttrib_Normal);
+    vao_->Disable(VertexAttrib_Instanced);
     shader_->Use();
     shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
     shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
@@ -175,8 +175,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
     shader_->SetUniform1f("material.shininess", 32.0f);
     shader_->SetUniform1f("alpha", surfaceColorAlpha_);
 
-    glBindVertexBuffer(0, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
-    glBindVertexBuffer(1, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
+    glBindVertexBuffer(VertexAttrib_Position, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
+    glBindVertexBuffer(VertexAttrib_Normal, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
     glDrawArrays(GL_TRIANGLES, 0, surface_.Vertices().size());
   }
 
@@ -227,9 +227,9 @@ OpenGLCanvas::InitGL()
 
   // We are using glVertexAttribFormat from OpenGL 4.3, execute glBindVertexArray first before adding new attributes.
   vao_->Bind();
-  vao_->AddAttribFormat("position", 0, format);
-  vao_->AddAttribFormat("normal", 1, format);
-  vao_->AddAttribFormat("instanced", 2, format);
+  vao_->AddAttribFormat(VertexAttrib_Position, format);
+  vao_->AddAttribFormat(VertexAttrib_Normal, format);
+  vao_->AddAttribFormat(VertexAttrib_Instanced, format);
 
   OBJImporter obj;
   obj.Read("res/models/surface2.obj");
@@ -276,11 +276,11 @@ OpenGLCanvas::InitGL()
   shaderEdge_->Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
   shaderEdge_->Link();
 
-  glBindVertexBuffer(2, vboLatPos_, 0, 3 * SIZE_FLOAT);
+  glBindVertexBuffer(VertexAttrib_Instanced, vboLatPos_, 0, 3 * SIZE_FLOAT);
   glVertexBindingDivisor(2, 1);
 
-  vao_->Enable("position");
-  vao_->Enable("normal");
+  vao_->Enable(VertexAttrib_Position);
+  vao_->Enable(VertexAttrib_Normal);
 
   shader_ = std::make_unique<Shader>();
   shader_->Attach(GL_VERTEX_SHADER, "shader/default.vert");
@@ -435,7 +435,7 @@ OpenGLCanvas::ResetLattice(int width, int height, int iterationCap, float initLe
     glBindBuffer(GL_ARRAY_BUFFER, vboLatPos_);
     glBufferData(GL_ARRAY_BUFFER, lattice_->Neurons().size() * 3 * SIZE_FLOAT, nullptr, GL_DYNAMIC_DRAW);
 
-    glBindVertexBuffer(2, vboLatPos_, 0, 3 * SIZE_FLOAT);
+    glBindVertexBuffer(VertexAttrib_Instanced, vboLatPos_, 0, 3 * SIZE_FLOAT);
   }
 }
 

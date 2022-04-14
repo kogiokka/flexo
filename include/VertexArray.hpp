@@ -3,7 +3,15 @@
 #include "glad/glad.h"
 
 #include <string>
-#include <unordered_map>
+
+using VertexAttrib = GLuint;
+
+enum VertexAttrib_ {
+  VertexAttrib_Position = 0,
+  VertexAttrib_Normal = 1,
+  VertexAttrib_Instanced = 2,
+  VertexAttrib_TextureCoordintes = 3,
+};
 
 struct AttribFormat {
   GLint count;
@@ -14,16 +22,15 @@ struct AttribFormat {
 class VertexArray
 {
   GLuint id_;
-  std::unordered_map<std::string, GLuint> attribTable_;
 
 public:
   VertexArray();
   ~VertexArray();
   GLuint Id() const;
   void Bind() const;
-  bool AddAttribFormat(std::string const& attribName, GLuint index, AttribFormat const& format);
-  void Enable(std::string const& attribName) const;
-  void Disable(std::string const& attribName) const;
+  void AddAttribFormat(VertexAttrib attribIndex, AttribFormat const& format);
+  void Enable(VertexAttrib attribIndex) const;
+  void Disable(VertexAttrib attribIndex) const;
 };
 
 inline void
@@ -39,13 +46,13 @@ VertexArray::Id() const
 }
 
 inline void
-VertexArray::Enable(std::string const& attribName) const
+VertexArray::Enable(VertexAttrib attribIndex) const
 {
-  glEnableVertexAttribArray(attribTable_.at(attribName));
+  glEnableVertexAttribArray(attribIndex);
 }
 
 inline void
-VertexArray::Disable(std::string const& attribName) const
+VertexArray::Disable(VertexAttrib attribIndex) const
 {
-  glDisableVertexAttribArray(attribTable_.at(attribName));
+  glDisableVertexAttribArray(attribIndex);
 }
