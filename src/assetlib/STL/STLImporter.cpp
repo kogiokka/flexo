@@ -1,7 +1,6 @@
 #include "assetlib/STL/STLImporter.hpp"
 #include "Util.hpp"
 
-#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -10,7 +9,7 @@
 bool
 STLImporter::IsAsciiSTL() const
 {
-  std::string_view solidStr(buffer_.data(), 5);
+  std::string_view solidStr(reinterpret_cast<const char*>(buffer_.data()), 5);
   return solidStr == "solid";
 }
 
@@ -111,7 +110,37 @@ STLImporter::ImportAsciiSTL()
 void
 STLImporter::ImportBinarySTL()
 {
-  throw NotImplementedException();
+  constexpr unsigned int STRIDE = 50;
+
+  unsigned int numTriangles = extractNumber<unsigned int>(80);
+
+  Vertex::Position p;
+  Vertex::Normal n;
+  for (unsigned int i = 0; i < numTriangles; i++) {
+    unsigned int begin = 84 + STRIDE * i;
+    n.x = extractNumber<float>(begin);
+    n.y = extractNumber<float>(begin + 4);
+    n.z = extractNumber<float>(begin + 8);
+    model_.normals.push_back(n);
+    for (unsigned int j = 1; j <= 3; j++) {
+      p.x = extractNumber<float>(begin + 12 * j);
+      p.y = extractNumber<float>(begin + 12 * j + 4);
+      p.z = extractNumber<float>(begin + 12 * j + 8);
+      model_.positions.push_back(p);
+    }
+  }
+}
+
+template<typename T>
+T
+STLImporter::extractNumber(std::size_t pos)
+{
+  T num;
+  auto tmp = reinterpret_cast<unsigned char*>(&num);
+  for (std::size_t i = 0; i < sizeof(T); i++) {
+    tmp[i] = buffer_[pos + i];
+  }
+  return num;
 }
 
 STLModel const&

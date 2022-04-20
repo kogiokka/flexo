@@ -5,6 +5,7 @@
 #include "assetlib/BaseImporter.hpp"
 #include "assetlib/ModelStructs.hpp"
 
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -20,6 +21,8 @@ private:
   bool IsAsciiSTL() const;
   void ImportAsciiSTL();
   void ImportBinarySTL();
+  template<typename T>
+  T extractNumber(std::size_t pos);
 };
 
 #endif

@@ -19,6 +19,6 @@ BaseImporter::Slurp(std::string const& filename)
 
   size_t fileSize = fs::file_size(filename);
   buffer_.resize(fileSize);
-  fh.read(buffer_.data(), fileSize);
+  fh.read(reinterpret_cast<char*>(buffer_.data()), fileSize);
   fh.close();
 }
