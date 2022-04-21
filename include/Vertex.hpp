@@ -1,24 +1,14 @@
 #pragma once
+
+#include <glm/glm.hpp>
 #include <type_traits>
 
-/* Standard Layout Type
- * https://en.cppreference.com/w/cpp/named_req/StandardLayoutType
- *
- * Make sure the elements are continuous in the memory.
- */
 struct Vertex {
-  struct Position {
-    float x, y, z;
-  };
-
-  struct Normal {
-    float x, y, z;
-  };
+  using Position = glm::vec3;
+  using Normal = glm::vec3;
 
   Position position;
   Normal normal;
 };
 
-static_assert(std::is_standard_layout_v<Vertex>);
-static_assert(std::is_standard_layout_v<Vertex::Position>);
-static_assert(std::is_standard_layout_v<Vertex::Normal>);
+static_assert(sizeof(Vertex) == 24);

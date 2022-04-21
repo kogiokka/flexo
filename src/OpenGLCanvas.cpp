@@ -182,8 +182,8 @@ OpenGLCanvas::OnPaint(wxPaintEvent&)
 
   for (int i = 0; i < iterPerFrame_; ++i) {
     if (isAcceptingInput_) {
-      auto const& [x, y, z] = surface_.Vertices()[RNG_->scalar()].position;
-      isAcceptingInput_ = lattice_->Input(std::vector{x, y, z});
+      auto const& p = surface_.Vertices()[RNG_->scalar()].position;
+      isAcceptingInput_ = lattice_->Input(std::vector{p.x, p.y, p.z});
     }
   }
 
