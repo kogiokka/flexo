@@ -164,7 +164,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
         shader_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
         shader_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
         shader_->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-        shader_->SetUniform3f("material.diffusion", 0.67f, 0.8f, 1.0f);
+        shader_->SetUniform3f("material.diffusion", 0.0f, 0.6352941f, 0.9294118f);
         shader_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
         shader_->SetUniform1f("material.shininess", 32.0f);
         shader_->SetUniform1f("alpha", surfaceColorAlpha_);
