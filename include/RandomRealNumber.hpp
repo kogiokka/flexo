@@ -7,61 +7,58 @@
 #include <type_traits>
 #include <vector>
 
-template<typename T>
+template <typename T>
 class RandomRealNumber : public RandomNumber<T>
 {
-  std::uniform_real_distribution<T> range_;
+    std::uniform_real_distribution<T> range_;
 
 public:
-  RandomRealNumber(T min, T max);
-  virtual T scalar() override;
-  virtual std::vector<T> vector(std::size_t dimension) override;
-  template<std::size_t S>
-  std::array<T, S> vector();
+    RandomRealNumber(T min, T max);
+    virtual T scalar() override;
+    virtual std::vector<T> vector(std::size_t dimension) override;
+    template <std::size_t S>
+    std::array<T, S> vector();
 };
 
-template<typename T>
+template <typename T>
 RandomRealNumber<T>::RandomRealNumber(T min, T max)
-  : RandomNumber<T>()
-  , range_{min, max}
+    : RandomNumber<T>()
+    , range_ { min, max }
 {
-  // The type must be RealType
-  constexpr bool isFloat = std::is_same_v<float, T>;
-  constexpr bool isDouble = std::is_same_v<double, T>;
-  constexpr bool isLongDouble = std::is_same_v<long double, T>;
+    // The type must be RealType
+    constexpr bool isFloat = std::is_same_v<float, T>;
+    constexpr bool isDouble = std::is_same_v<double, T>;
+    constexpr bool isLongDouble = std::is_same_v<long double, T>;
 
-  static_assert(isFloat | isDouble | isLongDouble);
+    static_assert(isFloat | isDouble | isLongDouble);
 }
 
-template<typename T>
-T
-RandomRealNumber<T>::scalar()
+template <typename T>
+T RandomRealNumber<T>::scalar()
 {
-  return range_(this->engine_);
+    return range_(this->engine_);
 }
 
-template<typename T>
-std::vector<T>
-RandomRealNumber<T>::vector(std::size_t dimension)
+template <typename T>
+std::vector<T> RandomRealNumber<T>::vector(std::size_t dimension)
 {
-  std::vector<T> vec;
+    std::vector<T> vec;
 
-  vec.reserve(dimension);
-  for (std::size_t i = 0; i < dimension; ++i) {
-    vec.push_back(range_(this->engine_));
-  }
+    vec.reserve(dimension);
+    for (std::size_t i = 0; i < dimension; ++i) {
+        vec.push_back(range_(this->engine_));
+    }
 
-  return vec;
+    return vec;
 }
 
-template<typename T>
-template<std::size_t S>
-std::array<T, S>
-RandomRealNumber<T>::vector()
+template <typename T>
+template <std::size_t S>
+std::array<T, S> RandomRealNumber<T>::vector()
 {
-  std::array<T, S> vec;
-  for (auto i = 0; i < S; ++i) {
-    vec[i] = range_(this->engine_);
-  }
-  return vec;
+    std::array<T, S> vec;
+    for (auto i = 0; i < S; ++i) {
+        vec[i] = range_(this->engine_);
+    }
+    return vec;
 }

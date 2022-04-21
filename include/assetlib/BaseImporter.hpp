@@ -7,11 +7,11 @@
 class BaseImporter
 {
 protected:
-  std::vector<unsigned char> buffer_;
-  void Slurp(std::string const& filename);
+    std::vector<unsigned char> buffer_;
+    void Slurp(std::string const& filename);
 
 public:
-  virtual void Read(std::string const& filename) = 0;
+    virtual void Read(std::string const& filename) = 0;
 };
 
 #endif

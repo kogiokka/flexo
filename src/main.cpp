@@ -5,35 +5,32 @@
 class SurfaceSOM : public wxApp
 {
 public:
-  virtual bool OnInit() override;
-  virtual int OnExit() override;
-  virtual void OnUnhandledException() override;
+    virtual bool OnInit() override;
+    virtual int OnExit() override;
+    virtual void OnUnhandledException() override;
 };
 
-bool
-SurfaceSOM::OnInit()
+bool SurfaceSOM::OnInit()
 {
-  if (!wxApp::OnInit()) {
-    return false;
-  }
+    if (!wxApp::OnInit()) {
+        return false;
+    }
 
-  MainWindow* window = new MainWindow();
-  window->Show();
-  window->InitializeGL();
+    MainWindow* window = new MainWindow();
+    window->Show();
+    window->InitializeGL();
 
-  return true;
+    return true;
 }
 
-void
-SurfaceSOM::OnUnhandledException()
+void SurfaceSOM::OnUnhandledException()
 {
-  throw;
+    throw;
 }
 
-int
-SurfaceSOM::OnExit()
+int SurfaceSOM::OnExit()
 {
-  return wxApp::OnExit();
+    return wxApp::OnExit();
 }
 
 IMPLEMENT_APP(SurfaceSOM)

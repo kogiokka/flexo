@@ -10,11 +10,11 @@
 
 class OBJImporter : public BaseImporter
 {
-  OBJModel model_;
+    OBJModel model_;
 
 public:
-  virtual void Read(std::string const& filename) override;
-  OBJModel const& Model() const;
+    virtual void Read(std::string const& filename) override;
+    OBJModel const& Model() const;
 };
 
 #endif

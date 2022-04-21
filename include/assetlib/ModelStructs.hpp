@@ -7,21 +7,21 @@
 #include <vector>
 
 struct OBJModel {
-  struct VertexRef {
-    int v, vt, vn;
-  };
+    struct VertexRef {
+        int v, vt, vn;
+    };
 
-  using Face = std::vector<VertexRef>;
+    using Face = std::vector<VertexRef>;
 
-  std::vector<Vertex::Position> positions;
-  std::vector<Vertex::Normal> normals;
-  std::vector<Face> faces;
+    std::vector<Vertex::Position> positions;
+    std::vector<Vertex::Normal> normals;
+    std::vector<Face> faces;
 };
 
 struct STLModel {
-  std::string name;
-  std::vector<Vertex::Position> positions;
-  std::vector<Vertex::Normal> normals;
+    std::string name;
+    std::vector<Vertex::Position> positions;
+    std::vector<Vertex::Normal> normals;
 };
 
 #endif
