@@ -43,6 +43,7 @@ class MainWindow : public wxFrame
     void OnCheckboxLatticeVertex(wxCommandEvent& evt);
     void OnCheckboxLatticeEdge(wxCommandEvent& evt);
     void OnCheckboxLatticeFace(wxCommandEvent& evt);
+    void OnCheckboxLightSource(wxCommandEvent& evt);
     void OnSliderTransparency(wxCommandEvent& evt);
     void OnOpenSurface(wxCommandEvent& evt);
     void OnExit(wxCommandEvent& evt);

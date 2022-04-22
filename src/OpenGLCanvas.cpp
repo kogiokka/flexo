@@ -42,7 +42,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wx
     wxSize clientSize = GetClientSize() * GetContentScaleFactor();
     camera_ = std::make_unique<Camera>(clientSize.x, clientSize.y);
 
-    renderOpt_ = { true, true, true, false };
+    renderOpt_ = { true, true, true, false, true };
 }
 
 OpenGLCanvas::~OpenGLCanvas() { }
@@ -52,8 +52,9 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
     wxPaintDC dc(this);
     SetCurrent(*context_);
 
-    static float s_scale = 30.0f;
-    static auto const s_scaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
+    static glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
+    static auto const vertexScaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.02f);
+    static auto const lightSrcMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
 
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -62,23 +63,34 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
     std::vector<std::array<float, 3>> latPos;
     latPos.reserve(neurons.size());
     for (auto const& n : neurons) {
-        float const x = n[0] * s_scale;
-        float const y = n[1] * s_scale;
-        float const z = n[2] * s_scale;
+        float const x = n[0];
+        float const y = n[1];
+        float const z = n[2];
         latPos.push_back({ x, y, z });
     }
 
     glBindBuffer(GL_ARRAY_BUFFER, vboLatPos_);
     glBufferSubData(GL_ARRAY_BUFFER, 0, neurons.size() * 3 * SIZE_FLOAT, latPos.data());
 
+    if (renderOpt_[LIGHT_SOURCE]) {
+        vao_->Disable(VertexAttrib_Normal);
+        vao_->Disable(VertexAttrib_Instanced);
+        shaderLightSrc_->Use();
+        shaderLightSrc_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
+        shaderLightSrc_->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
+        shaderLightSrc_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
+        glBindVertexBuffer(VertexAttrib_Position, vboVertModel_, offsetof(Vertex, position), sizeof(Vertex));
+        glDrawArrays(GL_TRIANGLES, 0, vertModel_.Vertices().size());
+    }
+
     if (renderOpt_[LAT_VERTEX]) {
         vao_->Enable(VertexAttrib_Normal);
         vao_->Enable(VertexAttrib_Instanced);
         shaderVertexModel_->Use();
         shaderVertexModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-        shaderVertexModel_->SetUniformMatrix4fv("modelMat", s_scaleMat);
+        shaderVertexModel_->SetUniformMatrix4fv("modelMat", vertexScaleMat);
         shaderVertexModel_->SetUniform3fv("viewPos", camera_->Position());
-        shaderVertexModel_->SetUniform3fv("light.position", camera_->Position());
+        shaderVertexModel_->SetUniform3fv("light.position", lightPos);
         shaderVertexModel_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
         shaderVertexModel_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
         shaderVertexModel_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
@@ -126,7 +138,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
         shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
         shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
         shader_->SetUniform3fv("viewPos", camera_->Position());
-        shader_->SetUniform3fv("light.position", camera_->Position());
+        shader_->SetUniform3fv("light.position", lightPos);
         shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
         shader_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
         shader_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
@@ -157,9 +169,9 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
         vao_->Disable(VertexAttrib_Instanced);
         shader_->Use();
         shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-        shader_->SetUniformMatrix4fv("modelMat", glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * s_scale));
+        shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
         shader_->SetUniform3fv("viewPos", camera_->Position());
-        shader_->SetUniform3fv("light.position", camera_->Position());
+        shader_->SetUniform3fv("light.position", lightPos);
         shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
         shader_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
         shader_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
@@ -245,13 +257,11 @@ void OpenGLCanvas::InitGL()
     latFaceIndices_ = lattice_->FaceIndices();
     glGenBuffers(1, &vboLatFace_);
     glBindBuffer(GL_ARRAY_BUFFER, vboLatFace_);
-    // GL_DYNAMIC_DRAW: The data store contents will be modified repeatedly and used many times.
     glBufferData(GL_ARRAY_BUFFER, latFaceIndices_.size() * 6 * SIZE_FLOAT, nullptr, GL_DYNAMIC_DRAW);
 
     // An Vertex Buffer Object storing the positions of neurons on the lattice.
     glGenBuffers(1, &vboLatPos_);
     glBindBuffer(GL_ARRAY_BUFFER, vboLatPos_);
-    // GL_DYNAMIC_DRAW: The data store contents will be modified repeatedly and used many times.
     glBufferData(GL_ARRAY_BUFFER, lattice_->Neurons().size() * 3 * SIZE_FLOAT, nullptr, GL_DYNAMIC_DRAW);
 
     // An Index Buffer that holds indices referencing the positions of neurons to draw the edges between them.
@@ -259,11 +269,6 @@ void OpenGLCanvas::InitGL()
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboLatEdge_);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, latEdgeIndices_.size() * SIZE_UINT, latEdgeIndices_.data(), GL_STATIC_DRAW);
     /** Lattice END ******************************************************/
-
-    shaderEdge_ = std::make_unique<Shader>();
-    shaderEdge_->Attach(GL_VERTEX_SHADER, "shader/Edge.vert");
-    shaderEdge_->Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
-    shaderEdge_->Link();
 
     glBindVertexBuffer(VertexAttrib_Instanced, vboLatPos_, 0, 3 * SIZE_FLOAT);
     glVertexBindingDivisor(2, 1);
@@ -275,6 +280,16 @@ void OpenGLCanvas::InitGL()
     shader_->Attach(GL_VERTEX_SHADER, "shader/default.vert");
     shader_->Attach(GL_FRAGMENT_SHADER, "shader/default.frag");
     shader_->Link();
+
+    shaderEdge_ = std::make_unique<Shader>();
+    shaderEdge_->Attach(GL_VERTEX_SHADER, "shader/Edge.vert");
+    shaderEdge_->Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
+    shaderEdge_->Link();
+
+    shaderLightSrc_ = std::make_unique<Shader>();
+    shaderLightSrc_->Attach(GL_VERTEX_SHADER, "shader/LightSource.vert");
+    shaderLightSrc_->Attach(GL_FRAGMENT_SHADER, "shader/LightSource.frag");
+    shaderLightSrc_->Link();
 
     shaderVertexModel_ = std::make_unique<Shader>();
     shaderVertexModel_->Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");

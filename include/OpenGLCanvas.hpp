@@ -33,6 +33,7 @@ class OpenGLCanvas : public wxGLCanvas
     std::unique_ptr<wxGLContext> context_;
     std::unique_ptr<Shader> shader_;
     std::unique_ptr<Shader> shaderEdge_;
+    std::unique_ptr<Shader> shaderLightSrc_;
     std::unique_ptr<Shader> shaderVertexModel_;
     std::unique_ptr<Camera> camera_;
     std::unique_ptr<Lattice> lattice_;
@@ -43,7 +44,7 @@ class OpenGLCanvas : public wxGLCanvas
     std::vector<unsigned int> latFaceIndices_;
 
 public:
-    enum RenderOpt { SURFACE = 0, LAT_VERTEX, LAT_EDGE, LAT_FACE };
+    enum RenderOpt { SURFACE = 0, LAT_VERTEX, LAT_EDGE, LAT_FACE, LIGHT_SOURCE };
 
 public:
     OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id = wxID_ANY,

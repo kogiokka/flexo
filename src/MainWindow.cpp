@@ -24,6 +24,7 @@ enum {
     CB_RENDEROPT_LAT_VERTEX,
     CB_RENDEROPT_LAT_EDGE,
     CB_RENDEROPT_LAT_FACE,
+    CB_RENDEROPT_LIGHT_SOURCE,
     TC_SET_ITERATION_CAP,
     TC_SET_LEARNING_RATE,
     TC_SET_LAT_WIDTH,
@@ -195,10 +196,12 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
     auto chkBox2 = new wxCheckBox(box, CB_RENDEROPT_LAT_VERTEX, "Lattice Vertex");
     auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
     auto chkBox4 = new wxCheckBox(box, CB_RENDEROPT_LAT_FACE, "Lattice Face");
+    auto chkBox5 = new wxCheckBox(box, CB_RENDEROPT_LIGHT_SOURCE, "Light Source");
     chkBox1->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::SURFACE));
     chkBox2->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_VERTEX));
     chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_EDGE));
     chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_FACE));
+    chkBox5->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LIGHT_SOURCE));
     auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Surface Transparency (%)");
     int const sliderInit = static_cast<int>(100.0f - canvas_->GetSurfaceTransparency() * 100.0f);
     slider_ = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
@@ -207,6 +210,7 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
     row1->Add(chkBox2, 0, wxGROW | wxALL, 5);
     row1->Add(chkBox3, 0, wxGROW | wxALL, 5);
     row1->Add(chkBox4, 0, wxGROW | wxALL, 5);
+    row1->Add(chkBox5, 0, wxGROW | wxALL, 5);
     row2->Add(surfAlphaLabel, 0, wxGROW);
     row2->Add(slider_, 0, wxGROW);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 10);
@@ -298,6 +302,11 @@ void MainWindow::OnCheckboxLatticeFace(wxCommandEvent&)
     canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_FACE);
 }
 
+void MainWindow::OnCheckboxLightSource(wxCommandEvent&)
+{
+    canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LIGHT_SOURCE);
+}
+
 void MainWindow::OnSliderTransparency(wxCommandEvent&)
 {
     float const range = static_cast<float>(slider_->GetMax() - slider_->GetMin());
@@ -350,6 +359,7 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckboxLatticeEdge)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckboxLatticeFace)
+    EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, MainWindow::OnCheckboxLightSource)
     EVT_SLIDER(SLIDER_TRANSPARENCY, MainWindow::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, MainWindow::OnTimerUIUpdate)
 wxEND_EVENT_TABLE()
