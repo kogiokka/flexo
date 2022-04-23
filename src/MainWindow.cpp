@@ -197,11 +197,11 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
     auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
     auto chkBox4 = new wxCheckBox(box, CB_RENDEROPT_LAT_FACE, "Lattice Face");
     auto chkBox5 = new wxCheckBox(box, CB_RENDEROPT_LIGHT_SOURCE, "Light Source");
-    chkBox1->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::SURFACE));
-    chkBox2->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_VERTEX));
-    chkBox3->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_EDGE));
-    chkBox4->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LAT_FACE));
-    chkBox5->SetValue(canvas_->GetRenderOptionState(OpenGLCanvas::RenderOpt::LIGHT_SOURCE));
+    chkBox1->SetValue(canvas_->GetRenderOptionState(RenderOption_Surface));
+    chkBox2->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeVertex));
+    chkBox3->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeEdge));
+    chkBox4->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeFace));
+    chkBox5->SetValue(canvas_->GetRenderOptionState(RenderOption_LightSource));
     auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Surface Transparency (%)");
     int const sliderInit = static_cast<int>(100.0f - canvas_->GetSurfaceTransparency() * 100.0f);
     slider_ = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
@@ -284,27 +284,27 @@ void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
 
 void MainWindow::OnCheckboxSurface(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::SURFACE);
+    canvas_->ToggleRenderOption(RenderOption_Surface);
 }
 
 void MainWindow::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_VERTEX);
+    canvas_->ToggleRenderOption(RenderOption_LatticeVertex);
 }
 
 void MainWindow::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_EDGE);
+    canvas_->ToggleRenderOption(RenderOption_LatticeEdge);
 }
 
 void MainWindow::OnCheckboxLatticeFace(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LAT_FACE);
+    canvas_->ToggleRenderOption(RenderOption_LatticeFace);
 }
 
 void MainWindow::OnCheckboxLightSource(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(OpenGLCanvas::RenderOpt::LIGHT_SOURCE);
+    canvas_->ToggleRenderOption(RenderOption_LightSource);
 }
 
 void MainWindow::OnSliderTransparency(wxCommandEvent&)

@@ -8,7 +8,6 @@
 #include <fstream>
 #include <iostream>
 
-constexpr std::size_t static SIZE_FLOAT = sizeof(float);
 constexpr std::size_t static SIZE_UINT = sizeof(unsigned int);
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
@@ -16,33 +15,16 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wx
     : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
     , isGLLoaded_(false)
     , isAcceptingInput_(false)
-    , vboSurf_(0)
-    , vboLatFace_(0)
-    , vboLatPos_(0)
-    , iboLatEdge_(0)
-    , vboVertModel_(0)
-    , surfaceColorAlpha_(0.8f)
     , iterPerFrame_(10)
     , RNG_(nullptr)
-    , vao_(nullptr)
     , context_(nullptr)
-    , shader_(nullptr)
-    , shaderEdge_(nullptr)
-    , shaderVertexModel_(nullptr)
-    , camera_(nullptr)
     , lattice_(nullptr)
-    , latEdgeIndices_(0)
-    , latFaceIndices_(0)
+    , renderer_(nullptr)
 {
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
     context_ = std::make_unique<wxGLContext>(this, nullptr, &attrs);
-
     lattice_ = std::make_unique<Lattice>(64, 64, 50000, 0.15f);
-    wxSize clientSize = GetClientSize() * GetContentScaleFactor();
-    camera_ = std::make_unique<Camera>(clientSize.x, clientSize.y);
-
-    renderOpt_ = { true, true, true, false, true };
 }
 
 OpenGLCanvas::~OpenGLCanvas() { }
@@ -52,146 +34,23 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
     wxPaintDC dc(this);
     SetCurrent(*context_);
 
-    static glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
-    static auto const vertexScaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.02f);
-    static auto const lightSrcMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
-
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    auto const& neurons = lattice_->Neurons();
-    std::vector<std::array<float, 3>> latPos;
-    latPos.reserve(neurons.size());
-    for (auto const& n : neurons) {
-        float const x = n[0];
-        float const y = n[1];
-        float const z = n[2];
-        latPos.push_back({ x, y, z });
-    }
+    UpdateLatticePositions();
 
-    glBindBuffer(GL_ARRAY_BUFFER, vboLatPos_);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, neurons.size() * 3 * SIZE_FLOAT, latPos.data());
-
-    if (renderOpt_[LIGHT_SOURCE]) {
-        vao_->Disable(VertexAttrib_Normal);
-        vao_->Disable(VertexAttrib_Instanced);
-        shaderLightSrc_->Use();
-        shaderLightSrc_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-        shaderLightSrc_->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
-        shaderLightSrc_->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, vboVertModel_, offsetof(Vertex, position), sizeof(Vertex));
-        glDrawArrays(GL_TRIANGLES, 0, vertModel_.Vertices().size());
-    }
-
-    if (renderOpt_[LAT_VERTEX]) {
-        vao_->Enable(VertexAttrib_Normal);
-        vao_->Enable(VertexAttrib_Instanced);
-        shaderVertexModel_->Use();
-        shaderVertexModel_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-        shaderVertexModel_->SetUniformMatrix4fv("modelMat", vertexScaleMat);
-        shaderVertexModel_->SetUniform3fv("viewPos", camera_->Position());
-        shaderVertexModel_->SetUniform3fv("light.position", lightPos);
-        shaderVertexModel_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-        shaderVertexModel_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
-        shaderVertexModel_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-        shaderVertexModel_->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-        shaderVertexModel_->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
-        shaderVertexModel_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-        shaderVertexModel_->SetUniform1f("material.shininess", 32.0f);
-        shaderVertexModel_->SetUniform1f("alpha", 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, vboVertModel_, offsetof(Vertex, position), sizeof(Vertex));
-        glBindVertexBuffer(VertexAttrib_Normal, vboVertModel_, offsetof(Vertex, normal), sizeof(Vertex));
-        glDrawArraysInstanced(GL_TRIANGLES, 0, vertModel_.Vertices().size() * 3, latPos.size());
-    }
-
-    if (renderOpt_[LAT_FACE]) {
-        std::vector<glm::vec3> latFace;
-        std::size_t drawArraysCount = 0;
-        latFace.reserve(latFaceIndices_.size());
-        for (std::size_t i = 0; i < latFaceIndices_.size(); i += 3) {
-            auto const idx1 = latFaceIndices_[i];
-            auto const idx2 = latFaceIndices_[i + 1];
-            auto const idx3 = latFaceIndices_[i + 2];
-            auto const p1 = glm::vec3 { latPos[idx1][0], latPos[idx1][1], latPos[idx1][2] };
-            auto const p2 = glm::vec3 { latPos[idx2][0], latPos[idx2][1], latPos[idx2][2] };
-            auto const p3 = glm::vec3 { latPos[idx3][0], latPos[idx3][1], latPos[idx3][2] };
-
-            glm::vec3 normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-            if (std::isnan(normal.x) || std::isnan(normal.y) || std::isnan(normal.z)) {
-                normal = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-            latFace.push_back(p1);
-            latFace.push_back(normal);
-            latFace.push_back(p2);
-            latFace.push_back(normal);
-            latFace.push_back(p3);
-            latFace.push_back(normal);
-            drawArraysCount += 3; // Added 3 vertices
-        }
-
-        glBindBuffer(GL_ARRAY_BUFFER, vboLatFace_);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, latFaceIndices_.size() * 6 * SIZE_FLOAT, latFace.data());
-
-        vao_->Enable(VertexAttrib_Normal);
-        vao_->Disable(VertexAttrib_Instanced);
-        shader_->Use();
-        shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-        shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-        shader_->SetUniform3fv("viewPos", camera_->Position());
-        shader_->SetUniform3fv("light.position", lightPos);
-        shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-        shader_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
-        shader_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-        shader_->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-        shader_->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
-        shader_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-        shader_->SetUniform1f("material.shininess", 32.0f);
-        shader_->SetUniform1f("alhpa", 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, vboLatFace_, 0, 6 * SIZE_FLOAT);
-        glBindVertexBuffer(VertexAttrib_Normal, vboLatFace_, 3 * SIZE_FLOAT, 6 * SIZE_FLOAT);
-        glDrawArrays(GL_TRIANGLES, 0, drawArraysCount);
-    }
-
-    if (renderOpt_[LAT_EDGE]) {
-        vao_->Disable(VertexAttrib_Normal);
-        vao_->Disable(VertexAttrib_Instanced);
-        shaderEdge_->Use();
-        shaderEdge_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-        shaderEdge_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-        shaderEdge_->SetUniform3f("color", 1.0f, 1.0f, 1.0f);
-        glBindVertexBuffer(0, vboLatPos_, 0, 3 * SIZE_FLOAT);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboLatEdge_);
-        glDrawElements(GL_LINES, latEdgeIndices_.size(), GL_UNSIGNED_INT, 0);
-    }
-
-    if (renderOpt_[SURFACE]) {
-        vao_->Enable(VertexAttrib_Normal);
-        vao_->Disable(VertexAttrib_Instanced);
-        shader_->Use();
-        shader_->SetUniformMatrix4fv("viewProjMat", camera_->ViewProjectionMatrix());
-        shader_->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-        shader_->SetUniform3fv("viewPos", camera_->Position());
-        shader_->SetUniform3fv("light.position", lightPos);
-        shader_->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-        shader_->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
-        shader_->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-        shader_->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-        shader_->SetUniform3f("material.diffusion", 0.0f, 0.6352941f, 0.9294118f);
-        shader_->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-        shader_->SetUniform1f("material.shininess", 32.0f);
-        shader_->SetUniform1f("alpha", surfaceColorAlpha_);
-
-        glBindVertexBuffer(VertexAttrib_Position, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
-        glBindVertexBuffer(VertexAttrib_Normal, vboSurf_, offsetof(Vertex, position), sizeof(Vertex));
-        glDrawArrays(GL_TRIANGLES, 0, surface_.Vertices().size());
+    if (rendopt & RenderOption_LatticeFace) {
+        UpdateLatticeFaces();
     }
 
     for (int i = 0; i < iterPerFrame_; ++i) {
         if (isAcceptingInput_) {
-            auto const& p = surface_.Vertices()[RNG_->scalar()].position;
+            auto const& p = surface.Vertices()[RNG_->scalar()].position;
             isAcceptingInput_ = lattice_->Input(std::vector { p.x, p.y, p.z });
         }
     }
+
+    renderer_->Render();
 
     SwapBuffers();
 }
@@ -219,82 +78,22 @@ void OpenGLCanvas::InitGL()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-    /** Surface **************************************************************/
-    vao_ = std::make_unique<VertexArray>();
-    AttribFormat format;
-    format.count = 3;
-    format.type = GL_FLOAT;
-    format.normalized = GL_FALSE;
-
-    // We are using glVertexAttribFormat from OpenGL 4.3, execute glBindVertexArray first before adding new attributes.
-    vao_->Bind();
-    vao_->AddAttribFormat(VertexAttrib_Position, format);
-    vao_->AddAttribFormat(VertexAttrib_Normal, format);
-    vao_->AddAttribFormat(VertexAttrib_Instanced, format);
+    wxSize const size = GetClientSize() * GetContentScaleFactor();
+    assert(size.x > 0 && size.y > 0);
 
     OBJImporter obj;
     obj.Read("res/models/surface2.obj");
-    surface_.Import(obj.Model());
-    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.Vertices().size() - 1);
-
-    glGenBuffers(1, &vboSurf_);
-    glBindBuffer(GL_ARRAY_BUFFER, vboSurf_);
-    glBufferData(GL_ARRAY_BUFFER, surface_.Vertices().size() * sizeof(Vertex), surface_.Vertices().data(),
-                 GL_STATIC_DRAW);
-    /** Surface END **********************************************************/
-
-    /** Lattice **********************************************************/
+    surface.Import(obj.Model());
 
     STLImporter stl;
     stl.Read("res/models/UVSphere.stl");
-    vertModel_.Import(stl.Model());
-    glGenBuffers(1, &vboVertModel_);
-    glBindBuffer(GL_ARRAY_BUFFER, vboVertModel_);
-    glBufferData(GL_ARRAY_BUFFER, vertModel_.Vertices().size() * sizeof(Vertex), vertModel_.Vertices().data(),
-                 GL_STATIC_DRAW);
+    uvsphere.Import(stl.Model());
 
-    latEdgeIndices_ = lattice_->EdgeIndices();
-    latFaceIndices_ = lattice_->FaceIndices();
-    glGenBuffers(1, &vboLatFace_);
-    glBindBuffer(GL_ARRAY_BUFFER, vboLatFace_);
-    glBufferData(GL_ARRAY_BUFFER, latFaceIndices_.size() * 6 * SIZE_FLOAT, nullptr, GL_DYNAMIC_DRAW);
+    latticeEdgeIndices = lattice_->EdgeIndices();
+    UpdateLatticePositions();
+    UpdateLatticeFaces();
 
-    // An Vertex Buffer Object storing the positions of neurons on the lattice.
-    glGenBuffers(1, &vboLatPos_);
-    glBindBuffer(GL_ARRAY_BUFFER, vboLatPos_);
-    glBufferData(GL_ARRAY_BUFFER, lattice_->Neurons().size() * 3 * SIZE_FLOAT, nullptr, GL_DYNAMIC_DRAW);
-
-    // An Index Buffer that holds indices referencing the positions of neurons to draw the edges between them.
-    glGenBuffers(1, &iboLatEdge_);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboLatEdge_);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, latEdgeIndices_.size() * SIZE_UINT, latEdgeIndices_.data(), GL_STATIC_DRAW);
-    /** Lattice END ******************************************************/
-
-    glBindVertexBuffer(VertexAttrib_Instanced, vboLatPos_, 0, 3 * SIZE_FLOAT);
-    glVertexBindingDivisor(2, 1);
-
-    vao_->Enable(VertexAttrib_Position);
-    vao_->Enable(VertexAttrib_Normal);
-
-    shader_ = std::make_unique<Shader>();
-    shader_->Attach(GL_VERTEX_SHADER, "shader/default.vert");
-    shader_->Attach(GL_FRAGMENT_SHADER, "shader/default.frag");
-    shader_->Link();
-
-    shaderEdge_ = std::make_unique<Shader>();
-    shaderEdge_->Attach(GL_VERTEX_SHADER, "shader/Edge.vert");
-    shaderEdge_->Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
-    shaderEdge_->Link();
-
-    shaderLightSrc_ = std::make_unique<Shader>();
-    shaderLightSrc_->Attach(GL_VERTEX_SHADER, "shader/LightSource.vert");
-    shaderLightSrc_->Attach(GL_FRAGMENT_SHADER, "shader/LightSource.frag");
-    shaderLightSrc_->Link();
-
-    shaderVertexModel_ = std::make_unique<Shader>();
-    shaderVertexModel_->Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
-    shaderVertexModel_->Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
-    shaderVertexModel_->Link();
+    renderer_ = std::make_unique<Renderer>(size.x, size.y);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -304,16 +103,19 @@ void OpenGLCanvas::InitGL()
               << "Renderer:     " << glGetString(GL_RENDERER) << "\n"
               << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
+
+    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface.Vertices().size() - 1);
 }
 
 void OpenGLCanvas::OnSize(wxSizeEvent&)
 {
-    assert(camera_.get() != nullptr);
     assert(context_.get() != nullptr);
 
-    // Adjust aspect ratio of the camera before GLCanvas is displayed, in response to any resizing of the canvas.
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    camera_->SetAspectRatio(size.x, size.y);
+
+    if (renderer_ != nullptr) {
+        renderer_->GetCamera().SetAspectRatio(size.x, size.y);
+    }
 
     // Guard for SetCurrent and calling GL functions
     if (!IsShownOnScreen() || !isGLLoaded_)
@@ -325,56 +127,78 @@ void OpenGLCanvas::OnSize(wxSizeEvent&)
 
 void OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
-    assert(camera_.get() != nullptr);
-    camera_->WheelZoom(event.GetWheelRotation() / 120);
+    renderer_->GetCamera().WheelZoom(event.GetWheelRotation() / 120);
 }
 
 void OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
-    assert(camera_.get() != nullptr);
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    camera_->InitDragTranslation(x, y);
+    renderer_->GetCamera().InitDragTranslation(x, y);
 }
 
 void OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 {
-    assert(camera_.get() != nullptr);
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    camera_->InitDragRotation(x, y);
+    renderer_->GetCamera().InitDragRotation(x, y);
 }
 
 void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
 {
-    assert(camera_.get() != nullptr);
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
     if (event.LeftIsDown()) {
-        camera_->DragTranslation(x, y);
+        renderer_->GetCamera().DragTranslation(x, y);
     }
     if (event.RightIsDown()) {
-        camera_->DragRotation(x, y);
+        renderer_->GetCamera().DragRotation(x, y);
     }
 }
 
 void OpenGLCanvas::ResetCamera()
 {
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    camera_ = std::make_unique<Camera>(size.x, size.y);
+    renderer_->GetCamera() = Camera(size.x, size.y);
 }
 
 void OpenGLCanvas::OpenSurface(std::string const& path)
 {
     OBJImporter obj;
     obj.Read(path);
-    surface_.Import(obj.Model());
-    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface_.Vertices().size() - 1);
-    glDeleteBuffers(1, &vboSurf_);
-    glGenBuffers(1, &vboSurf_);
-    glBindBuffer(GL_ARRAY_BUFFER, vboSurf_);
-    glBufferData(GL_ARRAY_BUFFER, surface_.Vertices().size() * sizeof(Vertex), surface_.Vertices().data(),
-                 GL_STATIC_DRAW);
+    surface.Import(obj.Model());
+    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface.Vertices().size() - 1);
+    renderer_->LoadLattice();
+}
+
+void OpenGLCanvas::UpdateLatticePositions()
+{
+    latPos.clear();
+    auto const& neurons = lattice_->Neurons();
+    latPos.reserve(neurons.size());
+    for (Node const& n : neurons) {
+        latPos.emplace_back(n[0], n[1], n[2]);
+    }
+}
+
+void OpenGLCanvas::UpdateLatticeFaces()
+{
+    latFace.clear();
+    auto const& indices = lattice_->FaceIndices();
+    latFace.reserve(indices.size());
+    for (std::size_t i = 0; i < indices.size(); i += 3) {
+        auto const p1 = latPos[indices[i]];
+        auto const p2 = latPos[indices[i + 1]];
+        auto const p3 = latPos[indices[i + 2]];
+
+        glm::vec3 normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+        if (std::isnan(normal.x) || std::isnan(normal.y) || std::isnan(normal.z)) {
+            normal = glm::vec3(0.0f, 0.0f, 0.0f);
+        }
+        latFace.push_back(Vertex { p1, normal });
+        latFace.push_back(Vertex { p2, normal });
+        latFace.push_back(Vertex { p3, normal });
+    }
 }
 
 void OpenGLCanvas::SetPlayOrPause(bool isAcceptingInput)
@@ -382,14 +206,18 @@ void OpenGLCanvas::SetPlayOrPause(bool isAcceptingInput)
     isAcceptingInput_ = isAcceptingInput;
 }
 
-void OpenGLCanvas::ToggleRenderOption(RenderOpt opt)
+void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
 {
-    renderOpt_[opt] = !renderOpt_[opt];
+    if (rendopt & opt) {
+        rendopt -= opt;
+    } else {
+        rendopt += opt;
+    }
 }
 
-bool OpenGLCanvas::GetRenderOptionState(RenderOpt opt) const
+bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
 {
-    return renderOpt_[opt];
+    return rendopt & opt;
 }
 
 int OpenGLCanvas::GetCurrentIterations() const
@@ -408,27 +236,10 @@ void OpenGLCanvas::ResetLattice(int width, int height, int iterationCap, float i
     lattice_ = std::make_unique<Lattice>(width, height, iterationCap, initLearningRate);
 
     if (changed) {
-        latEdgeIndices_ = lattice_->EdgeIndices();
-        latFaceIndices_ = lattice_->FaceIndices();
-
-        glDeleteBuffers(1, &iboLatEdge_);
-        glDeleteBuffers(1, &vboLatFace_);
-        glDeleteBuffers(1, &vboLatPos_);
-        glGenBuffers(1, &iboLatEdge_);
-        glGenBuffers(1, &vboLatFace_);
-        glGenBuffers(1, &vboLatPos_);
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, iboLatEdge_);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, latEdgeIndices_.size() * SIZE_UINT, latEdgeIndices_.data(),
-                     GL_STATIC_DRAW);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vboLatFace_);
-        glBufferData(GL_ARRAY_BUFFER, latFaceIndices_.size() * 6 * SIZE_FLOAT, nullptr, GL_DYNAMIC_DRAW);
-
-        glBindBuffer(GL_ARRAY_BUFFER, vboLatPos_);
-        glBufferData(GL_ARRAY_BUFFER, lattice_->Neurons().size() * 3 * SIZE_FLOAT, nullptr, GL_DYNAMIC_DRAW);
-
-        glBindVertexBuffer(VertexAttrib_Instanced, vboLatPos_, 0, 3 * SIZE_FLOAT);
+        latticeEdgeIndices = lattice_->EdgeIndices();
+        UpdateLatticePositions();
+        UpdateLatticeFaces();
+        renderer_->LoadLattice();
     }
 }
 
@@ -459,12 +270,12 @@ int OpenGLCanvas::GetLatticeHeight() const
 void OpenGLCanvas::SetSurfaceColorAlpha(float alpha)
 {
     // The range between 0.0 and 1.0 should be handled by UI
-    surfaceColorAlpha_ = alpha;
+    surfaceColorAlpha = alpha;
 }
 
 float OpenGLCanvas::GetSurfaceTransparency() const
 {
-    return surfaceColorAlpha_;
+    return surfaceColorAlpha;
 }
 
 void OpenGLCanvas::SetIterationsPerFrame(int times)

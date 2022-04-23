@@ -26,9 +26,6 @@ class Camera
     std::tuple<int, int, float, float> originRotate_;
     std::tuple<float, float, glm::vec3> originTranslate_;
 
-    Camera(Camera const&) = delete;
-    Camera& operator=(Camera const&) = delete;
-
 public:
     enum class Translate {
         Up,

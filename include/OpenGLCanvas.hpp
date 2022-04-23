@@ -2,7 +2,7 @@
 
 #include "glad/glad.h"
 
-#include "Camera.hpp"
+#include "Renderer.hpp"
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
@@ -21,30 +21,11 @@ class OpenGLCanvas : public wxGLCanvas
 {
     bool isGLLoaded_;
     bool isAcceptingInput_;
-    GLuint vboSurf_;
-    GLuint vboLatFace_;
-    GLuint vboLatPos_;
-    GLuint iboLatEdge_;
-    GLuint vboVertModel_;
-    float surfaceColorAlpha_;
     int iterPerFrame_;
     std::unique_ptr<RandomIntNumber<unsigned int>> RNG_;
-    std::unique_ptr<VertexArray> vao_;
     std::unique_ptr<wxGLContext> context_;
-    std::unique_ptr<Shader> shader_;
-    std::unique_ptr<Shader> shaderEdge_;
-    std::unique_ptr<Shader> shaderLightSrc_;
-    std::unique_ptr<Shader> shaderVertexModel_;
-    std::unique_ptr<Camera> camera_;
     std::unique_ptr<Lattice> lattice_;
-    Mesh vertModel_;
-    Mesh surface_;
-    std::vector<bool> renderOpt_;
-    std::vector<unsigned int> latEdgeIndices_;
-    std::vector<unsigned int> latFaceIndices_;
-
-public:
-    enum RenderOpt { SURFACE = 0, LAT_VERTEX, LAT_EDGE, LAT_FACE, LIGHT_SOURCE };
+    std::unique_ptr<Renderer> renderer_;
 
 public:
     OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id = wxID_ANY,
@@ -60,17 +41,19 @@ public:
     void InitGL();
     void ResetCamera();
     void ResetLattice(int width, int height, int iterationCap, float initLearningRate);
-    void ToggleRenderOption(RenderOpt opt);
+    void ToggleRenderOption(RenderOption opt);
     void SetPlayOrPause(bool isAcceptingInput);
     void SetSurfaceColorAlpha(float alpha);
     void SetIterationsPerFrame(int times);
     void OpenSurface(std::string const& path);
+    void UpdateLatticePositions();
+    void UpdateLatticeFaces();
     int GetIterationCap() const;
     int GetLatticeWidth() const;
     int GetLatticeHeight() const;
     int GetCurrentIterations() const;
     int GetIterationsPerFrame() const;
-    bool GetRenderOptionState(RenderOpt opt) const;
+    bool GetRenderOptionState(RenderOption opt) const;
     float GetInitialLearningRate() const;
     float GetSurfaceTransparency() const;
 

@@ -36,6 +36,7 @@ PRIVATE
     "src/OpenGLCanvas.cpp"
     "src/Camera.cpp"
     "src/Shader.cpp"
+    "src/Renderer.cpp"
     "src/VertexArray.cpp"
     "src/Lattice.cpp"
     "src/Mesh.cpp"

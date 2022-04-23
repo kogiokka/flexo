@@ -5,6 +5,9 @@
 
 using namespace std;
 
+Mesh uvsphere;
+Mesh surface;
+
 Mesh::Mesh() { }
 
 void Mesh::Import(STLModel const& model)

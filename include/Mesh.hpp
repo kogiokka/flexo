@@ -3,6 +3,8 @@
 
 #include "assetlib/ModelStructs.hpp"
 
+#include <vector>
+
 class Mesh
 {
     std::vector<Vertex> vertices_;
@@ -13,5 +15,8 @@ public:
     void Import(STLModel const& model);
     std::vector<Vertex> const& Vertices() const;
 };
+
+extern Mesh uvsphere;
+extern Mesh surface;
 
 #endif
