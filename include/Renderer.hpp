@@ -59,10 +59,5 @@ public:
     Camera& GetCamera();
 };
 
-extern std::vector<glm::vec3> latPos;
-extern std::vector<Vertex> latFace;
-extern std::vector<unsigned int> latticeEdgeIndices;
-extern float surfaceColorAlpha;
-
 extern RenderOption rendopt;
 #endif

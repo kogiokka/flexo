@@ -1,10 +1,6 @@
 #include "Renderer.hpp"
 #include "Shader.hpp"
-
-std::vector<glm::vec3> latPos;
-std::vector<Vertex> latFace;
-std::vector<unsigned int> latticeEdgeIndices;
-float surfaceColorAlpha = 0.8f;
+#include "World.hpp"
 
 RenderOption rendopt = RenderOption_Surface | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 
@@ -27,23 +23,23 @@ Renderer::Renderer(int width, int height)
     glGenBuffers(buffers_.size(), buffers_.data());
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_Surface]);
-    glBufferData(GL_ARRAY_BUFFER, surface.Vertices().size() * sizeof(Vertex), surface.Vertices().data(),
+    glBufferData(GL_ARRAY_BUFFER, world.surface.Vertices().size() * sizeof(Vertex), world.surface.Vertices().data(),
                  GL_STATIC_DRAW);
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_UVSphere]);
-    glBufferData(GL_ARRAY_BUFFER, uvsphere.Vertices().size() * sizeof(Vertex), uvsphere.Vertices().data(),
+    glBufferData(GL_ARRAY_BUFFER, world.uvsphere.Vertices().size() * sizeof(Vertex), world.uvsphere.Vertices().data(),
                  GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, latFace.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, world.lattice.faces.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
-    // An Vertex Buffer Object storing the positions of neurons on the lattice.
+    // An Vertex Buffer Object storing the positions of neurons on the world.lattice.tice.
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
-    glBufferData(GL_ARRAY_BUFFER, latPos.size() * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, world.lattice.positions.size() * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
 
     // An Index Buffer that holds indices referencing the positions of neurons to draw the edges between them.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, latticeEdgeIndices.size() * sizeof(unsigned int), latticeEdgeIndices.data(),
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, world.lattice.indices.size() * sizeof(unsigned int),
+                 world.lattice.indices.data(), GL_STATIC_DRAW);
 
     glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
     glVertexBindingDivisor(2, 1);
@@ -72,7 +68,8 @@ void Renderer::Render()
     static auto const lightSrcMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
-    glBufferSubData(GL_ARRAY_BUFFER, 0, latPos.size() * sizeof(glm::vec3), latPos.data());
+    glBufferSubData(GL_ARRAY_BUFFER, 0, world.lattice.positions.size() * sizeof(glm::vec3),
+                    world.lattice.positions.data());
 
     Shader* program = nullptr;
 
@@ -87,7 +84,7 @@ void Renderer::Render()
         program->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(Vertex, position),
                            sizeof(Vertex));
-        glDrawArrays(GL_TRIANGLES, 0, uvsphere.Vertices().size());
+        glDrawArrays(GL_TRIANGLES, 0, world.uvsphere.Vertices().size());
     }
 
     if (rendopt & RenderOption_LatticeVertex) {
@@ -114,7 +111,7 @@ void Renderer::Render()
                            sizeof(Vertex));
         glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
         glVertexBindingDivisor(2, 1);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, uvsphere.Vertices().size(), latPos.size());
+        glDrawArraysInstanced(GL_TRIANGLES, 0, world.uvsphere.Vertices().size(), world.lattice.positions.size());
     }
 
     if (rendopt & RenderOption_LatticeFace) {
@@ -123,7 +120,7 @@ void Renderer::Render()
         vao_.Disable(VertexAttrib_Instanced);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, latFace.size() * sizeof(Vertex), latFace.data());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, world.lattice.faces.size() * sizeof(Vertex), world.lattice.faces.data());
 
         program = &shaders_[ShaderType_Default];
         program->Use();
@@ -143,7 +140,7 @@ void Renderer::Render()
                            sizeof(Vertex));
         glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], offsetof(Vertex, normal),
                            sizeof(Vertex));
-        glDrawArrays(GL_TRIANGLES, 0, latFace.size());
+        glDrawArrays(GL_TRIANGLES, 0, world.lattice.faces.size());
     }
 
     if (rendopt & RenderOption_Surface) {
@@ -164,12 +161,12 @@ void Renderer::Render()
         program->SetUniform3f("material.diffusion", 0.0f, 0.6352941f, 0.9294118f);
         program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
         program->SetUniform1f("material.shininess", 32.0f);
-        program->SetUniform1f("alpha", surfaceColorAlpha);
+        program->SetUniform1f("alpha", world.surfaceColorAlpha);
 
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], offsetof(Vertex, position),
                            sizeof(Vertex));
         glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Surface], offsetof(Vertex, normal), sizeof(Vertex));
-        glDrawArrays(GL_TRIANGLES, 0, surface.Vertices().size());
+        glDrawArrays(GL_TRIANGLES, 0, world.surface.Vertices().size());
     }
 
     if (rendopt & RenderOption_LatticeEdge) {
@@ -184,7 +181,7 @@ void Renderer::Render()
         program->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
-        glDrawElements(GL_LINES, latticeEdgeIndices.size(), GL_UNSIGNED_INT, 0);
+        glDrawElements(GL_LINES, world.lattice.indices.size(), GL_UNSIGNED_INT, 0);
     }
 }
 
@@ -193,7 +190,7 @@ void Renderer::LoadSurface()
     glDeleteBuffers(1, &buffers_[BufferType_Surface]);
     glGenBuffers(1, &buffers_[BufferType_Surface]);
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_Surface]);
-    glBufferData(GL_ARRAY_BUFFER, surface.Vertices().size() * sizeof(Vertex), surface.Vertices().data(),
+    glBufferData(GL_ARRAY_BUFFER, world.surface.Vertices().size() * sizeof(Vertex), world.surface.Vertices().data(),
                  GL_STATIC_DRAW);
 }
 
@@ -207,16 +204,16 @@ void Renderer::LoadLattice()
     glGenBuffers(1, &buffers_[BufferType_LatticePositions]);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, latFace.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, world.lattice.faces.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
 
-    // An Vertex Buffer Object storing the positions of neurons on the lattice.
+    // An Vertex Buffer Object storing the positions of neurons on the world.lattice.tice.
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
-    glBufferData(GL_ARRAY_BUFFER, latPos.size() * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, world.lattice.positions.size() * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
 
     // An Index Buffer that holds indices referencing the positions of neurons to draw the edges between them.
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, latticeEdgeIndices.size() * sizeof(unsigned int), latticeEdgeIndices.data(),
-                 GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, world.lattice.indices.size() * sizeof(unsigned int),
+                 world.lattice.indices.data(), GL_STATIC_DRAW);
 
     glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
 }

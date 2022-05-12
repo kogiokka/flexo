@@ -16,7 +16,4 @@ public:
     std::vector<Vertex> const& Vertices() const;
 };
 
-extern Mesh uvsphere;
-extern Mesh surface;
-
 #endif

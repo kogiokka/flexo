@@ -8,6 +8,8 @@
 #include <fstream>
 #include <iostream>
 
+#include "World.hpp"
+
 constexpr std::size_t static SIZE_UINT = sizeof(unsigned int);
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
@@ -45,7 +47,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
 
     for (int i = 0; i < iterPerFrame_; ++i) {
         if (isAcceptingInput_) {
-            auto const& p = surface.Vertices()[RNG_->scalar()].position;
+            auto const& p = world.surface.Vertices()[RNG_->scalar()].position;
             isAcceptingInput_ = lattice_->Input(std::vector { p.x, p.y, p.z });
         }
     }
@@ -83,13 +85,13 @@ void OpenGLCanvas::InitGL()
 
     OBJImporter obj;
     obj.Read("res/models/surface2.obj");
-    surface.Import(obj.Model());
+    world.surface.Import(obj.Model());
 
     STLImporter stl;
     stl.Read("res/models/UVSphere.stl");
-    uvsphere.Import(stl.Model());
+    world.uvsphere.Import(stl.Model());
 
-    latticeEdgeIndices = lattice_->EdgeIndices();
+    world.lattice.indices = lattice_->EdgeIndices();
     UpdateLatticePositions();
     UpdateLatticeFaces();
 
@@ -104,7 +106,7 @@ void OpenGLCanvas::InitGL()
               << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
 
-    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface.Vertices().size() - 1);
+    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, world.surface.Vertices().size() - 1);
 }
 
 void OpenGLCanvas::OnSize(wxSizeEvent&)
@@ -166,38 +168,38 @@ void OpenGLCanvas::OpenSurface(std::string const& path)
 {
     OBJImporter obj;
     obj.Read(path);
-    surface.Import(obj.Model());
-    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, surface.Vertices().size() - 1);
+    world.surface.Import(obj.Model());
+    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, world.surface.Vertices().size() - 1);
     renderer_->LoadLattice();
 }
 
 void OpenGLCanvas::UpdateLatticePositions()
 {
-    latPos.clear();
+    world.lattice.positions.clear();
     auto const& neurons = lattice_->Neurons();
-    latPos.reserve(neurons.size());
+    world.lattice.positions.reserve(neurons.size());
     for (Node const& n : neurons) {
-        latPos.emplace_back(n[0], n[1], n[2]);
+        world.lattice.positions.emplace_back(n[0], n[1], n[2]);
     }
 }
 
 void OpenGLCanvas::UpdateLatticeFaces()
 {
-    latFace.clear();
+    world.lattice.faces.clear();
     auto const& indices = lattice_->FaceIndices();
-    latFace.reserve(indices.size());
+    world.lattice.faces.reserve(indices.size());
     for (std::size_t i = 0; i < indices.size(); i += 3) {
-        auto const p1 = latPos[indices[i]];
-        auto const p2 = latPos[indices[i + 1]];
-        auto const p3 = latPos[indices[i + 2]];
+        auto const p1 = world.lattice.positions[indices[i]];
+        auto const p2 = world.lattice.positions[indices[i + 1]];
+        auto const p3 = world.lattice.positions[indices[i + 2]];
 
         glm::vec3 normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
         if (std::isnan(normal.x) || std::isnan(normal.y) || std::isnan(normal.z)) {
             normal = glm::vec3(0.0f, 0.0f, 0.0f);
         }
-        latFace.push_back(Vertex { p1, normal });
-        latFace.push_back(Vertex { p2, normal });
-        latFace.push_back(Vertex { p3, normal });
+        world.lattice.faces.push_back(Vertex { p1, normal });
+        world.lattice.faces.push_back(Vertex { p2, normal });
+        world.lattice.faces.push_back(Vertex { p3, normal });
     }
 }
 
@@ -236,7 +238,7 @@ void OpenGLCanvas::ResetLattice(int width, int height, int iterationCap, float i
     lattice_ = std::make_unique<Lattice>(width, height, iterationCap, initLearningRate);
 
     if (changed) {
-        latticeEdgeIndices = lattice_->EdgeIndices();
+        world.lattice.indices = lattice_->EdgeIndices();
         UpdateLatticePositions();
         UpdateLatticeFaces();
         renderer_->LoadLattice();
@@ -270,12 +272,12 @@ int OpenGLCanvas::GetLatticeHeight() const
 void OpenGLCanvas::SetSurfaceColorAlpha(float alpha)
 {
     // The range between 0.0 and 1.0 should be handled by UI
-    surfaceColorAlpha = alpha;
+    world.surfaceColorAlpha = alpha;
 }
 
 float OpenGLCanvas::GetSurfaceTransparency() const
 {
-    return surfaceColorAlpha;
+    return world.surfaceColorAlpha;
 }
 
 void OpenGLCanvas::SetIterationsPerFrame(int times)
