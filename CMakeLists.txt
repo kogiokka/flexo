@@ -21,7 +21,7 @@ set_target_properties(som-demo
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
+    target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors -ggdb)
     target_compile_definitions(som-demo PRIVATE _GLIBCXX_DEBUG)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
@@ -43,11 +43,19 @@ PRIVATE
     "src/Node.cpp"
     "src/Util.cpp"
     "src/World.cpp"
+    "src/InputData.cpp"
+    "src/VolumeData.cpp"
+    "src/common/Logger.cpp"
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
     "src/assetlib/STL/STLImporter.cpp"
 )
-target_include_directories(som-demo PRIVATE "include")
+
+target_include_directories(som-demo
+PRIVATE
+    "include/"
+    "ext/tomlplusplus/"
+)
 
 target_sources(glad PRIVATE "ext/glad/src/glad.c")
 target_include_directories(glad PUBLIC "ext/glad/include")

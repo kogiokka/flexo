@@ -7,8 +7,12 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
+#include <limits>
+
+#include <glm/gtx/string_cast.hpp>
 
 #include "World.hpp"
+#include "common/Logger.hpp"
 
 constexpr std::size_t static SIZE_UINT = sizeof(unsigned int);
 
@@ -18,10 +22,10 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wx
     , isGLLoaded_(false)
     , isAcceptingInput_(false)
     , iterPerFrame_(10)
-    , RNG_(nullptr)
     , context_(nullptr)
     , lattice_(nullptr)
     , renderer_(nullptr)
+    , inputs_(nullptr)
 {
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
@@ -45,10 +49,12 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
         UpdateLatticeFaces();
     }
 
-    for (int i = 0; i < iterPerFrame_; ++i) {
-        if (isAcceptingInput_) {
-            auto const& p = world.surface.Vertices()[RNG_->scalar()].position;
-            isAcceptingInput_ = lattice_->Input(std::vector { p.x, p.y, p.z });
+    if (inputs_ != nullptr) {
+        for (int i = 0; i < iterPerFrame_; ++i) {
+            if (isAcceptingInput_) {
+                auto const& p = inputs_->getInput();
+                isAcceptingInput_ = lattice_->Input(std::vector { p.x, p.y, p.z });
+            }
         }
     }
 
@@ -83,13 +89,13 @@ void OpenGLCanvas::InitGL()
     wxSize const size = GetClientSize() * GetContentScaleFactor();
     assert(size.x > 0 && size.y > 0);
 
-    OBJImporter obj;
-    obj.Read("res/models/surface2.obj");
-    world.surface.Import(obj.Model());
+    STLImporter stl1;
+    stl1.Read("res/models/UVSphere.stl");
+    world.uvsphere.Import(stl1.Model());
 
-    STLImporter stl;
-    stl.Read("res/models/UVSphere.stl");
-    world.uvsphere.Import(stl.Model());
+    STLImporter stl2;
+    stl2.Read("res/models/cube.stl");
+    world.cube.Import(stl2.Model());
 
     world.lattice.indices = lattice_->EdgeIndices();
     UpdateLatticePositions();
@@ -105,8 +111,6 @@ void OpenGLCanvas::InitGL()
               << "Renderer:     " << glGetString(GL_RENDERER) << "\n"
               << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
-
-    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, world.surface.Vertices().size() - 1);
 }
 
 void OpenGLCanvas::OnSize(wxSizeEvent&)
@@ -164,12 +168,125 @@ void OpenGLCanvas::ResetCamera()
     renderer_->GetCamera() = Camera(size.x, size.y);
 }
 
-void OpenGLCanvas::OpenSurface(std::string const& path)
+void OpenGLCanvas::OpenInputDataFile(wxString const& path)
 {
-    OBJImporter obj;
-    obj.Read(path);
-    world.surface.Import(obj.Model());
-    RNG_ = std::make_unique<RandomIntNumber<unsigned int>>(0, world.surface.Vertices().size() - 1);
+    world.polyModel = nullptr;
+    world.volModel = nullptr;
+
+    std::vector<Vertex::Position> posData;
+
+    if (path.EndsWith(".obj")) {
+        OBJImporter obj;
+        obj.Read(path.ToStdString());
+        world.polyModel = std::make_unique<Mesh>();
+        world.polyModel->Import(obj.Model());
+        renderer_->LoadPolygonalModel();
+    } else if (path.EndsWith(".stl")) {
+        STLImporter stl;
+        stl.Read(path.ToStdString());
+        world.polyModel = std::make_unique<Mesh>();
+        world.polyModel->Import(stl.Model());
+        renderer_->LoadPolygonalModel();
+    } else if (path.EndsWith(".toml")) {
+        world.volModel = std::make_unique<VolumetricModel>();
+        auto& [data, pos] = *world.volModel;
+
+        if (!data.read(path.ToStdString())) {
+            Logger::error(R"(Failed to read volumetric model: "%s")", path.ToStdString().c_str());
+            return;
+        }
+
+        const int model = 252;
+        const int isovalue = 0;
+        auto reso = world.volModel->data.resolution();
+        for (int x = 0; x < reso.x; x++) {
+            for (int y = 0; y < reso.y; y++) {
+                for (int z = 0; z < reso.z; z++) {
+                    if (data.value(x, y, z) >= model) {
+                        if (x + 1 < reso.x) {
+                            if (data.value(x + 1, y, z) <= isovalue) {
+                                pos.push_back(Vertex::Position { x, y, z });
+                                continue;
+                            }
+                        }
+                        if (x - 1 >= 0) {
+                            if (data.value(x - 1, y, z) <= isovalue) {
+                                pos.push_back(Vertex::Position { x, y, z });
+                                continue;
+                            }
+                        }
+                        if (y + 1 < reso.y) {
+                            if (data.value(x, y + 1, z) <= isovalue) {
+                                pos.push_back(Vertex::Position { x, y, z });
+                                continue;
+                            }
+                        }
+                        if (y - 1 >= 0) {
+                            if (data.value(x, y - 1, z) <= isovalue) {
+                                pos.push_back(Vertex::Position { x, y, z });
+                                continue;
+                            }
+                        }
+                        if (z + 1 < reso.z) {
+                            if (data.value(x, y, z + 1) <= isovalue) {
+                                pos.push_back(Vertex::Position { x, y, z });
+                                continue;
+                            }
+                        }
+                        if (z - 1 >= 0) {
+                            if (data.value(x, y, z - 1) <= isovalue) {
+                                pos.push_back(Vertex::Position { x, y, z });
+                                continue;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        renderer_->LoadVolumetricModel();
+        Logger::info("%lu voxels will be rendered.", pos.size());
+    }
+
+    const float FLOAT_MAX = std::numeric_limits<float>::max();
+    Vertex::Position center;
+    Vertex::Position min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
+    Vertex::Position max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
+
+    if (world.polyModel != nullptr) {
+        posData.reserve(world.polyModel->Vertices().size());
+        for (Vertex const& v : world.polyModel->Vertices()) {
+            posData.push_back(v.position);
+        }
+    } else if (world.volModel != nullptr) {
+        posData = world.volModel->positions;
+    }
+
+    for (auto const& p : posData) {
+        if (p.x > max.x) {
+            max.x = p.x;
+        }
+        if (p.y > max.y) {
+            max.y = p.y;
+        }
+        if (p.z > max.z) {
+            max.z = p.z;
+        }
+        if (p.x < min.x) {
+            min.x = p.x;
+        }
+        if (p.y < min.y) {
+            min.y = p.y;
+        }
+        if (p.z < min.z) {
+            min.z = p.z;
+        }
+    }
+    center = (max + min) * 0.5f;
+
+    Logger::info("%s\n", glm::to_string(center).c_str());
+    inputs_ = std::make_unique<InputData>(posData);
+    renderer_->GetCamera().SetCenter(center.x, center.y, center.z);
     renderer_->LoadLattice();
 }
 
@@ -269,15 +386,15 @@ int OpenGLCanvas::GetLatticeHeight() const
     return lattice_->Height();
 }
 
-void OpenGLCanvas::SetSurfaceColorAlpha(float alpha)
+void OpenGLCanvas::SetModelColorAlpha(float alpha)
 {
     // The range between 0.0 and 1.0 should be handled by UI
-    world.surfaceColorAlpha = alpha;
+    world.modelColorAlpha = alpha;
 }
 
-float OpenGLCanvas::GetSurfaceTransparency() const
+float OpenGLCanvas::GetModelTransparency() const
 {
-    return world.surfaceColorAlpha;
+    return world.modelColorAlpha;
 }
 
 void OpenGLCanvas::SetIterationsPerFrame(int times)

@@ -19,6 +19,7 @@ using RenderOption = int;
 
 enum ShaderType_ : int {
     ShaderType_Default = 0,
+    ShaderType_VolumetricModel,
     ShaderType_LatticeEdge,
     ShaderType_LatticeVertex,
     ShaderType_LightSource,
@@ -27,7 +28,9 @@ enum ShaderType_ : int {
 
 enum BufferType_ : int {
     BufferType_Surface = 0,
+    BufferType_Cube,
     BufferType_UVSphere,
+    BufferType_VolumetricModel,
     BufferType_LatticePositions,
     BufferType_LatticeEdge,
     BufferType_LatticeFace,
@@ -35,7 +38,7 @@ enum BufferType_ : int {
 };
 
 enum RenderOption_ : int {
-    RenderOption_Surface = 1 << 0,
+    RenderOption_Model = 1 << 0,
     RenderOption_LatticeVertex = 1 << 1,
     RenderOption_LatticeEdge = 1 << 2,
     RenderOption_LatticeFace = 1 << 3,
@@ -54,8 +57,9 @@ class Renderer
 public:
     Renderer(int width, int height);
     void Render();
-    void LoadSurface();
+    void LoadPolygonalModel();
     void LoadLattice();
+    void LoadVolumetricModel();
     Camera& GetCamera();
 };
 

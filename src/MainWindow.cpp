@@ -34,7 +34,7 @@ enum {
 };
 
 MainWindow::MainWindow(wxWindow* parent)
-    : wxFrame(parent, wxID_ANY, "Self-organizing Map: Surface", wxDefaultPosition, wxSize(1200, 800))
+    : wxFrame(parent, wxID_ANY, "Self-organizing Map Demo", wxDefaultPosition, wxSize(1200, 800))
     , timerUIUpdate_(nullptr)
     , panel_(nullptr)
     , tcIterCurr_(nullptr)
@@ -50,7 +50,7 @@ MainWindow::MainWindow(wxWindow* parent)
     CreateStatusBar();
 
     auto fileMenu = new wxMenu;
-    fileMenu->Append(wxID_OPEN, "Open Surface");
+    fileMenu->Append(wxID_OPEN, "Open Model");
     fileMenu->Append(wxID_EXIT, "Exit");
 
     auto cameraMenu = new wxMenu;
@@ -192,18 +192,18 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
 
     auto row1 = new wxBoxSizer(wxVERTICAL);
     auto row2 = new wxBoxSizer(wxVERTICAL);
-    auto chkBox1 = new wxCheckBox(box, CB_RENDEROPT_SURFACE, "Surface");
+    auto chkBox1 = new wxCheckBox(box, CB_RENDEROPT_SURFACE, "Model");
     auto chkBox2 = new wxCheckBox(box, CB_RENDEROPT_LAT_VERTEX, "Lattice Vertex");
     auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
     auto chkBox4 = new wxCheckBox(box, CB_RENDEROPT_LAT_FACE, "Lattice Face");
     auto chkBox5 = new wxCheckBox(box, CB_RENDEROPT_LIGHT_SOURCE, "Light Source");
-    chkBox1->SetValue(canvas_->GetRenderOptionState(RenderOption_Surface));
+    chkBox1->SetValue(canvas_->GetRenderOptionState(RenderOption_Model));
     chkBox2->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeVertex));
     chkBox3->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeEdge));
     chkBox4->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeFace));
     chkBox5->SetValue(canvas_->GetRenderOptionState(RenderOption_LightSource));
-    auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Surface Transparency (%)");
-    int const sliderInit = static_cast<int>(100.0f - canvas_->GetSurfaceTransparency() * 100.0f);
+    auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Model Transparency (%)");
+    int const sliderInit = static_cast<int>(100.0f - canvas_->GetModelTransparency() * 100.0f);
     slider_ = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
                            wxSL_HORIZONTAL | wxSL_LABELS | wxSL_INVERSE);
     row1->Add(chkBox1, 0, wxGROW | wxALL, 5);
@@ -282,9 +282,9 @@ void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
     canvas_->ResetLattice(widthLat_, heightLat_, iterationCap_, initLearningRate_);
 }
 
-void MainWindow::OnCheckboxSurface(wxCommandEvent&)
+void MainWindow::OnCheckboxInputDataset(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(RenderOption_Surface);
+    canvas_->ToggleRenderOption(RenderOption_Model);
 }
 
 void MainWindow::OnCheckboxLatticeVertex(wxCommandEvent&)
@@ -312,7 +312,7 @@ void MainWindow::OnSliderTransparency(wxCommandEvent&)
     float const range = static_cast<float>(slider_->GetMax() - slider_->GetMin());
     float const value = static_cast<float>(slider_->GetValue());
     float const alpha = (range - value) / range;
-    canvas_->SetSurfaceColorAlpha(alpha);
+    canvas_->SetModelColorAlpha(alpha);
 }
 
 void MainWindow::OnMenuCameraReset(wxCommandEvent&)
@@ -320,12 +320,13 @@ void MainWindow::OnMenuCameraReset(wxCommandEvent&)
     canvas_->ResetCamera();
 }
 
-void MainWindow::OnOpenSurface(wxCommandEvent&)
+void MainWindow::OnOpenFile(wxCommandEvent&)
 {
     namespace fs = std::filesystem;
     static wxString defaultDir = "";
 
-    wxFileDialog dialog(this, "Import Surface", defaultDir, "", "Wavefront (*.obj)|*.obj",
+    wxFileDialog dialog(this, "Import Input Dataset", defaultDir, "",
+                        "Volumetric models|*.toml|Polygonal models (*stl,*.obj)|*stl;*.obj",
                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     dialog.CenterOnParent();
 
@@ -338,7 +339,7 @@ void MainWindow::OnOpenSurface(wxCommandEvent&)
     // Why wxBusyCursor does not work here?
     // wxBusyCursor wait;
     auto const filepath = dialog.GetPath().ToStdString();
-    canvas_->OpenSurface(filepath);
+    canvas_->OpenInputDataFile(filepath);
     defaultDir = fs::path(filepath).parent_path().string();
 }
 
@@ -348,14 +349,14 @@ void MainWindow::OnExit([[maybe_unused]] wxCommandEvent& evt)
 }
 
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
-    EVT_MENU(wxID_OPEN, MainWindow::OnOpenSurface)
+    EVT_MENU(wxID_OPEN, MainWindow::OnOpenFile)
     EVT_MENU(wxID_EXIT, MainWindow::OnExit)
     EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
     EVT_BUTTON(BTN_START, MainWindow::OnButtonStart)
     EVT_BUTTON(BTN_PAUSE, MainWindow::OnButtonPause)
     EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainWindow::OnButtonConfirmAndReset)
     EVT_SPINCTRL(SPCTRL_ITERATION_PER_FRAME, MainWindow::OnSpinCtrlIterationPerFrame)
-    EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckboxSurface)
+    EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckboxInputDataset)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckboxLatticeEdge)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckboxLatticeFace)

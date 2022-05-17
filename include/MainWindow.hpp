@@ -39,13 +39,13 @@ class MainWindow : public wxFrame
     void OnButtonPause(wxCommandEvent& evt);
     void OnButtonConfirmAndReset(wxCommandEvent& evt);
     void OnSpinCtrlIterationPerFrame(wxSpinEvent& evt);
-    void OnCheckboxSurface(wxCommandEvent& evt);
+    void OnCheckboxInputDataset(wxCommandEvent& evt);
     void OnCheckboxLatticeVertex(wxCommandEvent& evt);
     void OnCheckboxLatticeEdge(wxCommandEvent& evt);
     void OnCheckboxLatticeFace(wxCommandEvent& evt);
     void OnCheckboxLightSource(wxCommandEvent& evt);
     void OnSliderTransparency(wxCommandEvent& evt);
-    void OnOpenSurface(wxCommandEvent& evt);
+    void OnOpenFile(wxCommandEvent& evt);
     void OnExit(wxCommandEvent& evt);
 
 public:

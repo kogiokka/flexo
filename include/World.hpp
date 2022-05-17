@@ -2,10 +2,18 @@
 #define WORLD_H
 
 #include <glm/glm.hpp>
+#include <memory>
 #include <vector>
 
 #include "Mesh.hpp"
+#include "RandomIntNumber.hpp"
 #include "Vertex.hpp"
+#include "VolumeData.hpp"
+
+struct VolumetricModel {
+    VolumeData data;
+    std::vector<Vertex::Position> positions;
+};
 
 struct World {
     World();
@@ -17,11 +25,13 @@ struct World {
         std::vector<unsigned int> indices;
     };
 
-    float surfaceColorAlpha = 0.8f;
+    float modelColorAlpha = 0.8f;
     Lattice lattice;
 
     Mesh uvsphere;
-    Mesh surface;
+    Mesh cube;
+    std::unique_ptr<Mesh> polyModel;
+    std::unique_ptr<VolumetricModel> volModel;
 };
 
 extern World world;

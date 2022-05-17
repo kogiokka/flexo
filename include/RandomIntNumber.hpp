@@ -14,12 +14,21 @@ class RandomIntNumber : public RandomNumber<T>
     std::uniform_int_distribution<T> range_;
 
 public:
+    RandomIntNumber();
     RandomIntNumber(T min, T max);
+    void setRange(T min, T max);
     virtual T scalar() override;
     virtual std::vector<T> vector(std::size_t dimension) override;
     template <std::size_t S>
     std::array<T, S> vector();
 };
+
+template <typename T>
+RandomIntNumber<T>::RandomIntNumber()
+    : RandomNumber<T>()
+    , range_()
+{
+}
 
 template <typename T>
 RandomIntNumber<T>::RandomIntNumber(T min, T max)
@@ -39,6 +48,12 @@ RandomIntNumber<T>::RandomIntNumber(T min, T max)
     constexpr bool isUInt64 = std::is_same_v<uint64_t, T>;
 
     static_assert(isInt8 | isInt16 | isInt32 | isInt64 | isUInt8 | isUInt16 | isUInt32 | isUInt64);
+}
+
+template <typename T>
+void RandomIntNumber<T>::setRange(T min, T max)
+{
+    range_ = std::uniform_int_distribution<T>(min, max);
 }
 
 template <typename T>

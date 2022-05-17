@@ -2,17 +2,19 @@
 
 #include "glad/glad.h"
 
-#include "Renderer.hpp"
+#include "InputData.hpp"
 #include "Lattice.hpp"
 #include "Mesh.hpp"
-#include "RandomIntNumber.hpp"
+#include "Renderer.hpp"
 #include "Shader.hpp"
 #include "Vertex.hpp"
 #include "VertexArray.hpp"
+#include "VolumeData.hpp"
 
 #include <wx/dcclient.h>
 #include <wx/gdicmn.h>
 #include <wx/glcanvas.h>
+#include <wx/string.h>
 
 #include <memory>
 #include <string>
@@ -22,10 +24,10 @@ class OpenGLCanvas : public wxGLCanvas
     bool isGLLoaded_;
     bool isAcceptingInput_;
     int iterPerFrame_;
-    std::unique_ptr<RandomIntNumber<unsigned int>> RNG_;
     std::unique_ptr<wxGLContext> context_;
     std::unique_ptr<Lattice> lattice_;
     std::unique_ptr<Renderer> renderer_;
+    std::unique_ptr<InputData> inputs_;
 
 public:
     OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id = wxID_ANY,
@@ -43,9 +45,9 @@ public:
     void ResetLattice(int width, int height, int iterationCap, float initLearningRate);
     void ToggleRenderOption(RenderOption opt);
     void SetPlayOrPause(bool isAcceptingInput);
-    void SetSurfaceColorAlpha(float alpha);
+    void SetModelColorAlpha(float alpha);
     void SetIterationsPerFrame(int times);
-    void OpenSurface(std::string const& path);
+    void OpenInputDataFile(wxString const& path);
     void UpdateLatticePositions();
     void UpdateLatticeFaces();
     int GetIterationCap() const;
@@ -55,7 +57,7 @@ public:
     int GetIterationsPerFrame() const;
     bool GetRenderOptionState(RenderOption opt) const;
     float GetInitialLearningRate() const;
-    float GetSurfaceTransparency() const;
+    float GetModelTransparency() const;
 
     wxDECLARE_EVENT_TABLE();
 };
