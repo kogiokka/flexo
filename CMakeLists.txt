@@ -10,8 +10,12 @@ find_package(wxWidgets 3.1 COMPONENTS gl core REQUIRED)
 find_package(glm REQUIRED)
 include(${wxWidgets_USE_FILE})
 
+set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external/")
+include("cmake/BuildGLAD.cmake")
+include("cmake/BuildStbImage.cmake")
+include("cmake/BuildTomlPlusPlus.cmake")
+
 add_executable(som-demo)
-add_library(glad STATIC)
 
 set_target_properties(som-demo
     PROPERTIES
@@ -45,6 +49,7 @@ PRIVATE
     "src/World.cpp"
     "src/InputData.cpp"
     "src/VolumeData.cpp"
+    "src/Image.cpp"
     "src/common/Logger.cpp"
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
@@ -54,14 +59,13 @@ PRIVATE
 target_include_directories(som-demo
 PRIVATE
     "include/"
-    "ext/tomlplusplus/"
 )
 
-target_sources(glad PRIVATE "ext/glad/src/glad.c")
-target_include_directories(glad PUBLIC "ext/glad/include")
 
 target_link_libraries(som-demo PRIVATE
     glad
+    stb_image
+    tomlplusplus
     glm::glm
     OpenGL::GL
     ${wxWidgets_LIBRARIES}
