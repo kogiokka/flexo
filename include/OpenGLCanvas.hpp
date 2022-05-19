@@ -48,8 +48,6 @@ public:
     void SetModelColorAlpha(float alpha);
     void SetIterationsPerFrame(int times);
     void OpenInputDataFile(wxString const& path);
-    void UpdateLatticePositions();
-    void UpdateLatticeFaces();
     int GetIterationCap() const;
     int GetLatticeWidth() const;
     int GetLatticeHeight() const;
@@ -58,6 +56,12 @@ public:
     bool GetRenderOptionState(RenderOption opt) const;
     float GetInitialLearningRate() const;
     float GetModelTransparency() const;
+
+private:
+    void UpdateScene();
+    void UpdateLatticePositions();
+    void UpdateLatticeEdges();
+    void UpdateLatticeFaces();
 
     wxDECLARE_EVENT_TABLE();
 };
