@@ -40,7 +40,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
     wxPaintDC dc(this);
     SetCurrent(*context_);
 
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     UpdateScene();
@@ -422,36 +422,59 @@ void OpenGLCanvas::UpdateLatticeEdges()
 
 void OpenGLCanvas::UpdateLatticeFaces()
 {
-    std::vector<unsigned int> indices;
-    std::vector<Vertex> faces;
+    using std::isnan;
+
+    std::vector<Vertex2> faces;
 
     int const width = lattice_->Width();
     int const height = lattice_->Height();
-    for (int i = 0; i < height - 1; ++i) {
-        for (int j = 0; j < width - 1; ++j) {
-            indices.push_back(i * width + j);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j + 1);
+    faces.reserve((width - 1) * (height - 1) * 6);
+
+    Vertex2 v1, v2, v3;
+    auto& [p1, n1, t1] = v1;
+    auto& [p2, n2, t2] = v2;
+    auto& [p3, n3, t3] = v3;
+
+    float const w = static_cast<float>(width);
+    float const h = static_cast<float>(height);
+    for (int y = 0; y < height - 1; ++y) {
+        for (int x = 0; x < width - 1; ++x) {
+            const int idx = y * width + x;
+
+            p1 = world.lattice.positions[idx];
+            p2 = world.lattice.positions[idx + 1];
+            p3 = world.lattice.positions[idx + width + 1];
+            glm::vec3 normal1 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+            if (isnan(normal1.x) || isnan(normal1.y) || isnan(normal1.z)) {
+                normal1 = glm::vec3(0.0f, 0.0f, 0.0f);
+            }
+            n1 = normal1;
+            n2 = normal1;
+            n3 = normal1;
+            t1 = glm::vec2(x / w, y / h);
+            t2 = glm::vec2((x + 1) / w, y / h);
+            t3 = glm::vec2((x + 1) / w, (y + 1) / h);
+            faces.push_back(v1);
+            faces.push_back(v2);
+            faces.push_back(v3);
+
+            p1 = world.lattice.positions[idx];
+            p2 = world.lattice.positions[idx + width + 1];
+            p3 = world.lattice.positions[idx + width];
+            glm::vec3 normal2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+            if (isnan(normal2.x) || isnan(normal2.y) || isnan(normal2.z)) {
+                normal2 = glm::vec3(0.0f, 0.0f, 0.0f);
+            }
+            n1 = normal2;
+            n2 = normal2;
+            n3 = normal2;
+            t1 = glm::vec2(x / w, y / h);
+            t2 = glm::vec2((x + 1) / w, (y + 1) / h);
+            t3 = glm::vec2(x / w, (y + 1) / h);
+            faces.push_back(v1);
+            faces.push_back(v2);
+            faces.push_back(v3);
         }
-    }
-
-    faces.reserve(indices.size());
-
-    for (std::size_t i = 0; i < indices.size(); i += 3) {
-        auto const p1 = world.lattice.positions[indices[i]];
-        auto const p2 = world.lattice.positions[indices[i + 1]];
-        auto const p3 = world.lattice.positions[indices[i + 2]];
-
-        glm::vec3 normal = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-        if (std::isnan(normal.x) || std::isnan(normal.y) || std::isnan(normal.z)) {
-            normal = glm::vec3(0.0f, 0.0f, 0.0f);
-        }
-        faces.push_back(Vertex { p1, normal });
-        faces.push_back(Vertex { p2, normal });
-        faces.push_back(Vertex { p3, normal });
     }
 
     world.lattice.faces = faces;

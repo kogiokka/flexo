@@ -1,3 +1,6 @@
+#include <cstdlib>
+
+#include "Image.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
 #include "World.hpp"
@@ -17,9 +20,11 @@ Renderer::Renderer(int width, int height)
     vao_.Bind();
     vao_.AddAttribFormat(VertexAttrib_Position, format);
     vao_.AddAttribFormat(VertexAttrib_Normal, format);
+    vao_.AddAttribFormat(VertexAttrib_TextureCoordintes, { 2, GL_FLOAT, GL_FALSE });
     vao_.AddAttribFormat(VertexAttrib_Instanced, format);
     vao_.Enable(VertexAttrib_Position);
     vao_.Enable(VertexAttrib_Normal);
+    vao_.Enable(VertexAttrib_TextureCoordintes);
 
     glGenBuffers(buffers_.size(), buffers_.data());
 
@@ -32,7 +37,7 @@ Renderer::Renderer(int width, int height)
                  GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, world.lattice.faces.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, world.lattice.faces.size() * sizeof(Vertex2), nullptr, GL_DYNAMIC_DRAW);
 
     // An Vertex Buffer Object storing the positions of neurons on the world.lattice.tice.
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
@@ -46,11 +51,14 @@ Renderer::Renderer(int width, int height)
     shaders_[ShaderType_Default].Attach(GL_VERTEX_SHADER, "shader/default.vert");
     shaders_[ShaderType_Default].Attach(GL_FRAGMENT_SHADER, "shader/default.frag");
 
+    shaders_[ShaderType_LatticeVertex].Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
+    shaders_[ShaderType_LatticeVertex].Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
+
     shaders_[ShaderType_LatticeEdge].Attach(GL_VERTEX_SHADER, "shader/Edge.vert");
     shaders_[ShaderType_LatticeEdge].Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
 
-    shaders_[ShaderType_LatticeVertex].Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
-    shaders_[ShaderType_LatticeVertex].Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
+    shaders_[ShaderType_LatticeFace].Attach(GL_VERTEX_SHADER, "shader/Texture.vert");
+    shaders_[ShaderType_LatticeFace].Attach(GL_FRAGMENT_SHADER, "shader/Texture.frag");
 
     shaders_[ShaderType_LightSource].Attach(GL_VERTEX_SHADER, "shader/LightSource.vert");
     shaders_[ShaderType_LightSource].Attach(GL_FRAGMENT_SHADER, "shader/LightSource.frag");
@@ -61,6 +69,24 @@ Renderer::Renderer(int width, int height)
     for (Shader const& s : shaders_) {
         s.Link();
     }
+
+    const char* imgFile = "res/images/pattern01.png";
+    Image pattern(imgFile, 0, STBI_rgb_alpha);
+    glGenTextures(1, &tex_);
+    glBindTexture(GL_TEXTURE_2D, tex_);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    {
+        auto const& [img, w, h, ch] = pattern;
+        if (img == nullptr) {
+            Logger::error("Failed to open image: %s", imgFile);
+            std::exit(EXIT_FAILURE);
+        }
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
+    }
+    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Renderer::Render()
@@ -82,6 +108,7 @@ void Renderer::Render()
     if (rendopt & RenderOption_LightSource) {
         vao_.Enable(VertexAttrib_Position);
         vao_.Disable(VertexAttrib_Normal);
+        vao_.Disable(VertexAttrib_TextureCoordintes);
         vao_.Disable(VertexAttrib_Instanced);
         program = &shaders_[ShaderType_LightSource];
         program->Use();
@@ -96,6 +123,7 @@ void Renderer::Render()
     if (rendopt & RenderOption_LatticeVertex) {
         vao_.Enable(VertexAttrib_Position);
         vao_.Enable(VertexAttrib_Normal);
+        vao_.Disable(VertexAttrib_TextureCoordintes);
         vao_.Enable(VertexAttrib_Instanced);
         program = &shaders_[ShaderType_LatticeVertex];
         program->Use();
@@ -120,39 +148,11 @@ void Renderer::Render()
         glDrawArraysInstanced(GL_TRIANGLES, 0, world.uvsphere.Vertices().size(), world.lattice.positions.size());
     }
 
-    if (rendopt & RenderOption_LatticeFace) {
-        vao_.Enable(VertexAttrib_Position);
-        vao_.Enable(VertexAttrib_Normal);
-        vao_.Disable(VertexAttrib_Instanced);
-
-        glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, world.lattice.faces.size() * sizeof(Vertex), world.lattice.faces.data());
-
-        program = &shaders_[ShaderType_Default];
-        program->Use();
-        program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
-        program->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-        program->SetUniform3fv("viewPos", camera_.Position());
-        program->SetUniform3fv("light.position", lightPos);
-        program->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-        program->SetUniform3f("light.diffusion", 0.5f, 0.4f, 0.5f);
-        program->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-        program->SetUniform1f("material.shininess", 32.0f);
-        program->SetUniform1f("alpha", 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticeFace], offsetof(Vertex, position),
-                           sizeof(Vertex));
-        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], offsetof(Vertex, normal),
-                           sizeof(Vertex));
-        glDrawArrays(GL_TRIANGLES, 0, world.lattice.faces.size());
-    }
-
     if (rendopt & RenderOption_Model) {
         if (world.polyModel != nullptr) {
             vao_.Enable(VertexAttrib_Position);
             vao_.Enable(VertexAttrib_Normal);
+            vao_.Disable(VertexAttrib_TextureCoordintes);
             vao_.Disable(VertexAttrib_Instanced);
 
             program = &shaders_[ShaderType_Default];
@@ -180,6 +180,7 @@ void Renderer::Render()
             glCullFace(GL_BACK);
             vao_.Enable(VertexAttrib_Position);
             vao_.Enable(VertexAttrib_Normal);
+            vao_.Disable(VertexAttrib_TextureCoordintes);
             vao_.Enable(VertexAttrib_Instanced);
             program = &shaders_[ShaderType_VolumetricModel];
             program->Use();
@@ -187,13 +188,16 @@ void Renderer::Render()
             program->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
             program->SetUniform3fv("viewPos", camera_.Position());
             program->SetUniform3fv("light.position", camera_.Position());
-            program->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-            program->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
-            program->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-            program->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-            program->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
+
+            program->SetUniform3f("light.ambient", 0.8f, 0.8f, 0.8f);
+            program->SetUniform3f("light.diffusion", 0.8f, 0.8f, 0.8f);
+            program->SetUniform3f("light.specular", 0.8f, 0.8f, 0.8f);
+
+            program->SetUniform3f("material.ambient", 0.0f, 0.3f, 0.0f);
+            program->SetUniform3f("material.diffusion", 0.0f, 0.6f, 0.0f);
             program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-            program->SetUniform1f("material.shininess", 32.0f);
+            program->SetUniform1f("material.shininess", 256.0f);
+
             program->SetUniform1f("alpha", world.modelColorAlpha);
 
             glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Cube], offsetof(Vertex, position),
@@ -210,6 +214,7 @@ void Renderer::Render()
     if (rendopt & RenderOption_LatticeEdge) {
         vao_.Enable(VertexAttrib_Position);
         vao_.Disable(VertexAttrib_Normal);
+        vao_.Disable(VertexAttrib_TextureCoordintes);
         vao_.Disable(VertexAttrib_Instanced);
 
         program = &shaders_[ShaderType_LatticeEdge];
@@ -220,6 +225,39 @@ void Renderer::Render()
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
         glDrawElements(GL_LINES, world.lattice.indices.size(), GL_UNSIGNED_INT, 0);
+    }
+
+    if (rendopt & RenderOption_LatticeFace) {
+        vao_.Enable(VertexAttrib_Position);
+        vao_.Enable(VertexAttrib_Normal);
+        vao_.Enable(VertexAttrib_TextureCoordintes);
+        vao_.Disable(VertexAttrib_Instanced);
+
+        glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, world.lattice.faces.size() * sizeof(Vertex2), world.lattice.faces.data());
+
+        program = &shaders_[ShaderType_LatticeFace];
+        program->Use();
+        program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
+        program->SetUniform3fv("viewPos", camera_.Position());
+        program->SetUniform3fv("light.position", lightPos);
+        program->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
+        program->SetUniform3f("light.diffusion", 0.5f, 0.4f, 0.5f);
+        program->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
+        program->SetUniform1f("material.shininess", 32.0f);
+
+        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticeFace], offsetof(Vertex2, position),
+                           sizeof(Vertex2));
+        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], offsetof(Vertex2, normal),
+                           sizeof(Vertex2));
+        glBindVertexBuffer(VertexAttrib_TextureCoordintes, buffers_[BufferType_LatticeFace], offsetof(Vertex2, texcoord),
+                           sizeof(Vertex2));
+        glBindTexture(GL_TEXTURE_2D, tex_);
+        glDrawArrays(GL_TRIANGLES, 0, world.lattice.faces.size());
     }
 }
 
@@ -242,7 +280,7 @@ void Renderer::LoadLattice()
     glGenBuffers(1, &buffers_[BufferType_LatticePositions]);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, world.lattice.faces.size() * sizeof(Vertex), nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, world.lattice.faces.size() * sizeof(Vertex2), nullptr, GL_DYNAMIC_DRAW);
 
     // An Vertex Buffer Object storing the positions of neurons on the world.lattice.tice.
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
@@ -262,8 +300,8 @@ void Renderer::LoadVolumetricModel()
     glGenBuffers(1, &buffers_[BufferType_VolumetricModel]);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel]);
-    glBufferData(GL_ARRAY_BUFFER, world.volModel->positions.size() * sizeof(glm::vec3), world.volModel->positions.data(),
-                 GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, world.volModel->positions.size() * sizeof(glm::vec3),
+                 world.volModel->positions.data(), GL_DYNAMIC_DRAW);
     glVertexBindingDivisor(2, 1);
     glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_VolumetricModel], 0, sizeof(glm::vec3));
 }

@@ -21,7 +21,7 @@ struct World {
 
     struct Lattice {
         std::vector<Vertex::Position> positions;
-        std::vector<Vertex> faces;
+        std::vector<Vertex2> faces;
         std::vector<unsigned int> indices;
     };
 

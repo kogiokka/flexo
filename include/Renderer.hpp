@@ -20,8 +20,9 @@ using RenderOption = int;
 enum ShaderType_ : int {
     ShaderType_Default = 0,
     ShaderType_VolumetricModel,
-    ShaderType_LatticeEdge,
     ShaderType_LatticeVertex,
+    ShaderType_LatticeEdge,
+    ShaderType_LatticeFace,
     ShaderType_LightSource,
     ShaderType_Last = ShaderType_LightSource,
 };
@@ -53,6 +54,7 @@ class Renderer
     std::array<GLuint, BufferType_Last + 1> buffers_;
     std::array<Shader, ShaderType_Last + 1> shaders_;
     Camera camera_;
+    GLuint tex_;
 
 public:
     Renderer(int width, int height);
