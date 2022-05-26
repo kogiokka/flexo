@@ -1,4 +1,5 @@
 #include "MainWindow.hpp"
+#include "World.hpp"
 
 #include <wx/button.h>
 #include <wx/checkbox.h>
@@ -16,7 +17,7 @@
 #include <string>
 
 enum {
-    BTN_START = wxID_HIGHEST + 1,
+    BTN_PLAY_PAUSE = wxID_HIGHEST + 1,
     BTN_PAUSE,
     BTN_CONFIRM_AND_RESET,
     SPCTRL_ITERATION_PER_FRAME,
@@ -62,6 +63,11 @@ MainWindow::MainWindow(wxWindow* parent)
 
     this->SetMenuBar(menubar);
 
+    iterationCap_ = 50000;
+    initLearningRate_ = 0.15f;
+    widthLat_ = 64;
+    heightLat_ = 64;
+    world.lattice = std::make_unique<Lattice>(widthLat_, heightLat_);
     CreateOpenGLCanvas();
 
     panel_ = new wxPanel(this, wxID_ANY);
@@ -124,16 +130,13 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox1()
                                  validDimen);
     tcLatHeight_ = new wxTextCtrl(box, TC_SET_LAT_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
                                   validDimen);
-    iterationCap_ = canvas_->GetIterationCap();
-    initLearningRate_ = canvas_->GetInitialLearningRate();
-    widthLat_ = canvas_->GetLatticeWidth();
-    heightLat_ = canvas_->GetLatticeHeight();
     *tcIterCap_ << iterationCap_;
     *tcInitLearningRate_ << initLearningRate_;
     *tcLatWidth_ << widthLat_;
     *tcLatHeight_ << heightLat_;
 
-    auto btnConfirm = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
+    btnConfirm_ = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
+    btnConfirm_->Disable();
 
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
@@ -149,7 +152,7 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox1()
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(btnConfirm, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(btnConfirm_, 0, wxGROW | wxALL, 10);
 
     return boxLayout;
 }
@@ -159,28 +162,20 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox2()
     auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Control");
     auto const box = boxLayout->GetStaticBox();
 
-    auto row3 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
 
-    auto btnStart = new wxButton(box, BTN_START, "Start");
-    auto btnPause = new wxButton(box, BTN_PAUSE, "Pause");
-    auto spctrlIPFLabel = new wxStaticText(box, wxID_ANY, "Iterations Per Frame: ");
-    auto spctrlIPF = new wxSpinCtrl(box, SPCTRL_ITERATION_PER_FRAME, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_CENTER_HORIZONTAL, 1, 500, canvas_->GetIterationsPerFrame());
+    btnPlayPause_ = new wxButton(box, BTN_PLAY_PAUSE, "Start");
+    btnPlayPause_->Disable();
     auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
     tcIterCurr_ = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
     tcIterCurr_->SetCanFocus(false);
 
     row1->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     row1->Add(tcIterCurr_, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-    row2->Add(spctrlIPFLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-    row2->Add(spctrlIPF, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-    row3->Add(btnStart, 1, wxGROW | wxLEFT | wxRIGHT, 5);
-    row3->Add(btnPause, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    row2->Add(btnPlayPause_, 1, wxGROW | wxLEFT | wxRIGHT, 5);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(row3, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
 
     return boxLayout;
 }
@@ -227,27 +222,24 @@ void MainWindow::InitializeGL()
 void MainWindow::OnTimerUIUpdate(wxTimerEvent&)
 {
     if (tcIterCurr_ != nullptr) {
+        assert(world.lattice != nullptr);
         tcIterCurr_->Clear();
-        *tcIterCurr_ << canvas_->GetCurrentIterations();
+        *tcIterCurr_ << world.lattice->CurrentIteration();
     }
     if (canvas_ != nullptr) {
         canvas_->Refresh();
     }
 }
 
-void MainWindow::OnButtonStart(wxCommandEvent&)
+void MainWindow::OnButtonPlayPause(wxCommandEvent&)
 {
-    canvas_->SetPlayOrPause(true);
-}
-
-void MainWindow::OnButtonPause(wxCommandEvent&)
-{
-    canvas_->SetPlayOrPause(false);
-}
-
-void MainWindow::OnSpinCtrlIterationPerFrame(wxSpinEvent& evt)
-{
-    canvas_->SetIterationsPerFrame(evt.GetInt());
+    assert(world.lattice != nullptr);
+    world.lattice->ToggleTraining();
+    if (btnPlayPause_->GetLabel() == "Start") {
+        btnPlayPause_->SetLabel("Pause");
+    } else {
+        btnPlayPause_->SetLabel("Start");
+    }
 }
 
 void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
@@ -279,7 +271,11 @@ void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
         return;
     }
 
-    canvas_->ResetLattice(widthLat_, heightLat_, iterationCap_, initLearningRate_);
+    assert(world.dataset != nullptr);
+    world.lattice = std::make_unique<Lattice>(widthLat_, heightLat_);
+    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_);
+    btnPlayPause_->SetLabel("Start");
+    canvas_->ResetLattice();
 }
 
 void MainWindow::OnCheckboxInputDataset(wxCommandEvent&)
@@ -339,12 +335,18 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
     // Why wxBusyCursor does not work here?
     // wxBusyCursor wait;
     auto const filepath = dialog.GetPath().ToStdString();
-    canvas_->OpenInputDataFile(filepath);
     defaultDir = fs::path(filepath).parent_path().string();
+    canvas_->OpenInputDataFile(filepath);
+
+    assert(world.dataset != nullptr);
+    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_);
+    btnConfirm_->Enable();
+    btnPlayPause_->Enable();
 }
 
 void MainWindow::OnExit([[maybe_unused]] wxCommandEvent& evt)
 {
+    world.lattice->QuitTraining();
     Close(true);
 }
 
@@ -352,10 +354,8 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_MENU(wxID_OPEN, MainWindow::OnOpenFile)
     EVT_MENU(wxID_EXIT, MainWindow::OnExit)
     EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
-    EVT_BUTTON(BTN_START, MainWindow::OnButtonStart)
-    EVT_BUTTON(BTN_PAUSE, MainWindow::OnButtonPause)
+    EVT_BUTTON(BTN_PLAY_PAUSE, MainWindow::OnButtonPlayPause)
     EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainWindow::OnButtonConfirmAndReset)
-    EVT_SPINCTRL(SPCTRL_ITERATION_PER_FRAME, MainWindow::OnSpinCtrlIterationPerFrame)
     EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckboxInputDataset)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckboxLatticeEdge)

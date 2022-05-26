@@ -1,28 +1,34 @@
 #pragma once
 
+#include "InputData.hpp"
 #include "Node.hpp"
 #include "RandomRealNumber.hpp"
 
 #include <array>
+#include <memory>
+#include <thread>
 #include <vector>
 
 class Lattice
 {
     int width_;
     int height_;
-    float lenDiag_;
     int iterCap_;
     int iterRemained_;
-    float timeConstant_;
-    float rateCurrent_;
-    float rateInitial_;
+    float initRate_;
+    float currRate_;
     float neighborhoodRadius_;
+    float timeConst_;
+    float initRadius_;
+    bool isTraining_;
+    bool isQuit_;
     RandomRealNumber<float> RNG_;
     std::vector<Node> neurons_;
+    std::unique_ptr<std::thread> worker_;
 
 public:
-    Lattice(int width, int height, int iterations, float initRate);
-    bool Input(std::vector<float> in);
+    Lattice(int width, int height);
+    ~Lattice();
     int Width() const;
     int Height() const;
     int IterationCap() const;
@@ -30,13 +36,11 @@ public:
     float CurrentRate() const;
     float InitialRate() const;
     float NeighborhoodRadius() const;
-    template <std::size_t S>
-    bool Input(std::array<float, S> in);
+    void Train(InputData& dataset, float rate, int iterations);
     std::vector<Node> const& Neurons() const;
-};
+    void ToggleTraining();
+    void QuitTraining();
 
-template <std::size_t S>
-inline bool Lattice::Input(std::array<float, S> in)
-{
-    return Input(std::vector<float>(in.begin(), in.end()));
-}
+private:
+    void TrainInternal(InputData& dataset);
+};
