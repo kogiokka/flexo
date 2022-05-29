@@ -5,7 +5,9 @@
 #include "RandomRealNumber.hpp"
 
 #include <array>
+#include <condition_variable>
 #include <memory>
+#include <mutex>
 #include <thread>
 #include <vector>
 
@@ -25,6 +27,8 @@ class Lattice
     RandomRealNumber<float> RNG_;
     std::vector<Node> neurons_;
     std::unique_ptr<std::thread> worker_;
+    std::mutex mut_;
+    std::condition_variable cv_;
 
 public:
     Lattice(int width, int height);

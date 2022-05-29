@@ -18,6 +18,8 @@ Lattice::Lattice(int width, int height)
     , isQuit_(false)
     , RNG_(-1.0f, 1.0f)
     , worker_(nullptr)
+    , mut_()
+    , cv_()
 {
     for (int j = 0; j < height_; ++j) {
         for (int i = 0; i < width_; ++i) {
@@ -34,8 +36,8 @@ Lattice::~Lattice()
 void Lattice::TrainInternal(InputData& dataset)
 {
     while (iterRemained_ > 0 && not isQuit_) {
-        while (not isTraining_ && not isQuit_)
-            ;
+        std::unique_lock lk(mut_);
+        cv_.wait(lk, [this] { return this->isTraining_ || this->isQuit_; });
 
         glm::vec3 const input = dataset.getInput();
         float const progress = static_cast<float>(iterCap_ - iterRemained_);
@@ -134,6 +136,8 @@ float Lattice::CurrentRate() const
 void Lattice::ToggleTraining()
 {
     isTraining_ = not isTraining_;
+    cv_.notify_one();
+
     if (isTraining_) {
         Logger::info("Training started...");
     } else {
@@ -144,6 +148,8 @@ void Lattice::ToggleTraining()
 void Lattice::QuitTraining()
 {
     isQuit_ = true;
+    cv_.notify_one();
+
     if (worker_ && worker_->joinable()) {
         worker_->join();
         Logger::info("The worker joined successfully");
