@@ -346,7 +346,6 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
 
 void MainWindow::OnExit([[maybe_unused]] wxCommandEvent& evt)
 {
-    world.lattice->QuitTraining();
     Close(true);
 }
 
