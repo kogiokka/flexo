@@ -17,7 +17,7 @@ Lattice::Lattice(int width, int height)
     , isTraining_(false)
     , isQuit_(false)
     , RNG_(-1.0f, 1.0f)
-    , worker_(nullptr)
+    , worker_()
     , mut_()
     , cv_()
 {
@@ -90,7 +90,10 @@ void Lattice::Train(InputData& dataset, float rate, int iterations)
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", iterCap_, initRate_);
 
     void (Lattice::*TrainInternal)(InputData&) = &Lattice::TrainInternal;
-    worker_ = std::make_unique<std::thread>(TrainInternal, std::ref(*this), std::ref(dataset));
+    worker_ = std::thread(TrainInternal, std::ref(*this), std::ref(dataset));
+
+    Logger::info("Training worker created");
+    Logger::info("Training has been paused");
 }
 
 int Lattice::Width() const
@@ -139,7 +142,7 @@ void Lattice::ToggleTraining()
     cv_.notify_one();
 
     if (isTraining_) {
-        Logger::info("Training started...");
+        Logger::info("Training resumed");
     } else {
         Logger::info("Training paused");
     }
@@ -150,8 +153,8 @@ void Lattice::QuitTraining()
     isQuit_ = true;
     cv_.notify_one();
 
-    if (worker_ && worker_->joinable()) {
-        worker_->join();
+    if (worker_.joinable()) {
+        worker_.join();
         Logger::info("The worker joined successfully");
     }
 }

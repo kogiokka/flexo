@@ -6,7 +6,6 @@
 
 #include <array>
 #include <condition_variable>
-#include <memory>
 #include <mutex>
 #include <thread>
 #include <vector>
@@ -26,7 +25,7 @@ class Lattice
     bool isQuit_;
     RandomRealNumber<float> RNG_;
     std::vector<Node> neurons_;
-    std::unique_ptr<std::thread> worker_;
+    std::thread worker_;
     std::mutex mut_;
     std::condition_variable cv_;
 
