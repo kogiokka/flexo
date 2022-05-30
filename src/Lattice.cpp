@@ -30,7 +30,13 @@ Lattice::Lattice(int width, int height)
 
 Lattice::~Lattice()
 {
-    QuitTraining();
+    isQuit_ = true;
+    cv_.notify_one();
+
+    if (worker_.joinable()) {
+        worker_.join();
+        Logger::info("The worker joined successfully");
+    }
 }
 
 void Lattice::TrainInternal(InputData& dataset)
@@ -145,16 +151,5 @@ void Lattice::ToggleTraining()
         Logger::info("Training resumed");
     } else {
         Logger::info("Training paused");
-    }
-}
-
-void Lattice::QuitTraining()
-{
-    isQuit_ = true;
-    cv_.notify_one();
-
-    if (worker_.joinable()) {
-        worker_.join();
-        Logger::info("The worker joined successfully");
     }
 }

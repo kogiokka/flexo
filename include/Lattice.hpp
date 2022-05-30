@@ -42,7 +42,6 @@ public:
     void Train(InputData& dataset, float rate, int iterations);
     std::vector<Node> const& Neurons() const;
     void ToggleTraining();
-    void QuitTraining();
 
 private:
     void TrainInternal(InputData& dataset);
