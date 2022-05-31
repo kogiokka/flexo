@@ -1,73 +1,105 @@
 #include "Lattice.hpp"
+#include "common/Logger.hpp"
 
 #include <cmath>
 #include <fstream>
 #include <limits>
 #include <sstream>
 
-Lattice::Lattice(int width, int height, int iterations, float initRate)
+Lattice::Lattice(int width, int height)
     : width_(width)
     , height_(height)
-    , lenDiag_(sqrtf(static_cast<float>(width * width + height * height)))
-    , iterCap_(iterations)
-    , iterRemained_(iterations)
-    , rateCurrent_(initRate)
-    , rateInitial_(initRate)
-    , neighborhoodRadius_(lenDiag_)
+    , iterCap_(0)
+    , iterRemained_(0)
+    , initRate_(0.0f)
+    , currRate_(0.0f)
+    , neighborhoodRadius_(0.0f)
+    , isTraining_(false)
+    , isQuit_(false)
     , RNG_(-1.0f, 1.0f)
+    , worker_()
+    , mut_()
+    , cv_()
 {
     for (int j = 0; j < height_; ++j) {
         for (int i = 0; i < width_; ++i) {
             neurons_.emplace_back(i, j, RNG_.vector(3));
         }
     }
-    timeConstant_ = iterations / logf(neighborhoodRadius_);
 }
 
-bool Lattice::Input(std::vector<float> in)
+Lattice::~Lattice()
 {
-    if (iterRemained_ <= 0)
-        return false;
+    isQuit_ = true;
+    cv_.notify_one();
 
-    float const progress = static_cast<float>(iterCap_ - iterRemained_);
-
-    // Decay of neighborhood and learning rate
-    neighborhoodRadius_ = lenDiag_ * expf(-progress / timeConstant_);
-    rateCurrent_ = rateInitial_ * expf(-progress / iterRemained_);
-
-    auto bmu = neurons_.cbegin();
-    float distMin = std::numeric_limits<float>::max();
-
-    // Find the Best Matching Unit
-    for (auto it = neurons_.cbegin(); it != neurons_.cend(); ++it) {
-        float sum = 0;
-        for (int i = 0; i < it->Dimension(); ++i) {
-            float const diff = (*it)[i] - in[i];
-            sum += diff * diff;
-        }
-        if (distMin > sum) {
-            bmu = it;
-            distMin = sum;
-        }
+    if (worker_.joinable()) {
+        worker_.join();
+        Logger::info("The worker joined successfully");
     }
+}
 
-    for (Node& node : neurons_) {
-        float const dx = bmu->X() - node.X();
-        float const dy = bmu->Y() - node.Y();
-        float const distToBmuSqr = dx * dx + dy * dy;
-        float const radiusSqr = (neighborhoodRadius_ * neighborhoodRadius_);
-        if (distToBmuSqr < radiusSqr) {
-            float const influence
-                = expf(-distToBmuSqr / (2.0f * radiusSqr)); // Why does (2.0f * radiusSqr) need parens?
-            for (int i = 0; i < node.Dimension(); ++i) {
-                node[i] += rateCurrent_ * influence * (in[i] - node[i]);
+void Lattice::TrainInternal(InputData& dataset)
+{
+    while (iterRemained_ > 0 && not isQuit_) {
+        std::unique_lock lk(mut_);
+        cv_.wait(lk, [this] { return this->isTraining_ || this->isQuit_; });
+
+        glm::vec3 const input = dataset.getInput();
+        float const progress = static_cast<float>(iterCap_ - iterRemained_);
+
+        neighborhoodRadius_ = initRadius_ * expf(-progress / timeConst_);
+        currRate_ = initRate_ * expf(-progress / iterRemained_);
+
+        auto bmu = neurons_.cbegin();
+        float distMin = std::numeric_limits<float>::max();
+
+        // Find the Best Matching Unit
+        for (auto it = neurons_.cbegin(); it != neurons_.cend(); ++it) {
+            float sum = 0;
+            for (int i = 0; i < it->Dimension(); ++i) {
+                float const diff = (*it)[i] - input[i];
+                sum += diff * diff;
+            }
+            if (distMin > sum) {
+                bmu = it;
+                distMin = sum;
             }
         }
+
+        for (Node& node : neurons_) {
+            float const dx = bmu->X() - node.X();
+            float const dy = bmu->Y() - node.Y();
+            float const distToBmuSqr = dx * dx + dy * dy;
+            float const radiusSqr = (neighborhoodRadius_ * neighborhoodRadius_);
+            if (distToBmuSqr < radiusSqr) {
+                float const influence = expf(-distToBmuSqr / (2.0f * radiusSqr));
+                for (int i = 0; i < node.Dimension(); ++i) {
+                    node[i] += currRate_ * influence * (input[i] - node[i]);
+                }
+            }
+        }
+
+        --iterRemained_;
     }
+}
 
-    --iterRemained_;
+void Lattice::Train(InputData& dataset, float rate, int iterations)
+{
+    iterCap_ = iterations;
+    iterRemained_ = iterations;
+    initRate_ = rate;
+    currRate_ = rate;
+    initRadius_ = sqrt(static_cast<float>(width_ * width_ + height_ * height_));
+    timeConst_ = iterations / logf(initRadius_);
 
-    return true;
+    Logger::info("Max iterations: %d, Initial Learning Rate: %f", iterCap_, initRate_);
+
+    void (Lattice::*TrainInternal)(InputData&) = &Lattice::TrainInternal;
+    worker_ = std::thread(TrainInternal, std::ref(*this), std::ref(dataset));
+
+    Logger::info("Training worker created");
+    Logger::info("Training has been paused");
 }
 
 int Lattice::Width() const
@@ -102,10 +134,22 @@ std::vector<Node> const& Lattice::Neurons() const
 
 float Lattice::InitialRate() const
 {
-    return rateInitial_;
+    return initRate_;
 }
 
 float Lattice::CurrentRate() const
 {
-    return rateCurrent_;
+    return currRate_;
+}
+
+void Lattice::ToggleTraining()
+{
+    isTraining_ = not isTraining_;
+    cv_.notify_one();
+
+    if (isTraining_) {
+        Logger::info("Training resumed");
+    } else {
+        Logger::info("Training paused");
+    }
 }

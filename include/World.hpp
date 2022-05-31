@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
 #include "Vertex.hpp"
@@ -19,14 +20,17 @@ struct World {
     World();
     ~World();
 
-    struct Lattice {
+    struct LatticeMesh {
         std::vector<Vertex::Position> positions;
         std::vector<Vertex2> faces;
         std::vector<unsigned int> indices;
     };
 
     float modelColorAlpha = 0.8f;
-    Lattice lattice;
+    std::unique_ptr<InputData> dataset;
+
+    std::unique_ptr<Lattice> lattice;
+    LatticeMesh latticeMesh;
 
     Mesh uvsphere;
     Mesh cube;

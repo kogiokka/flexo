@@ -2,6 +2,7 @@
 
 #include "OpenGLCanvas.hpp"
 
+#include <wx/button.h>
 #include <wx/dcclient.h>
 #include <wx/event.h>
 #include <wx/frame.h>
@@ -19,6 +20,8 @@ class MainWindow : public wxFrame
     int iterationCap_;
     float initLearningRate_;
 
+    wxButton* btnPlayPause_;
+    wxButton* btnConfirm_;
     wxTimer* timerUIUpdate_;
     wxPanel* panel_;
     wxTextCtrl* tcIterCurr_;
@@ -35,10 +38,8 @@ class MainWindow : public wxFrame
     wxStaticBoxSizer* CreatePanelStaticBox3();
 
     void OnTimerUIUpdate(wxTimerEvent& evt);
-    void OnButtonStart(wxCommandEvent& evt);
-    void OnButtonPause(wxCommandEvent& evt);
+    void OnButtonPlayPause(wxCommandEvent& evt);
     void OnButtonConfirmAndReset(wxCommandEvent& evt);
-    void OnSpinCtrlIterationPerFrame(wxSpinEvent& evt);
     void OnCheckboxInputDataset(wxCommandEvent& evt);
     void OnCheckboxLatticeVertex(wxCommandEvent& evt);
     void OnCheckboxLatticeEdge(wxCommandEvent& evt);

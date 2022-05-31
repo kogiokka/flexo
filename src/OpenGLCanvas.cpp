@@ -1,7 +1,3 @@
-#include "OpenGLCanvas.hpp"
-#include "assetlib/OBJ/OBJImporter.hpp"
-#include "assetlib/STL/STLImporter.hpp"
-
 #include <cassert>
 #include <cmath>
 #include <cstddef>
@@ -11,26 +7,22 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "OpenGLCanvas.hpp"
 #include "World.hpp"
+#include "assetlib/OBJ/OBJImporter.hpp"
+#include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
-
-constexpr std::size_t static SIZE_UINT = sizeof(unsigned int);
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
                            wxSize const& size, long style, wxString const& name)
     : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
     , isGLLoaded_(false)
-    , isAcceptingInput_(false)
-    , iterPerFrame_(10)
     , context_(nullptr)
-    , lattice_(nullptr)
     , renderer_(nullptr)
-    , inputs_(nullptr)
 {
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
     context_ = std::make_unique<wxGLContext>(this, nullptr, &attrs);
-    lattice_ = std::make_unique<Lattice>(64, 64, 50000, 0.15f);
 }
 
 OpenGLCanvas::~OpenGLCanvas() { }
@@ -272,14 +264,9 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     center = (max + min) * 0.5f;
 
     Logger::info("%s\n", glm::to_string(center).c_str());
-    inputs_ = std::make_unique<InputData>(posData);
+    world.dataset = std::make_unique<InputData>(posData);
     renderer_->GetCamera().SetCenter(center.x, center.y, center.z);
     renderer_->LoadLattice();
-}
-
-void OpenGLCanvas::SetPlayOrPause(bool isAcceptingInput)
-{
-    isAcceptingInput_ = isAcceptingInput;
 }
 
 void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
@@ -296,51 +283,12 @@ bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
     return rendopt & opt;
 }
 
-int OpenGLCanvas::GetCurrentIterations() const
+void OpenGLCanvas::ResetLattice()
 {
-    return lattice_->CurrentIteration();
-}
-
-void OpenGLCanvas::ResetLattice(int width, int height, int iterationCap, float initLearningRate)
-{
-    isAcceptingInput_ = false;
-    bool const isSameWidth = (width == lattice_->Width());
-    bool const isSameHeight = (height == lattice_->Height());
-    bool const isSameIter = (iterationCap == lattice_->IterationCap());
-    bool const isSameRate = (initLearningRate == lattice_->InitialRate());
-    bool const changed = !(isSameWidth && isSameHeight && isSameIter && isSameRate);
-    lattice_ = std::make_unique<Lattice>(width, height, iterationCap, initLearningRate);
-
-    if (changed) {
-        UpdateLatticePositions();
-        UpdateLatticeEdges();
-        UpdateLatticeFaces();
-        renderer_->LoadLattice();
-    }
-}
-
-int OpenGLCanvas::GetIterationCap() const
-{
-    assert(lattice_.get() != nullptr);
-    return lattice_->IterationCap();
-}
-
-float OpenGLCanvas::GetInitialLearningRate() const
-{
-    assert(lattice_.get() != nullptr);
-    return lattice_->InitialRate();
-}
-
-int OpenGLCanvas::GetLatticeWidth() const
-{
-    assert(lattice_.get() != nullptr);
-    return lattice_->Width();
-}
-
-int OpenGLCanvas::GetLatticeHeight() const
-{
-    assert(lattice_.get() != nullptr);
-    return lattice_->Height();
+    UpdateLatticePositions();
+    UpdateLatticeEdges();
+    UpdateLatticeFaces();
+    renderer_->LoadLattice();
 }
 
 void OpenGLCanvas::SetModelColorAlpha(float alpha)
@@ -354,27 +302,8 @@ float OpenGLCanvas::GetModelTransparency() const
     return world.modelColorAlpha;
 }
 
-void OpenGLCanvas::SetIterationsPerFrame(int times)
-{
-    iterPerFrame_ = times;
-}
-
-int OpenGLCanvas::GetIterationsPerFrame() const
-{
-    return iterPerFrame_;
-}
-
 void OpenGLCanvas::UpdateScene()
 {
-    if (inputs_ != nullptr) {
-        for (int i = 0; i < iterPerFrame_; ++i) {
-            if (isAcceptingInput_) {
-                auto const& p = inputs_->getInput();
-                isAcceptingInput_ = lattice_->Input(std::vector { p.x, p.y, p.z });
-            }
-        }
-    }
-
     if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
         || rendopt & RenderOption_LatticeFace) {
         UpdateLatticePositions();
@@ -388,22 +317,22 @@ void OpenGLCanvas::UpdateScene()
 void OpenGLCanvas::UpdateLatticePositions()
 {
     std::vector<Vertex::Position> positions;
-    auto const& neurons = lattice_->Neurons();
+    auto const& neurons = world.lattice->Neurons();
     positions.reserve(neurons.size());
 
     for (Node const& n : neurons) {
         positions.emplace_back(n[0], n[1], n[2]);
     }
 
-    world.lattice.positions = positions;
+    world.latticeMesh.positions = positions;
 }
 
 void OpenGLCanvas::UpdateLatticeEdges()
 {
     std::vector<unsigned int> indices;
 
-    int const width = lattice_->Width();
-    int const height = lattice_->Height();
+    int const width = world.lattice->Width();
+    int const height = world.lattice->Height();
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);
@@ -417,7 +346,7 @@ void OpenGLCanvas::UpdateLatticeEdges()
         }
     }
 
-    world.lattice.indices = indices;
+    world.latticeMesh.indices = indices;
 }
 
 void OpenGLCanvas::UpdateLatticeFaces()
@@ -426,8 +355,8 @@ void OpenGLCanvas::UpdateLatticeFaces()
 
     std::vector<Vertex2> faces;
 
-    int const width = lattice_->Width();
-    int const height = lattice_->Height();
+    int const width = world.lattice->Width();
+    int const height = world.lattice->Height();
     faces.reserve((width - 1) * (height - 1) * 6);
 
     Vertex2 v1, v2, v3;
@@ -441,9 +370,9 @@ void OpenGLCanvas::UpdateLatticeFaces()
         for (int x = 0; x < width - 1; ++x) {
             const int idx = y * width + x;
 
-            p1 = world.lattice.positions[idx];
-            p2 = world.lattice.positions[idx + 1];
-            p3 = world.lattice.positions[idx + width + 1];
+            p1 = world.latticeMesh.positions[idx];
+            p2 = world.latticeMesh.positions[idx + 1];
+            p3 = world.latticeMesh.positions[idx + width + 1];
             glm::vec3 normal1 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
             if (isnan(normal1.x) || isnan(normal1.y) || isnan(normal1.z)) {
                 normal1 = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -458,9 +387,9 @@ void OpenGLCanvas::UpdateLatticeFaces()
             faces.push_back(v2);
             faces.push_back(v3);
 
-            p1 = world.lattice.positions[idx];
-            p2 = world.lattice.positions[idx + width + 1];
-            p3 = world.lattice.positions[idx + width];
+            p1 = world.latticeMesh.positions[idx];
+            p2 = world.latticeMesh.positions[idx + width + 1];
+            p3 = world.latticeMesh.positions[idx + width];
             glm::vec3 normal2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
             if (isnan(normal2.x) || isnan(normal2.y) || isnan(normal2.z)) {
                 normal2 = glm::vec3(0.0f, 0.0f, 0.0f);
@@ -477,7 +406,7 @@ void OpenGLCanvas::UpdateLatticeFaces()
         }
     }
 
-    world.lattice.faces = faces;
+    world.latticeMesh.faces = faces;
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
