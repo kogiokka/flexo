@@ -12,12 +12,21 @@ Image::Image()
 
 Image& Image::operator=(Image&& other)
 {
+    if (this == &other) {
+        return *this;
+    }
+
+    stbi_image_free(data);
+
+    data = other.data;
     width = other.width;
     height = other.height;
     channels = other.channels;
 
-    data = other.data;
     other.data = nullptr;
+    other.width = 0;
+    other.height = 0;
+    other.channels = 0;
 
     return *this;
 }
