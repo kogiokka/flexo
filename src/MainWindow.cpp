@@ -68,8 +68,8 @@ MainWindow::MainWindow(wxWindow* parent)
 
     iterationCap_ = 50000;
     initLearningRate_ = 0.15f;
-    widthLat_ = 64;
-    heightLat_ = 64;
+    widthLat_ = 150;
+    heightLat_ = 200;
     world.lattice = std::make_unique<Lattice>(widthLat_, heightLat_);
     CreateOpenGLCanvas();
 

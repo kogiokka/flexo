@@ -68,7 +68,7 @@ Renderer::Renderer(int width, int height)
         s.Link();
     }
 
-    const char* imgFile = "res/images/pattern01.png";
+    const char* imgFile = "res/images/chessboard.png";
     Image pattern(imgFile, 0, STBI_rgb_alpha);
     glGenTextures(1, &tex_);
     glBindTexture(GL_TEXTURE_2D, tex_);
