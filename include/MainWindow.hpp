@@ -1,6 +1,7 @@
 #pragma once
 
 #include "OpenGLCanvas.hpp"
+#include "Lattice.hpp"
 
 #include <wx/button.h>
 #include <wx/dcclient.h>
@@ -19,6 +20,7 @@ class MainWindow : public wxFrame
     int heightLat_;
     int iterationCap_;
     float initLearningRate_;
+    LatticeFlags latFlags_;
 
     wxButton* btnPlayPause_;
     wxButton* btnConfirm_;
@@ -45,6 +47,8 @@ class MainWindow : public wxFrame
     void OnCheckboxLatticeEdge(wxCommandEvent& evt);
     void OnCheckboxLatticeFace(wxCommandEvent& evt);
     void OnCheckboxLightSource(wxCommandEvent& evt);
+    void OnCheckboxLatticeFlagsCyclicX(wxCommandEvent& evt);
+    void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& evt);
     void OnSliderTransparency(wxCommandEvent& evt);
     void OnOpenFile(wxCommandEvent& evt);
     void OnExit(wxCommandEvent& evt);

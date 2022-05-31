@@ -10,6 +10,14 @@
 #include <thread>
 #include <vector>
 
+using LatticeFlags = int;
+
+enum LatticeFlags_ : int {
+    LatticeFlags_CyclicNone = 0,
+    LatticeFlags_CyclicX,
+    LatticeFlags_CyclicY,
+};
+
 class Lattice
 {
     int width_;
@@ -23,6 +31,7 @@ class Lattice
     float initRadius_;
     bool isTraining_;
     bool isQuit_;
+    LatticeFlags flags_;
     RandomRealNumber<float> RNG_;
     std::vector<Node> neurons_;
     std::thread worker_;
@@ -39,7 +48,7 @@ public:
     float CurrentRate() const;
     float InitialRate() const;
     float NeighborhoodRadius() const;
-    void Train(InputData& dataset, float rate, int iterations);
+    void Train(InputData& dataset, float rate, int iterations, LatticeFlags flags);
     std::vector<Node> const& Neurons() const;
     void ToggleTraining();
 

@@ -26,6 +26,8 @@ enum {
     CB_RENDEROPT_LAT_EDGE,
     CB_RENDEROPT_LAT_FACE,
     CB_RENDEROPT_LIGHT_SOURCE,
+    CB_LATTICE_FLAGS_CYCLIC_X,
+    CB_LATTICE_FLAGS_CYCLIC_Y,
     TC_SET_ITERATION_CAP,
     TC_SET_LEARNING_RATE,
     TC_SET_LAT_WIDTH,
@@ -36,6 +38,7 @@ enum {
 
 MainWindow::MainWindow(wxWindow* parent)
     : wxFrame(parent, wxID_ANY, "Self-organizing Map Demo", wxDefaultPosition, wxSize(1200, 800))
+    , latFlags_(LatticeFlags_CyclicNone)
     , timerUIUpdate_(nullptr)
     , panel_(nullptr)
     , tcIterCurr_(nullptr)
@@ -135,12 +138,18 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox1()
     *tcLatWidth_ << widthLat_;
     *tcLatHeight_ << heightLat_;
 
+    auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
+    auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
+    chkBox1->SetValue(latFlags_ & LatticeFlags_CyclicX);
+    chkBox2->SetValue(latFlags_ & LatticeFlags_CyclicY);
+
     btnConfirm_ = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
     btnConfirm_->Disable();
 
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
+    auto row4 = new wxBoxSizer(wxHORIZONTAL);
     auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
     row1->Add(iterCapLabel, 1, sizerFlag, 5);
     row1->Add(tcIterCap_, 1, sizerFlag, 5);
@@ -149,9 +158,12 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox1()
     row3->Add(dimenLabel, 1, sizerFlag, 5);
     row3->Add(tcLatWidth_, 1, sizerFlag, 5);
     row3->Add(tcLatHeight_, 1, sizerFlag, 5);
+    row4->Add(chkBox1, 1, sizerFlag, 5);
+    row4->Add(chkBox2, 1, sizerFlag, 5);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
+    boxLayout->Add(row4, 0, wxGROW | wxALL, 5);
     boxLayout->Add(btnConfirm_, 0, wxGROW | wxALL, 10);
 
     return boxLayout;
@@ -273,7 +285,7 @@ void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
 
     assert(world.dataset != nullptr);
     world.lattice = std::make_unique<Lattice>(widthLat_, heightLat_);
-    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_);
+    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_, latFlags_);
     btnPlayPause_->SetLabel("Start");
     canvas_->ResetLattice();
 }
@@ -301,6 +313,16 @@ void MainWindow::OnCheckboxLatticeFace(wxCommandEvent&)
 void MainWindow::OnCheckboxLightSource(wxCommandEvent&)
 {
     canvas_->ToggleRenderOption(RenderOption_LightSource);
+}
+
+void MainWindow::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
+{
+    latFlags_ ^= LatticeFlags_CyclicX;
+}
+
+void MainWindow::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
+{
+    latFlags_ ^= LatticeFlags_CyclicY;
 }
 
 void MainWindow::OnSliderTransparency(wxCommandEvent&)
@@ -339,7 +361,7 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
     canvas_->OpenInputDataFile(filepath);
 
     assert(world.dataset != nullptr);
-    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_);
+    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_, latFlags_);
     btnConfirm_->Enable();
     btnPlayPause_->Enable();
 }
@@ -360,6 +382,8 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainWindow::OnCheckboxLatticeEdge)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainWindow::OnCheckboxLatticeFace)
     EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, MainWindow::OnCheckboxLightSource)
+    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, MainWindow::OnCheckboxLatticeFlagsCyclicX)
+    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, MainWindow::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, MainWindow::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, MainWindow::OnTimerUIUpdate)
 wxEND_EVENT_TABLE()

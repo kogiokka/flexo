@@ -16,6 +16,7 @@ Lattice::Lattice(int width, int height)
     , neighborhoodRadius_(0.0f)
     , isTraining_(false)
     , isQuit_(false)
+    , flags_(LatticeFlags_CyclicNone)
     , RNG_(-1.0f, 1.0f)
     , worker_()
     , mut_()
@@ -59,13 +60,14 @@ void Lattice::TrainInternal(InputData& dataset)
     }
 }
 
-void Lattice::Train(InputData& dataset, float rate, int iterations)
+void Lattice::Train(InputData& dataset, float rate, int iterations, LatticeFlags flags)
 {
+    flags_ = flags;
     iterCap_ = iterations;
     iterRemained_ = iterations;
     initRate_ = rate;
     currRate_ = rate;
-    initRadius_ = sqrt(static_cast<float>(width_ * width_ + height_ * height_));
+    initRadius_ = sqrt(static_cast<float>(width_ * width_ + height_ * height_)) * 0.5f;
     timeConst_ = iterations / logf(initRadius_);
 
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", iterCap_, initRate_);
@@ -157,20 +159,26 @@ void Lattice::UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius)
     int const radSqr = rad * rad;
 
     for (int i = bmu.X() - rad; i <= bmu.X() + rad; i++) {
-        if (i < 0 || i >= width_) {
-            continue;
+        int x = i;
+        if (flags_ & LatticeFlags_CyclicX) {
+            x = ((i % width_) + width_) % width_;
+        } else {
+            if (i < 0 || i >= width_)
+                continue;
         }
         for (int j = bmu.Y() - rad; j <= bmu.Y() + rad; j++) {
-            if (j < 0 || j >= height_) {
-                continue;
+            int y = j;
+            if (flags_ & LatticeFlags_CyclicY) {
+                y = ((j % height_) + height_) % height_;
+            } else {
+                if (j < 0 || j >= height_)
+                    continue;
             }
-
-            Node& node = neurons_[i + j * width_];
-
-            float const dx = bmu.X() - node.X();
-            float const dy = bmu.Y() - node.Y();
+            float const dx = bmu.X() - i;
+            float const dy = bmu.Y() - j;
             float const distToBmuSqr = dx * dx + dy * dy;
             if (distToBmuSqr < radSqr) {
+                Node& node = neurons_[x + y * width_];
                 float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
                 for (int i = 0; i < node.Dimension(); ++i) {
                     node[i] += currRate_ * influence * (input[i] - node[i]);
