@@ -51,23 +51,9 @@ void Lattice::TrainInternal(InputData& dataset)
         neighborhoodRadius_ = initRadius_ * expf(-progress / timeConst_);
         currRate_ = initRate_ * expf(-progress / iterRemained_);
 
-        auto bmu = neurons_.cbegin();
-        float distMin = std::numeric_limits<float>::max();
-
-        // Find the Best Matching Unit
-        for (auto it = neurons_.cbegin(); it != neurons_.cend(); ++it) {
-            float sum = 0;
-            for (int i = 0; i < it->Dimension(); ++i) {
-                float const diff = (*it)[i] - input[i];
-                sum += diff * diff;
-            }
-            if (distMin > sum) {
-                bmu = it;
-                distMin = sum;
-            }
-        }
-
-        UpdateNeighborhood(input, *bmu, neighborhoodRadius_);
+        glm::ivec2 const index = FindBMU(input);
+        Node& bmu = neurons_[index.x + index.y * width_];
+        UpdateNeighborhood(input, bmu, neighborhoodRadius_);
 
         --iterRemained_;
     }
@@ -141,6 +127,28 @@ void Lattice::ToggleTraining()
     } else {
         Logger::info("Training paused");
     }
+}
+
+glm::ivec2 Lattice::FindBMU(glm::vec3 const& input) const
+{
+    glm::ivec2 idx;
+    float distMin = std::numeric_limits<float>::max();
+
+    for (int i = 0; i < width_; i++) {
+        for (int j = 0; j < height_; j++) {
+            float sum = 0;
+            for (int k = 0; k < neurons_.front().Dimension(); k++) {
+                float const diff = input[k] - neurons_[i + j * width_][k];
+                sum += (diff * diff);
+            }
+            if (distMin > sum) {
+                distMin = sum;
+                idx = { i, j };
+            }
+        }
+    }
+
+    return idx;
 }
 
 void Lattice::UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius)

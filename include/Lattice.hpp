@@ -45,5 +45,6 @@ public:
 
 private:
     void TrainInternal(InputData& dataset);
+    glm::ivec2 FindBMU(glm::vec3 const& input) const;
     void UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius);
 };
