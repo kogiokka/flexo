@@ -1,6 +1,5 @@
 #include <cstdlib>
 
-#include "Image.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
 #include "World.hpp"
@@ -68,8 +67,6 @@ Renderer::Renderer(int width, int height)
         s.Link();
     }
 
-    const char* imgFile = "res/images/chessboard.png";
-    Image pattern(imgFile, 0, STBI_rgb_alpha);
     glGenTextures(1, &tex_);
     glBindTexture(GL_TEXTURE_2D, tex_);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -77,10 +74,9 @@ Renderer::Renderer(int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     {
-        auto const& [img, w, h, ch] = pattern;
-        if (img == nullptr) {
-            Logger::error("Failed to open image: %s", imgFile);
-            std::exit(EXIT_FAILURE);
+        auto const& [img, w, h, ch] = world.pattern;
+        if (w == 0 || h == 0 || ch == 0 || img == nullptr) {
+            Logger::error("HOW?");
         }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
     }

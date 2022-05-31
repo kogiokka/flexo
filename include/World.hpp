@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "Image.hpp"
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
@@ -36,6 +37,7 @@ struct World {
     Mesh cube;
     std::unique_ptr<Mesh> polyModel;
     std::unique_ptr<VolumetricModel> volModel;
+    Image pattern;
 };
 
 extern World world;

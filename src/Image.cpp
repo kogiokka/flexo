@@ -1,4 +1,26 @@
+#include <cstring>
+
 #include "Image.hpp"
+
+Image::Image()
+    : data(nullptr)
+    , width(0)
+    , height(0)
+    , channels(0)
+{
+}
+
+Image& Image::operator=(Image&& other)
+{
+    width = other.width;
+    height = other.height;
+    channels = other.channels;
+
+    data = other.data;
+    other.data = nullptr;
+
+    return *this;
+}
 
 Image::Image(char const* filename, int flip, int reqComp)
 {
