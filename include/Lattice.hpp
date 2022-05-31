@@ -45,4 +45,5 @@ public:
 
 private:
     void TrainInternal(InputData& dataset);
+    void UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius);
 };

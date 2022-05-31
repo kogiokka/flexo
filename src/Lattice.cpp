@@ -67,18 +67,7 @@ void Lattice::TrainInternal(InputData& dataset)
             }
         }
 
-        for (Node& node : neurons_) {
-            float const dx = bmu->X() - node.X();
-            float const dy = bmu->Y() - node.Y();
-            float const distToBmuSqr = dx * dx + dy * dy;
-            float const radiusSqr = (neighborhoodRadius_ * neighborhoodRadius_);
-            if (distToBmuSqr < radiusSqr) {
-                float const influence = expf(-distToBmuSqr / (2.0f * radiusSqr));
-                for (int i = 0; i < node.Dimension(); ++i) {
-                    node[i] += currRate_ * influence * (input[i] - node[i]);
-                }
-            }
-        }
+        UpdateNeighborhood(input, *bmu, neighborhoodRadius_);
 
         --iterRemained_;
     }
@@ -151,5 +140,34 @@ void Lattice::ToggleTraining()
         Logger::info("Training resumed");
     } else {
         Logger::info("Training paused");
+    }
+}
+
+void Lattice::UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius)
+{
+    int const rad = static_cast<int>(radius);
+    int const radSqr = rad * rad;
+
+    for (int i = bmu.X() - rad; i <= bmu.X() + rad; i++) {
+        if (i < 0 || i >= width_) {
+            continue;
+        }
+        for (int j = bmu.Y() - rad; j <= bmu.Y() + rad; j++) {
+            if (j < 0 || j >= height_) {
+                continue;
+            }
+
+            Node& node = neurons_[i + j * width_];
+
+            float const dx = bmu.X() - node.X();
+            float const dy = bmu.Y() - node.Y();
+            float const distToBmuSqr = dx * dx + dy * dy;
+            if (distToBmuSqr < radSqr) {
+                float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
+                for (int i = 0; i < node.Dimension(); ++i) {
+                    node[i] += currRate_ * influence * (input[i] - node[i]);
+                }
+            }
+        }
     }
 }
