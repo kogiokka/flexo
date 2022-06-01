@@ -158,30 +158,39 @@ void Lattice::UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius)
     int const rad = static_cast<int>(radius);
     int const radSqr = rad * rad;
 
-    for (int i = bmu.X() - rad; i <= bmu.X() + rad; i++) {
-        int x = i;
+    int w = width_ - 1;
+    int h = height_ - 1;
+    for (int x = bmu.X() - rad; x <= bmu.X() + rad; x++) {
+        int modX = x;
         if (flags_ & LatticeFlags_CyclicX) {
-            x = ((i % width_) + width_) % width_;
+            modX = ((x % w) + w) % w;
         } else {
-            if (i < 0 || i >= width_)
+            if (x < 0 || x >= width_)
                 continue;
         }
-        for (int j = bmu.Y() - rad; j <= bmu.Y() + rad; j++) {
-            int y = j;
+        for (int y = bmu.Y() - rad; y <= bmu.Y() + rad; y++) {
+            int modY = y;
             if (flags_ & LatticeFlags_CyclicY) {
-                y = ((j % height_) + height_) % height_;
+                modY = ((y % h) + h) % h;
             } else {
-                if (j < 0 || j >= height_)
+                if (y < 0 || y >= height_)
                     continue;
             }
-            float const dx = bmu.X() - i;
-            float const dy = bmu.Y() - j;
+            float const dx = bmu.X() - x;
+            float const dy = bmu.Y() - y;
             float const distToBmuSqr = dx * dx + dy * dy;
             if (distToBmuSqr < radSqr) {
-                Node& node = neurons_[x + y * width_];
+                Node& node = neurons_[modX + modY * width_];
                 float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
-                for (int i = 0; i < node.Dimension(); ++i) {
-                    node[i] += currRate_ * influence * (input[i] - node[i]);
+                for (int k = 0; k < node.Dimension(); ++k) {
+                    node[k] += currRate_ * influence * (input[k] - node[k]);
+                }
+
+                if (flags_ & LatticeFlags_CyclicX && x == w) {
+                    neurons_[x + modY * width_] = node;
+                }
+                if (flags_ & LatticeFlags_CyclicY && y == h) {
+                    neurons_[modX + y * width_] = node;
                 }
             }
         }
