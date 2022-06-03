@@ -14,6 +14,7 @@ public:
     int& Y();
     int X() const;
     int Y() const;
+    Node& operator=(Node const& other);
     float& operator[](int index);
     float operator[](int index) const;
     int Dimension() const;

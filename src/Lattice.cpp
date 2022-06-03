@@ -56,6 +56,18 @@ void Lattice::TrainInternal(InputData& dataset)
         Node& bmu = neurons_[index.x + index.y * width_];
         UpdateNeighborhood(input, bmu, neighborhoodRadius_);
 
+        if (flags_ & LatticeFlags_CyclicX) {
+            for (int y = 0; y < height_; y++) {
+                neurons_[y * width_ + width_ - 1] = neurons_[y * width_ + 0];
+            }
+        }
+
+        if (flags_ & LatticeFlags_CyclicY) {
+            for (int x = 0; x < height_; x++) {
+                neurons_[(height_ - 1) * width_ + x] = neurons_[0 * width_ + x];
+            }
+        }
+
         --iterRemained_;
     }
 }
@@ -149,7 +161,6 @@ glm::ivec2 Lattice::FindBMU(glm::vec3 const& input) const
             }
         }
     }
-
     return idx;
 }
 
@@ -184,13 +195,6 @@ void Lattice::UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius)
                 float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
                 for (int k = 0; k < node.Dimension(); ++k) {
                     node[k] += currRate_ * influence * (input[k] - node[k]);
-                }
-
-                if (flags_ & LatticeFlags_CyclicX && x == w) {
-                    neurons_[x + modY * width_] = node;
-                }
-                if (flags_ & LatticeFlags_CyclicY && y == h) {
-                    neurons_[modX + y * width_] = node;
                 }
             }
         }
