@@ -10,10 +10,12 @@ class Node
 
 public:
     Node(int x, int y, std::vector<float> initWeights);
+    Node(Node const& other);
     int& X();
     int& Y();
     int X() const;
     int Y() const;
+    Node& operator=(Node const& other);
     float& operator[](int index);
     float operator[](int index) const;
     int Dimension() const;
