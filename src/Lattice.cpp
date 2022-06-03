@@ -63,7 +63,7 @@ void Lattice::TrainInternal(InputData& dataset)
         }
 
         if (flags_ & LatticeFlags_CyclicY) {
-            for (int x = 0; x < height_; x++) {
+            for (int x = 0; x < width_; x++) {
                 neurons_[(height_ - 1) * width_ + x] = neurons_[0 * width_ + x];
             }
         }

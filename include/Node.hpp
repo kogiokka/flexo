@@ -10,6 +10,7 @@ class Node
 
 public:
     Node(int x, int y, std::vector<float> initWeights);
+    Node(Node const& other);
     int& X();
     int& Y();
     int X() const;

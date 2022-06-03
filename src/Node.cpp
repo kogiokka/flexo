@@ -7,6 +7,13 @@ Node::Node(int x, int y, std::vector<float> initWeights)
     weights_ = initWeights;
 }
 
+Node::Node(Node const& other)
+{
+    x_ = other.x_;
+    y_ = other.y_;
+    weights_ = other.weights_;
+}
+
 Node& Node::operator=(Node const& other)
 {
     weights_ = other.weights_;
