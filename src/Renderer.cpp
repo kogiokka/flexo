@@ -8,9 +8,7 @@
 RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 
 Renderer::Renderer(int width, int height)
-    : width_(width)
-    , height_(height)
-    , camera_(width, height)
+    : camera_(width, height)
 {
     AttribFormat format;
     format.count = 3;
@@ -75,9 +73,6 @@ Renderer::Renderer(int width, int height)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     {
         auto const& [img, w, h, ch] = world.pattern;
-        if (w == 0 || h == 0 || ch == 0 || img == nullptr) {
-            Logger::error("HOW?");
-        }
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
     }
     glGenerateMipmap(GL_TEXTURE_2D);

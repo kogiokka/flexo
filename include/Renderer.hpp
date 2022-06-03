@@ -48,8 +48,6 @@ enum RenderOption_ : int {
 
 class Renderer
 {
-    int width_;
-    int height_;
     VertexArray vao_;
     std::array<GLuint, BufferType_Last + 1> buffers_;
     std::array<Shader, ShaderType_Last + 1> shaders_;
