@@ -364,8 +364,8 @@ void OpenGLCanvas::UpdateLatticeFaces()
     auto& [p2, n2, t2] = v2;
     auto& [p3, n3, t3] = v3;
 
-    float const w = static_cast<float>(width);
-    float const h = static_cast<float>(height);
+    float const w = static_cast<float>(width - 1);
+    float const h = static_cast<float>(height - 1);
     for (int y = 0; y < height - 1; ++y) {
         for (int x = 0; x < width - 1; ++x) {
             const int idx = y * width + x;
