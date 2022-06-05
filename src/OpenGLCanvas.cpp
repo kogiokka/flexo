@@ -364,8 +364,7 @@ void OpenGLCanvas::UpdateLatticeFaces()
     auto& [p2, n2, t2] = v2;
     auto& [p3, n3, t3] = v3;
 
-    float const w = static_cast<float>(width - 1);
-    float const h = static_cast<float>(height - 1);
+    float const divisor = 1.0f;
     for (int y = 0; y < height - 1; ++y) {
         for (int x = 0; x < width - 1; ++x) {
             const int idx = y * width + x;
@@ -380,9 +379,9 @@ void OpenGLCanvas::UpdateLatticeFaces()
             n1 = normal1;
             n2 = normal1;
             n3 = normal1;
-            t1 = glm::vec2(x / w, y / h);
-            t2 = glm::vec2((x + 1) / w, y / h);
-            t3 = glm::vec2((x + 1) / w, (y + 1) / h);
+            t1 = glm::vec2(x / divisor, y / divisor);
+            t2 = glm::vec2((x + 1) / divisor, y / divisor);
+            t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
             faces.push_back(v1);
             faces.push_back(v2);
             faces.push_back(v3);
@@ -397,9 +396,9 @@ void OpenGLCanvas::UpdateLatticeFaces()
             n1 = normal2;
             n2 = normal2;
             n3 = normal2;
-            t1 = glm::vec2(x / w, y / h);
-            t2 = glm::vec2((x + 1) / w, (y + 1) / h);
-            t3 = glm::vec2(x / w, (y + 1) / h);
+            t1 = glm::vec2(x / divisor, y / divisor);
+            t2 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
+            t3 = glm::vec2(x / divisor, (y + 1) / divisor);
             faces.push_back(v1);
             faces.push_back(v2);
             faces.push_back(v3);

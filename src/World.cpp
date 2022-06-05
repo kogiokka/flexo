@@ -7,7 +7,7 @@ World::World()
 {
     polyModel = nullptr;
     volModel = nullptr;
-    const char* imgFile = "res/images/chessboard.png";
+    const char* imgFile = "res/images/checkerboard_64x64.png";
     pattern = Image(imgFile, 0, STBI_rgb_alpha);
     Logger::info("Hello from World");
 
