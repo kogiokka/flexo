@@ -4,7 +4,6 @@
 #include "Camera.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
-#include "Vertex.hpp"
 #include "VertexArray.hpp"
 
 #include <glad/glad.h>
@@ -53,6 +52,8 @@ class Renderer
     std::array<Shader, ShaderType_Last + 1> shaders_;
     Camera camera_;
     GLuint tex_;
+    std::vector<float> cubeBuffer_;
+    std::vector<float> uvsphereBuffer_;
 
 public:
     Renderer(int width, int height);
@@ -61,6 +62,9 @@ public:
     void LoadLattice();
     void LoadVolumetricModel();
     Camera& GetCamera();
+
+private:
+    void CreateVertexBuffers();
 };
 
 extern RenderOption rendopt;

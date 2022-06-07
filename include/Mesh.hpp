@@ -1,19 +1,23 @@
 #ifndef MESH_H
 #define MESH_H
 
-#include "assetlib/ModelStructs.hpp"
-
+#include <glm/glm.hpp>
 #include <vector>
 
-class Mesh
-{
-    std::vector<Vertex> vertices_;
+struct Face {
+    std::vector<unsigned int> indices;
+};
 
-public:
-    Mesh();
-    void Import(OBJModel const& model);
-    void Import(STLModel const& model);
-    std::vector<Vertex> const& Vertices() const;
+struct Mesh {
+    std::vector<glm::vec3> positions;
+    std::vector<glm::vec3> normals;
+    std::vector<glm::vec2> textureCoords;
+    std::vector<Face> faces;
+
+    bool HasPositions() const;
+    bool HasNormals() const;
+    bool HasTextureCoords() const;
+    bool HasFaces() const;
 };
 
 #endif

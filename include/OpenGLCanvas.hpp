@@ -8,7 +8,6 @@
 #include "Mesh.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
-#include "Vertex.hpp"
 #include "VolumeData.hpp"
 
 #include <wx/dcclient.h>

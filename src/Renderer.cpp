@@ -104,9 +104,8 @@ void Renderer::Render()
         program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
         program->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
         program->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(Vertex, position),
-                           sizeof(Vertex));
-        glDrawArrays(GL_TRIANGLES, 0, world.uvsphere.Vertices().size());
+        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], 0, sizeof(glm::vec3));
+        glDrawArrays(GL_TRIANGLES, 0, world.uvsphere.positions.size());
     }
 
     if (rendopt & RenderOption_LatticeVertex) {
@@ -128,13 +127,11 @@ void Renderer::Render()
         program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
         program->SetUniform1f("material.shininess", 32.0f);
         program->SetUniform1f("alpha", 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(Vertex, position),
-                           sizeof(Vertex));
-        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_UVSphere], offsetof(Vertex, normal),
-                           sizeof(Vertex));
+        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], 0, sizeof(glm::vec3));
+        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_UVSphere], 0, sizeof(glm::vec3));
         glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
         glVertexBindingDivisor(2, 1);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, world.uvsphere.Vertices().size(), world.latticeMesh.positions.size());
+        glDrawArraysInstanced(GL_TRIANGLES, 0, world.uvsphere.positions.size(), world.latticeMesh.positions.size());
     }
 
     if (rendopt & RenderOption_Model) {
@@ -159,11 +156,9 @@ void Renderer::Render()
             program->SetUniform1f("material.shininess", 32.0f);
             program->SetUniform1f("alpha", world.modelColorAlpha);
 
-            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], offsetof(Vertex, position),
-                               sizeof(Vertex));
-            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Surface], offsetof(Vertex, normal),
-                               sizeof(Vertex));
-            glDrawArrays(GL_TRIANGLES, 0, world.polyModel->Vertices().size());
+            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], 0, sizeof(glm::vec3));
+            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Surface], 0, sizeof(glm::vec3));
+            glDrawArrays(GL_TRIANGLES, 0, world.polyModel->positions.size());
         } else if (world.volModel != nullptr) {
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
@@ -189,13 +184,11 @@ void Renderer::Render()
 
             program->SetUniform1f("alpha", world.modelColorAlpha);
 
-            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Cube], offsetof(Vertex, position),
-                               sizeof(Vertex));
-            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Cube], offsetof(Vertex, normal),
-                               sizeof(Vertex));
+            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Cube], 0, sizeof(glm::vec3));
+            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Cube], 0, sizeof(glm::vec3));
             glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_VolumetricModel], 0, sizeof(glm::vec3));
             glVertexBindingDivisor(2, 1);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, world.cube.Vertices().size(), world.volModel->positions.size());
+            glDrawArraysInstanced(GL_TRIANGLES, 0, world.cube.positions.size(), world.volModel->positions.size());
             glDisable(GL_CULL_FACE);
         }
     }
@@ -213,7 +206,11 @@ void Renderer::Render()
         program->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
-        glDrawElements(GL_LINES, world.latticeMesh.indices.size(), GL_UNSIGNED_INT, 0);
+        std::vector<unsigned int> indices;
+        for (Face const& f : world.latticeMesh.faces) {
+            indices.insert(indices.end(), f.indices.begin(), f.indices.end());
+        }
+        glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
     }
 
     if (rendopt & RenderOption_LatticeFace) {
@@ -223,7 +220,8 @@ void Renderer::Render()
         vao_.Disable(VertexAttrib_Instanced);
 
         glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, world.latticeMesh.faces.size() * sizeof(Vertex2), world.latticeMesh.faces.data());
+        glBufferSubData(GL_ARRAY_BUFFER, 0, world.latticeMesh.faces.size() * sizeof(Vertex2),
+                        world.latticeMesh.faces.data());
 
         program = &shaders_[ShaderType_LatticeFace];
         program->Use();
@@ -243,8 +241,8 @@ void Renderer::Render()
                            sizeof(Vertex2));
         glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], offsetof(Vertex2, normal),
                            sizeof(Vertex2));
-        glBindVertexBuffer(VertexAttrib_TextureCoordintes, buffers_[BufferType_LatticeFace], offsetof(Vertex2, texcoord),
-                           sizeof(Vertex2));
+        glBindVertexBuffer(VertexAttrib_TextureCoordintes, buffers_[BufferType_LatticeFace],
+                           offsetof(Vertex2, texcoord), sizeof(Vertex2));
         glBindTexture(GL_TEXTURE_2D, tex_);
         glDrawArrays(GL_TRIANGLES, 0, world.latticeMesh.faces.size());
     }
@@ -298,4 +296,18 @@ void Renderer::LoadVolumetricModel()
 Camera& Renderer::GetCamera()
 {
     return camera_;
+}
+
+void Renderer::CreateVertexBuffers()
+{
+    for (auto const& p : world.cube.positions) {
+        cubeBuffers_.push_back(p.x);
+        cubeBuffers_.push_back(p.y);
+        cubeBuffers_.push_back(p.z);
+    }
+    for (auto const& n : world.cube.normals) {
+        cubeBuffers_.push_back(n.x);
+        cubeBuffers_.push_back(n.y);
+        cubeBuffers_.push_back(n.z);
+    }
 }

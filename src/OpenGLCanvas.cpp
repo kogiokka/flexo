@@ -68,13 +68,9 @@ void OpenGLCanvas::InitGL()
     wxSize const size = GetClientSize() * GetContentScaleFactor();
     assert(size.x > 0 && size.y > 0);
 
-    STLImporter stl1;
-    stl1.Read("res/models/UVSphere.stl");
-    world.uvsphere.Import(stl1.Model());
-
-    STLImporter stl2;
-    stl2.Read("res/models/cube.stl");
-    world.cube.Import(stl2.Model());
+    STLImporter stlImp;
+    world.uvsphere  = stlImp.ReadFile("res/models/UVSphere.stl");
+    world.cube = stlImp.ReadFile("res/models/cube.stl");
 
     UpdateLatticePositions();
     UpdateLatticeEdges();

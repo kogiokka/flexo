@@ -1,20 +1,32 @@
 #ifndef OBJ_IMPORTER_H
 #define OBJ_IMPORTER_H
 
-#include "Vertex.hpp"
-#include "assetlib/BaseImporter.hpp"
-#include "assetlib/ModelStructs.hpp"
-
 #include <string>
 #include <vector>
 
+#include <glm/glm.hpp>
+
+#include "assetlib/BaseImporter.hpp"
+
 class OBJImporter : public BaseImporter
 {
-    OBJModel model_;
-
 public:
-    virtual void Read(std::string const& filename) override;
-    OBJModel const& Model() const;
+    virtual Mesh ReadFile(std::string const& filename) override;
+
+private:
+    struct OBJModel {
+        struct VertexRef {
+            int v, vt, vn;
+        };
+
+        using Face = std::vector<VertexRef>;
+
+        std::vector<glm::vec3> positions;
+        std::vector<glm::vec3> normals;
+        std::vector<Face> faces;
+    };
+
+    Mesh BuildMesh(OBJModel const& model) const;
 };
 
 #endif
