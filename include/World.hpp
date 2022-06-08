@@ -9,32 +9,27 @@
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
-#include "Vertex.hpp"
 #include "VolumeData.hpp"
 
 struct VolumetricModel {
     VolumeData data;
-    std::vector<Vertex::Position> positions;
+    std::vector<glm::vec3> positions;
 };
 
 struct World {
     World();
     ~World();
 
-    struct LatticeMesh {
-        std::vector<Vertex::Position> positions;
-        std::vector<Vertex2> faces;
-        std::vector<unsigned int> indices;
-    };
-
     float modelColorAlpha = 0.8f;
     std::unique_ptr<InputData> dataset;
 
     std::unique_ptr<Lattice> lattice;
-    LatticeMesh latticeMesh;
 
     Mesh uvsphere;
     Mesh cube;
+    Mesh latticeMesh;
+    std::vector<glm::vec3> neuronPositions;
+    std::vector<unsigned int> latticeEdges;
     std::unique_ptr<Mesh> polyModel;
     std::unique_ptr<VolumetricModel> volModel;
     Image pattern;

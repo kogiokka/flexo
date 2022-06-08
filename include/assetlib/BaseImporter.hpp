@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "Mesh.hpp"
+
 class BaseImporter
 {
 protected:
@@ -11,7 +13,7 @@ protected:
     void Slurp(std::string const& filename);
 
 public:
-    virtual void Read(std::string const& filename) = 0;
+    virtual Mesh ReadFile(std::string const& filename) = 0;
 };
 
 #endif

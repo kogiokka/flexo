@@ -1,38 +1,34 @@
 #ifndef STL_IMPORTER_H
 #define STL_IMPORTER_H
 
-#include "Vertex.hpp"
-#include "assetlib/BaseImporter.hpp"
-#include "assetlib/ModelStructs.hpp"
-
-#include <cstddef>
 #include <cstdlib>
 #include <string>
 #include <vector>
+
+#include <glm/glm.hpp>
+
+#include "assetlib/BaseImporter.hpp"
 
 class STLImporter : public BaseImporter
 {
 #pragma pack(push, 1) // Suppress padding
     struct Triangle {
-        Vertex::Normal n;
-        Vertex::Position p1;
-        Vertex::Position p2;
-        Vertex::Position p3;
+        glm::vec3 n;
+        glm::vec3 p1;
+        glm::vec3 p2;
+        glm::vec3 p3;
         uint16_t attribByteCount;
     };
     static_assert(sizeof(Triangle) == 50); // In Binary STL, each triangle occupies 50 bytes.
 #pragma pack(pop)
 
-    STLModel model_;
-
 public:
-    virtual void Read(std::string const& filename) override;
-    STLModel const& Model() const;
+    [[nodiscard]] virtual Mesh ReadFile(std::string const& filename) override;
 
 private:
     bool IsAsciiSTL() const;
-    void ImportAsciiSTL();
-    void ImportBinarySTL();
+    Mesh ImportAsciiSTL();
+    Mesh ImportBinarySTL();
 };
 
 #endif

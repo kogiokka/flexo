@@ -8,7 +8,6 @@
 #include "Mesh.hpp"
 #include "Renderer.hpp"
 #include "Shader.hpp"
-#include "Vertex.hpp"
 #include "VolumeData.hpp"
 
 #include <wx/dcclient.h>
@@ -47,9 +46,8 @@ public:
 
 private:
     void UpdateScene();
-    void UpdateLatticePositions();
     void UpdateLatticeEdges();
-    void UpdateLatticeFaces();
+    void BuildLatticeMesh();
 
     wxDECLARE_EVENT_TABLE();
 };

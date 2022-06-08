@@ -12,19 +12,21 @@ bool STLImporter::IsAsciiSTL() const
     return solidStr == "solid";
 }
 
-void STLImporter::Read(std::string const& filename)
+Mesh STLImporter::ReadFile(std::string const& filename)
 {
     Slurp(filename);
 
     if (IsAsciiSTL()) {
-        ImportAsciiSTL();
+        return ImportAsciiSTL();
     } else {
-        ImportBinarySTL();
+        return ImportBinarySTL();
     }
 }
 
-void STLImporter::ImportAsciiSTL()
+Mesh STLImporter::ImportAsciiSTL()
 {
+    Mesh mesh;
+
     using namespace std;
 
     istringstream iss(std::string(buffer_.cbegin(), buffer_.cend()));
@@ -33,13 +35,12 @@ void STLImporter::ImportAsciiSTL()
         "solid", "facet", "normal", "outer", "loop", "vertex", "vertex", "vertex", "endloop", "endfacet", "endsolid",
     };
 
-    Vertex::Position p;
-    Vertex::Normal n;
-    string token;
+    glm::vec3 p, n;
+    string token, modelName;
     int state = 0;
     while (iss >> token) {
         if (token == keywords.front()) {
-            getline(iss, model_.name);
+            getline(iss, modelName);
             state = 1;
             continue;
         }
@@ -57,7 +58,9 @@ void STLImporter::ImportAsciiSTL()
                     cerr << "Error: Wrong normal format" << endl;
                     exit(EXIT_FAILURE);
                 }
-                model_.normals.push_back(n);
+                mesh.normals.push_back(n);
+                mesh.normals.push_back(n);
+                mesh.normals.push_back(n);
                 state = 3;
             } break;
             case 3:
@@ -74,7 +77,7 @@ void STLImporter::ImportAsciiSTL()
                     cerr << "Error: Wrong vertex format" << endl;
                     exit(EXIT_FAILURE);
                 }
-                model_.positions.push_back(p);
+                mesh.positions.push_back(p);
                 state = state + 1;
             } break;
             case 8:
@@ -92,22 +95,25 @@ void STLImporter::ImportAsciiSTL()
             exit(EXIT_FAILURE);
         }
     }
+
+    return mesh;
 }
 
-void STLImporter::ImportBinarySTL()
+Mesh STLImporter::ImportBinarySTL()
 {
+    Mesh mesh;
+
     unsigned int* numTriangles = reinterpret_cast<unsigned int*>(buffer_.data() + 80);
     Triangle* triangles = reinterpret_cast<Triangle*>(buffer_.data() + 84);
 
     for (unsigned int i = 0; i < *numTriangles; i++) {
-        model_.normals.push_back(triangles[i].n);
-        model_.positions.push_back(triangles[i].p1);
-        model_.positions.push_back(triangles[i].p2);
-        model_.positions.push_back(triangles[i].p3);
+        mesh.normals.push_back(triangles[i].n);
+        mesh.normals.push_back(triangles[i].n);
+        mesh.normals.push_back(triangles[i].n);
+        mesh.positions.push_back(triangles[i].p1);
+        mesh.positions.push_back(triangles[i].p2);
+        mesh.positions.push_back(triangles[i].p3);
     }
-}
 
-STLModel const& STLImporter::Model() const
-{
-    return model_;
+    return mesh;
 }
