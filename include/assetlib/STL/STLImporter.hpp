@@ -23,7 +23,7 @@ class STLImporter : public BaseImporter
 #pragma pack(pop)
 
 public:
-    virtual Mesh ReadFile(std::string const& filename) override;
+    [[nodiscard]] virtual Mesh ReadFile(std::string const& filename) override;
 
 private:
     bool IsAsciiSTL() const;

@@ -28,6 +28,7 @@ struct World {
     Mesh uvsphere;
     Mesh cube;
     Mesh latticeMesh;
+    std::vector<unsigned int> latticeEdges;
     std::unique_ptr<Mesh> polyModel;
     std::unique_ptr<VolumetricModel> volModel;
     Image pattern;

@@ -45,6 +45,19 @@ enum RenderOption_ : int {
     RenderOption_LightSource = 1 << 4,
 };
 
+struct VertexBuffer {
+    VertexBuffer();
+    VertexBuffer(Mesh const& mesh);
+    ~VertexBuffer();
+    VertexBuffer& operator=(VertexBuffer&& other);
+    GLsizei mCount;
+    GLsizei mSize;
+    GLsizei mOffsetPositions;
+    GLsizei mOffsetNormals;
+    GLsizei mOffsetTextureCoords;
+    float* mData;
+};
+
 class Renderer
 {
     VertexArray vao_;
@@ -52,8 +65,10 @@ class Renderer
     std::array<Shader, ShaderType_Last + 1> shaders_;
     Camera camera_;
     GLuint tex_;
-    std::vector<float> cubeBuffer_;
-    std::vector<float> uvsphereBuffer_;
+    VertexBuffer cubeBuf_;
+    VertexBuffer uvsphereBuf_;
+    VertexBuffer latticeMeshBuf_;
+    VertexBuffer polyModelBuf_;
 
 public:
     Renderer(int width, int height);
@@ -62,9 +77,6 @@ public:
     void LoadLattice();
     void LoadVolumetricModel();
     Camera& GetCamera();
-
-private:
-    void CreateVertexBuffers();
 };
 
 extern RenderOption rendopt;

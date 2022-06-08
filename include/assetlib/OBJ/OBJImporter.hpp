@@ -11,7 +11,7 @@
 class OBJImporter : public BaseImporter
 {
 public:
-    virtual Mesh ReadFile(std::string const& filename) override;
+    [[nodiscard]] virtual Mesh ReadFile(std::string const& filename) override;
 
 private:
     struct OBJModel {

@@ -69,12 +69,11 @@ void OpenGLCanvas::InitGL()
     assert(size.x > 0 && size.y > 0);
 
     STLImporter stlImp;
-    world.uvsphere  = stlImp.ReadFile("res/models/UVSphere.stl");
+    world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
     world.cube = stlImp.ReadFile("res/models/cube.stl");
 
-    UpdateLatticePositions();
+    BuildLatticeMesh();
     UpdateLatticeEdges();
-    UpdateLatticeFaces();
 
     renderer_ = std::make_unique<Renderer>(size.x, size.y);
 
@@ -148,19 +147,15 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     world.polyModel = nullptr;
     world.volModel = nullptr;
 
-    std::vector<Vertex::Position> posData;
+    std::vector<glm::vec3> posData;
 
     if (path.EndsWith(".obj")) {
-        OBJImporter obj;
-        obj.Read(path.ToStdString());
-        world.polyModel = std::make_unique<Mesh>();
-        world.polyModel->Import(obj.Model());
+        OBJImporter objImp;
+        world.polyModel = std::make_unique<Mesh>(objImp.ReadFile(path.ToStdString()));
         renderer_->LoadPolygonalModel();
     } else if (path.EndsWith(".stl")) {
-        STLImporter stl;
-        stl.Read(path.ToStdString());
-        world.polyModel = std::make_unique<Mesh>();
-        world.polyModel->Import(stl.Model());
+        STLImporter stlImp;
+        world.polyModel = std::make_unique<Mesh>(stlImp.ReadFile(path.ToStdString()));
         renderer_->LoadPolygonalModel();
     } else if (path.EndsWith(".toml")) {
         world.volModel = std::make_unique<VolumetricModel>();
@@ -180,37 +175,37 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
                     if (data.value(x, y, z) >= model) {
                         if (x + 1 < reso.x) {
                             if (data.value(x + 1, y, z) <= isovalue) {
-                                pos.push_back(Vertex::Position { x, y, z });
+                                pos.push_back(glm::vec3 { x, y, z });
                                 continue;
                             }
                         }
                         if (x - 1 >= 0) {
                             if (data.value(x - 1, y, z) <= isovalue) {
-                                pos.push_back(Vertex::Position { x, y, z });
+                                pos.push_back(glm::vec3 { x, y, z });
                                 continue;
                             }
                         }
                         if (y + 1 < reso.y) {
                             if (data.value(x, y + 1, z) <= isovalue) {
-                                pos.push_back(Vertex::Position { x, y, z });
+                                pos.push_back(glm::vec3 { x, y, z });
                                 continue;
                             }
                         }
                         if (y - 1 >= 0) {
                             if (data.value(x, y - 1, z) <= isovalue) {
-                                pos.push_back(Vertex::Position { x, y, z });
+                                pos.push_back(glm::vec3 { x, y, z });
                                 continue;
                             }
                         }
                         if (z + 1 < reso.z) {
                             if (data.value(x, y, z + 1) <= isovalue) {
-                                pos.push_back(Vertex::Position { x, y, z });
+                                pos.push_back(glm::vec3 { x, y, z });
                                 continue;
                             }
                         }
                         if (z - 1 >= 0) {
                             if (data.value(x, y, z - 1) <= isovalue) {
-                                pos.push_back(Vertex::Position { x, y, z });
+                                pos.push_back(glm::vec3 { x, y, z });
                                 continue;
                             }
                         }
@@ -224,15 +219,12 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     }
 
     const float FLOAT_MAX = std::numeric_limits<float>::max();
-    Vertex::Position center;
-    Vertex::Position min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
-    Vertex::Position max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
+    glm::vec3 center;
+    glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
+    glm::vec3 max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
 
     if (world.polyModel != nullptr) {
-        posData.reserve(world.polyModel->Vertices().size());
-        for (Vertex const& v : world.polyModel->Vertices()) {
-            posData.push_back(v.position);
-        }
+        posData = world.polyModel->positions;
     } else if (world.volModel != nullptr) {
         posData = world.volModel->positions;
     }
@@ -281,9 +273,8 @@ bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
 
 void OpenGLCanvas::ResetLattice()
 {
-    UpdateLatticePositions();
+    BuildLatticeMesh();
     UpdateLatticeEdges();
-    UpdateLatticeFaces();
     renderer_->LoadLattice();
 }
 
@@ -302,25 +293,8 @@ void OpenGLCanvas::UpdateScene()
 {
     if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
         || rendopt & RenderOption_LatticeFace) {
-        UpdateLatticePositions();
+        BuildLatticeMesh();
     }
-
-    if (rendopt & RenderOption_LatticeFace) {
-        UpdateLatticeFaces();
-    }
-}
-
-void OpenGLCanvas::UpdateLatticePositions()
-{
-    std::vector<Vertex::Position> positions;
-    auto const& neurons = world.lattice->Neurons();
-    positions.reserve(neurons.size());
-
-    for (Node const& n : neurons) {
-        positions.emplace_back(n[0], n[1], n[2]);
-    }
-
-    world.latticeMesh.positions = positions;
 }
 
 void OpenGLCanvas::UpdateLatticeEdges()
@@ -342,66 +316,86 @@ void OpenGLCanvas::UpdateLatticeEdges()
         }
     }
 
-    world.latticeMesh.indices = indices;
+    world.latticeEdges = indices;
 }
 
-void OpenGLCanvas::UpdateLatticeFaces()
+void OpenGLCanvas::BuildLatticeMesh()
 {
-    using std::isnan;
+    Mesh mesh;
 
-    std::vector<Vertex2> faces;
+    // Positions
+    auto const& neurons = world.lattice->Neurons();
+    mesh.positions.reserve(neurons.size());
+    for (Node const& n : neurons) {
+        mesh.positions.emplace_back(n[0], n[1], n[2]);
+    }
 
     int const width = world.lattice->Width();
     int const height = world.lattice->Height();
-    faces.reserve((width - 1) * (height - 1) * 6);
-
-    Vertex2 v1, v2, v3;
-    auto& [p1, n1, t1] = v1;
-    auto& [p2, n2, t2] = v2;
-    auto& [p3, n3, t3] = v3;
-
     float const divisor = 1.0f;
+
     for (int y = 0; y < height - 1; ++y) {
         for (int x = 0; x < width - 1; ++x) {
-            const int idx = y * width + x;
 
-            p1 = world.latticeMesh.positions[idx];
-            p2 = world.latticeMesh.positions[idx + 1];
-            p3 = world.latticeMesh.positions[idx + width + 1];
-            glm::vec3 normal1 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-            if (isnan(normal1.x) || isnan(normal1.y) || isnan(normal1.z)) {
-                normal1 = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-            n1 = normal1;
-            n2 = normal1;
-            n3 = normal1;
-            t1 = glm::vec2(x / divisor, y / divisor);
-            t2 = glm::vec2((x + 1) / divisor, y / divisor);
-            t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
-            faces.push_back(v1);
-            faces.push_back(v2);
-            faces.push_back(v3);
+            unsigned int const idx = y * width + x;
+            glm::vec3 p1, p2, p3, p4;
+            glm::vec3 n1, n2, n3, n4;
+            glm::vec2 t1, t2, t3, t4;
+            Face f1, f2;
 
-            p1 = world.latticeMesh.positions[idx];
-            p2 = world.latticeMesh.positions[idx + width + 1];
-            p3 = world.latticeMesh.positions[idx + width];
-            glm::vec3 normal2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-            if (isnan(normal2.x) || isnan(normal2.y) || isnan(normal2.z)) {
-                normal2 = glm::vec3(0.0f, 0.0f, 0.0f);
+            /**
+             *  4-----3
+             *  |     |
+             *  |     |
+             *  1-----2
+             */
+            p1 = world.latticeMesh.positions[idx]; // [x, y]
+            p2 = world.latticeMesh.positions[idx + 1]; // [x + 1, y]
+            p3 = world.latticeMesh.positions[idx + width + 1]; // [x + 1, y + 1]
+            p4 = world.latticeMesh.positions[idx + width]; // [x, y + 1]
+
+            // Normals
+            n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+            n4 = glm::normalize(glm::cross(p3 - p1, p4 - p3));
+
+            if (isnan(n1.x) || isnan(n1.y) || isnan(n1.z)) {
+                n1 = glm::vec3(0.0f, 0.0f, 0.0f);
             }
-            n1 = normal2;
-            n2 = normal2;
-            n3 = normal2;
+            if (isnan(n2.x) || isnan(n2.y) || isnan(n2.z)) {
+                n2 = glm::vec3(0.0f, 0.0f, 0.0f);
+            }
+
+            n3 = (n2 + n4) * 0.5f;
+            n1 = (n2 + n4) * 0.5f;
+
+            // TextureCoords
             t1 = glm::vec2(x / divisor, y / divisor);
             t2 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
-            t3 = glm::vec2(x / divisor, (y + 1) / divisor);
-            faces.push_back(v1);
-            faces.push_back(v2);
-            faces.push_back(v3);
+            t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
+            t4 = glm::vec2(x / divisor, (y + 1) / divisor);
+
+            // Faces
+            f1.indices = { idx, idx + 1, idx + width + 1 };
+            f2.indices = { idx, idx + width + 1, idx + width };
+
+            mesh.positions.push_back(p1);
+            mesh.positions.push_back(p2);
+            mesh.positions.push_back(p3);
+            mesh.positions.push_back(p4);
+            mesh.normals.push_back(n1);
+            mesh.normals.push_back(n2);
+            mesh.normals.push_back(n3);
+            mesh.normals.push_back(n4);
+            mesh.textureCoords.push_back(t1);
+            mesh.textureCoords.push_back(t2);
+            mesh.textureCoords.push_back(t3);
+            mesh.textureCoords.push_back(t4);
+            mesh.faces.push_back(f1);
+            mesh.faces.push_back(f2);
         }
     }
 
-    world.latticeMesh.faces = faces;
+    world.latticeMesh = mesh;
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)

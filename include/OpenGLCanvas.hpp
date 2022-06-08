@@ -46,9 +46,8 @@ public:
 
 private:
     void UpdateScene();
-    void UpdateLatticePositions();
     void UpdateLatticeEdges();
-    void UpdateLatticeFaces();
+    void BuildLatticeMesh();
 
     wxDECLARE_EVENT_TABLE();
 };
