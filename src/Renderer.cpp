@@ -1,5 +1,4 @@
 #include <cstdlib>
-#include <cstring>
 
 #include "Renderer.hpp"
 #include "Shader.hpp"
@@ -24,20 +23,18 @@ Renderer::Renderer(int width, int height)
     vao_.Enable(VertexAttrib_Normal);
     vao_.Enable(VertexAttrib_TextureCoordintes);
 
-    cubeBuf_ = VertexBuffer(world.cube);
-    uvsphereBuf_ = VertexBuffer(world.uvsphere);
-    latticeMeshBuf_ = VertexBuffer(world.latticeMesh);
+    CreateVertexBuffers();
 
     glGenBuffers(buffers_.size(), buffers_.data());
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_Cube]);
-    glBufferData(GL_ARRAY_BUFFER, cubeBuf_.mSize, cubeBuf_.mData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, cubeBuf_.size() * sizeof(Vertex), cubeBuf_.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_UVSphere]);
-    glBufferData(GL_ARRAY_BUFFER, uvsphereBuf_.mSize, uvsphereBuf_.mData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, uvsphereBuf_.size() * sizeof(Vertex), uvsphereBuf_.data(), GL_STATIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, latticeMeshBuf_.mSize, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, latticeMeshBuf_.size() * sizeof(Vertex2), nullptr, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
     glBufferData(GL_ARRAY_BUFFER, world.latticeMesh.positions.size() * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
@@ -107,8 +104,9 @@ void Renderer::Render()
         program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
         program->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
         program->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], uvsphereBuf_.mOffsetPositions, sizeof(glm::vec3));
-        glDrawArrays(GL_TRIANGLES, 0, uvsphereBuf_.mCount);
+        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(Vertex, position),
+                           sizeof(Vertex));
+        glDrawArrays(GL_TRIANGLES, 0, uvsphereBuf_.size());
     }
 
     if (rendopt & RenderOption_LatticeVertex) {
@@ -130,11 +128,13 @@ void Renderer::Render()
         program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
         program->SetUniform1f("material.shininess", 32.0f);
         program->SetUniform1f("alpha", 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], uvsphereBuf_.mOffsetPositions, sizeof(glm::vec3));
-        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_UVSphere], uvsphereBuf_.mOffsetNormals, sizeof(glm::vec3));
+        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(Vertex, position),
+                           sizeof(Vertex));
+        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_UVSphere], offsetof(Vertex, normal),
+                           sizeof(Vertex));
         glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
         glVertexBindingDivisor(2, 1);
-        glDrawArraysInstanced(GL_TRIANGLES, 0, uvsphereBuf_.mCount, world.latticeMesh.positions.size());
+        glDrawArraysInstanced(GL_TRIANGLES, 0, uvsphereBuf_.size(), world.latticeMesh.positions.size());
     }
 
     if (rendopt & RenderOption_Model) {
@@ -159,9 +159,11 @@ void Renderer::Render()
             program->SetUniform1f("material.shininess", 32.0f);
             program->SetUniform1f("alpha", world.modelColorAlpha);
 
-            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], polyModelBuf_.mOffsetPositions, sizeof(glm::vec3));
-            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Surface], polyModelBuf_.mOffsetNormals, sizeof(glm::vec3));
-            glDrawArrays(GL_TRIANGLES, 0, polyModelBuf_.mCount);
+            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], offsetof(Vertex, position),
+                               sizeof(Vertex));
+            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Surface], offsetof(Vertex, normal),
+                               sizeof(Vertex));
+            glDrawArrays(GL_TRIANGLES, 0, polyModelBuf_.size());
         } else if (world.volModel != nullptr) {
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
@@ -187,11 +189,13 @@ void Renderer::Render()
 
             program->SetUniform1f("alpha", world.modelColorAlpha);
 
-            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Cube], cubeBuf_.mOffsetPositions, sizeof(glm::vec3));
-            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Cube], cubeBuf_.mOffsetNormals, sizeof(glm::vec3));
+            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Cube], offsetof(Vertex, position),
+                               sizeof(Vertex));
+            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Cube], offsetof(Vertex, normal),
+                               sizeof(Vertex));
             glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_VolumetricModel], 0, sizeof(glm::vec3));
             glVertexBindingDivisor(2, 1);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, cubeBuf_.mCount, world.volModel->positions.size());
+            glDrawArraysInstanced(GL_TRIANGLES, 0, cubeBuf_.size(), world.volModel->positions.size());
             glDisable(GL_CULL_FACE);
         }
     }
@@ -218,8 +222,10 @@ void Renderer::Render()
         vao_.Enable(VertexAttrib_TextureCoordintes);
         vao_.Disable(VertexAttrib_Instanced);
 
+        UpdateLatticeMeshBuffer();
         glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, latticeMeshBuf_.mSize, latticeMeshBuf_.mData);
+        glBufferSubData(GL_ARRAY_BUFFER, 0, latticeMeshBuf_.size() * sizeof(Vertex2), latticeMeshBuf_.data());
+
         program = &shaders_[ShaderType_LatticeFace];
         program->Use();
         program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
@@ -234,29 +240,37 @@ void Renderer::Render()
         program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
         program->SetUniform1f("material.shininess", 32.0f);
 
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticeFace], latticeMeshBuf_.mOffsetPositions,
-                           sizeof(glm::vec3));
-        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], latticeMeshBuf_.mOffsetNormals,
-                           sizeof(glm::vec3));
+        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticeFace], offsetof(Vertex2, position),
+                           sizeof(Vertex2));
+        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], offsetof(Vertex2, normal),
+                           sizeof(Vertex2));
         glBindVertexBuffer(VertexAttrib_TextureCoordintes, buffers_[BufferType_LatticeFace],
-                           latticeMeshBuf_.mOffsetTextureCoords, sizeof(glm::vec2));
+                           offsetof(Vertex2, texcoord), sizeof(Vertex2));
         glBindTexture(GL_TEXTURE_2D, tex_);
-        glDrawArrays(GL_TRIANGLES, 0, latticeMeshBuf_.mCount);
+        glDrawArrays(GL_TRIANGLES, 0, latticeMeshBuf_.size());
     }
 }
 
 void Renderer::LoadPolygonalModel()
 {
+    assert(world.polyModel);
+
+    polyModelBuf_.clear();
+    for (unsigned int i = 0; i < world.polyModel->positions.size(); i++) {
+        Vertex v;
+        v.position = world.polyModel->positions[i];
+        v.normal = world.polyModel->normals[i];
+        polyModelBuf_.push_back(v);
+    }
+
     glDeleteBuffers(1, &buffers_[BufferType_Surface]);
     glGenBuffers(1, &buffers_[BufferType_Surface]);
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_Surface]);
-    glBufferData(GL_ARRAY_BUFFER, polyModelBuf_.mSize, polyModelBuf_.mData, GL_STATIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, polyModelBuf_.size() * sizeof(Vertex), polyModelBuf_.data(), GL_STATIC_DRAW);
 }
 
 void Renderer::LoadLattice()
 {
-    latticeMeshBuf_ = VertexBuffer(world.latticeMesh);
-
     glDeleteBuffers(1, &buffers_[BufferType_LatticeEdge]);
     glDeleteBuffers(1, &buffers_[BufferType_LatticeFace]);
     glDeleteBuffers(1, &buffers_[BufferType_LatticePositions]);
@@ -265,7 +279,7 @@ void Renderer::LoadLattice()
     glGenBuffers(1, &buffers_[BufferType_LatticePositions]);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, latticeMeshBuf_.mSize, nullptr, GL_DYNAMIC_DRAW);
+    glBufferData(GL_ARRAY_BUFFER, latticeMeshBuf_.size() * sizeof(Vertex2), nullptr, GL_DYNAMIC_DRAW);
 
     // An Vertex Buffer Object storing the positions of neurons on the world.lattice.tice.
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
@@ -296,57 +310,34 @@ Camera& Renderer::GetCamera()
     return camera_;
 }
 
-VertexBuffer::VertexBuffer()
-    : mCount(0)
-    , mSize(0)
-    , mData(nullptr)
+void Renderer::UpdateLatticeMeshBuffer()
 {
+    latticeMeshBuf_.clear();
+    for (unsigned int i = 0; i < world.latticeMesh.positions.size(); i++) {
+        Vertex2 v;
+        v.position = world.latticeMesh.positions[i];
+        v.normal = world.latticeMesh.normals[i];
+        v.texcoord = world.latticeMesh.textureCoords[i];
+        latticeMeshBuf_.push_back(v);
+    }
 }
 
-VertexBuffer::VertexBuffer(Mesh const& mesh)
+
+void Renderer::CreateVertexBuffers()
 {
-    using namespace std;
-
-    size_t sizePos = mesh.positions.size() * sizeof(glm::vec3);
-    size_t sizeNorm = mesh.normals.size() * sizeof(glm::vec3);
-    size_t sizeTexCoord = mesh.textureCoords.size() * sizeof(glm::vec2);
-
-    mCount = mesh.positions.size();
-    mSize = sizePos + sizeNorm + sizeTexCoord;
-    mData = new float[mSize];
-    mOffsetPositions = 0;
-    mOffsetNormals = sizePos;
-    mOffsetTextureCoords = sizePos + sizeNorm;
-
-    memcpy(mData, mesh.positions.data(), sizePos);
-    memcpy(mData + sizePos, mesh.normals.data(), sizeNorm);
-    memcpy(mData + sizePos + sizeNorm, mesh.textureCoords.data(), sizeTexCoord);
-}
-
-VertexBuffer::~VertexBuffer()
-{
-    delete[] mData;
-}
-
-VertexBuffer& VertexBuffer::operator=(VertexBuffer&& other)
-{
-    if (this == &other) {
-        return *this;
+    for (unsigned int i = 0; i < world.cube.positions.size(); i++) {
+        Vertex v;
+        v.position = world.cube.positions[i];
+        v.normal = world.cube.normals[i];
+        cubeBuf_.push_back(v);
     }
 
-    delete[] mData;
+    for (unsigned int i = 0; i < world.uvsphere.positions.size(); i++) {
+        Vertex v;
+        v.position = world.uvsphere.positions[i];
+        v.normal = world.uvsphere.normals[i];
+        uvsphereBuf_.push_back(v);
+    }
 
-    mSize = other.mSize;
-    mData = other.mData;
-    mOffsetPositions = other.mOffsetPositions;
-    mOffsetNormals = other.mOffsetNormals;
-    mOffsetTextureCoords = other.mOffsetTextureCoords;
-
-    other.mSize = 0;
-    other.mData = nullptr;
-    other.mOffsetPositions = 0;
-    other.mOffsetNormals = 0;
-    other.mOffsetTextureCoords = 0;
-
-    return *this;
+    UpdateLatticeMeshBuffer();
 }

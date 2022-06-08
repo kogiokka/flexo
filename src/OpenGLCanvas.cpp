@@ -294,6 +294,7 @@ void OpenGLCanvas::UpdateScene()
     if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
         || rendopt & RenderOption_LatticeFace) {
         BuildLatticeMesh();
+        renderer_->UpdateLatticeMeshBuffer();
     }
 }
 
@@ -378,10 +379,6 @@ void OpenGLCanvas::BuildLatticeMesh()
             f1.indices = { idx, idx + 1, idx + width + 1 };
             f2.indices = { idx, idx + width + 1, idx + width };
 
-            mesh.positions.push_back(p1);
-            mesh.positions.push_back(p2);
-            mesh.positions.push_back(p3);
-            mesh.positions.push_back(p4);
             mesh.normals.push_back(n1);
             mesh.normals.push_back(n2);
             mesh.normals.push_back(n3);
@@ -392,8 +389,12 @@ void OpenGLCanvas::BuildLatticeMesh()
             mesh.textureCoords.push_back(t4);
             mesh.faces.push_back(f1);
             mesh.faces.push_back(f2);
+
         }
     }
+    Logger::info("Lattice: pos - %d, norm - %d", mesh.positions.size(), mesh.normals.size());
+    assert(mesh.positions.size() == mesh.normals.size());
+    assert(mesh.positions.size() == mesh.textureCoords.size());
 
     world.latticeMesh = mesh;
 }

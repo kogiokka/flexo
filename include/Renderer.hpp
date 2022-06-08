@@ -4,6 +4,7 @@
 #include "Camera.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
+#include "Vertex.hpp"
 #include "VertexArray.hpp"
 
 #include <glad/glad.h>
@@ -45,19 +46,6 @@ enum RenderOption_ : int {
     RenderOption_LightSource = 1 << 4,
 };
 
-struct VertexBuffer {
-    VertexBuffer();
-    VertexBuffer(Mesh const& mesh);
-    ~VertexBuffer();
-    VertexBuffer& operator=(VertexBuffer&& other);
-    GLsizei mCount;
-    GLsizei mSize;
-    GLsizei mOffsetPositions;
-    GLsizei mOffsetNormals;
-    GLsizei mOffsetTextureCoords;
-    float* mData;
-};
-
 class Renderer
 {
     VertexArray vao_;
@@ -65,10 +53,11 @@ class Renderer
     std::array<Shader, ShaderType_Last + 1> shaders_;
     Camera camera_;
     GLuint tex_;
-    VertexBuffer cubeBuf_;
-    VertexBuffer uvsphereBuf_;
-    VertexBuffer latticeMeshBuf_;
-    VertexBuffer polyModelBuf_;
+
+    std::vector<Vertex> cubeBuf_;
+    std::vector<Vertex> uvsphereBuf_;
+    std::vector<Vertex> polyModelBuf_;
+    std::vector<Vertex2> latticeMeshBuf_;
 
 public:
     Renderer(int width, int height);
@@ -77,6 +66,10 @@ public:
     void LoadLattice();
     void LoadVolumetricModel();
     Camera& GetCamera();
+    void UpdateLatticeMeshBuffer();
+
+private:
+    void CreateVertexBuffers();
 };
 
 extern RenderOption rendopt;
