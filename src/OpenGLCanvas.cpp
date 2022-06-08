@@ -349,10 +349,10 @@ void OpenGLCanvas::BuildLatticeMesh()
              *  |     |
              *  1-----2
              */
-            p1 = world.latticeMesh.positions[idx]; // [x, y]
-            p2 = world.latticeMesh.positions[idx + 1]; // [x + 1, y]
-            p3 = world.latticeMesh.positions[idx + width + 1]; // [x + 1, y + 1]
-            p4 = world.latticeMesh.positions[idx + width]; // [x, y + 1]
+            p1 = mesh.positions[idx]; // [x, y]
+            p2 = mesh.positions[idx + 1]; // [x + 1, y]
+            p3 = mesh.positions[idx + width + 1]; // [x + 1, y + 1]
+            p4 = mesh.positions[idx + width]; // [x, y + 1]
 
             // Normals
             n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
