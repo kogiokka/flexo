@@ -324,11 +324,13 @@ void OpenGLCanvas::BuildLatticeMesh()
 {
     Mesh mesh;
 
+    std::vector<glm::vec3> positions;
+
     // Positions
     auto const& neurons = world.lattice->Neurons();
-    mesh.positions.reserve(neurons.size());
+    positions.reserve(neurons.size());
     for (Node const& n : neurons) {
-        mesh.positions.emplace_back(n[0], n[1], n[2]);
+        positions.emplace_back(n[0], n[1], n[2]);
     }
 
     int const width = world.lattice->Width();
@@ -350,10 +352,10 @@ void OpenGLCanvas::BuildLatticeMesh()
              *  |     |
              *  1-----2
              */
-            p1 = mesh.positions[idx]; // [x, y]
-            p2 = mesh.positions[idx + 1]; // [x + 1, y]
-            p3 = mesh.positions[idx + width + 1]; // [x + 1, y + 1]
-            p4 = mesh.positions[idx + width]; // [x, y + 1]
+            p1 = positions[idx]; // [x, y]
+            p2 = positions[idx + 1]; // [x + 1, y]
+            p3 = positions[idx + width + 1]; // [x + 1, y + 1]
+            p4 = positions[idx + width]; // [x, y + 1]
 
             // Normals
             n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
@@ -371,31 +373,32 @@ void OpenGLCanvas::BuildLatticeMesh()
 
             // TextureCoords
             t1 = glm::vec2(x / divisor, y / divisor);
-            t2 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
+            t2 = glm::vec2((x + 1) / divisor, y / divisor);
             t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
             t4 = glm::vec2(x / divisor, (y + 1) / divisor);
 
-            // Faces
-            f1.indices = { idx, idx + 1, idx + width + 1 };
-            f2.indices = { idx, idx + width + 1, idx + width };
-
+            mesh.positions.push_back(p1);
+            mesh.positions.push_back(p2);
+            mesh.positions.push_back(p3);
+            mesh.positions.push_back(p1);
+            mesh.positions.push_back(p3);
+            mesh.positions.push_back(p4);
             mesh.normals.push_back(n1);
             mesh.normals.push_back(n2);
+            mesh.normals.push_back(n3);
+            mesh.normals.push_back(n1);
             mesh.normals.push_back(n3);
             mesh.normals.push_back(n4);
             mesh.textureCoords.push_back(t1);
             mesh.textureCoords.push_back(t2);
             mesh.textureCoords.push_back(t3);
+            mesh.textureCoords.push_back(t1);
+            mesh.textureCoords.push_back(t3);
             mesh.textureCoords.push_back(t4);
-            mesh.faces.push_back(f1);
-            mesh.faces.push_back(f2);
-
         }
     }
-    Logger::info("Lattice: pos - %d, norm - %d", mesh.positions.size(), mesh.normals.size());
-    assert(mesh.positions.size() == mesh.normals.size());
-    assert(mesh.positions.size() == mesh.textureCoords.size());
 
+    world.neuronPositions = positions;
     world.latticeMesh = mesh;
 }
 
