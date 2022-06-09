@@ -54,10 +54,10 @@ class Renderer
     Camera camera_;
     GLuint tex_;
 
-    std::vector<Vertex> cubeBuf_;
-    std::vector<Vertex> uvsphereBuf_;
-    std::vector<Vertex> polyModelBuf_;
-    std::vector<Vertex2> latticeMeshBuf_;
+    std::vector<VertexPN> cubeBuf_;
+    std::vector<VertexPN> uvsphereBuf_;
+    std::vector<VertexPN> polyModelBuf_;
+    std::vector<VertexPNT> latticeMeshBuf_;
 
 public:
     Renderer(int width, int height);
