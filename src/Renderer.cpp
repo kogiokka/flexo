@@ -69,25 +69,28 @@ Renderer::Renderer(int width, int height)
     glBindTexture(GL_TEXTURE_2D, tex_);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     {
         auto const& [img, w, h, ch] = world.pattern;
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
     }
 
-    glGenTextures(1, &texVolModel_);
-    glBindTexture(GL_TEXTURE_2D, texVolModel_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glGenTextures(1, &texColor_);
+    glBindTexture(GL_TEXTURE_2D, texColor_);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     {
         float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_FLOAT, color);
     }
 
     glGenerateMipmap(GL_TEXTURE_2D);
+
+    // Render the volumetric model with a color at the beginning
+    texVolModel_ = texColor_;
 }
 
 void Renderer::Render()
@@ -207,7 +210,7 @@ void Renderer::Render()
             glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_VolumetricModel_Translation], 0,
                                sizeof(glm::vec3));
             glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_VolumetricModel_TextureCoord], 0,
-                               sizeof(glm::vec3));
+                               sizeof(glm::vec2));
             glVertexBindingDivisor(VertexAttrib_Translation, 1);
             glVertexBindingDivisor(VertexAttrib_TextureCoord, 1);
             glBindTexture(GL_TEXTURE_2D, texVolModel_);
@@ -322,12 +325,16 @@ void Renderer::LoadVolumetricModel()
     glBufferData(GL_ARRAY_BUFFER, world.volModel->positions.size() * sizeof(glm::vec3),
                  world.volModel->positions.data(), GL_DYNAMIC_DRAW);
 
+    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel_TextureCoord]);
+    glBufferData(GL_ARRAY_BUFFER, world.volModel->textureCoords.size() * sizeof(glm::vec2),
+                 world.volModel->textureCoords.data(), GL_DYNAMIC_DRAW);
+
     glVertexBindingDivisor(VertexAttrib_Translation, 1);
     glVertexBindingDivisor(VertexAttrib_TextureCoord, 1);
     glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_VolumetricModel_Translation], 0,
                        sizeof(glm::vec3));
     glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_VolumetricModel_TextureCoord], 0,
-                       sizeof(glm::vec3));
+                       sizeof(glm::vec2));
 }
 
 Camera& Renderer::GetCamera()
@@ -346,6 +353,17 @@ void Renderer::UpdateLatticeMeshBuffer()
         v.texcoord = world.latticeMesh.textureCoords[i];
         latticeMeshBuf_[i] = v;
     }
+}
+
+void Renderer::SetWatermarkTexture()
+{
+    glDeleteBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
+    glGenBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
+    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel_TextureCoord]);
+    glBufferData(GL_ARRAY_BUFFER, world.volModel->textureCoords.size() * sizeof(glm::vec2),
+                 world.volModel->textureCoords.data(), GL_DYNAMIC_DRAW);
+
+    texVolModel_ = tex_;
 }
 
 void Renderer::CreateVertexBuffers()

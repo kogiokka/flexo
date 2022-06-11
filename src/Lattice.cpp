@@ -15,6 +15,7 @@ Lattice::Lattice(int width, int height)
     , currRate_(0.0f)
     , neighborhoodRadius_(0.0f)
     , isTraining_(false)
+    , isTrainingDone_(false)
     , isQuit_(false)
     , flags_(LatticeFlags_CyclicNone)
     , RNG_(-1.0f, 1.0f)
@@ -70,6 +71,8 @@ void Lattice::TrainInternal(InputData& dataset)
 
         --iterRemained_;
     }
+
+    isTrainingDone_ = true;
 }
 
 void Lattice::Train(InputData& dataset, float rate, int iterations, LatticeFlags flags)
@@ -81,6 +84,7 @@ void Lattice::Train(InputData& dataset, float rate, int iterations, LatticeFlags
     currRate_ = rate;
     initRadius_ = sqrt(static_cast<float>(width_ * width_ + height_ * height_)) * 0.5f;
     timeConst_ = iterations / logf(initRadius_);
+    isTrainingDone_ = false;
 
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", iterCap_, initRate_);
 
@@ -141,6 +145,11 @@ void Lattice::ToggleTraining()
     } else {
         Logger::info("Training paused");
     }
+}
+
+bool Lattice::IsTrainingDone() const
+{
+    return isTrainingDone_;
 }
 
 glm::ivec2 Lattice::FindBMU(glm::vec3 const& input) const

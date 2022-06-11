@@ -30,6 +30,7 @@ class Lattice
     float timeConst_;
     float initRadius_;
     bool isTraining_;
+    bool isTrainingDone_;
     bool isQuit_;
     LatticeFlags flags_;
     RandomRealNumber<float> RNG_;
@@ -51,6 +52,7 @@ public:
     void Train(InputData& dataset, float rate, int iterations, LatticeFlags flags);
     std::vector<Node> const& Neurons() const;
     void ToggleTraining();
+    bool IsTrainingDone() const;
 
 private:
     void TrainInternal(InputData& dataset);

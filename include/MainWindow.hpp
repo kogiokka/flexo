@@ -23,6 +23,7 @@ class MainWindow : public wxFrame
     LatticeFlags latFlags_;
 
     wxButton* btnPlayPause_;
+    wxButton* btnWatermark_;
     wxButton* btnConfirm_;
     wxTimer* timerUIUpdate_;
     wxPanel* panel_;
@@ -41,6 +42,7 @@ class MainWindow : public wxFrame
 
     void OnTimerUIUpdate(wxTimerEvent& evt);
     void OnButtonPlayPause(wxCommandEvent& evt);
+    void OnButtonWatermark(wxCommandEvent& evt);
     void OnButtonConfirmAndReset(wxCommandEvent& evt);
     void OnCheckboxInputDataset(wxCommandEvent& evt);
     void OnCheckboxLatticeVertex(wxCommandEvent& evt);

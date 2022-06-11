@@ -54,6 +54,7 @@ class Renderer
     std::array<Shader, ShaderType_Last + 1> shaders_;
     Camera camera_;
     GLuint tex_;
+    GLuint texColor_;
     GLuint texVolModel_;
 
     std::vector<VertexPN> cubeBuf_;
@@ -69,6 +70,7 @@ public:
     void LoadVolumetricModel();
     Camera& GetCamera();
     void UpdateLatticeMeshBuffer();
+    void SetWatermarkTexture();
 
 private:
     void CreateVertexBuffers();

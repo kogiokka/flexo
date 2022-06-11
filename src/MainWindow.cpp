@@ -15,10 +15,12 @@
 
 #include <filesystem>
 #include <string>
+#include <glm/gtx/string_cast.hpp>
+#include <vector>
 
 enum {
     BTN_PLAY_PAUSE = wxID_HIGHEST + 1,
-    BTN_PAUSE,
+    BTN_WATERMARK,
     BTN_CONFIRM_AND_RESET,
     SPCTRL_ITERATION_PER_FRAME,
     CB_RENDEROPT_SURFACE,
@@ -176,11 +178,16 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox2()
     auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Control");
     auto const box = boxLayout->GetStaticBox();
 
-    auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
+    auto row2 = new wxBoxSizer(wxHORIZONTAL);
+    auto row3 = new wxBoxSizer(wxHORIZONTAL);
 
     btnPlayPause_ = new wxButton(box, BTN_PLAY_PAUSE, "Start");
     btnPlayPause_->Disable();
+
+    btnWatermark_ = new wxButton(box, BTN_WATERMARK, "Watermark");
+    btnWatermark_->Disable();
+
     auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
     tcIterCurr_ = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
     tcIterCurr_->SetCanFocus(false);
@@ -188,8 +195,10 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox2()
     row1->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     row1->Add(tcIterCurr_, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     row2->Add(btnPlayPause_, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    row3->Add(btnWatermark_, 1, wxGROW | wxLEFT | wxRIGHT, 5);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(row3, 0, wxGROW | wxALL, 10);
 
     return boxLayout;
 }
@@ -239,6 +248,12 @@ void MainWindow::OnTimerUIUpdate(wxTimerEvent&)
         assert(world.lattice != nullptr);
         tcIterCurr_->Clear();
         *tcIterCurr_ << world.lattice->CurrentIteration();
+
+        if (world.lattice->IsTrainingDone()) {
+            btnWatermark_->Enable();
+        } else {
+            btnWatermark_->Disable();
+        }
     }
     if (canvas_ != nullptr) {
         canvas_->Refresh();
@@ -254,6 +269,32 @@ void MainWindow::OnButtonPlayPause(wxCommandEvent&)
     } else {
         btnPlayPause_->SetLabel("Start");
     }
+}
+
+void MainWindow::OnButtonWatermark(wxCommandEvent&)
+{
+    assert(world.lattice);
+    assert(world.volModel);
+
+    // Update the texture coordinates of the Volumetric Model.
+    std::vector<glm::vec2> textureCoords;
+    textureCoords.reserve(world.volModel->textureCoords.size());
+
+    for (glm::vec3 const& vp : world.volModel->positions) {
+        glm::vec2 coord = world.latticeMesh.textureCoords.front();
+        float minDist = glm::distance(vp, world.latticeMesh.positions.front());
+        // TODO: Deal with the duplicate calculations
+        for (unsigned int i = 1; i < world.latticeMesh.positions.size(); i++) {
+            auto dist = glm::distance(vp, world.latticeMesh.positions[i]);
+            if (dist < minDist) {
+                minDist = dist;
+                coord = world.latticeMesh.textureCoords[i];
+            }
+        }
+        textureCoords.push_back(coord);
+    }
+    world.volModel->textureCoords = textureCoords;
+    canvas_->ToggleWatermarkTexture();
 }
 
 void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
@@ -378,6 +419,7 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_MENU(wxID_EXIT, MainWindow::OnExit)
     EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
     EVT_BUTTON(BTN_PLAY_PAUSE, MainWindow::OnButtonPlayPause)
+    EVT_BUTTON(BTN_WATERMARK, MainWindow::OnButtonWatermark)
     EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainWindow::OnButtonConfirmAndReset)
     EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainWindow::OnCheckboxInputDataset)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainWindow::OnCheckboxLatticeVertex)
@@ -389,3 +431,4 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_SLIDER(SLIDER_TRANSPARENCY, MainWindow::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, MainWindow::OnTimerUIUpdate)
 wxEND_EVENT_TABLE()
+

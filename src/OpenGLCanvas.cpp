@@ -214,7 +214,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
             }
         }
 
-        texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f));
+        texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
         renderer_->LoadVolumetricModel();
         Logger::info("%lu voxels will be rendered.", pos.size());
     }
@@ -265,6 +265,11 @@ void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
     } else {
         rendopt += opt;
     }
+}
+
+void OpenGLCanvas::ToggleWatermarkTexture()
+{
+    renderer_->SetWatermarkTexture();
 }
 
 bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
@@ -323,6 +328,10 @@ void OpenGLCanvas::UpdateLatticeEdges()
 
 void OpenGLCanvas::BuildLatticeMesh()
 {
+    if (world.lattice->IsTrainingDone()) {
+        return;
+    }
+
     Mesh mesh;
 
     std::vector<glm::vec3> positions;
@@ -336,7 +345,7 @@ void OpenGLCanvas::BuildLatticeMesh()
 
     int const width = world.lattice->Width();
     int const height = world.lattice->Height();
-    float const divisor = 1.0f;
+    float const divisor = 1.1f; // FIXME
 
     for (int y = 0; y < height - 1; ++y) {
         for (int x = 0; x < width - 1; ++x) {

@@ -26,7 +26,7 @@ set_target_properties(som-demo
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors -ggdb)
-    target_compile_definitions(som-demo PRIVATE _GLIBCXX_DEBUG)
+    target_compile_definitions(som-demo PRIVATE $<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
