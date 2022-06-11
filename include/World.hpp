@@ -14,6 +14,7 @@
 struct VolumetricModel {
     VolumeData data;
     std::vector<glm::vec3> positions;
+    std::vector<glm::vec2> textureCoords;
 };
 
 struct World {

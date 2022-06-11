@@ -9,8 +9,8 @@ using VertexAttrib = GLuint;
 enum VertexAttrib_ {
     VertexAttrib_Position = 0,
     VertexAttrib_Normal = 1,
-    VertexAttrib_Instanced = 2,
-    VertexAttrib_TextureCoordintes = 3,
+    VertexAttrib_Translation = 2,
+    VertexAttrib_TextureCoord = 3,
 };
 
 struct AttribFormat {

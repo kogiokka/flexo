@@ -31,7 +31,8 @@ enum BufferType_ : int {
     BufferType_Surface = 0,
     BufferType_Cube,
     BufferType_UVSphere,
-    BufferType_VolumetricModel,
+    BufferType_VolumetricModel_Translation,
+    BufferType_VolumetricModel_TextureCoord,
     BufferType_LatticePositions,
     BufferType_LatticeEdge,
     BufferType_LatticeFace,
@@ -53,6 +54,7 @@ class Renderer
     std::array<Shader, ShaderType_Last + 1> shaders_;
     Camera camera_;
     GLuint tex_;
+    GLuint texVolModel_;
 
     std::vector<VertexPN> cubeBuf_;
     std::vector<VertexPN> uvsphereBuf_;

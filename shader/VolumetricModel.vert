@@ -3,6 +3,7 @@
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 translation;
+layout (location = 3) in vec2 textureCoord;
 
 out vec4 color;
 
@@ -28,6 +29,8 @@ uniform float alpha;
 uniform mat4 viewProjMat;
 uniform mat4 modelMat;
 
+uniform sampler2D pattern;
+
 void main()
 {
   vec3 norm = normalize(normal);
@@ -42,7 +45,8 @@ void main()
   vec3 diffusion = light.diffusion * material.diffusion * diffuseCoef;
   vec3 specular = light.specular * material.specular * specularCoef;
 
-  color = vec4((ambient + diffusion + specular), alpha);
+  color = vec4((ambient + diffusion + specular), alpha) * texture(pattern, textureCoord);
+
   gl_Position = viewProjMat * (vec4(translation, 0.0) + modelMat * vec4(position, 1.0));
 }
 

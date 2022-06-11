@@ -159,7 +159,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
         renderer_->LoadPolygonalModel();
     } else if (path.EndsWith(".toml")) {
         world.volModel = std::make_unique<VolumetricModel>();
-        auto& [data, pos] = *world.volModel;
+        auto& [data, pos, texcoord] = *world.volModel;
 
         if (!data.read(path.ToStdString())) {
             Logger::error(R"(Failed to read volumetric model: "%s")", path.ToStdString().c_str());
@@ -214,6 +214,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
             }
         }
 
+        texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f));
         renderer_->LoadVolumetricModel();
         Logger::info("%lu voxels will be rendered.", pos.size());
     }

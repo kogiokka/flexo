@@ -17,11 +17,11 @@ Renderer::Renderer(int width, int height)
     vao_.Bind();
     vao_.AddAttribFormat(VertexAttrib_Position, format);
     vao_.AddAttribFormat(VertexAttrib_Normal, format);
-    vao_.AddAttribFormat(VertexAttrib_TextureCoordintes, { 2, GL_FLOAT, GL_FALSE });
-    vao_.AddAttribFormat(VertexAttrib_Instanced, format);
+    vao_.AddAttribFormat(VertexAttrib_TextureCoord, { 2, GL_FLOAT, GL_FALSE });
+    vao_.AddAttribFormat(VertexAttrib_Translation, format);
     vao_.Enable(VertexAttrib_Position);
     vao_.Enable(VertexAttrib_Normal);
-    vao_.Enable(VertexAttrib_TextureCoordintes);
+    vao_.Enable(VertexAttrib_TextureCoord);
 
     CreateVertexBuffers();
 
@@ -58,8 +58,8 @@ Renderer::Renderer(int width, int height)
     shaders_[ShaderType_LightSource].Attach(GL_VERTEX_SHADER, "shader/LightSource.vert");
     shaders_[ShaderType_LightSource].Attach(GL_FRAGMENT_SHADER, "shader/LightSource.frag");
 
-    shaders_[ShaderType_VolumetricModel].Attach(GL_VERTEX_SHADER, "shader/FlatShading.vert");
-    shaders_[ShaderType_VolumetricModel].Attach(GL_FRAGMENT_SHADER, "shader/FlatShading.frag");
+    shaders_[ShaderType_VolumetricModel].Attach(GL_VERTEX_SHADER, "shader/VolumetricModel.vert");
+    shaders_[ShaderType_VolumetricModel].Attach(GL_FRAGMENT_SHADER, "shader/VolumetricModel.frag");
 
     for (Shader const& s : shaders_) {
         s.Link();
@@ -75,6 +75,18 @@ Renderer::Renderer(int width, int height)
         auto const& [img, w, h, ch] = world.pattern;
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
     }
+
+    glGenTextures(1, &texVolModel_);
+    glBindTexture(GL_TEXTURE_2D, texVolModel_);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    {
+        float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
+        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_FLOAT, color);
+    }
+
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
@@ -96,8 +108,8 @@ void Renderer::Render()
     if (rendopt & RenderOption_LightSource) {
         vao_.Enable(VertexAttrib_Position);
         vao_.Disable(VertexAttrib_Normal);
-        vao_.Disable(VertexAttrib_TextureCoordintes);
-        vao_.Disable(VertexAttrib_Instanced);
+        vao_.Disable(VertexAttrib_TextureCoord);
+        vao_.Disable(VertexAttrib_Translation);
         program = &shaders_[ShaderType_LightSource];
         program->Use();
         program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
@@ -111,8 +123,8 @@ void Renderer::Render()
     if (rendopt & RenderOption_LatticeVertex) {
         vao_.Enable(VertexAttrib_Position);
         vao_.Enable(VertexAttrib_Normal);
-        vao_.Disable(VertexAttrib_TextureCoordintes);
-        vao_.Enable(VertexAttrib_Instanced);
+        vao_.Disable(VertexAttrib_TextureCoord);
+        vao_.Enable(VertexAttrib_Translation);
         program = &shaders_[ShaderType_LatticeVertex];
         program->Use();
         program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
@@ -131,8 +143,8 @@ void Renderer::Render()
                            sizeof(VertexPN));
         glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_UVSphere], offsetof(VertexPN, normal),
                            sizeof(VertexPN));
-        glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
-        glVertexBindingDivisor(2, 1);
+        glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
+        glVertexBindingDivisor(VertexAttrib_Translation, 1);
         glDrawArraysInstanced(GL_TRIANGLES, 0, uvsphereBuf_.size(), world.neuronPositions.size());
     }
 
@@ -140,8 +152,8 @@ void Renderer::Render()
         if (world.polyModel != nullptr) {
             vao_.Enable(VertexAttrib_Position);
             vao_.Enable(VertexAttrib_Normal);
-            vao_.Disable(VertexAttrib_TextureCoordintes);
-            vao_.Disable(VertexAttrib_Instanced);
+            vao_.Disable(VertexAttrib_TextureCoord);
+            vao_.Disable(VertexAttrib_Translation);
 
             program = &shaders_[ShaderType_Default];
             program->Use();
@@ -168,8 +180,8 @@ void Renderer::Render()
             glCullFace(GL_BACK);
             vao_.Enable(VertexAttrib_Position);
             vao_.Enable(VertexAttrib_Normal);
-            vao_.Disable(VertexAttrib_TextureCoordintes);
-            vao_.Enable(VertexAttrib_Instanced);
+            vao_.Enable(VertexAttrib_TextureCoord);
+            vao_.Enable(VertexAttrib_Translation);
             program = &shaders_[ShaderType_VolumetricModel];
             program->Use();
             program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
@@ -181,8 +193,8 @@ void Renderer::Render()
             program->SetUniform3f("light.diffusion", 0.8f, 0.8f, 0.8f);
             program->SetUniform3f("light.specular", 0.8f, 0.8f, 0.8f);
 
-            program->SetUniform3f("material.ambient", 0.0f, 0.3f, 0.0f);
-            program->SetUniform3f("material.diffusion", 0.0f, 0.6f, 0.0f);
+            program->SetUniform3f("material.ambient", 0.3f, 0.3f, 0.3f);
+            program->SetUniform3f("material.diffusion", 0.6f, 0.6f, 0.6f);
             program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
             program->SetUniform1f("material.shininess", 256.0f);
 
@@ -192,8 +204,13 @@ void Renderer::Render()
                                sizeof(VertexPN));
             glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Cube], offsetof(VertexPN, normal),
                                sizeof(VertexPN));
-            glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_VolumetricModel], 0, sizeof(glm::vec3));
-            glVertexBindingDivisor(2, 1);
+            glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_VolumetricModel_Translation], 0,
+                               sizeof(glm::vec3));
+            glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_VolumetricModel_TextureCoord], 0,
+                               sizeof(glm::vec3));
+            glVertexBindingDivisor(VertexAttrib_Translation, 1);
+            glVertexBindingDivisor(VertexAttrib_TextureCoord, 1);
+            glBindTexture(GL_TEXTURE_2D, texVolModel_);
             glDrawArraysInstanced(GL_TRIANGLES, 0, cubeBuf_.size(), world.volModel->positions.size());
             glDisable(GL_CULL_FACE);
         }
@@ -202,8 +219,8 @@ void Renderer::Render()
     if (rendopt & RenderOption_LatticeEdge) {
         vao_.Enable(VertexAttrib_Position);
         vao_.Disable(VertexAttrib_Normal);
-        vao_.Disable(VertexAttrib_TextureCoordintes);
-        vao_.Disable(VertexAttrib_Instanced);
+        vao_.Disable(VertexAttrib_TextureCoord);
+        vao_.Disable(VertexAttrib_Translation);
 
         program = &shaders_[ShaderType_LatticeEdge];
         program->Use();
@@ -218,8 +235,8 @@ void Renderer::Render()
     if (rendopt & RenderOption_LatticeFace) {
         vao_.Enable(VertexAttrib_Position);
         vao_.Enable(VertexAttrib_Normal);
-        vao_.Enable(VertexAttrib_TextureCoordintes);
-        vao_.Disable(VertexAttrib_Instanced);
+        vao_.Enable(VertexAttrib_TextureCoord);
+        vao_.Disable(VertexAttrib_Translation);
 
         UpdateLatticeMeshBuffer();
         glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
@@ -243,8 +260,8 @@ void Renderer::Render()
                            sizeof(VertexPNT));
         glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], offsetof(VertexPNT, normal),
                            sizeof(VertexPNT));
-        glBindVertexBuffer(VertexAttrib_TextureCoordintes, buffers_[BufferType_LatticeFace],
-                           offsetof(VertexPNT, texcoord), sizeof(VertexPNT));
+        glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_LatticeFace], offsetof(VertexPNT, texcoord),
+                           sizeof(VertexPNT));
         glBindTexture(GL_TEXTURE_2D, tex_);
         glDrawArrays(GL_TRIANGLES, 0, latticeMeshBuf_.size());
     }
@@ -289,19 +306,27 @@ void Renderer::LoadLattice()
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, world.latticeEdges.size() * sizeof(unsigned int), world.latticeEdges.data(),
                  GL_STATIC_DRAW);
 
-    glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
+    glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
 }
 
 void Renderer::LoadVolumetricModel()
 {
-    glDeleteBuffers(1, &buffers_[BufferType_VolumetricModel]);
-    glGenBuffers(1, &buffers_[BufferType_VolumetricModel]);
+    glDeleteBuffers(1, &buffers_[BufferType_VolumetricModel_Translation]);
+    glDeleteBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
 
-    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel]);
+    glGenBuffers(1, &buffers_[BufferType_VolumetricModel_Translation]);
+    glGenBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
+
+    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel_Translation]);
     glBufferData(GL_ARRAY_BUFFER, world.volModel->positions.size() * sizeof(glm::vec3),
                  world.volModel->positions.data(), GL_DYNAMIC_DRAW);
-    glVertexBindingDivisor(2, 1);
-    glBindVertexBuffer(VertexAttrib_Instanced, buffers_[BufferType_VolumetricModel], 0, sizeof(glm::vec3));
+
+    glVertexBindingDivisor(VertexAttrib_Translation, 1);
+    glVertexBindingDivisor(VertexAttrib_TextureCoord, 1);
+    glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_VolumetricModel_Translation], 0,
+                       sizeof(glm::vec3));
+    glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_VolumetricModel_TextureCoord], 0,
+                       sizeof(glm::vec3));
 }
 
 Camera& Renderer::GetCamera()
