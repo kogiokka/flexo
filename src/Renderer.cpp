@@ -262,6 +262,7 @@ void Renderer::Render()
                            sizeof(VertexPNT));
         glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_LatticeFace], offsetof(VertexPNT, texcoord),
                            sizeof(VertexPNT));
+        glVertexBindingDivisor(VertexAttrib_TextureCoord, 0);
         glBindTexture(GL_TEXTURE_2D, tex_);
         glDrawArrays(GL_TRIANGLES, 0, latticeMeshBuf_.size());
     }
