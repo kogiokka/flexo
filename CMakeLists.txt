@@ -54,6 +54,11 @@ PRIVATE
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
     "src/assetlib/STL/STLImporter.cpp"
+
+    "src/Drawable.cpp"
+    "src/Graphics.cpp"
+    "src/IndexBuffer.cpp"
+    "src/VertexBuffer.cpp"
 )
 
 target_include_directories(som-demo
