@@ -60,6 +60,7 @@ PRIVATE
     "src/bindable/Primitive.cpp"
     "src/bindable/IndexBuffer.cpp"
     "src/bindable/VertexBuffer.cpp"
+    "src/bindable/Texture.cpp"
 )
 
 target_include_directories(som-demo

@@ -10,6 +10,14 @@ struct BufferDesc {
     GLsizei stride;
 };
 
+struct Texture2dDesc {
+    GLsizei width;
+    GLsizei height;
+    GLenum format;
+    GLenum usage;
+    GLsizei stride;
+};
+
 struct BufferData {
     const void* mem;
 };
@@ -28,6 +36,7 @@ class Graphics
 public:
     void ClearBuffer(float red, float green, float blue) const;
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
+    void CreateTexture2D(GLuint& texture, Texture2dDesc const& desc, BufferData const& data);
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(int startAttrib, int numBuffers, GLuint* buffers, GLintptr* offsets, GLsizei* strides);
     void SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset);

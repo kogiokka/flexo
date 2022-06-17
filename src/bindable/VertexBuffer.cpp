@@ -1,7 +1,9 @@
+#include <cstdlib>
 #include <type_traits>
 
 #include "Vertex.hpp"
 #include "bindable/VertexBuffer.hpp"
+#include "common/Logger.hpp"
 
 template <typename T>
 VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices)
@@ -29,6 +31,9 @@ VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices)
         GLsizei const stride = sizeof(VertexPNC);
         offsets_ = { offsetof(VertexPNC, position), offsetof(VertexPNC, normal), offsetof(VertexPNC, color) };
         strides_ = { stride, stride, stride };
+    } else {
+        Logger::error("Unknown vertex type");
+        std::exit(EXIT_FAILURE);
     }
 }
 
