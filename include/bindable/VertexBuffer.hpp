@@ -3,13 +3,14 @@
 
 #include <vector>
 
-#include "Bindable.hpp"
 #include "Graphics.hpp"
+#include "bindable/Bindable.hpp"
 
 class VertexBuffer : public Bindable
 {
     GLuint id_;
-    GLsizei stride_;
+    std::vector<GLsizei> strides_;
+    std::vector<GLintptr> offsets_;
 
 public:
     template <typename T>

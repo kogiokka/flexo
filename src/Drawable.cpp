@@ -5,5 +5,4 @@ void Drawable::Draw(Graphics& gfx) const
     for (auto& b : binds) {
         b->Bind(gfx);
     }
-    // gfx.DrawIndexed(
 }

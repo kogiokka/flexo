@@ -57,8 +57,9 @@ PRIVATE
 
     "src/Drawable.cpp"
     "src/Graphics.cpp"
-    "src/IndexBuffer.cpp"
-    "src/VertexBuffer.cpp"
+    "src/bindable/Primitive.cpp"
+    "src/bindable/IndexBuffer.cpp"
+    "src/bindable/VertexBuffer.cpp"
 )
 
 target_include_directories(som-demo

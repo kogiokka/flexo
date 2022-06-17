@@ -6,6 +6,7 @@
 
 #include "Bindable.hpp"
 #include "Graphics.hpp"
+#include "IndexBuffer.hpp"
 
 class Drawable
 {
@@ -18,6 +19,7 @@ public:
     void AddBind(std::unique_ptr<Bindable> bind);
 
 private:
+    IndexBuffer const* indexBuffer_;
     std::vector<std::unique_ptr<Bindable>> binds;
 };
 

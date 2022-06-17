@@ -5,8 +5,8 @@
 
 #include <glad/glad.h>
 
-#include "Bindable.hpp"
 #include "Graphics.hpp"
+#include "bindable/Bindable.hpp"
 
 class IndexBuffer : public Bindable
 {
