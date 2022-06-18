@@ -4,9 +4,9 @@
 #include <memory>
 #include <vector>
 
-#include "Bindable.hpp"
 #include "Graphics.hpp"
-#include "IndexBuffer.hpp"
+#include "bindable/Bindable.hpp"
+#include "bindable/IndexBuffer.hpp"
 
 class Drawable
 {

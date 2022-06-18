@@ -13,9 +13,9 @@ struct BufferDesc {
 struct Texture2dDesc {
     GLsizei width;
     GLsizei height;
-    GLenum format;
-    GLenum usage;
-    GLsizei stride;
+    GLenum textureFormat;
+    GLenum pixelFormat;
+    GLenum dataType;
 };
 
 struct BufferData {
@@ -40,6 +40,7 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(int startAttrib, int numBuffers, GLuint* buffers, GLintptr* offsets, GLsizei* strides);
     void SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset);
+    void SetTexture(GLenum target, GLuint texture);
     void Draw(GLsizei vertexCount);
     void DrawIndexed(GLsizei indexCount);
     void DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCount);

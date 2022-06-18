@@ -13,6 +13,20 @@ void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData c
     glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
 }
 
+void Graphics::CreateTexture2D(GLuint& texture, const Texture2dDesc& desc, const BufferData& data)
+{
+    constexpr GLint BORDER = 0;
+    glGenTextures(1, &texture);
+    glBindTexture(GL_TEXTURE_2D, texture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, desc.textureFormat, desc.width, desc.height, BORDER, desc.pixelFormat, desc.dataType,
+                 data.mem);
+    glGenerateMipmap(GL_TEXTURE_2D);
+}
+
 void Graphics::SetPrimitive(GLenum primitive)
 {
     ctx_.primitive = primitive;
@@ -32,6 +46,11 @@ void Graphics::SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
     ctx_.format = format;
     ctx_.offset = offset;
+}
+
+void Graphics::SetTexture(GLenum target, GLuint texture)
+{
+    glBindTexture(target, texture);
 }
 
 void Graphics::Draw(GLsizei vertexCount)

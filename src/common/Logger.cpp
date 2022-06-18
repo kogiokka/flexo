@@ -1,13 +1,13 @@
-#include "Logger.hpp"
-
-#include <glad/glad.h>
-
 #include <chrono>
 #include <cstdarg>
 #include <cstdio>
 #include <ctime>
 #include <iomanip>
 #include <sstream>
+
+#include <glad/glad.h>
+
+#include "common/Logger.hpp"
 
 namespace Logger
 {
