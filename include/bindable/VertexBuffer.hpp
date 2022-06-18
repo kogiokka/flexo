@@ -11,12 +11,14 @@ class VertexBuffer : public Bindable
 {
 protected:
     GLuint id_;
+    GLuint count_;
     std::vector<GLintptr> offsets_;
 
 public:
     template <typename T>
     VertexBuffer(Graphics& gfx, std::vector<T> const& vertices);
     void Bind(Graphics& gfx) override;
+    GLuint GetCount() const;
 
 protected:
     template <typename T>
@@ -26,6 +28,7 @@ protected:
 template <typename T>
 VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices)
     : id_(0)
+    , count_(vertices.size())
 {
     BufferDesc desc;
     BufferData data;
@@ -42,21 +45,10 @@ VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices)
 }
 
 template <>
-void VertexBuffer::setOffsets<VertexPN>()
-{
-    offsets_ = { offsetof(VertexPN, position), offsetof(VertexPN, normal) };
-}
-
+void VertexBuffer::setOffsets<VertexPN>();
 template <>
-void VertexBuffer::setOffsets<VertexPNT>()
-{
-    offsets_ = { offsetof(VertexPNT, position), offsetof(VertexPNT, normal), offsetof(VertexPNT, texcoord) };
-}
-
+void VertexBuffer::setOffsets<VertexPNT>();
 template <>
-void VertexBuffer::setOffsets<VertexPNC>()
-{
-    offsets_ = { offsetof(VertexPNC, position), offsetof(VertexPNC, normal), offsetof(VertexPNC, color) };
-}
+void VertexBuffer::setOffsets<VertexPNC>();
 
 #endif

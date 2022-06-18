@@ -4,6 +4,7 @@
 #include "Shader.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
+#include "drawable/UVSphere.hpp"
 
 RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 
@@ -22,6 +23,8 @@ Renderer::Renderer(int width, int height)
     vao_.Enable(VertexAttrib_Position);
     vao_.Enable(VertexAttrib_Normal);
     vao_.Enable(VertexAttrib_TextureCoord);
+
+    drawables_.push_back(std::make_unique<UVSphere>(gfx_));
 
     CreateVertexBuffers();
 
@@ -95,6 +98,10 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::Render()
 {
+    for (auto const& d : drawables_) {
+        d->Draw(gfx_);
+    }
+
     if (world.polyModel == nullptr && world.volModel == nullptr) {
         return;
     }

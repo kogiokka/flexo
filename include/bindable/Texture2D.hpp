@@ -39,15 +39,9 @@ Texture2D::Texture2D(Graphics& gfx, std::vector<T> const& textureData, int width
 }
 
 template <>
-void Texture2D::determineDataType<float>(Texture2dDesc& desc) const
-{
-    desc.dataType = GL_FLOAT;
-}
+void Texture2D::determineDataType<float>(Texture2dDesc& desc) const;
 
 template <>
-void Texture2D::determineDataType<unsigned char>(Texture2dDesc& desc) const
-{
-    desc.dataType = GL_UNSIGNED_BYTE;
-}
+void Texture2D::determineDataType<unsigned char>(Texture2dDesc& desc) const;
 
 #endif

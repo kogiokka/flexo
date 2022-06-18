@@ -7,11 +7,19 @@
 #include "Vertex.hpp"
 #include "VertexArray.hpp"
 
+#include "Drawable.hpp"
+#include "Graphics.hpp"
+#include "bindable/IndexBuffer.hpp"
+#include "bindable/Primitive.hpp"
+#include "bindable/Texture2D.hpp"
+#include "bindable/VertexBuffer.hpp"
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <array>
 #include <vector>
+#include <memory>
 
 using BufferType = int;
 using ShaderType = int;
@@ -52,6 +60,10 @@ class Renderer
     VertexArray vao_;
     std::array<GLuint, BufferType_Last + 1> buffers_;
     std::array<Shader, ShaderType_Last + 1> shaders_;
+
+    Graphics gfx_;
+    std::vector<std::unique_ptr<Drawable>> drawables_;
+
     Camera camera_;
     GLuint tex_;
     GLuint texColor_;
