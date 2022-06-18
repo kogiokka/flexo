@@ -11,6 +11,7 @@ void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData c
     glGenBuffers(1, &buffer);
     glBindBuffer(desc.target, buffer);
     glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
+    ctx_.stride = desc.stride;
 }
 
 void Graphics::CreateTexture2D(GLuint& texture, const Texture2dDesc& desc, const BufferData& data)
@@ -32,12 +33,12 @@ void Graphics::SetPrimitive(GLenum primitive)
     ctx_.primitive = primitive;
 }
 
-void Graphics::SetVertexBuffers(int startAttrib, int numBuffers, GLuint* buffers, GLintptr* offsets, GLsizei* strides)
+void Graphics::SetVertexBuffers(int startAttrib, int numBuffers, GLuint* buffers, GLintptr* offsets)
 {
     for (int i = 0; i < numBuffers; i++) {
         int const attr = startAttrib + i;
         glBindBuffer(GL_ARRAY_BUFFER, attr);
-        glBindVertexBuffer(attr, buffers[i], offsets[i], strides[i]);
+        glBindVertexBuffer(attr, buffers[i], offsets[i], ctx_.stride);
     }
 }
 

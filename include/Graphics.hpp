@@ -28,6 +28,7 @@ class Graphics
         GLenum primitive;
         GLenum format;
         GLsizei count;
+        GLsizei stride;
         const GLvoid* offset;
     };
 
@@ -38,7 +39,7 @@ public:
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
     void CreateTexture2D(GLuint& texture, Texture2dDesc const& desc, BufferData const& data);
     void SetPrimitive(GLenum primitive);
-    void SetVertexBuffers(int startAttrib, int numBuffers, GLuint* buffers, GLintptr* offsets, GLsizei* strides);
+    void SetVertexBuffers(int startAttrib, int numBuffers, GLuint* buffers, GLintptr* offsets);
     void SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset);
     void SetTexture(GLenum target, GLuint texture);
     void Draw(GLsizei vertexCount);
