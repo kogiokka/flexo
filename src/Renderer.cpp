@@ -46,17 +46,17 @@ Renderer::Renderer(int width, int height)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, world.latticeEdges.size() * sizeof(unsigned int), world.latticeEdges.data(),
                  GL_STATIC_DRAW);
 
-    shaders_[ShaderType_Default].Attach(GL_VERTEX_SHADER, "shader/default.vert");
-    shaders_[ShaderType_Default].Attach(GL_FRAGMENT_SHADER, "shader/default.frag");
+    shaders_[ShaderType_PolygonalModel].Attach(GL_VERTEX_SHADER, "shader/PolygonalModel.vert");
+    shaders_[ShaderType_PolygonalModel].Attach(GL_FRAGMENT_SHADER, "shader/PolygonalModel.frag");
 
-    shaders_[ShaderType_LatticeVertex].Attach(GL_VERTEX_SHADER, "shader/VertexModel.vert");
-    shaders_[ShaderType_LatticeVertex].Attach(GL_FRAGMENT_SHADER, "shader/VertexModel.frag");
+    shaders_[ShaderType_LatticeVertex].Attach(GL_VERTEX_SHADER, "shader/LatticeVertex.vert");
+    shaders_[ShaderType_LatticeVertex].Attach(GL_FRAGMENT_SHADER, "shader/LatticeVertex.frag");
 
-    shaders_[ShaderType_LatticeEdge].Attach(GL_VERTEX_SHADER, "shader/Edge.vert");
-    shaders_[ShaderType_LatticeEdge].Attach(GL_FRAGMENT_SHADER, "shader/Edge.frag");
+    shaders_[ShaderType_LatticeEdge].Attach(GL_VERTEX_SHADER, "shader/LatticeEdge.vert");
+    shaders_[ShaderType_LatticeEdge].Attach(GL_FRAGMENT_SHADER, "shader/LatticeEdge.frag");
 
-    shaders_[ShaderType_LatticeFace].Attach(GL_VERTEX_SHADER, "shader/Texture.vert");
-    shaders_[ShaderType_LatticeFace].Attach(GL_FRAGMENT_SHADER, "shader/Texture.frag");
+    shaders_[ShaderType_LatticeFace].Attach(GL_VERTEX_SHADER, "shader/LatticeFace.vert");
+    shaders_[ShaderType_LatticeFace].Attach(GL_FRAGMENT_SHADER, "shader/LatticeFace.frag");
 
     shaders_[ShaderType_LightSource].Attach(GL_VERTEX_SHADER, "shader/LightSource.vert");
     shaders_[ShaderType_LightSource].Attach(GL_FRAGMENT_SHADER, "shader/LightSource.frag");
@@ -98,10 +98,10 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::Render()
 {
-    for (auto const& d : drawables_) {
-        d->Draw(gfx_);
-    }
-
+//     for (auto const& d : drawables_) {
+//         d->Draw(gfx_);
+//     }
+//
     if (world.polyModel == nullptr && world.volModel == nullptr) {
         return;
     }
@@ -122,9 +122,9 @@ void Renderer::Render()
         vao_.Disable(VertexAttrib_Translation);
         program = &shaders_[ShaderType_LightSource];
         program->Use();
-        program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
-        program->SetUniformMatrix4fv("modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
-        program->SetUniform3f("lightColor", 1.0f, 1.0f, 1.0f);
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
+        program->SetUniform3f("ubo.frag.lightColor", 1.0f, 1.0f, 1.0f);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(VertexPN, position),
                            sizeof(VertexPN));
         glDrawArrays(GL_TRIANGLES, 0, uvsphereBuf_.size());
@@ -137,18 +137,18 @@ void Renderer::Render()
         vao_.Enable(VertexAttrib_Translation);
         program = &shaders_[ShaderType_LatticeVertex];
         program->Use();
-        program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
-        program->SetUniformMatrix4fv("modelMat", vertexScaleMat);
-        program->SetUniform3fv("viewPos", camera_.Position());
-        program->SetUniform3fv("light.position", lightPos);
-        program->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-        program->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
-        program->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-        program->SetUniform1f("material.shininess", 32.0f);
-        program->SetUniform1f("alpha", 1.0f);
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.modelMat", vertexScaleMat);
+        program->SetUniform3fv("ubo.frag.light.position", lightPos);
+        program->SetUniform3f("ubo.frag.light.ambient", 0.2f, 0.2f, 0.2f);
+        program->SetUniform3f("ubo.frag.light.diffusion", 0.5f, 0.5f, 0.5f);
+        program->SetUniform3f("ubo.frag.light.specular", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("ubo.frag.material.ambient", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("ubo.frag.material.diffusion", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("ubo.frag.material.specular", 0.3f, 0.3f, 0.3f);
+        program->SetUniform1f("ubo.frag.material.shininess", 32.0f);
+        program->SetUniform3fv("ubo.frag.viewPos", camera_.Position());
+        program->SetUniform1f("ubo.frag.alpha", 1.0f);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(VertexPN, position),
                            sizeof(VertexPN));
         glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_UVSphere], offsetof(VertexPN, normal),
@@ -165,20 +165,20 @@ void Renderer::Render()
             vao_.Disable(VertexAttrib_TextureCoord);
             vao_.Disable(VertexAttrib_Translation);
 
-            program = &shaders_[ShaderType_Default];
+            program = &shaders_[ShaderType_PolygonalModel];
             program->Use();
-            program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
-            program->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-            program->SetUniform3fv("viewPos", camera_.Position());
-            program->SetUniform3fv("light.position", lightPos);
-            program->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-            program->SetUniform3f("light.diffusion", 0.5f, 0.5f, 0.5f);
-            program->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-            program->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-            program->SetUniform3f("material.diffusion", 0.0f, 0.6352941f, 0.9294118f);
-            program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-            program->SetUniform1f("material.shininess", 32.0f);
-            program->SetUniform1f("alpha", world.modelColorAlpha);
+            program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+            program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
+            program->SetUniform3fv("ubo.frag.light.position", lightPos);
+            program->SetUniform3f("ubo.frag.light.ambient", 0.2f, 0.2f, 0.2f);
+            program->SetUniform3f("ubo.frag.light.diffusion", 0.5f, 0.5f, 0.5f);
+            program->SetUniform3f("ubo.frag.light.specular", 1.0f, 1.0f, 1.0f);
+            program->SetUniform3f("ubo.frag.material.ambient", 1.0f, 1.0f, 1.0f);
+            program->SetUniform3f("ubo.frag.material.diffusion", 0.0f, 0.6352941f, 0.9294118f);
+            program->SetUniform3f("ubo.frag.material.specular", 0.3f, 0.3f, 0.3f);
+            program->SetUniform1f("ubo.frag.material.shininess", 32.0f);
+            program->SetUniform3fv("ubo.frag.viewPos", camera_.Position());
+            program->SetUniform1f("ubo.frag.alpha", world.modelColorAlpha);
 
             glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], offsetof(VertexPN, position),
                                sizeof(VertexPN));
@@ -194,21 +194,21 @@ void Renderer::Render()
             vao_.Enable(VertexAttrib_Translation);
             program = &shaders_[ShaderType_VolumetricModel];
             program->Use();
-            program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
-            program->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-            program->SetUniform3fv("viewPos", camera_.Position());
-            program->SetUniform3fv("light.position", camera_.Position());
+            program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+            program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
+            program->SetUniform3fv("ubo.vert.viewPos", camera_.Position());
+            program->SetUniform3fv("ubo.vert.light.position", camera_.Position());
 
-            program->SetUniform3f("light.ambient", 0.8f, 0.8f, 0.8f);
-            program->SetUniform3f("light.diffusion", 0.8f, 0.8f, 0.8f);
-            program->SetUniform3f("light.specular", 0.8f, 0.8f, 0.8f);
+            program->SetUniform3f("ubo.vert.light.ambient", 0.8f, 0.8f, 0.8f);
+            program->SetUniform3f("ubo.vert.light.diffusion", 0.8f, 0.8f, 0.8f);
+            program->SetUniform3f("ubo.vert.light.specular", 0.8f, 0.8f, 0.8f);
 
-            program->SetUniform3f("material.ambient", 0.3f, 0.3f, 0.3f);
-            program->SetUniform3f("material.diffusion", 0.6f, 0.6f, 0.6f);
-            program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-            program->SetUniform1f("material.shininess", 256.0f);
+            program->SetUniform3f("ubo.vert.material.ambient", 0.3f, 0.3f, 0.3f);
+            program->SetUniform3f("ubo.vert.material.diffusion", 0.6f, 0.6f, 0.6f);
+            program->SetUniform3f("ubo.vert.material.specular", 0.3f, 0.3f, 0.3f);
+            program->SetUniform1f("ubo.vert.material.shininess", 256.0f);
 
-            program->SetUniform1f("alpha", world.modelColorAlpha);
+            program->SetUniform1f("ubo.vert.alpha", world.modelColorAlpha);
 
             glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Cube], offsetof(VertexPN, position),
                                sizeof(VertexPN));
@@ -234,9 +234,9 @@ void Renderer::Render()
 
         program = &shaders_[ShaderType_LatticeEdge];
         program->Use();
-        program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
-        program->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-        program->SetUniform3f("color", 0.7f, 0.7f, 0.7f);
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
+        program->SetUniform3f("ubo.frag.color", 0.7f, 0.7f, 0.7f);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
         glDrawElements(GL_LINES, world.latticeEdges.size(), GL_UNSIGNED_INT, 0);
@@ -254,17 +254,17 @@ void Renderer::Render()
 
         program = &shaders_[ShaderType_LatticeFace];
         program->Use();
-        program->SetUniformMatrix4fv("viewProjMat", camera_.ViewProjectionMatrix());
-        program->SetUniformMatrix4fv("modelMat", glm::mat4(1.0f));
-        program->SetUniform3fv("viewPos", camera_.Position());
-        program->SetUniform3fv("light.position", lightPos);
-        program->SetUniform3f("light.ambient", 0.2f, 0.2f, 0.2f);
-        program->SetUniform3f("light.diffusion", 0.5f, 0.4f, 0.5f);
-        program->SetUniform3f("light.specular", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.ambient", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.diffusion", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("material.specular", 0.3f, 0.3f, 0.3f);
-        program->SetUniform1f("material.shininess", 32.0f);
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
+        program->SetUniform3fv("ubo.frag.viewPos", camera_.Position());
+        program->SetUniform3fv("ubo.frag.light.position", lightPos);
+        program->SetUniform3f("ubo.frag.light.ambient", 0.2f, 0.2f, 0.2f);
+        program->SetUniform3f("ubo.frag.light.diffusion", 0.5f, 0.4f, 0.5f);
+        program->SetUniform3f("ubo.frag.light.specular", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("ubo.frag.material.ambient", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("ubo.frag.material.diffusion", 1.0f, 1.0f, 1.0f);
+        program->SetUniform3f("ubo.frag.material.specular", 0.3f, 0.3f, 0.3f);
+        program->SetUniform1f("ubo.frag.material.shininess", 32.0f);
 
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticeFace], offsetof(VertexPNT, position),
                            sizeof(VertexPNT));

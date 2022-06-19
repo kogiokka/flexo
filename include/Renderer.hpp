@@ -26,7 +26,7 @@ using ShaderType = int;
 using RenderOption = int;
 
 enum ShaderType_ : int {
-    ShaderType_Default = 0,
+    ShaderType_PolygonalModel = 0,
     ShaderType_VolumetricModel,
     ShaderType_LatticeVertex,
     ShaderType_LatticeEdge,

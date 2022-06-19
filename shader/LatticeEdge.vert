@@ -6,7 +6,7 @@ struct UniformBuffer_Vert {
 };
 
 struct UniformBuffer_Frag {
-    vec3 lightColor;
+    vec3 color;
 };
 
 struct UniformBuffer {
@@ -21,4 +21,3 @@ void main()
 {
     gl_Position = ubo.vert.viewProjMat * ubo.vert.modelMat * vec4(position, 1.0);
 }
-

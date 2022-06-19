@@ -29,8 +29,8 @@ UVSphere::UVSphere(Graphics& gfx)
     AddBind(std::make_unique<VertexBuffer>(gfx, vertices));
 
     auto shader = std::make_unique<ShaderBindable>(gfx);
-    shader->Attach(gfx, ShaderStage::Vert, "shader/default.vert");
-    shader->Attach(gfx, ShaderStage::Frag, "shader/default.frag");
+    shader->Attach(gfx, ShaderStage::Vert, "shader/PolygonalModel.vert");
+    shader->Attach(gfx, ShaderStage::Frag, "shader/PolygonalModel.frag");
     shader->Link(gfx);
 
     AddBind(std::move(shader));

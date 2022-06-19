@@ -72,6 +72,7 @@ public:
     void SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset);
     void SetTexture(GLenum target, GLuint texture);
     void SetShaderProgram(GLuint program);
+    void SetUniformBuffer(GLuint program);
 
     template <typename T, int D1, int D2 = 1>
     void SetUniform(std::string const& name, T* values);

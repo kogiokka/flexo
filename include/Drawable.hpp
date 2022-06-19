@@ -14,7 +14,6 @@ public:
     Drawable(Drawable const&) = delete;
     virtual ~Drawable() = default;
 
-    virtual void Update(Graphics& gfx);
     virtual void Draw(Graphics& gfx) const;
     void AddBind(std::unique_ptr<Bindable> bind);
 
