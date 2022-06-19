@@ -2,6 +2,7 @@
 #define GRAPHICS_H
 
 #include <glad/glad.h>
+#include <glm/glm.hpp>
 #include <string>
 
 struct BufferDesc {
@@ -21,6 +22,20 @@ struct Texture2dDesc {
 
 struct BufferData {
     const void* mem;
+};
+
+struct LightUniform {
+    glm::vec3 position;
+    glm::vec3 ambient;
+    glm::vec3 diffusion;
+    glm::vec3 specular;
+};
+
+struct MaterialUniform {
+    glm::vec3 ambient;
+    glm::vec3 diffusion;
+    glm::vec3 specular;
+    float shininess;
 };
 
 enum ShaderStage : GLenum {
