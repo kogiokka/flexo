@@ -1,9 +1,35 @@
 #version 430
 
-layout (std140, binding = 0) uniform UniformBuffer_Vert {
+struct Light {
+    vec3 position;
+    vec3 ambient;
+    vec3 diffusion;
+    vec3 specular;
+};
+
+struct Material {
+    vec3 ambient;
+    vec3 diffusion;
+    vec3 specular;
+    float shininess;
+};
+
+struct UniformBuffer_Vert {
     mat4 viewProjMat;
     mat4 modelMat;
 };
+
+struct UniformBuffer_Frag {
+    Light light;
+    Material material;
+    vec3 viewPos;
+    float alpha;
+};
+
+layout (std140, binding = 0) uniform UniformBuffer {
+    UniformBuffer_Vert vert;
+    UniformBuffer_Frag frag;
+} ubo;
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
@@ -13,7 +39,7 @@ out vec3 normFrag;
 
 void main()
 {
-     gl_Position = viewProjMat * modelMat * vec4(position, 1.0);
+     gl_Position = ubo.vert.viewProjMat * ubo.vert.modelMat * vec4(position, 1.0);
      posFrag = position;
      normFrag  = normal;
 }
