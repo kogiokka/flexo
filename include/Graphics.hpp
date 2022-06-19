@@ -72,7 +72,10 @@ public:
     void SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset);
     void SetTexture(GLenum target, GLuint texture);
     void SetShaderProgram(GLuint program);
-    void SetUniformBuffer(GLuint program);
+    void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
+
+    template <typename T>
+    void UpdateUniformBuffer(GLuint const uniform, T const& uniformBlock);
 
     template <typename T, int D1, int D2 = 1>
     void SetUniform(std::string const& name, T* values);
@@ -86,16 +89,11 @@ private:
     bool IsShaderCompiled(GLuint const shaderObject);
 };
 
-template <>
-void Graphics::SetUniform<int, 1, 1>(std::string const& name, int* values);
-
-template <>
-void Graphics::SetUniform<float, 1, 1>(std::string const& name, float* values);
-
-template <>
-void Graphics::SetUniform<float, 3, 1>(std::string const& name, float* values);
-
-template <>
-void Graphics::SetUniform<float, 4, 4>(std::string const& name, float* values);
+template <typename T>
+void Graphics::UpdateUniformBuffer(GLuint const uniform, T const& uniformBlock)
+{
+    glBindBuffer(GL_UNIFORM_BUFFER, uniform);
+    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(T), &uniformBlock);
+}
 
 #endif

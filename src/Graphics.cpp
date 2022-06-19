@@ -131,15 +131,9 @@ void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCou
     glDrawArraysInstanced(ctx_.primitive, 0, vertexCountPerInstance, instanceCount);
 }
 
-int Graphics::UniformLocation(std::string const& uniformName) const
+void Graphics::SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex)
 {
-    char const* name = uniformName.data();
-
-    int location = glGetUniformLocation(ctx_.program, name);
-    if (location == -1) {
-        Logger::error("Uniform %s does not exist.\n", name);
-    }
-    return location;
+    glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, uniform);
 }
 
 bool Graphics::IsShaderCompiled(GLuint const shaderObject)
@@ -161,28 +155,4 @@ bool Graphics::IsShaderCompiled(GLuint const shaderObject)
     std::fprintf(stderr, "%s\n", log.data());
 
     return false;
-}
-
-template <>
-void Graphics::SetUniform<int, 1, 1>(std::string const& name, int* values)
-{
-    glUniform1iv(UniformLocation(name), 1, values);
-}
-
-template <>
-void Graphics::SetUniform<float, 1, 1>(std::string const& name, float* values)
-{
-    glUniform1fv(UniformLocation(name), 1, values);
-}
-
-template <>
-void Graphics::SetUniform<float, 3, 1>(std::string const& name, float* values)
-{
-    glUniform3fv(UniformLocation(name), 1, values);
-}
-
-template <>
-void Graphics::SetUniform<float, 4, 4>(std::string const& name, float* values)
-{
-    glUniformMatrix4fv(UniformLocation(name), 1, GL_FALSE, values);
 }
