@@ -5,7 +5,7 @@
 #include "Vertex.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "bindable/ShaderBindable.hpp"
-#include "bindable/Uniform.hpp"
+#include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "drawable/UVSphere.hpp"
 
@@ -34,20 +34,6 @@ UVSphere::UVSphere(Graphics& gfx)
     shader->Link(gfx);
 
     AddBind(std::move(shader));
-
-    using namespace glm;
-    AddBind(make_unique<Uniform<float, 4, 4>>(gfx, "viewProjMat", value_ptr(uniformBuf_.viewProjMat)));
-    AddBind(make_unique<Uniform<float, 4, 4>>(gfx, "modelMat", value_ptr(uniformBuf_.modelMat)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "viewPos", value_ptr(uniformBuf_.viewPos)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "light.ambient", value_ptr(uniformBuf_.light.ambient)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "light.diffusion", value_ptr(uniformBuf_.light.diffusion)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "light.specular", value_ptr(uniformBuf_.light.specular)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "light.position", value_ptr(uniformBuf_.light.position)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "material.ambient", value_ptr(uniformBuf_.material.ambient)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "material.diffusion", value_ptr(uniformBuf_.material.diffusion)));
-    AddBind(make_unique<Uniform<float, 3, 1>>(gfx, "material.specular", value_ptr(uniformBuf_.material.specular)));
-    AddBind(make_unique<Uniform<float, 1, 1>>(gfx, "material.shininess", &uniformBuf_.material.shininess));
-    AddBind(make_unique<Uniform<float, 1, 1>>(gfx, "alpha", &uniformBuf_.alpha));
 }
 
 void UVSphere::Draw(Graphics& gfx) const

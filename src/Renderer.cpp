@@ -1,10 +1,45 @@
-#include <cstdlib>
-
 #include "Renderer.hpp"
 #include "Shader.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 #include "drawable/UVSphere.hpp"
+#include <array>
+#include <cstdlib>
+
+struct Light {
+    alignas(sizeof(glm::vec4)) glm::vec3 position;
+    alignas(sizeof(glm::vec4)) glm::vec3 ambient;
+    alignas(sizeof(glm::vec4)) glm::vec3 diffusion;
+    alignas(sizeof(glm::vec4)) glm::vec3 specular;
+};
+
+struct Material {
+    alignas(sizeof(glm::vec4)) glm::vec3 ambient;
+    alignas(sizeof(glm::vec4)) glm::vec3 diffusion;
+    alignas(sizeof(glm::vec4)) glm::vec3 specular;
+    float shininess;
+};
+
+struct UniformBuffer_Vert {
+    glm::mat4 viewProjMat;
+    glm::mat4 modelMat;
+};
+
+struct UniformBuffer_Frag {
+    alignas(sizeof(glm::vec4)) glm::vec3 viewPos;
+    float alpha;
+};
+
+std::array<GLuint, 4> ubo;
+std::array<GLuint, 4> uniformBlockIndex;
+std::array<GLuint, 4> uniformBlockBindings = { 0, 1, 2, 3 };
+std::array<GLsizeiptr, 4> uniformBlockSizes
+    = { sizeof(UniformBuffer_Vert), sizeof(UniformBuffer_Frag), sizeof(Light), sizeof(Material) };
+
+UniformBuffer_Vert vertBuffer;
+UniformBuffer_Frag fragBuffer;
+Light lightBuffer;
+Material materialBuffer;
 
 RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 
@@ -68,6 +103,20 @@ Renderer::Renderer(int width, int height)
         s.Link();
     }
 
+    // Test UniformBuffer
+    uniformBlockIndex[0] = glGetUniformBlockIndex(shaders_[ShaderType_PolygonalModel].Id(), "UniformBuffer_Vert");
+    uniformBlockIndex[1] = glGetUniformBlockIndex(shaders_[ShaderType_PolygonalModel].Id(), "UniformBuffer_Frag");
+    uniformBlockIndex[2] = glGetUniformBlockIndex(shaders_[ShaderType_PolygonalModel].Id(), "Light");
+    uniformBlockIndex[3] = glGetUniformBlockIndex(shaders_[ShaderType_PolygonalModel].Id(), "Material");
+    glGenBuffers(ubo.size(), ubo.data());
+    for (unsigned int i = 0; i < ubo.size(); i++) {
+        glBindBuffer(GL_UNIFORM_BUFFER, ubo[i]);
+        glBufferData(GL_UNIFORM_BUFFER, uniformBlockSizes[i], nullptr, GL_STREAM_DRAW);
+        glUniformBlockBinding(shaders_[ShaderType_PolygonalModel].Id(), uniformBlockIndex[i], uniformBlockBindings[i]);
+        glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockBindings[i], ubo[i]);
+        glBindBufferRange(GL_UNIFORM_BUFFER, uniformBlockIndex[i], ubo[i], 0, uniformBlockSizes[i]);
+    }
+
     glGenTextures(1, &tex_);
     glBindTexture(GL_TEXTURE_2D, tex_);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
@@ -98,10 +147,10 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::Render()
 {
-//     for (auto const& d : drawables_) {
-//         d->Draw(gfx_);
-//     }
-//
+    //     for (auto const& d : drawables_) {
+    //         d->Draw(gfx_);
+    //     }
+    //
     if (world.polyModel == nullptr && world.volModel == nullptr) {
         return;
     }
@@ -167,18 +216,27 @@ void Renderer::Render()
 
             program = &shaders_[ShaderType_PolygonalModel];
             program->Use();
-            program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
-            program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
-            program->SetUniform3fv("ubo.frag.light.position", lightPos);
-            program->SetUniform3f("ubo.frag.light.ambient", 0.2f, 0.2f, 0.2f);
-            program->SetUniform3f("ubo.frag.light.diffusion", 0.5f, 0.5f, 0.5f);
-            program->SetUniform3f("ubo.frag.light.specular", 1.0f, 1.0f, 1.0f);
-            program->SetUniform3f("ubo.frag.material.ambient", 1.0f, 1.0f, 1.0f);
-            program->SetUniform3f("ubo.frag.material.diffusion", 0.0f, 0.6352941f, 0.9294118f);
-            program->SetUniform3f("ubo.frag.material.specular", 0.3f, 0.3f, 0.3f);
-            program->SetUniform1f("ubo.frag.material.shininess", 32.0f);
-            program->SetUniform3fv("ubo.frag.viewPos", camera_.Position());
-            program->SetUniform1f("ubo.frag.alpha", world.modelColorAlpha);
+            vertBuffer.viewProjMat = camera_.ViewProjectionMatrix();
+            vertBuffer.modelMat = glm::mat4(1.0f);
+            lightBuffer.position = lightPos;
+            lightBuffer.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+            lightBuffer.diffusion = glm::vec3(0.5f, 0.5f, 0.5f);
+            lightBuffer.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+            materialBuffer.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+            materialBuffer.diffusion = glm::vec3(0.0f, 0.6352941f, 0.9294118f);
+            materialBuffer.specular = glm::vec3(0.3f, 0.3f, 0.3f);
+            materialBuffer.shininess = 32.0f;
+            fragBuffer.viewPos = camera_.Position();
+            fragBuffer.alpha = world.modelColorAlpha;
+
+            glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockBindings[0], ubo[0]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformBlockSizes[0], &vertBuffer);
+            glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockBindings[1], ubo[1]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformBlockSizes[1], &fragBuffer);
+            glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockBindings[2], ubo[2]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformBlockSizes[2], &lightBuffer);
+            glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockBindings[3], ubo[3]);
+            glBufferSubData(GL_UNIFORM_BUFFER, 0, uniformBlockSizes[3], &materialBuffer);
 
             glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], offsetof(VertexPN, position),
                                sizeof(VertexPN));

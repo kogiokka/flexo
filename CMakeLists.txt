@@ -59,7 +59,7 @@ PRIVATE
     "src/Graphics.cpp"
     "src/bindable/Primitive.cpp"
     "src/bindable/IndexBuffer.cpp"
-    "src/bindable/Uniform.cpp"
+    "src/bindable/UniformBuffer.cpp"
     "src/bindable/VertexBuffer.cpp"
     "src/bindable/Texture2D.cpp"
     "src/bindable/ShaderBindable.cpp"
@@ -70,7 +70,6 @@ target_include_directories(som-demo
 PRIVATE
     "include/"
 )
-
 
 target_link_libraries(som-demo PRIVATE
     glad
