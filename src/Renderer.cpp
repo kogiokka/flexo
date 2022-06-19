@@ -5,17 +5,19 @@
 #include "drawable/UVSphere.hpp"
 #include <cstdlib>
 
+#define STD140_ALIGN alignas(sizeof(float) * 4)
+
 struct Light {
-    alignas(sizeof(glm::vec4)) glm::vec3 position;
-    alignas(sizeof(glm::vec4)) glm::vec3 ambient;
-    alignas(sizeof(glm::vec4)) glm::vec3 diffusion;
-    alignas(sizeof(glm::vec4)) glm::vec3 specular;
+    STD140_ALIGN glm::vec3 position;
+    STD140_ALIGN glm::vec3 ambient;
+    STD140_ALIGN glm::vec3 diffusion;
+    STD140_ALIGN glm::vec3 specular;
 };
 
 struct Material {
-    alignas(sizeof(glm::vec4)) glm::vec3 ambient;
-    alignas(sizeof(glm::vec4)) glm::vec3 diffusion;
-    alignas(sizeof(glm::vec4)) glm::vec3 specular;
+    STD140_ALIGN glm::vec3 ambient;
+    STD140_ALIGN glm::vec3 diffusion;
+    STD140_ALIGN glm::vec3 specular;
     float shininess;
 };
 
@@ -27,7 +29,7 @@ struct UniformBuffer_Vert {
 struct UniformBuffer_Frag {
     Light light;
     Material material;
-    alignas(sizeof(glm::vec4)) glm::vec3 viewPos;
+    STD140_ALIGN glm::vec3 viewPos;
     float alpha;
 };
 
