@@ -1,6 +1,8 @@
 #include <utility>
 #include <vector>
 
+#include "drawable/LightSource.hpp"
+
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
@@ -8,9 +10,8 @@
 #include "bindable/ShaderBindable.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
-#include "drawable/PolygonalModel.hpp"
 
-PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
+LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 {
     STLImporter stlImp;
     std::vector<VertexPN> vertices;
@@ -25,22 +26,14 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     count_ = vertices.size();
 
     ShaderBindable shader(gfx);
-    shader.Attach(gfx, ShaderStage::Vert, "shader/PolygonalModel.vert");
-    shader.Attach(gfx, ShaderStage::Frag, "shader/PolygonalModel.frag");
+    shader.Attach(gfx, ShaderStage::Vert, "shader/LightSource.vert");
+    shader.Attach(gfx, ShaderStage::Frag, "shader/LightSource.frag");
     shader.Link(gfx);
 
+    scaling_ = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.modelMat = glm::mat4(1.0f);
-    ub_.frag.alpha = world.modelColorAlpha;
-    ub_.frag.viewPos = gfx.GetCameraPosition();
-    ub_.frag.light.position = world.lightPos;
-    ub_.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-    ub_.frag.light.diffusion = glm::vec3(0.5f, 0.5f, 0.5f);
-    ub_.frag.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-    ub_.frag.material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-    ub_.frag.material.diffusion = glm::vec3(0.0f, 0.6352941f, 0.9294118f);
-    ub_.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
-    ub_.frag.material.shininess = 32.0f;
+    ub_.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * scaling_;
+    ub_.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
@@ -48,18 +41,16 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
-void PolygonalModel::Draw(Graphics& gfx) const
+void LightSource::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
     gfx.Draw(count_);
 }
 
-void PolygonalModel::Update(Graphics& gfx)
+void LightSource::Update(Graphics& gfx)
 {
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.frag.alpha = world.modelColorAlpha;
-    ub_.frag.viewPos = gfx.GetCameraPosition();
-    ub_.frag.light.position = world.lightPos;
+    ub_.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * scaling_;
 
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         UniformBuffer<UniformBlock>* buf = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());

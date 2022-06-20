@@ -9,13 +9,12 @@ struct UniformBuffer_Frag {
     vec3 lightColor;
 };
 
-struct UniformBuffer {
+layout (std140, binding = 0) uniform UniformBuffer {
     UniformBuffer_Vert vert;
     UniformBuffer_Frag frag;
-};
+} ubo;
 
 layout (location = 0) in vec3 position;
-layout (location = 1) uniform UniformBuffer ubo;
 
 void main()
 {

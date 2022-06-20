@@ -88,6 +88,8 @@ Renderer::Renderer(int width, int height)
 
     // Render the volumetric model with a color at the beginning
     texVolModel_ = texColor_;
+
+    lightSource_ = std::make_unique<LightSource>(gfx_, world.uvsphere);
 }
 
 void Renderer::Render()
@@ -98,7 +100,6 @@ void Renderer::Render()
 
     static glm::vec3 lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
     static auto const vertexScaleMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.02f);
-    static auto const lightSrcMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
     glBufferSubData(GL_ARRAY_BUFFER, 0, world.neuronPositions.size() * sizeof(glm::vec3), world.neuronPositions.data());
@@ -110,14 +111,8 @@ void Renderer::Render()
         vao_.Disable(VertexAttrib_Normal);
         vao_.Disable(VertexAttrib_TextureCoord);
         vao_.Disable(VertexAttrib_Translation);
-        program = &shaders_[ShaderType_LightSource];
-        program->Use();
-        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
-        program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
-        program->SetUniform3f("ubo.frag.lightColor", 1.0f, 1.0f, 1.0f);
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(VertexPN, position),
-                           sizeof(VertexPN));
-        glDrawArrays(GL_TRIANGLES, 0, uvsphereBuf_.size());
+        lightSource_->Update(gfx_);
+        lightSource_->Draw(gfx_);
     }
 
     if (rendopt & RenderOption_LatticeVertex) {
