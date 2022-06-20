@@ -3,8 +3,8 @@
 
 #include <glm/glm.hpp>
 
-#include "Drawable.hpp"
 #include "Graphics.hpp"
+#include "drawable/Drawable.hpp"
 
 class UVSphere : public Drawable
 {

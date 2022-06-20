@@ -55,7 +55,6 @@ PRIVATE
     "src/assetlib/OBJ/OBJImporter.cpp"
     "src/assetlib/STL/STLImporter.cpp"
 
-    "src/Drawable.cpp"
     "src/Graphics.cpp"
     "src/bindable/Primitive.cpp"
     "src/bindable/IndexBuffer.cpp"
@@ -63,6 +62,7 @@ PRIVATE
     "src/bindable/VertexBuffer.cpp"
     "src/bindable/Texture2D.cpp"
     "src/bindable/ShaderBindable.cpp"
+    "src/drawable/Drawable.cpp"
     "src/drawable/UVSphere.cpp"
 )
 

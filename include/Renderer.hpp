@@ -7,19 +7,19 @@
 #include "Vertex.hpp"
 #include "VertexArray.hpp"
 
-#include "Drawable.hpp"
 #include "Graphics.hpp"
 #include "bindable/IndexBuffer.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/Texture2D.hpp"
 #include "bindable/VertexBuffer.hpp"
+#include "drawable/Drawable.hpp"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include <array>
-#include <vector>
 #include <memory>
+#include <vector>
 
 using BufferType = int;
 using ShaderType = int;
