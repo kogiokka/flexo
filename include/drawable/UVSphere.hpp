@@ -4,24 +4,47 @@
 #include <glm/glm.hpp>
 
 #include "Drawable.hpp"
+#include "Graphics.hpp"
 
 class UVSphere : public Drawable
 {
-    struct UniformBuffer {
-        glm::mat4 viewProjMat;
-        glm::mat4 modelMat;
-        glm::vec3 viewPos;
-        LightUniform light;
-        MaterialUniform material;
-        float alpha;
+    struct UniformBlock {
+        struct Vert {
+            glm::mat4 viewProjMat;
+            glm::mat4 modelMat;
+        };
+        struct Frag {
+            struct Light {
+                STD140_ALIGN glm::vec3 position;
+                STD140_ALIGN glm::vec3 ambient;
+                STD140_ALIGN glm::vec3 diffusion;
+                STD140_ALIGN glm::vec3 specular;
+            };
+
+            struct Material {
+                STD140_ALIGN glm::vec3 ambient;
+                STD140_ALIGN glm::vec3 diffusion;
+                STD140_ALIGN glm::vec3 specular;
+                float shininess;
+            };
+
+            Light light;
+            Material material;
+            STD140_ALIGN glm::vec3 viewPos;
+            float alpha;
+        };
+
+        Vert vert;
+        Frag frag;
     };
 
     GLuint count_;
-    UniformBuffer uniformBuf_;
+    UniformBlock ub_;
 
 public:
     UVSphere(Graphics& gfx);
     void Draw(Graphics& gfx) const override;
+    void Update(Graphics& gfx) override;
 };
 
 #endif

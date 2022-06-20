@@ -1,9 +1,12 @@
+#include <utility>
 #include <vector>
 
 #include <glm/gtc/type_ptr.hpp>
 
 #include "Vertex.hpp"
+#include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
+#include "bindable/Primitive.hpp"
 #include "bindable/ShaderBindable.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
@@ -11,33 +14,63 @@
 
 UVSphere::UVSphere(Graphics& gfx)
 {
-    using std::make_unique;
-
     STLImporter stlImp;
     std::vector<VertexPN> vertices;
 
-    auto cubeMesh = stlImp.ReadFile("res/models/cube.stl");
-    for (unsigned int i = 0; i < cubeMesh.positions.size(); i++) {
+    // auto uvsphereMesh = stlImp.ReadFile("res/models/UVSphere.stl");
+    auto uvsphereMesh = world.uvsphere;
+
+    for (unsigned int i = 0; i < uvsphereMesh.positions.size(); i++) {
         VertexPN v;
-        v.position = cubeMesh.positions[i];
-        v.normal = cubeMesh.normals[i];
+        v.position = uvsphereMesh.positions[i];
+        v.normal = uvsphereMesh.normals[i];
         vertices.push_back(v);
     }
 
     count_ = vertices.size();
 
-    AddBind(std::make_unique<VertexBuffer>(gfx, vertices));
+    ShaderBindable shader(gfx);
+    shader.Attach(gfx, ShaderStage::Vert, "shader/PolygonalModel.vert");
+    shader.Attach(gfx, ShaderStage::Frag, "shader/PolygonalModel.frag");
+    shader.Link(gfx);
 
-    auto shader = std::make_unique<ShaderBindable>(gfx);
-    shader->Attach(gfx, ShaderStage::Vert, "shader/PolygonalModel.vert");
-    shader->Attach(gfx, ShaderStage::Frag, "shader/PolygonalModel.frag");
-    shader->Link(gfx);
+    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    ub_.vert.modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 100.0f));
+    ub_.frag.alpha = world.modelColorAlpha;
+    ub_.frag.viewPos = gfx.GetCameraPosition();
+    ub_.frag.light.position = world.lightPos;
+    ub_.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+    ub_.frag.light.diffusion = glm::vec3(0.5f, 0.5f, 0.5f);
+    ub_.frag.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    ub_.frag.material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+    ub_.frag.material.diffusion = glm::vec3(0.0f, 0.6352941f, 0.9294118f);
+    ub_.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
+    ub_.frag.material.shininess = 32.0f;
 
-    AddBind(std::move(shader));
+    AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
+    AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
+    AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
+    AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
 void UVSphere::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
     gfx.Draw(count_);
+}
+
+void UVSphere::Update(Graphics& gfx)
+{
+    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    ub_.frag.alpha = world.modelColorAlpha;
+    ub_.frag.viewPos = gfx.GetCameraPosition();
+    ub_.frag.light.position = world.lightPos;
+
+    for (auto it = binds_.begin(); it != binds_.end(); it++) {
+        UniformBuffer<UniformBlock>* buf = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());
+        if (buf != nullptr) {
+            buf->Update(gfx, ub_);
+            break;
+        }
+    }
 }

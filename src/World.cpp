@@ -15,6 +15,8 @@ World::World()
         Logger::error("Failed to open image: %s", imgFile);
         std::exit(EXIT_FAILURE);
     }
+
+    lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
 }
 
 World::~World() { }

@@ -22,7 +22,7 @@ public:
 
 protected:
     template <typename T>
-    void setOffsets();
+    void SetOffsets();
 };
 
 template <typename T>
@@ -37,18 +37,18 @@ VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices)
     desc.usage = GL_STATIC_DRAW;
     desc.byteWidth = sizeof(T) * vertices.size();
     desc.stride = sizeof(T);
-
-    setOffsets<T>();
-
     data.mem = vertices.data();
+
+    SetOffsets<T>();
+
     gfx.CreateBuffer(id_, desc, data);
 }
 
 template <>
-void VertexBuffer::setOffsets<VertexPN>();
+void VertexBuffer::SetOffsets<VertexPN>();
 template <>
-void VertexBuffer::setOffsets<VertexPNT>();
+void VertexBuffer::SetOffsets<VertexPNT>();
 template <>
-void VertexBuffer::setOffsets<VertexPNC>();
+void VertexBuffer::SetOffsets<VertexPNC>();
 
 #endif

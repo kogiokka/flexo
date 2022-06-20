@@ -5,6 +5,10 @@
 #include <glm/glm.hpp>
 #include <string>
 
+#include "Camera.hpp"
+
+#define STD140_ALIGN alignas(sizeof(float) * 4)
+
 struct BufferDesc {
     GLenum target;
     GLenum usage;
@@ -59,8 +63,10 @@ class Graphics
     };
 
     Context ctx_;
+    Camera camera_;
 
 public:
+    Graphics(int width, int height);
     void ClearBuffer(float red, float green, float blue) const;
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
     void CreateTexture2D(GLuint& texture, Texture2dDesc const& desc, BufferData const& data);
@@ -74,11 +80,12 @@ public:
     void SetShaderProgram(GLuint program);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 
+    glm::mat4 GetViewProjectionMatrix() const;
+    glm::vec3 GetCameraPosition() const;
+    Camera& GetCamera();
+
     template <typename T>
     void UpdateUniformBuffer(GLuint const uniform, T const& uniformBlock);
-
-    template <typename T, int D1, int D2 = 1>
-    void SetUniform(std::string const& name, T* values);
 
     void Draw(GLsizei vertexCount);
     void DrawIndexed(GLsizei indexCount);

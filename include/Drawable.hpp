@@ -15,10 +15,11 @@ public:
     virtual ~Drawable() = default;
 
     virtual void Draw(Graphics& gfx) const;
-    void AddBind(std::unique_ptr<Bindable> bind);
+    virtual void Update(Graphics& gfx);
+    void AddBind(std::shared_ptr<Bindable> bind);
 
-private:
-    std::vector<std::unique_ptr<Bindable>> binds_;
+protected:
+    std::vector<std::shared_ptr<Bindable>> binds_;
 };
 
 #endif

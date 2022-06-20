@@ -34,6 +34,7 @@ struct World {
     std::unique_ptr<Mesh> polyModel;
     std::unique_ptr<VolumetricModel> volModel;
     Image pattern;
+    glm::vec3 lightPos;
 };
 
 extern World world;

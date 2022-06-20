@@ -1,6 +1,6 @@
 #include "bindable/Primitive.hpp"
 
-Primitive::Primitive(GLenum mode)
+Primitive::Primitive(Graphics&, GLenum mode)
     : mode_(mode)
 {
 }

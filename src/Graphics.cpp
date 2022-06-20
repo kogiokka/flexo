@@ -4,6 +4,11 @@
 #include "Graphics.hpp"
 #include "common/Logger.hpp"
 
+Graphics::Graphics(int width, int height)
+    : camera_(width, height)
+{
+}
+
 void Graphics::ClearBuffer(float red, float green, float blue) const
 {
     glClearColor(red, green, blue, 1.0f);
@@ -15,7 +20,10 @@ void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData c
     glGenBuffers(1, &buffer);
     glBindBuffer(desc.target, buffer);
     glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
-    ctx_.stride = desc.stride;
+
+    if (desc.target == GL_ARRAY_BUFFER) {
+        ctx_.stride = desc.stride;
+    }
 }
 
 void Graphics::CreateTexture2D(GLuint& texture, const Texture2dDesc& desc, const BufferData& data)
@@ -134,6 +142,21 @@ void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCou
 void Graphics::SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex)
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, uniform);
+}
+
+glm::mat4 Graphics::GetViewProjectionMatrix() const
+{
+    return camera_.ViewProjectionMatrix();
+}
+
+glm::vec3 Graphics::GetCameraPosition() const
+{
+    return camera_.Position();
+}
+
+Camera& Graphics::GetCamera()
+{
+    return camera_;
 }
 
 bool Graphics::IsShaderCompiled(GLuint const shaderObject)

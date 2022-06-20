@@ -12,7 +12,7 @@ protected:
     GLenum mode_;
 
 public:
-    Primitive(GLenum mode);
+    Primitive(Graphics& gfx, GLenum mode);
     void Bind(Graphics& gfx) override;
 };
 

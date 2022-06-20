@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "Drawable.hpp"
 
 void Drawable::Draw(Graphics& gfx) const
@@ -9,7 +7,9 @@ void Drawable::Draw(Graphics& gfx) const
     }
 }
 
-void Drawable::AddBind(std::unique_ptr<Bindable> bind)
+void Drawable::Update(Graphics&) { }
+
+void Drawable::AddBind(std::shared_ptr<Bindable> bind)
 {
-    binds_.push_back(std::move(bind));
+    binds_.push_back(bind);
 }

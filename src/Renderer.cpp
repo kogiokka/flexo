@@ -5,8 +5,6 @@
 #include "drawable/UVSphere.hpp"
 #include <cstdlib>
 
-#define STD140_ALIGN alignas(sizeof(float) * 4)
-
 struct Light {
     STD140_ALIGN glm::vec3 position;
     STD140_ALIGN glm::vec3 ambient;
@@ -47,7 +45,8 @@ UniformBuffer ubdata;
 RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 
 Renderer::Renderer(int width, int height)
-    : camera_(width, height)
+    : gfx_(width, height)
+    , camera_(width, height)
 {
     AttribFormat format;
     format.count = 3;
@@ -145,10 +144,13 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::Render()
 {
-    //     for (auto const& d : drawables_) {
-    //         d->Draw(gfx_);
-    //     }
-    //
+    for (auto const& d : drawables_) {
+        vao_.Enable(VertexAttrib_Position);
+        vao_.Enable(VertexAttrib_Normal);
+        d->Update(gfx_);
+        d->Draw(gfx_);
+    }
+
     if (world.polyModel == nullptr && world.volModel == nullptr) {
         return;
     }
@@ -396,7 +398,7 @@ void Renderer::LoadVolumetricModel()
 
 Camera& Renderer::GetCamera()
 {
-    return camera_;
+    return gfx_.GetCamera();
 }
 
 void Renderer::UpdateLatticeMeshBuffer()
