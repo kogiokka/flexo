@@ -10,20 +10,17 @@
 #include "bindable/ShaderBindable.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
-#include "drawable/UVSphere.hpp"
+#include "drawable/PolygonalModel.hpp"
 
-UVSphere::UVSphere(Graphics& gfx)
+PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 {
     STLImporter stlImp;
     std::vector<VertexPN> vertices;
 
-    // auto uvsphereMesh = stlImp.ReadFile("res/models/UVSphere.stl");
-    auto uvsphereMesh = world.uvsphere;
-
-    for (unsigned int i = 0; i < uvsphereMesh.positions.size(); i++) {
+    for (unsigned int i = 0; i < mesh.positions.size(); i++) {
         VertexPN v;
-        v.position = uvsphereMesh.positions[i];
-        v.normal = uvsphereMesh.normals[i];
+        v.position = mesh.positions[i];
+        v.normal = mesh.normals[i];
         vertices.push_back(v);
     }
 
@@ -35,7 +32,7 @@ UVSphere::UVSphere(Graphics& gfx)
     shader.Link(gfx);
 
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(100.0f, 100.0f, 100.0f));
+    ub_.vert.modelMat = glm::mat4(1.0f);
     ub_.frag.alpha = world.modelColorAlpha;
     ub_.frag.viewPos = gfx.GetCameraPosition();
     ub_.frag.light.position = world.lightPos;
@@ -53,13 +50,13 @@ UVSphere::UVSphere(Graphics& gfx)
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
-void UVSphere::Draw(Graphics& gfx) const
+void PolygonalModel::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
     gfx.Draw(count_);
 }
 
-void UVSphere::Update(Graphics& gfx)
+void PolygonalModel::Update(Graphics& gfx)
 {
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     ub_.frag.alpha = world.modelColorAlpha;

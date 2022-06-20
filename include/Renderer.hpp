@@ -1,7 +1,6 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "Camera.hpp"
 #include "Mesh.hpp"
 #include "Shader.hpp"
 #include "Vertex.hpp"
@@ -13,6 +12,7 @@
 #include "bindable/Texture2D.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "drawable/Drawable.hpp"
+#include "drawable/PolygonalModel.hpp"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -26,7 +26,6 @@ using ShaderType = int;
 using RenderOption = int;
 
 enum ShaderType_ : int {
-    ShaderType_PolygonalModel = 0,
     ShaderType_VolumetricModel,
     ShaderType_LatticeVertex,
     ShaderType_LatticeEdge,
@@ -64,15 +63,14 @@ class Renderer
     Graphics gfx_;
     std::vector<std::unique_ptr<Drawable>> drawables_;
 
-    Camera camera_;
     GLuint tex_;
     GLuint texColor_;
     GLuint texVolModel_;
 
     std::vector<VertexPN> cubeBuf_;
     std::vector<VertexPN> uvsphereBuf_;
-    std::vector<VertexPN> polyModelBuf_;
     std::vector<VertexPNT> latticeMeshBuf_;
+    std::unique_ptr<PolygonalModel> polyModel_;
 
 public:
     Renderer(int width, int height);

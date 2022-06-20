@@ -63,7 +63,7 @@ PRIVATE
     "src/bindable/Texture2D.cpp"
     "src/bindable/ShaderBindable.cpp"
     "src/drawable/Drawable.cpp"
-    "src/drawable/UVSphere.cpp"
+    "src/drawable/PolygonalModel.cpp"
 )
 
 target_include_directories(som-demo

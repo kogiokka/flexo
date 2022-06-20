@@ -2,51 +2,13 @@
 #include "Shader.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
-#include "drawable/UVSphere.hpp"
 #include <cstdlib>
-
-struct Light {
-    STD140_ALIGN glm::vec3 position;
-    STD140_ALIGN glm::vec3 ambient;
-    STD140_ALIGN glm::vec3 diffusion;
-    STD140_ALIGN glm::vec3 specular;
-};
-
-struct Material {
-    STD140_ALIGN glm::vec3 ambient;
-    STD140_ALIGN glm::vec3 diffusion;
-    STD140_ALIGN glm::vec3 specular;
-    float shininess;
-};
-
-struct UniformBuffer_Vert {
-    glm::mat4 viewProjMat;
-    glm::mat4 modelMat;
-};
-
-struct UniformBuffer_Frag {
-    Light light;
-    Material material;
-    STD140_ALIGN glm::vec3 viewPos;
-    float alpha;
-};
-
-struct UniformBuffer {
-    UniformBuffer_Vert vert;
-    UniformBuffer_Frag frag;
-};
-
-GLuint ubo;
-GLuint uniformBlockIndex;
-GLuint uniformBlockBinding = 0;
-
-UniformBuffer ubdata;
 
 RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 
 Renderer::Renderer(int width, int height)
     : gfx_(width, height)
-    , camera_(width, height)
+    , polyModel_(nullptr)
 {
     AttribFormat format;
     format.count = 3;
@@ -60,8 +22,6 @@ Renderer::Renderer(int width, int height)
     vao_.Enable(VertexAttrib_Position);
     vao_.Enable(VertexAttrib_Normal);
     vao_.Enable(VertexAttrib_TextureCoord);
-
-    drawables_.push_back(std::make_unique<UVSphere>(gfx_));
 
     CreateVertexBuffers();
 
@@ -83,9 +43,6 @@ Renderer::Renderer(int width, int height)
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, world.latticeEdges.size() * sizeof(unsigned int), world.latticeEdges.data(),
                  GL_STATIC_DRAW);
 
-    shaders_[ShaderType_PolygonalModel].Attach(GL_VERTEX_SHADER, "shader/PolygonalModel.vert");
-    shaders_[ShaderType_PolygonalModel].Attach(GL_FRAGMENT_SHADER, "shader/PolygonalModel.frag");
-
     shaders_[ShaderType_LatticeVertex].Attach(GL_VERTEX_SHADER, "shader/LatticeVertex.vert");
     shaders_[ShaderType_LatticeVertex].Attach(GL_FRAGMENT_SHADER, "shader/LatticeVertex.frag");
 
@@ -104,15 +61,6 @@ Renderer::Renderer(int width, int height)
     for (Shader const& s : shaders_) {
         s.Link();
     }
-
-    // Test UniformBuffer
-    uniformBlockIndex = glGetUniformBlockIndex(shaders_[ShaderType_PolygonalModel].Id(), "UniformBuffer");
-    glGenBuffers(1, &ubo);
-    glBindBuffer(GL_UNIFORM_BUFFER, ubo);
-    glBufferData(GL_UNIFORM_BUFFER, sizeof(UniformBuffer), nullptr, GL_STREAM_DRAW);
-    glUniformBlockBinding(shaders_[ShaderType_PolygonalModel].Id(), uniformBlockIndex, uniformBlockBinding);
-    glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockBinding, ubo);
-    glBindBufferRange(GL_UNIFORM_BUFFER, uniformBlockIndex, ubo, 0, sizeof(UniformBuffer));
 
     glGenTextures(1, &tex_);
     glBindTexture(GL_TEXTURE_2D, tex_);
@@ -144,13 +92,6 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::Render()
 {
-    for (auto const& d : drawables_) {
-        vao_.Enable(VertexAttrib_Position);
-        vao_.Enable(VertexAttrib_Normal);
-        d->Update(gfx_);
-        d->Draw(gfx_);
-    }
-
     if (world.polyModel == nullptr && world.volModel == nullptr) {
         return;
     }
@@ -171,7 +112,7 @@ void Renderer::Render()
         vao_.Disable(VertexAttrib_Translation);
         program = &shaders_[ShaderType_LightSource];
         program->Use();
-        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
         program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::translate(glm::mat4(1.0f), lightPos) * lightSrcMat);
         program->SetUniform3f("ubo.frag.lightColor", 1.0f, 1.0f, 1.0f);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(VertexPN, position),
@@ -186,7 +127,7 @@ void Renderer::Render()
         vao_.Enable(VertexAttrib_Translation);
         program = &shaders_[ShaderType_LatticeVertex];
         program->Use();
-        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
         program->SetUniformMatrix4fv("ubo.vert.modelMat", vertexScaleMat);
         program->SetUniform3fv("ubo.frag.light.position", lightPos);
         program->SetUniform3f("ubo.frag.light.ambient", 0.2f, 0.2f, 0.2f);
@@ -196,7 +137,7 @@ void Renderer::Render()
         program->SetUniform3f("ubo.frag.material.diffusion", 1.0f, 1.0f, 1.0f);
         program->SetUniform3f("ubo.frag.material.specular", 0.3f, 0.3f, 0.3f);
         program->SetUniform1f("ubo.frag.material.shininess", 32.0f);
-        program->SetUniform3fv("ubo.frag.viewPos", camera_.Position());
+        program->SetUniform3fv("ubo.frag.viewPos", gfx_.GetCamera().Position());
         program->SetUniform1f("ubo.frag.alpha", 1.0f);
         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_UVSphere], offsetof(VertexPN, position),
                            sizeof(VertexPN));
@@ -208,35 +149,13 @@ void Renderer::Render()
     }
 
     if (rendopt & RenderOption_Model) {
-        if (world.polyModel != nullptr) {
+        if (world.polyModel && polyModel_) {
             vao_.Enable(VertexAttrib_Position);
             vao_.Enable(VertexAttrib_Normal);
             vao_.Disable(VertexAttrib_TextureCoord);
             vao_.Disable(VertexAttrib_Translation);
-
-            program = &shaders_[ShaderType_PolygonalModel];
-            program->Use();
-            ubdata.vert.viewProjMat = camera_.ViewProjectionMatrix();
-            ubdata.vert.modelMat = glm::mat4(1.0f);
-            ubdata.frag.light.position = lightPos;
-            ubdata.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-            ubdata.frag.light.diffusion = glm::vec3(0.5f, 0.5f, 0.5f);
-            ubdata.frag.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-            ubdata.frag.material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-            ubdata.frag.material.diffusion = glm::vec3(0.0f, 0.6352941f, 0.9294118f);
-            ubdata.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
-            ubdata.frag.material.shininess = 32.0f;
-            ubdata.frag.viewPos = camera_.Position();
-            ubdata.frag.alpha = world.modelColorAlpha;
-
-            glBindBufferBase(GL_UNIFORM_BUFFER, uniformBlockBinding, ubo);
-            glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(UniformBuffer), &ubdata);
-
-            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Surface], offsetof(VertexPN, position),
-                               sizeof(VertexPN));
-            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Surface], offsetof(VertexPN, normal),
-                               sizeof(VertexPN));
-            glDrawArrays(GL_TRIANGLES, 0, polyModelBuf_.size());
+            polyModel_->Update(gfx_);
+            polyModel_->Draw(gfx_);
         } else if (world.volModel != nullptr) {
             glEnable(GL_CULL_FACE);
             glCullFace(GL_BACK);
@@ -246,10 +165,10 @@ void Renderer::Render()
             vao_.Enable(VertexAttrib_Translation);
             program = &shaders_[ShaderType_VolumetricModel];
             program->Use();
-            program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+            program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
             program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
-            program->SetUniform3fv("ubo.vert.viewPos", camera_.Position());
-            program->SetUniform3fv("ubo.vert.light.position", camera_.Position());
+            program->SetUniform3fv("ubo.vert.viewPos", gfx_.GetCamera().Position());
+            program->SetUniform3fv("ubo.vert.light.position", gfx_.GetCamera().Position());
 
             program->SetUniform3f("ubo.vert.light.ambient", 0.8f, 0.8f, 0.8f);
             program->SetUniform3f("ubo.vert.light.diffusion", 0.8f, 0.8f, 0.8f);
@@ -286,7 +205,7 @@ void Renderer::Render()
 
         program = &shaders_[ShaderType_LatticeEdge];
         program->Use();
-        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
         program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
         program->SetUniform3f("ubo.frag.color", 0.7f, 0.7f, 0.7f);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
@@ -306,9 +225,9 @@ void Renderer::Render()
 
         program = &shaders_[ShaderType_LatticeFace];
         program->Use();
-        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", camera_.ViewProjectionMatrix());
+        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
         program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
-        program->SetUniform3fv("ubo.frag.viewPos", camera_.Position());
+        program->SetUniform3fv("ubo.frag.viewPos", gfx_.GetCamera().Position());
         program->SetUniform3fv("ubo.frag.light.position", lightPos);
         program->SetUniform3f("ubo.frag.light.ambient", 0.2f, 0.2f, 0.2f);
         program->SetUniform3f("ubo.frag.light.diffusion", 0.5f, 0.4f, 0.5f);
@@ -333,19 +252,7 @@ void Renderer::Render()
 void Renderer::LoadPolygonalModel()
 {
     assert(world.polyModel);
-
-    polyModelBuf_.clear();
-    for (unsigned int i = 0; i < world.polyModel->positions.size(); i++) {
-        VertexPN v;
-        v.position = world.polyModel->positions[i];
-        v.normal = world.polyModel->normals[i];
-        polyModelBuf_.push_back(v);
-    }
-
-    glDeleteBuffers(1, &buffers_[BufferType_Surface]);
-    glGenBuffers(1, &buffers_[BufferType_Surface]);
-    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_Surface]);
-    glBufferData(GL_ARRAY_BUFFER, polyModelBuf_.size() * sizeof(VertexPN), polyModelBuf_.data(), GL_STATIC_DRAW);
+    polyModel_ = std::make_unique<PolygonalModel>(gfx_, *world.polyModel);
 }
 
 void Renderer::LoadLattice()

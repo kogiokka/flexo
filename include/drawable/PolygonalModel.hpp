@@ -1,12 +1,13 @@
-#ifndef CUBE_H
-#define CUBE_H
+#ifndef POLYGONAL_MODEL_H
+#define POLYGONAL_MODEL_H
 
 #include <glm/glm.hpp>
 
 #include "Graphics.hpp"
+#include "Mesh.hpp"
 #include "drawable/Drawable.hpp"
 
-class UVSphere : public Drawable
+class PolygonalModel : public Drawable
 {
     struct UniformBlock {
         struct Vert {
@@ -42,7 +43,7 @@ class UVSphere : public Drawable
     UniformBlock ub_;
 
 public:
-    UVSphere(Graphics& gfx);
+    PolygonalModel(Graphics& gfx, Mesh const& mesh);
     void Draw(Graphics& gfx) const override;
     void Update(Graphics& gfx) override;
 };
