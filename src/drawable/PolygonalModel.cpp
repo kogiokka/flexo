@@ -3,7 +3,6 @@
 
 #include "Vertex.hpp"
 #include "World.hpp"
-#include "assetlib/STL/STLImporter.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/ShaderBindable.hpp"
 #include "bindable/UniformBuffer.hpp"
@@ -12,7 +11,6 @@
 
 PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 {
-    STLImporter stlImp;
     std::vector<VertexPN> vertices;
 
     for (unsigned int i = 0; i < mesh.positions.size(); i++) {
