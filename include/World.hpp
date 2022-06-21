@@ -35,6 +35,7 @@ struct World {
     std::unique_ptr<VolModel> volModel;
     Image pattern;
     glm::vec3 lightPos;
+    bool isWatermarked;
 };
 
 extern World world;

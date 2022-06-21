@@ -39,7 +39,6 @@ public:
     void ResetCamera();
     void ResetLattice();
     void ToggleRenderOption(RenderOption opt);
-    void ToggleWatermarkTexture();
     void SetModelColorAlpha(float alpha);
     void OpenInputDataFile(wxString const& path);
     bool GetRenderOptionState(RenderOption opt) const;

@@ -44,12 +44,13 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     ub_.vert.material.diffusion = glm::vec3(0.6f, 0.6f, 0.6f);
     ub_.vert.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     ub_.vert.material.shininess = 256.0f;
-
-    auto const& [img, w, h, ch] = world.pattern;
-    texPattern_ = std::make_shared<Texture2D>(gfx, img, w, h);
+    ub_.vert.isWatermarked = false;
 
     float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    texColor_ = std::make_shared<Texture2D>(gfx, color, 1, 1);
+    texColor_ = std::make_shared<Texture2D>(gfx, color, 1, 1, GL_TEXTURE0);
+
+    auto const& [img, w, h, ch] = world.pattern;
+    texPattern_ = std::make_shared<Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices, VertexAttrib_Position));
@@ -58,6 +59,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
     AddBind(texColor_);
+    AddBind(texPattern_);
 }
 
 void VolumetricModel::Draw(Graphics& gfx) const
@@ -75,12 +77,20 @@ void VolumetricModel::Update(Graphics& gfx)
     ub_.vert.alpha = world.modelColorAlpha;
     ub_.vert.viewPos = gfx.GetCameraPosition();
     ub_.vert.light.position = gfx.GetCameraPosition();
+    ub_.vert.isWatermarked = world.isWatermarked;
 
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
-        UniformBuffer<UniformBlock>* buf = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());
-        if (buf != nullptr) {
-            buf->Update(gfx, ub_);
-            break;
+        {
+            VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
+            if ((vb != nullptr) && (vb->GetStartAttrib() == VertexAttrib_TextureCoord)) {
+                vb->Update(gfx, world.volModel->textureCoords);
+            }
+        }
+        {
+            UniformBuffer<UniformBlock>* ub = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());
+            if (ub != nullptr) {
+                ub->Update(gfx, ub_);
+            }
         }
     }
 }

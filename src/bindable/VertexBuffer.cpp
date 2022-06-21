@@ -6,7 +6,13 @@
 void VertexBuffer::Bind(Graphics& gfx)
 {
     int const numBuffers = offsets_.size();
-    gfx.SetVertexBuffers(startAttrib_, numBuffers, std::vector<GLuint>(numBuffers, id_).data(), offsets_.data(), strides_.data());
+    gfx.SetVertexBuffers(startAttrib_, numBuffers, std::vector<GLuint>(numBuffers, id_).data(), offsets_.data(),
+                         strides_.data());
+}
+
+GLuint VertexBuffer::GetStartAttrib() const
+{
+    return startAttrib_;
 }
 
 GLuint VertexBuffer::GetCount() const

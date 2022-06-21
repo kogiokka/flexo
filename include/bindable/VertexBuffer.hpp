@@ -20,6 +20,9 @@ public:
     template <typename T>
     VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib = 0);
     void Bind(Graphics& gfx) override;
+    template <typename T>
+    void Update(Graphics& gfx, std::vector<T> const& vertices);
+    GLuint GetStartAttrib() const;
     GLuint GetCount() const;
 
 protected:
@@ -37,7 +40,7 @@ VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint
     BufferData data;
 
     desc.target = GL_ARRAY_BUFFER;
-    desc.usage = GL_STATIC_DRAW;
+    desc.usage = GL_DYNAMIC_DRAW;
     desc.byteWidth = sizeof(T) * vertices.size();
     desc.stride = sizeof(T);
     data.mem = vertices.data();
@@ -57,5 +60,11 @@ template <>
 void VertexBuffer::SetOffsets<glm::vec3>();
 template <>
 void VertexBuffer::SetOffsets<glm::vec2>();
+
+template <typename T>
+void VertexBuffer::Update(Graphics& gfx, std::vector<T> const& vertices)
+{
+    gfx.UpdateVertexBuffer(id_, 0, vertices.size() * sizeof(T), vertices.data());
+}
 
 #endif

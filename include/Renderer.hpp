@@ -79,7 +79,6 @@ public:
     void LoadVolumetricModel();
     Camera& GetCamera();
     void UpdateLatticeMeshBuffer();
-    void SetWatermarkTexture();
 
 private:
     void CreateVertexBuffers();

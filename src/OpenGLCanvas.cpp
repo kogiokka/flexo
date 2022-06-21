@@ -267,11 +267,6 @@ void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
     }
 }
 
-void OpenGLCanvas::ToggleWatermarkTexture()
-{
-    renderer_->SetWatermarkTexture();
-}
-
 bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
 {
     return rendopt & opt;

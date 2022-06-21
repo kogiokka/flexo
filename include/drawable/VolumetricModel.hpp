@@ -33,6 +33,7 @@ class VolumetricModel : public Drawable
             Material material;
             STD140_ALIGN glm::vec3 viewPos;
             float alpha;
+            bool isWatermarked;
         };
 
         Vert vert;

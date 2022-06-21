@@ -13,7 +13,7 @@ protected:
 
 public:
     template <typename T>
-    Texture2D(Graphics& gfx, T const* textureData, int width, int height);
+    Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit);
     void Bind(Graphics& gfx) override;
 
 protected:
@@ -22,13 +22,14 @@ protected:
 };
 
 template <typename T>
-Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height)
+Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit)
 {
     Texture2dDesc desc;
     BufferData data;
 
     desc.width = width;
     desc.height = height;
+    desc.unit = unit;
     desc.textureFormat = GL_RGBA;
     desc.pixelFormat = GL_RGBA;
 

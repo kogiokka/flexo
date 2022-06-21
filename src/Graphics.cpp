@@ -26,6 +26,9 @@ void Graphics::CreateTexture2D(GLuint& texture, Texture2dDesc const& desc, Buffe
 {
     constexpr GLint BORDER = 0;
     glGenTextures(1, &texture);
+
+    glActiveTexture(desc.unit);
+
     glBindTexture(GL_TEXTURE_2D, texture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
@@ -152,6 +155,12 @@ glm::vec3 Graphics::GetCameraPosition() const
 Camera& Graphics::GetCamera()
 {
     return camera_;
+}
+
+void Graphics::UpdateVertexBuffer(GLuint const buffer, GLintptr offset, GLsizei byteWidth, void const* data)
+{
+    glBindBuffer(GL_ARRAY_BUFFER, buffer);
+    glBufferSubData(GL_ARRAY_BUFFER, offset, byteWidth, data);
 }
 
 bool Graphics::IsShaderCompiled(GLuint const shaderObject)

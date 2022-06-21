@@ -247,17 +247,6 @@ void Renderer::UpdateLatticeMeshBuffer()
     }
 }
 
-void Renderer::SetWatermarkTexture()
-{
-    glDeleteBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
-    glGenBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
-    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel_TextureCoord]);
-    glBufferData(GL_ARRAY_BUFFER, world.volModel->textureCoords.size() * sizeof(glm::vec2),
-                 world.volModel->textureCoords.data(), GL_DYNAMIC_DRAW);
-
-    // texVolModel_ = tex_;
-}
-
 void Renderer::CreateVertexBuffers()
 {
     for (unsigned int i = 0; i < world.cube.positions.size(); i++) {

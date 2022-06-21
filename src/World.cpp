@@ -17,6 +17,7 @@ World::World()
     }
 
     lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
+    isWatermarked = false;
 }
 
 World::~World() { }

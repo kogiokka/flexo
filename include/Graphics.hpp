@@ -19,6 +19,7 @@ struct BufferDesc {
 struct Texture2dDesc {
     GLsizei width;
     GLsizei height;
+    GLenum unit;
     GLenum textureFormat;
     GLenum pixelFormat;
     GLenum dataType;
@@ -84,6 +85,7 @@ public:
     glm::vec3 GetCameraPosition() const;
     Camera& GetCamera();
 
+    void UpdateVertexBuffer(GLuint const buffer, GLintptr offset, GLsizei byteWidth, void const* data);
     template <typename T>
     void UpdateUniformBuffer(GLuint const uniform, T const& uniformBlock);
 

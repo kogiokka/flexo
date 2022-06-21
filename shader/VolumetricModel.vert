@@ -21,6 +21,7 @@ struct UniformBuffer_Vert {
     Material material;
     vec3 viewPos;
     float alpha;
+    bool isWatermarked;
 };
 
 layout(std140, binding = 0) uniform UniformBuffer {
@@ -32,7 +33,8 @@ layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 translation;
 layout (location = 3) in vec2 textureCoord;
 
-uniform sampler2D pattern;
+layout (binding = 0) uniform sampler2D voxelColor;
+layout (binding = 1) uniform sampler2D voxelPattern;
 
 out vec4 color;
 
@@ -50,7 +52,11 @@ void main()
     vec3 diffusion = ubo.vert.light.diffusion * ubo.vert.material.diffusion * diffuseCoef;
     vec3 specular = ubo.vert.light.specular * ubo.vert.material.specular * specularCoef;
 
-    color = vec4((ambient + diffusion + specular), ubo.vert.alpha) * texture(pattern, textureCoord);
+    if (ubo.vert.isWatermarked) {
+        color = vec4((ambient + diffusion + specular), ubo.vert.alpha) * texture(voxelPattern, textureCoord);
+    } else {
+        color = vec4((ambient + diffusion + specular), ubo.vert.alpha) * texture(voxelColor, textureCoord);
+    }
 
     gl_Position = ubo.vert.viewProjMat * (vec4(translation, 0.0) + ubo.vert.modelMat * vec4(position, 1.0));
 }
