@@ -26,12 +26,10 @@ struct UniformBuffer_Vert {
     mat4 modelMat;
 };
 
-struct UniformBuffer {
+layout(std140, binding = 0) uniform UniformBuffer {
     UniformBuffer_Vert vert;
     UniformBuffer_Frag frag;
-};
-
-layout (location = 3) uniform UniformBuffer ubo;
+} ubo;
 
 in vec3 posFrag;
 in vec3 normFrag;

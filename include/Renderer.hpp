@@ -13,6 +13,7 @@
 #include "bindable/VertexBuffer.hpp"
 #include "drawable/Drawable.hpp"
 #include "drawable/LatticeFace.hpp"
+#include "drawable/LatticeVertex.hpp"
 #include "drawable/LightSource.hpp"
 #include "drawable/PolygonalModel.hpp"
 #include "drawable/VolumetricModel.hpp"
@@ -29,7 +30,6 @@ using ShaderType = int;
 using RenderOption = int;
 
 enum ShaderType_ : int {
-    ShaderType_LatticeVertex,
     ShaderType_LatticeEdge,
     ShaderType_Last = ShaderType_LatticeEdge,
 };
@@ -63,11 +63,10 @@ class Renderer
 
     Graphics gfx_;
 
-    std::vector<VertexPN> cubeBuf_;
-    std::vector<VertexPN> uvsphereBuf_;
     std::unique_ptr<PolygonalModel> polyModel_;
     std::unique_ptr<LightSource> lightSource_;
     std::unique_ptr<VolumetricModel> volModel_;
+    std::unique_ptr<LatticeVertex> latticeVert_;
     std::unique_ptr<LatticeFace> latticeFace_;
 
 public:
@@ -77,9 +76,6 @@ public:
     void LoadLattice();
     void LoadVolumetricModel();
     Camera& GetCamera();
-
-private:
-    void CreateVertexBuffers();
 };
 
 extern RenderOption rendopt;
