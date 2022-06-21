@@ -64,6 +64,7 @@ PRIVATE
     "src/bindable/ShaderBindable.cpp"
     "src/drawable/Drawable.cpp"
     "src/drawable/PolygonalModel.cpp"
+    "src/drawable/VolumetricModel.cpp"
     "src/drawable/LightSource.cpp"
 )
 

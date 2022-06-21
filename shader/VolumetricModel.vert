@@ -23,15 +23,14 @@ struct UniformBuffer_Vert {
     float alpha;
 };
 
-struct UniformBuffer {
+layout(std140, binding = 0) uniform UniformBuffer {
     UniformBuffer_Vert vert;
-};
+} ubo;
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 translation;
 layout (location = 3) in vec2 textureCoord;
-layout (location = 4) uniform UniformBuffer ubo;
 
 uniform sampler2D pattern;
 

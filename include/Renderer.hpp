@@ -12,8 +12,9 @@
 #include "bindable/Texture2D.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "drawable/Drawable.hpp"
-#include "drawable/PolygonalModel.hpp"
 #include "drawable/LightSource.hpp"
+#include "drawable/PolygonalModel.hpp"
+#include "drawable/VolumetricModel.hpp"
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -73,6 +74,7 @@ class Renderer
     std::vector<VertexPNT> latticeMeshBuf_;
     std::unique_ptr<PolygonalModel> polyModel_;
     std::unique_ptr<LightSource> lightSource_;
+    std::unique_ptr<VolumetricModel> volModel_;
 
 public:
     Renderer(int width, int height);

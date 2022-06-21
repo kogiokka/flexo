@@ -58,7 +58,6 @@ class Graphics
         GLenum primitive;
         GLenum format;
         GLsizei count;
-        GLsizei stride;
         const GLvoid* offset;
     };
 
@@ -74,7 +73,8 @@ public:
     void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filepath);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
-    void SetVertexBuffers(int startAttrib, int numBuffers, GLuint* buffers, GLintptr* offsets);
+    void SetVertexBuffers(GLuint first, int numBuffers, const GLuint* buffers, const GLintptr* offsets,
+                          const GLsizei* strides);
     void SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset);
     void SetTexture(GLenum target, GLuint texture);
     void SetShaderProgram(GLuint program);

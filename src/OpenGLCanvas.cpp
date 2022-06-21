@@ -158,7 +158,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
         world.polyModel = std::make_unique<Mesh>(stlImp.ReadFile(path.ToStdString()));
         renderer_->LoadPolygonalModel();
     } else if (path.EndsWith(".toml")) {
-        world.volModel = std::make_unique<VolumetricModel>();
+        world.volModel = std::make_unique<VolModel>();
         auto& [data, pos, texcoord] = *world.volModel;
 
         if (!data.read(path.ToStdString())) {

@@ -152,42 +152,14 @@ void Renderer::Render()
             polyModel_->Update(gfx_);
             polyModel_->Draw(gfx_);
         } else if (world.volModel != nullptr) {
-            glEnable(GL_CULL_FACE);
+            glEnable(GL_CULL_FACE); // FIXME: VertexArrray bindable?
             glCullFace(GL_BACK);
             vao_.Enable(VertexAttrib_Position);
             vao_.Enable(VertexAttrib_Normal);
             vao_.Enable(VertexAttrib_TextureCoord);
             vao_.Enable(VertexAttrib_Translation);
-            program = &shaders_[ShaderType_VolumetricModel];
-            program->Use();
-            program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
-            program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
-            program->SetUniform3fv("ubo.vert.viewPos", gfx_.GetCamera().Position());
-            program->SetUniform3fv("ubo.vert.light.position", gfx_.GetCamera().Position());
-
-            program->SetUniform3f("ubo.vert.light.ambient", 0.8f, 0.8f, 0.8f);
-            program->SetUniform3f("ubo.vert.light.diffusion", 0.8f, 0.8f, 0.8f);
-            program->SetUniform3f("ubo.vert.light.specular", 0.8f, 0.8f, 0.8f);
-
-            program->SetUniform3f("ubo.vert.material.ambient", 0.3f, 0.3f, 0.3f);
-            program->SetUniform3f("ubo.vert.material.diffusion", 0.6f, 0.6f, 0.6f);
-            program->SetUniform3f("ubo.vert.material.specular", 0.3f, 0.3f, 0.3f);
-            program->SetUniform1f("ubo.vert.material.shininess", 256.0f);
-
-            program->SetUniform1f("ubo.vert.alpha", world.modelColorAlpha);
-
-            glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_Cube], offsetof(VertexPN, position),
-                               sizeof(VertexPN));
-            glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_Cube], offsetof(VertexPN, normal),
-                               sizeof(VertexPN));
-            glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_VolumetricModel_Translation], 0,
-                               sizeof(glm::vec3));
-            glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_VolumetricModel_TextureCoord], 0,
-                               sizeof(glm::vec2));
-            glVertexBindingDivisor(VertexAttrib_Translation, 1);
-            glVertexBindingDivisor(VertexAttrib_TextureCoord, 1);
-            glBindTexture(GL_TEXTURE_2D, texVolModel_);
-            glDrawArraysInstanced(GL_TRIANGLES, 0, cubeBuf_.size(), world.volModel->positions.size());
+            volModel_->Update(gfx_);
+            volModel_->Draw(gfx_);
             glDisable(GL_CULL_FACE);
         }
     }
@@ -276,26 +248,7 @@ void Renderer::LoadLattice()
 
 void Renderer::LoadVolumetricModel()
 {
-    glDeleteBuffers(1, &buffers_[BufferType_VolumetricModel_Translation]);
-    glDeleteBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
-
-    glGenBuffers(1, &buffers_[BufferType_VolumetricModel_Translation]);
-    glGenBuffers(1, &buffers_[BufferType_VolumetricModel_TextureCoord]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel_Translation]);
-    glBufferData(GL_ARRAY_BUFFER, world.volModel->positions.size() * sizeof(glm::vec3),
-                 world.volModel->positions.data(), GL_DYNAMIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_VolumetricModel_TextureCoord]);
-    glBufferData(GL_ARRAY_BUFFER, world.volModel->textureCoords.size() * sizeof(glm::vec2),
-                 world.volModel->textureCoords.data(), GL_DYNAMIC_DRAW);
-
-    glVertexBindingDivisor(VertexAttrib_Translation, 1);
-    glVertexBindingDivisor(VertexAttrib_TextureCoord, 1);
-    glBindVertexBuffer(VertexAttrib_Translation, buffers_[BufferType_VolumetricModel_Translation], 0,
-                       sizeof(glm::vec3));
-    glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_VolumetricModel_TextureCoord], 0,
-                       sizeof(glm::vec2));
+    volModel_ = std::make_unique<VolumetricModel>(gfx_, world.cube);
 }
 
 Camera& Renderer::GetCamera()

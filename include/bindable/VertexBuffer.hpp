@@ -12,11 +12,13 @@ class VertexBuffer : public Bindable
 protected:
     GLuint id_;
     GLuint count_;
+    GLuint startAttrib_;
     std::vector<GLintptr> offsets_;
+    std::vector<GLsizei> strides_;
 
 public:
     template <typename T>
-    VertexBuffer(Graphics& gfx, std::vector<T> const& vertices);
+    VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib = 0);
     void Bind(Graphics& gfx) override;
     GLuint GetCount() const;
 
@@ -26,9 +28,10 @@ protected:
 };
 
 template <typename T>
-VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices)
+VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib)
     : id_(0)
     , count_(vertices.size())
+    , startAttrib_(startAttrib)
 {
     BufferDesc desc;
     BufferData data;
@@ -50,5 +53,9 @@ template <>
 void VertexBuffer::SetOffsets<VertexPNT>();
 template <>
 void VertexBuffer::SetOffsets<VertexPNC>();
+template <>
+void VertexBuffer::SetOffsets<glm::vec3>();
+template <>
+void VertexBuffer::SetOffsets<glm::vec2>();
 
 #endif

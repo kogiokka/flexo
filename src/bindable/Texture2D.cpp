@@ -6,13 +6,13 @@ void Texture2D::Bind(Graphics& gfx)
 }
 
 template <>
-void Texture2D::determineDataType<float>(Texture2dDesc& desc) const
+void Texture2D::DetermineDataType<float>(Texture2dDesc& desc) const
 {
     desc.dataType = GL_FLOAT;
 }
 
 template <>
-void Texture2D::determineDataType<unsigned char>(Texture2dDesc& desc) const
+void Texture2D::DetermineDataType<unsigned char>(Texture2dDesc& desc) const
 {
     desc.dataType = GL_UNSIGNED_BYTE;
 }

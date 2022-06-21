@@ -11,7 +11,7 @@
 #include "RandomIntNumber.hpp"
 #include "VolumeData.hpp"
 
-struct VolumetricModel {
+struct VolModel {
     VolumeData data;
     std::vector<glm::vec3> positions;
     std::vector<glm::vec2> textureCoords;
@@ -32,7 +32,7 @@ struct World {
     std::vector<glm::vec3> neuronPositions;
     std::vector<unsigned int> latticeEdges;
     std::unique_ptr<Mesh> polyModel;
-    std::unique_ptr<VolumetricModel> volModel;
+    std::unique_ptr<VolModel> volModel;
     Image pattern;
     glm::vec3 lightPos;
 };
