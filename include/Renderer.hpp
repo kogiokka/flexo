@@ -28,12 +28,10 @@ using ShaderType = int;
 using RenderOption = int;
 
 enum ShaderType_ : int {
-    ShaderType_VolumetricModel,
     ShaderType_LatticeVertex,
     ShaderType_LatticeEdge,
     ShaderType_LatticeFace,
-    ShaderType_LightSource,
-    ShaderType_Last = ShaderType_LightSource,
+    ShaderType_Last = ShaderType_LatticeFace,
 };
 
 enum BufferType_ : int {
@@ -63,11 +61,8 @@ class Renderer
     std::array<Shader, ShaderType_Last + 1> shaders_;
 
     Graphics gfx_;
-    std::vector<std::unique_ptr<Drawable>> drawables_;
 
     GLuint tex_;
-    GLuint texColor_;
-    GLuint texVolModel_;
 
     std::vector<VertexPN> cubeBuf_;
     std::vector<VertexPN> uvsphereBuf_;

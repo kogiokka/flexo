@@ -52,12 +52,6 @@ Renderer::Renderer(int width, int height)
     shaders_[ShaderType_LatticeFace].Attach(GL_VERTEX_SHADER, "shader/LatticeFace.vert");
     shaders_[ShaderType_LatticeFace].Attach(GL_FRAGMENT_SHADER, "shader/LatticeFace.frag");
 
-    shaders_[ShaderType_LightSource].Attach(GL_VERTEX_SHADER, "shader/LightSource.vert");
-    shaders_[ShaderType_LightSource].Attach(GL_FRAGMENT_SHADER, "shader/LightSource.frag");
-
-    shaders_[ShaderType_VolumetricModel].Attach(GL_VERTEX_SHADER, "shader/VolumetricModel.vert");
-    shaders_[ShaderType_VolumetricModel].Attach(GL_FRAGMENT_SHADER, "shader/VolumetricModel.frag");
-
     for (Shader const& s : shaders_) {
         s.Link();
     }
@@ -72,22 +66,6 @@ Renderer::Renderer(int width, int height)
         auto const& [img, w, h, ch] = world.pattern;
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
     }
-
-    glGenTextures(1, &texColor_);
-    glBindTexture(GL_TEXTURE_2D, texColor_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    {
-        float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_FLOAT, color);
-    }
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-
-    // Render the volumetric model with a color at the beginning
-    texVolModel_ = texColor_;
 
     lightSource_ = std::make_unique<LightSource>(gfx_, world.uvsphere);
 }
@@ -277,7 +255,7 @@ void Renderer::SetWatermarkTexture()
     glBufferData(GL_ARRAY_BUFFER, world.volModel->textureCoords.size() * sizeof(glm::vec2),
                  world.volModel->textureCoords.data(), GL_DYNAMIC_DRAW);
 
-    texVolModel_ = tex_;
+    // texVolModel_ = tex_;
 }
 
 void Renderer::CreateVertexBuffers()

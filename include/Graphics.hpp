@@ -73,9 +73,9 @@ public:
     void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filepath);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
-    void SetVertexBuffers(GLuint first, int numBuffers, const GLuint* buffers, const GLintptr* offsets,
-                          const GLsizei* strides);
-    void SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset);
+    void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
+                          GLsizei const* strides);
+    void SetIndexBuffer(GLuint buffer, GLenum format, GLvoid const* offset);
     void SetTexture(GLenum target, GLuint texture);
     void SetShaderProgram(GLuint program);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);

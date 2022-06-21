@@ -22,7 +22,7 @@ void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData c
     glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
 }
 
-void Graphics::CreateTexture2D(GLuint& texture, const Texture2dDesc& desc, const BufferData& data)
+void Graphics::CreateTexture2D(GLuint& texture, Texture2dDesc const& desc, BufferData const& data)
 {
     constexpr GLint BORDER = 0;
     glGenTextures(1, &texture);
@@ -93,8 +93,8 @@ void Graphics::SetPrimitive(GLenum primitive)
     ctx_.primitive = primitive;
 }
 
-void Graphics::SetVertexBuffers(GLuint first, int numBuffers, const GLuint* buffers, const GLintptr* offsets,
-                                const GLsizei* strides)
+void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
+                                GLsizei const* strides)
 {
     for (int i = 0; i < numBuffers; i++) {
         glBindVertexBuffer(first + i, buffers[i], offsets[i], strides[i]);
