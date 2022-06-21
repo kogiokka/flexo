@@ -19,7 +19,6 @@ struct BufferDesc {
 struct Texture2dDesc {
     GLsizei width;
     GLsizei height;
-    GLenum unit;
     GLenum textureFormat;
     GLenum pixelFormat;
     GLenum dataType;
@@ -69,7 +68,7 @@ public:
     Graphics(int width, int height);
     void ClearBuffer(float red, float green, float blue) const;
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
-    void CreateTexture2D(GLuint& texture, Texture2dDesc const& desc, BufferData const& data);
+    void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data);
     void CreateShaderProgram(GLuint& program);
     void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filepath);
     void LinkShaderProgram(GLuint const program);
@@ -77,7 +76,7 @@ public:
     void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
                           GLsizei const* strides);
     void SetIndexBuffer(GLuint buffer, GLenum format, GLvoid const* offset);
-    void SetTexture(GLenum target, GLuint texture);
+    void SetTexture(GLenum target, GLuint texture, GLuint unit);
     void SetShaderProgram(GLuint program);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 

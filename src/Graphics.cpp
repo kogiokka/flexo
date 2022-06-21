@@ -22,14 +22,14 @@ void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData c
     glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
 }
 
-void Graphics::CreateTexture2D(GLuint& texture, Texture2dDesc const& desc, BufferData const& data)
+void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data)
 {
     constexpr GLint BORDER = 0;
     glGenTextures(1, &texture);
 
-    glActiveTexture(desc.unit);
-
+    glActiveTexture(unit);
     glBindTexture(GL_TEXTURE_2D, texture);
+
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -111,8 +111,9 @@ void Graphics::SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset
     ctx_.offset = offset;
 }
 
-void Graphics::SetTexture(GLenum target, GLuint texture)
+void Graphics::SetTexture(GLenum target, GLuint texture, GLuint unit)
 {
+    glActiveTexture(unit);
     glBindTexture(target, texture);
 }
 

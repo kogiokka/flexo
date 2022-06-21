@@ -66,6 +66,7 @@ PRIVATE
     "src/drawable/PolygonalModel.cpp"
     "src/drawable/VolumetricModel.cpp"
     "src/drawable/LightSource.cpp"
+    "src/drawable/LatticeFace.cpp"
 )
 
 target_include_directories(som-demo

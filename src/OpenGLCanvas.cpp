@@ -295,7 +295,7 @@ void OpenGLCanvas::UpdateScene()
     if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
         || rendopt & RenderOption_LatticeFace) {
         BuildLatticeMesh();
-        renderer_->UpdateLatticeMeshBuffer();
+        // renderer_->UpdateLatticeMeshBuffer();
     }
 }
 

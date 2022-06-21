@@ -9,19 +9,32 @@ RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOpt
 Renderer::Renderer(int width, int height)
     : gfx_(width, height)
     , polyModel_(nullptr)
+    , lightSource_(nullptr)
+    , volModel_(nullptr)
+    , latticeFace_(nullptr)
 {
     AttribFormat format;
     format.count = 3;
     format.type = GL_FLOAT;
     format.normalized = GL_FALSE;
     vao_.Bind();
-    vao_.AddAttribFormat(VertexAttrib_Position, format);
-    vao_.AddAttribFormat(VertexAttrib_Normal, format);
-    vao_.AddAttribFormat(VertexAttrib_TextureCoord, { 2, GL_FLOAT, GL_FALSE });
-    vao_.AddAttribFormat(VertexAttrib_Translation, format);
+    vao_.AddAttribFormat(VertexAttrib_Position, format); // 0
+    vao_.AddAttribFormat(VertexAttrib_Normal, format); // 1
+    vao_.AddAttribFormat(VertexAttrib_Translation, format); // 2
+    vao_.AddAttribFormat(VertexAttrib_TextureCoord, { 2, GL_FLOAT, GL_FALSE }); // 3
     vao_.Enable(VertexAttrib_Position);
     vao_.Enable(VertexAttrib_Normal);
     vao_.Enable(VertexAttrib_TextureCoord);
+
+    vaoTemp_.Bind();
+    vaoTemp_.AddAttribFormat(VertexAttrib_Position, format); // 0
+    vaoTemp_.AddAttribFormat(VertexAttrib_Normal, format); // 1
+    vaoTemp_.AddAttribFormat(2, { 2, GL_FLOAT, GL_FALSE }); // Texture coordinates
+    vaoTemp_.Enable(VertexAttrib_Position);
+    vaoTemp_.Enable(VertexAttrib_Normal);
+    vaoTemp_.Enable(2);
+
+    vao_.Bind();
 
     CreateVertexBuffers();
 
@@ -32,9 +45,6 @@ Renderer::Renderer(int width, int height)
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_UVSphere]);
     glBufferData(GL_ARRAY_BUFFER, uvsphereBuf_.size() * sizeof(VertexPN), uvsphereBuf_.data(), GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, latticeMeshBuf_.size() * sizeof(VertexPNT), nullptr, GL_DYNAMIC_DRAW);
 
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
     glBufferData(GL_ARRAY_BUFFER, world.neuronPositions.size() * sizeof(glm::vec3), nullptr, GL_DYNAMIC_DRAW);
@@ -49,25 +59,12 @@ Renderer::Renderer(int width, int height)
     shaders_[ShaderType_LatticeEdge].Attach(GL_VERTEX_SHADER, "shader/LatticeEdge.vert");
     shaders_[ShaderType_LatticeEdge].Attach(GL_FRAGMENT_SHADER, "shader/LatticeEdge.frag");
 
-    shaders_[ShaderType_LatticeFace].Attach(GL_VERTEX_SHADER, "shader/LatticeFace.vert");
-    shaders_[ShaderType_LatticeFace].Attach(GL_FRAGMENT_SHADER, "shader/LatticeFace.frag");
-
     for (Shader const& s : shaders_) {
         s.Link();
     }
 
-    glGenTextures(1, &tex_);
-    glBindTexture(GL_TEXTURE_2D, tex_);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    {
-        auto const& [img, w, h, ch] = world.pattern;
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, img);
-    }
-
     lightSource_ = std::make_unique<LightSource>(gfx_, world.uvsphere);
+    latticeFace_ = std::make_unique<LatticeFace>(gfx_, world.latticeMesh);
 }
 
 void Renderer::Render()
@@ -159,38 +156,10 @@ void Renderer::Render()
     }
 
     if (rendopt & RenderOption_LatticeFace) {
-        vao_.Enable(VertexAttrib_Position);
-        vao_.Enable(VertexAttrib_Normal);
-        vao_.Enable(VertexAttrib_TextureCoord);
-        vao_.Disable(VertexAttrib_Translation);
-
-        UpdateLatticeMeshBuffer();
-        glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, latticeMeshBuf_.size() * sizeof(VertexPNT), latticeMeshBuf_.data());
-
-        program = &shaders_[ShaderType_LatticeFace];
-        program->Use();
-        program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
-        program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
-        program->SetUniform3fv("ubo.frag.viewPos", gfx_.GetCamera().Position());
-        program->SetUniform3fv("ubo.frag.light.position", lightPos);
-        program->SetUniform3f("ubo.frag.light.ambient", 0.2f, 0.2f, 0.2f);
-        program->SetUniform3f("ubo.frag.light.diffusion", 0.5f, 0.4f, 0.5f);
-        program->SetUniform3f("ubo.frag.light.specular", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("ubo.frag.material.ambient", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("ubo.frag.material.diffusion", 1.0f, 1.0f, 1.0f);
-        program->SetUniform3f("ubo.frag.material.specular", 0.3f, 0.3f, 0.3f);
-        program->SetUniform1f("ubo.frag.material.shininess", 32.0f);
-
-        glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticeFace], offsetof(VertexPNT, position),
-                           sizeof(VertexPNT));
-        glBindVertexBuffer(VertexAttrib_Normal, buffers_[BufferType_LatticeFace], offsetof(VertexPNT, normal),
-                           sizeof(VertexPNT));
-        glBindVertexBuffer(VertexAttrib_TextureCoord, buffers_[BufferType_LatticeFace], offsetof(VertexPNT, texcoord),
-                           sizeof(VertexPNT));
-        glVertexBindingDivisor(VertexAttrib_TextureCoord, 0);
-        glBindTexture(GL_TEXTURE_2D, tex_);
-        glDrawArrays(GL_TRIANGLES, 0, latticeMeshBuf_.size());
+        vaoTemp_.Bind();
+        latticeFace_->Update(gfx_);
+        latticeFace_->Draw(gfx_);
+        vao_.Bind();
     }
 }
 
@@ -202,15 +171,12 @@ void Renderer::LoadPolygonalModel()
 
 void Renderer::LoadLattice()
 {
+    latticeFace_ = std::make_unique<LatticeFace>(gfx_, world.latticeMesh);
+
     glDeleteBuffers(1, &buffers_[BufferType_LatticeEdge]);
-    glDeleteBuffers(1, &buffers_[BufferType_LatticeFace]);
     glDeleteBuffers(1, &buffers_[BufferType_LatticePositions]);
     glGenBuffers(1, &buffers_[BufferType_LatticeEdge]);
-    glGenBuffers(1, &buffers_[BufferType_LatticeFace]);
     glGenBuffers(1, &buffers_[BufferType_LatticePositions]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticeFace]);
-    glBufferData(GL_ARRAY_BUFFER, latticeMeshBuf_.size() * sizeof(VertexPNT), nullptr, GL_DYNAMIC_DRAW);
 
     // An Vertex Buffer Object storing the positions of neurons on the world.lattice.tice.
     glBindBuffer(GL_ARRAY_BUFFER, buffers_[BufferType_LatticePositions]);
@@ -234,19 +200,6 @@ Camera& Renderer::GetCamera()
     return gfx_.GetCamera();
 }
 
-void Renderer::UpdateLatticeMeshBuffer()
-{
-    latticeMeshBuf_.clear();
-    latticeMeshBuf_.resize(world.latticeMesh.positions.size());
-    for (unsigned int i = 0; i < world.latticeMesh.positions.size(); i++) {
-        VertexPNT v;
-        v.position = world.latticeMesh.positions[i];
-        v.normal = world.latticeMesh.normals[i];
-        v.texcoord = world.latticeMesh.textureCoords[i];
-        latticeMeshBuf_[i] = v;
-    }
-}
-
 void Renderer::CreateVertexBuffers()
 {
     for (unsigned int i = 0; i < world.cube.positions.size(); i++) {
@@ -262,6 +215,4 @@ void Renderer::CreateVertexBuffers()
         v.normal = world.uvsphere.normals[i];
         uvsphereBuf_.push_back(v);
     }
-
-    UpdateLatticeMeshBuffer();
 }

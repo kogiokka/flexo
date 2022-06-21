@@ -48,7 +48,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
 
     float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
     texColor_ = std::make_shared<Texture2D>(gfx, color, 1, 1, GL_TEXTURE0);
-
     auto const& [img, w, h, ch] = world.pattern;
     texPattern_ = std::make_shared<Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 

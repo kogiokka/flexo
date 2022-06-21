@@ -10,6 +10,7 @@ class Texture2D : public Bindable
 {
 protected:
     GLuint id_;
+    GLuint unit_;
 
 public:
     template <typename T>
@@ -23,20 +24,21 @@ protected:
 
 template <typename T>
 Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit)
+    : id_(0)
+    , unit_(unit)
 {
     Texture2dDesc desc;
     BufferData data;
 
     desc.width = width;
     desc.height = height;
-    desc.unit = unit;
     desc.textureFormat = GL_RGBA;
     desc.pixelFormat = GL_RGBA;
 
     DetermineDataType<T>(desc);
 
     data.mem = textureData;
-    gfx.CreateTexture2D(id_, desc, data);
+    gfx.CreateTexture2D(id_, unit_, desc, data);
 }
 
 template <>

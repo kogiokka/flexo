@@ -1,8 +1,10 @@
 #include "bindable/Texture2D.hpp"
 
+#include "common/Logger.hpp"
+
 void Texture2D::Bind(Graphics& gfx)
 {
-    gfx.SetTexture(GL_TEXTURE_2D, id_);
+    gfx.SetTexture(GL_TEXTURE_2D, id_, unit_);
 }
 
 template <>
