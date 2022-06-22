@@ -45,7 +45,7 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
 
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices, VertexAttrib_Position));
-    AddBind(std::make_shared<VertexBuffer>(gfx, world.neuronPositions, VertexAttrib_Translation));
+    AddBind(std::make_shared<VertexBuffer>(gfx, world.neurons.positions, VertexAttrib_Translation));
     AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
 }
@@ -56,7 +56,7 @@ void LatticeVertex::Draw(Graphics& gfx) const
 
     glVertexBindingDivisor(VertexAttrib_Translation, 1); // FIXME
 
-    gfx.DrawInstanced(count_, world.neuronPositions.size());
+    gfx.DrawInstanced(count_, world.neurons.positions.size());
 }
 
 void LatticeVertex::Update(Graphics& gfx)
@@ -70,7 +70,7 @@ void LatticeVertex::Update(Graphics& gfx)
         {
             VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == VertexAttrib_Translation)) {
-                vb->Update(gfx, world.neuronPositions);
+                vb->Update(gfx, world.neurons.positions);
             }
         }
         {

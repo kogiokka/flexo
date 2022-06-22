@@ -67,6 +67,7 @@ PRIVATE
     "src/drawable/VolumetricModel.cpp"
     "src/drawable/LightSource.cpp"
     "src/drawable/LatticeVertex.cpp"
+    "src/drawable/LatticeEdge.cpp"
     "src/drawable/LatticeFace.cpp"
 )
 

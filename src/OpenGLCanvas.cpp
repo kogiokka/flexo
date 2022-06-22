@@ -403,7 +403,7 @@ void OpenGLCanvas::BuildLatticeMesh()
         }
     }
 
-    world.neuronPositions = positions;
+    world.neurons.positions = positions;
     world.latticeMesh = mesh;
 }
 

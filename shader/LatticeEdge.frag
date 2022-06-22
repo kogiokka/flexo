@@ -9,12 +9,10 @@ struct UniformBuffer_Frag {
     vec3 color;
 };
 
-struct UniformBuffer {
+layout(std140, binding = 0) uniform UniformBuffer {
     UniformBuffer_Vert vert;
     UniformBuffer_Frag frag;
-};
-
-layout (location = 1) uniform UniformBuffer ubo;
+} ubo;
 
 out vec4 outColor;
 

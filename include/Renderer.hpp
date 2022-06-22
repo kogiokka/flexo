@@ -12,6 +12,7 @@
 #include "bindable/Texture2D.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "drawable/Drawable.hpp"
+#include "drawable/LatticeEdge.hpp"
 #include "drawable/LatticeFace.hpp"
 #include "drawable/LatticeVertex.hpp"
 #include "drawable/LightSource.hpp"
@@ -29,23 +30,6 @@ using BufferType = int;
 using ShaderType = int;
 using RenderOption = int;
 
-enum ShaderType_ : int {
-    ShaderType_LatticeEdge,
-    ShaderType_Last = ShaderType_LatticeEdge,
-};
-
-enum BufferType_ : int {
-    BufferType_Surface = 0,
-    BufferType_Cube,
-    BufferType_UVSphere,
-    BufferType_VolumetricModel_Translation,
-    BufferType_VolumetricModel_TextureCoord,
-    BufferType_LatticePositions,
-    BufferType_LatticeEdge,
-    BufferType_LatticeFace,
-    BufferType_Last = BufferType_LatticeFace,
-};
-
 enum RenderOption_ : int {
     RenderOption_Model = 1 << 0,
     RenderOption_LatticeVertex = 1 << 1,
@@ -58,8 +42,6 @@ class Renderer
 {
     VertexArray vao_;
     VertexArray vaoTemp_;
-    std::array<GLuint, BufferType_Last + 1> buffers_;
-    std::array<Shader, ShaderType_Last + 1> shaders_;
 
     Graphics gfx_;
 
@@ -67,6 +49,7 @@ class Renderer
     std::unique_ptr<LightSource> lightSource_;
     std::unique_ptr<VolumetricModel> volModel_;
     std::unique_ptr<LatticeVertex> latticeVert_;
+    std::unique_ptr<LatticeEdge> latticeEdge_;
     std::unique_ptr<LatticeFace> latticeFace_;
 
 public:

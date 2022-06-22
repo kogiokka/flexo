@@ -29,7 +29,7 @@ struct World {
     Mesh uvsphere;
     Mesh cube;
     Mesh latticeMesh;
-    std::vector<glm::vec3> neuronPositions;
+    Mesh neurons;
     std::vector<unsigned int> latticeEdges;
     std::unique_ptr<Mesh> polyModel;
     std::unique_ptr<VolModel> volModel;
