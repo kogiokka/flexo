@@ -6,7 +6,7 @@
 #include "World.hpp"
 #include "bindable/IndexBuffer.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/ShaderBindable.hpp"
+#include "bindable/Shader.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -24,7 +24,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
 
     std::vector<glm::vec3> vertices = mesh.positions;
 
-    ShaderBindable shader(gfx);
+    Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/LatticeEdge.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/LatticeEdge.frag");
     shader.Link(gfx);
@@ -39,7 +39,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
     AddBind(ibo_);
-    AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
+    AddBind(std::make_shared<Shader>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 

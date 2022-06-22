@@ -4,7 +4,7 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/ShaderBindable.hpp"
+#include "bindable/Shader.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -33,7 +33,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    ShaderBindable shader(gfx);
+    Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/VolumetricModel.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/VolumetricModel.frag");
     shader.Link(gfx);
@@ -62,7 +62,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->textureCoords, 2));
     AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->positions, 3));
-    AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
+    AddBind(std::make_shared<Shader>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
     AddBind(texColor_);
     AddBind(texPattern_);

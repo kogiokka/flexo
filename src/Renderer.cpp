@@ -1,5 +1,4 @@
 #include "Renderer.hpp"
-#include "Shader.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 #include <cstdlib>

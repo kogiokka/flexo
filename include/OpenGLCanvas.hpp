@@ -5,7 +5,6 @@
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "Renderer.hpp"
-#include "Shader.hpp"
 #include "VolumeData.hpp"
 
 #include <wx/dcclient.h>

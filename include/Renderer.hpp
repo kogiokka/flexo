@@ -2,7 +2,6 @@
 #define RENDERER_H
 
 #include "Mesh.hpp"
-#include "Shader.hpp"
 #include "Vertex.hpp"
 
 #include "Graphics.hpp"

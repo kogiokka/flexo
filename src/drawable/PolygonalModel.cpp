@@ -4,7 +4,7 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/ShaderBindable.hpp"
+#include "bindable/Shader.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -27,7 +27,7 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    ShaderBindable shader(gfx);
+    Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/PolygonalModel.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/PolygonalModel.frag");
     shader.Link(gfx);
@@ -48,7 +48,7 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
+    AddBind(std::make_shared<Shader>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 

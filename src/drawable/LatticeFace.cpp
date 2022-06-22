@@ -2,7 +2,7 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/ShaderBindable.hpp"
+#include "bindable/Shader.hpp"
 #include "bindable/Texture2D.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
@@ -27,7 +27,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    ShaderBindable shader(gfx);
+    Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/LatticeFace.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/LatticeFace.frag");
     shader.Link(gfx);
@@ -49,7 +49,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
+    AddBind(std::make_shared<Shader>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
     AddBind(std::make_shared<Texture2D>(gfx, img, w, h, GL_TEXTURE0));
 }
