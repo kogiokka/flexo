@@ -7,12 +7,17 @@
 #include "bindable/ShaderBindable.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
+#include "bindable/VertexLayout.hpp"
 #include "drawable/PolygonalModel.hpp"
 
 PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<VertexPN> vertices;
+    std::vector<AttributeDesc> attrs = {
+        { "position", 3, GL_FLOAT, GL_FALSE },
+        { "normal", 3, GL_FLOAT, GL_FALSE },
+    };
 
+    std::vector<VertexPN> vertices;
     for (unsigned int i = 0; i < mesh.positions.size(); i++) {
         VertexPN v;
         v.position = mesh.positions[i];
@@ -40,6 +45,7 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     ub_.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     ub_.frag.material.shininess = 32.0f;
 
+    AddBind(std::make_shared<VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
     AddBind(std::make_shared<ShaderBindable>(std::move(shader)));

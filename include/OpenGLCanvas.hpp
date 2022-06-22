@@ -1,7 +1,5 @@
 #pragma once
 
-#include "VertexArray.hpp"
-
 #include "glad/glad.h"
 #include "InputData.hpp"
 #include "Lattice.hpp"

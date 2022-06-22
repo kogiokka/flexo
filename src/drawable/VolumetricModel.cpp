@@ -2,12 +2,12 @@
 #include <vector>
 
 #include "Vertex.hpp"
-#include "VertexArray.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/ShaderBindable.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
+#include "bindable/VertexLayout.hpp"
 #include "drawable/VolumetricModel.hpp"
 
 VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
@@ -16,8 +16,14 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     , texColor_(nullptr)
     , texPattern_(nullptr)
 {
-    std::vector<VertexPN> vertices;
+    std::vector<AttributeDesc> attrs = {
+        { "position", 3, GL_FLOAT, GL_FALSE }, // 0
+        { "normal", 3, GL_FLOAT, GL_FALSE }, // 1
+        { "textureCoord", 2, GL_FLOAT, GL_FALSE }, // 2
+        { "translation", 3, GL_FLOAT, GL_FALSE }, // 3
+    };
 
+    std::vector<VertexPN> vertices;
     for (unsigned int i = 0; i < mesh.positions.size(); i++) {
         VertexPN v;
         v.position = mesh.positions[i];
@@ -51,10 +57,11 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     auto const& [img, w, h, ch] = world.pattern;
     texPattern_ = std::make_shared<Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
+    AddBind(std::make_shared<VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<VertexBuffer>(gfx, vertices, VertexAttrib_Position));
-    AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->positions, VertexAttrib_Translation));
-    AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->textureCoords, VertexAttrib_TextureCoord));
+    AddBind(std::make_shared<VertexBuffer>(gfx, vertices, 0));
+    AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->textureCoords, 2));
+    AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->positions, 3));
     AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
     AddBind(texColor_);
@@ -81,7 +88,7 @@ void VolumetricModel::Update(Graphics& gfx)
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         {
             VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
-            if ((vb != nullptr) && (vb->GetStartAttrib() == VertexAttrib_TextureCoord)) {
+            if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
                 vb->Update(gfx, world.volModel->textureCoords);
             }
         }

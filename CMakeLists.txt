@@ -41,7 +41,6 @@ PRIVATE
     "src/Camera.cpp"
     "src/Shader.cpp"
     "src/Renderer.cpp"
-    "src/VertexArray.cpp"
     "src/Lattice.cpp"
     "src/Mesh.cpp"
     "src/Node.cpp"
@@ -57,6 +56,7 @@ PRIVATE
 
     "src/Graphics.cpp"
     "src/bindable/Primitive.cpp"
+    "src/bindable/VertexLayout.cpp"
     "src/bindable/IndexBuffer.cpp"
     "src/bindable/UniformBuffer.cpp"
     "src/bindable/VertexBuffer.cpp"

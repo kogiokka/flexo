@@ -2,20 +2,25 @@
 #include <vector>
 
 #include "Vertex.hpp"
-#include "VertexArray.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/ShaderBindable.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
+#include "bindable/VertexLayout.hpp"
 #include "drawable/LatticeVertex.hpp"
 
 LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     : count_(0)
     , ub_ {}
 {
-    std::vector<VertexPN> vertices;
+    std::vector<AttributeDesc> attrs = {
+        { "position", 3, GL_FLOAT, GL_FALSE }, // 0
+        { "normal", 3, GL_FLOAT, GL_FALSE }, // 1
+        { "translation", 3, GL_FLOAT, GL_FALSE }, // 2
+    };
 
+    std::vector<VertexPN> vertices;
     for (unsigned int i = 0; i < mesh.positions.size(); i++) {
         VertexPN v;
         v.position = mesh.positions[i];
@@ -43,9 +48,10 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     ub_.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     ub_.frag.material.shininess = 256.0f;
 
+    AddBind(std::make_shared<VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<VertexBuffer>(gfx, vertices, VertexAttrib_Position));
-    AddBind(std::make_shared<VertexBuffer>(gfx, world.neurons.positions, VertexAttrib_Translation));
+    AddBind(std::make_shared<VertexBuffer>(gfx, vertices, 0));
+    AddBind(std::make_shared<VertexBuffer>(gfx, world.neurons.positions, 2));
     AddBind(std::make_shared<ShaderBindable>(std::move(shader)));
     AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
 }
@@ -54,7 +60,7 @@ void LatticeVertex::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
 
-    glVertexBindingDivisor(VertexAttrib_Translation, 1); // FIXME
+    glVertexBindingDivisor(2, 1); // FIXME
 
     gfx.DrawInstanced(count_, world.neurons.positions.size());
 }
@@ -69,7 +75,7 @@ void LatticeVertex::Update(Graphics& gfx)
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         {
             VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
-            if ((vb != nullptr) && (vb->GetStartAttrib() == VertexAttrib_Translation)) {
+            if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
                 vb->Update(gfx, world.neurons.positions);
             }
         }

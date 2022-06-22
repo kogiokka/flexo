@@ -9,10 +9,15 @@ Graphics::Graphics(int width, int height)
 {
 }
 
-void Graphics::ClearBuffer(float red, float green, float blue) const
+void Graphics::CreateVertexLayout(GLuint& layout, AttributeDesc const* attrDescs, int const numAttrs)
 {
-    glClearColor(red, green, blue, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    GLuint index = 0;
+    glGenVertexArrays(1, &layout);
+    glBindVertexArray(layout);
+    for (int i = 0; i < numAttrs; i++) {
+        glEnableVertexAttribArray(index + i);
+        glVertexAttribFormat(index + i, attrDescs[i].numValues, attrDescs[i].valueType, attrDescs[i].shouldNormalize, 0);
+    }
 }
 
 void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data)
@@ -91,6 +96,11 @@ void Graphics::LinkShaderProgram(const GLuint program)
     Logger::error("Shader program linking error: %s\n", log.data());
 }
 
+void Graphics::SetVertexLayout(GLuint const layout)
+{
+    glBindVertexArray(layout);
+}
+
 void Graphics::SetPrimitive(GLenum primitive)
 {
     ctx_.primitive = primitive;
@@ -120,7 +130,6 @@ void Graphics::SetTexture(GLenum target, GLuint texture, GLuint unit)
 void Graphics::SetShaderProgram(GLuint program)
 {
     glUseProgram(program);
-    ctx_.program = program;
 }
 
 void Graphics::Draw(GLsizei vertexCount)
@@ -141,6 +150,17 @@ void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCou
 void Graphics::SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex)
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, uniform);
+}
+
+void Graphics::ClearBuffer(float red, float green, float blue) const
+{
+    glClearColor(red, green, blue, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+}
+
+void Graphics::DeleteVertexLayout(GLuint& layout)
+{
+    glDeleteVertexArrays(1, &layout);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const

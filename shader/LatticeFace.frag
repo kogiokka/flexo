@@ -30,15 +30,11 @@ layout(std140, binding = 0) uniform UniformBuffer {
     UniformBuffer_Frag frag;
 } ubo;
 
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texCoord;
-
 layout (binding = 0) uniform sampler2D pattern;
 
 in vec3 posFrag;
 in vec3 normFrag;
-in vec2 texCoordFrag;
+in vec2 textureCoordFrag;
 out vec4 outColor;
 
 void main()
@@ -59,5 +55,5 @@ void main()
   vec3 ambient = ubo.frag.light.ambient * ubo.frag.material.ambient;
   vec3 diffusion = ubo.frag.light.diffusion * ubo.frag.material.diffusion * diffuseCoef;
   vec3 specular = ubo.frag.light.specular * ubo.frag.material.specular * specularCoef;
-  outColor = vec4((ambient + diffusion + specular), 1.0f) * texture(pattern, texCoordFrag);
+  outColor = vec4((ambient + diffusion + specular), 1.0f) * texture(pattern, textureCoordFrag);
 }

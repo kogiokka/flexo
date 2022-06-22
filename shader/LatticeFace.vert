@@ -32,16 +32,16 @@ layout(std140, binding = 0) uniform UniformBuffer {
 
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texCoord;
+layout (location = 2) in vec2 textureCoord;
 
 out vec3 posFrag ;
 out vec3 normFrag ;
-out vec2 texCoordFrag ;
+out vec2 textureCoordFrag ;
 
 void main()
 {
   gl_Position = ubo.vert.viewProjMat * ubo.vert.modelMat * vec4(position, 1.0);
   posFrag = vec3(ubo.vert.modelMat * vec4(position, 1.0));
   normFrag = mat3(transpose(inverse(ubo.vert.modelMat))) * normal;
-  texCoordFrag = texCoord;
+  textureCoordFrag = textureCoord;
 }

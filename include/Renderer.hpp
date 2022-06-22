@@ -4,7 +4,6 @@
 #include "Mesh.hpp"
 #include "Shader.hpp"
 #include "Vertex.hpp"
-#include "VertexArray.hpp"
 
 #include "Graphics.hpp"
 #include "bindable/IndexBuffer.hpp"
@@ -40,9 +39,6 @@ enum RenderOption_ : int {
 
 class Renderer
 {
-    VertexArray vao_;
-    VertexArray vaoTemp_;
-
     Graphics gfx_;
 
     std::unique_ptr<PolygonalModel> polyModel_;

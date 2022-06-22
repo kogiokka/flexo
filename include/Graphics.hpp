@@ -9,6 +9,13 @@
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
+struct AttributeDesc {
+    GLchar const* name;
+    GLint numValues;
+    GLenum valueType;
+    GLboolean shouldNormalize;
+};
+
 struct BufferDesc {
     GLenum target;
     GLenum usage;
@@ -54,7 +61,6 @@ enum ShaderStage : GLenum {
 class Graphics
 {
     struct Context {
-        GLuint program;
         GLenum primitive;
         GLenum elementDataType;
         const GLvoid* offsetOfFirstIndex;
@@ -65,7 +71,7 @@ class Graphics
 
 public:
     Graphics(int width, int height);
-    void ClearBuffer(float red, float green, float blue) const;
+    void CreateVertexLayout(GLuint& layout, AttributeDesc const* attrDescs, int const numAttrs);
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
     void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data);
     void CreateShaderProgram(GLuint& program);
@@ -74,10 +80,14 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
                           GLsizei const* strides);
+    void SetVertexLayout(GLuint const layout);
     void SetIndexBuffer(GLuint buffer, GLenum elementDataType, GLvoid const* offsetOfFirstIndex);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
     void SetShaderProgram(GLuint program);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
+
+    void DeleteVertexLayout(GLuint& layout);
+    void ClearBuffer(float red, float green, float blue) const;
 
     glm::mat4 GetViewProjectionMatrix() const;
     glm::vec3 GetCameraPosition() const;
