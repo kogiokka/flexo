@@ -104,11 +104,11 @@ void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buff
     }
 }
 
-void Graphics::SetIndexBuffer(GLuint buffer, GLenum format, const GLvoid* offset)
+void Graphics::SetIndexBuffer(GLuint buffer, GLenum elementDataType, const GLvoid* offsetOfFirstIndex)
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-    ctx_.format = format;
-    ctx_.offset = offset;
+    ctx_.elementDataType = elementDataType;
+    ctx_.offsetOfFirstIndex = offsetOfFirstIndex;
 }
 
 void Graphics::SetTexture(GLenum target, GLuint texture, GLuint unit)
@@ -130,7 +130,7 @@ void Graphics::Draw(GLsizei vertexCount)
 
 void Graphics::DrawIndexed(GLsizei indexCount)
 {
-    glDrawElements(ctx_.primitive, indexCount, ctx_.count, ctx_.offset);
+    glDrawElements(ctx_.primitive, indexCount, ctx_.elementDataType, ctx_.offsetOfFirstIndex);
 }
 
 void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCount)

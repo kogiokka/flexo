@@ -56,9 +56,8 @@ class Graphics
     struct Context {
         GLuint program;
         GLenum primitive;
-        GLenum format;
-        GLsizei count;
-        const GLvoid* offset;
+        GLenum elementDataType;
+        const GLvoid* offsetOfFirstIndex;
     };
 
     Context ctx_;
@@ -75,7 +74,7 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
                           GLsizei const* strides);
-    void SetIndexBuffer(GLuint buffer, GLenum format, GLvoid const* offset);
+    void SetIndexBuffer(GLuint buffer, GLenum elementDataType, GLvoid const* offsetOfFirstIndex);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
     void SetShaderProgram(GLuint program);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);

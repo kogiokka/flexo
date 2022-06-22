@@ -52,13 +52,7 @@ void LatticeEdge::Update(Graphics& gfx)
         {
             VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == VertexAttrib_Position)) {
-                std::vector<glm::vec3> vertices;
-                for (unsigned int i = 0; i < world.neurons.positions.size(); i++) {
-                    glm::vec3 p;
-                    p = world.neurons.positions[i];
-                    vertices.push_back(p);
-                }
-                vb->Update(gfx, vertices);
+                vb->Update(gfx, world.neurons.positions);
             }
         }
         {

@@ -89,16 +89,6 @@ void Renderer::Render()
         vao_.Disable(VertexAttrib_Normal);
         vao_.Disable(VertexAttrib_TextureCoord);
         vao_.Disable(VertexAttrib_Translation);
-
-//         program = &shaders_[ShaderType_LatticeEdge];
-//         program->Use();
-//         program->SetUniformMatrix4fv("ubo.vert.viewProjMat", gfx_.GetCamera().ViewProjectionMatrix());
-//         program->SetUniformMatrix4fv("ubo.vert.modelMat", glm::mat4(1.0f));
-//         program->SetUniform3f("ubo.frag.color", 0.7f, 0.7f, 0.7f);
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffers_[BufferType_LatticeEdge]);
-//         glBindVertexBuffer(VertexAttrib_Position, buffers_[BufferType_LatticePositions], 0, sizeof(glm::vec3));
-//         glDrawElements(GL_LINES, world.latticeEdges.size(), GL_UNSIGNED_INT, 0);
-
         latticeEdge_->Update(gfx_);
         latticeEdge_->Draw(gfx_);
     }
