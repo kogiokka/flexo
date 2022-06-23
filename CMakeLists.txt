@@ -54,6 +54,7 @@ PRIVATE
     "src/assetlib/STL/STLImporter.cpp"
 
     "src/Graphics.cpp"
+    "src/bindable/Bindable.cpp"
     "src/bindable/Primitive.cpp"
     "src/bindable/VertexLayout.cpp"
     "src/bindable/IndexBuffer.cpp"

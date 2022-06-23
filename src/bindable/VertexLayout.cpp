@@ -3,12 +3,18 @@
 namespace Bind
 {
     VertexLayout::VertexLayout(Graphics& gfx, std::vector<AttributeDesc> const& attrDescs)
+        : Bindable(gfx)
     {
-        gfx.CreateVertexLayout(id_, attrDescs.data(), attrDescs.size());
+        gfx_->CreateVertexLayout(id_, attrDescs.data(), attrDescs.size());
     }
 
-    void VertexLayout::Bind(Graphics& gfx)
+    VertexLayout::~VertexLayout()
     {
-        gfx.SetVertexLayout(id_);
+        gfx_->DeleteVertexLayout(id_);
+    }
+
+    void VertexLayout::Bind()
+    {
+        gfx_->SetVertexLayout(id_);
     }
 }

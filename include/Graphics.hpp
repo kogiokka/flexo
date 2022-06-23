@@ -87,6 +87,9 @@ public:
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 
     void DeleteVertexLayout(GLuint& layout);
+    void DeleteVertexBuffer(GLuint& buffer);
+    void DeleteTexture(GLuint& texture);
+    void DeleteShaderProgram(GLuint& program);
     void ClearBuffer(float red, float green, float blue) const;
 
     glm::mat4 GetViewProjectionMatrix() const;

@@ -17,13 +17,15 @@ namespace Bind
 
     public:
         UniformBuffer(Graphics& gfx, T const& uniformBlock);
-        void Bind(Graphics& gfx) override;
-        void Update(Graphics& gfx, T const& uniformBlock);
+        ~UniformBuffer();
+        void Bind() override;
+        void Update(T const& uniformBlock);
     };
 
     template <typename T>
     UniformBuffer<T>::UniformBuffer(Graphics& gfx, T const& uniformBlock)
-        : id_(0)
+        : Bindable(gfx)
+        , id_(0)
         , bindingIndex_(0)
     {
         BufferDesc desc;
@@ -35,19 +37,25 @@ namespace Bind
         desc.stride = sizeof(T);
 
         data.mem = &uniformBlock;
-        gfx.CreateBuffer(id_, desc, data);
+        gfx_->CreateBuffer(id_, desc, data);
     }
 
     template <typename T>
-    void UniformBuffer<T>::Bind(Graphics& gfx)
+    UniformBuffer<T>::~UniformBuffer()
     {
-        gfx.SetUniformBuffer(id_, bindingIndex_);
+        gfx_->DeleteTexture(id_);
     }
 
     template <typename T>
-    void UniformBuffer<T>::Update(Graphics& gfx, T const& uniformBlock)
+    void UniformBuffer<T>::Bind()
     {
-        gfx.UpdateUniformBuffer<T>(id_, uniformBlock);
+        gfx_->SetUniformBuffer(id_, bindingIndex_);
+    }
+
+    template <typename T>
+    void UniformBuffer<T>::Update(T const& uniformBlock)
+    {
+        gfx_->UpdateUniformBuffer<T>(id_, uniformBlock);
     }
 }
 

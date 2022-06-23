@@ -1,9 +1,9 @@
 #include "drawable/Drawable.hpp"
 
-void Drawable::Draw(Graphics& gfx) const
+void Drawable::Draw(Graphics&) const
 {
     for (auto& b : binds_) {
-        b->Bind(gfx);
+        b->Bind();
     }
 }
 

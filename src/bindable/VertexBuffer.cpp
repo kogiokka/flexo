@@ -3,10 +3,15 @@
 
 namespace Bind
 {
-    void VertexBuffer::Bind(Graphics& gfx)
+    VertexBuffer::~VertexBuffer()
     {
-        gfx.SetVertexBuffers(startAttrib_, numAttrs_, std::vector<GLuint>(numAttrs_, id_).data(), offsets_.data(),
-                             strides_.data());
+        gfx_->DeleteVertexBuffer(id_);
+    }
+
+    void VertexBuffer::Bind()
+    {
+        gfx_->SetVertexBuffers(startAttrib_, numAttrs_, std::vector<GLuint>(numAttrs_, id_).data(), offsets_.data(),
+                               strides_.data());
     }
 
     GLuint VertexBuffer::GetStartAttrib() const

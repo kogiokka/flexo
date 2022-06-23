@@ -24,10 +24,10 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
 
     std::vector<glm::vec3> vertices = mesh.positions;
 
-    Bind::Shader shader(gfx);
-    shader.Attach(gfx, ShaderStage::Vert, "shader/LatticeEdge.vert");
-    shader.Attach(gfx, ShaderStage::Frag, "shader/LatticeEdge.frag");
-    shader.Link(gfx);
+    auto shader = std::make_shared<Bind::Shader>(gfx);
+    shader->Attach(ShaderStage::Vert, "shader/LatticeEdge.vert");
+    shader->Attach(ShaderStage::Frag, "shader/LatticeEdge.frag");
+    shader->Link();
 
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     ub_.vert.modelMat = glm::mat4(1.0f);
@@ -39,7 +39,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(ibo_);
-    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(shader);
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
@@ -57,13 +57,13 @@ void LatticeEdge::Update(Graphics& gfx)
         {
             Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
-                vb->Update(gfx, world.neurons.positions);
+                vb->Update(world.neurons.positions);
             }
         }
         {
             Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
-                ub->Update(gfx, ub_);
+                ub->Update(ub_);
             }
         }
     }

@@ -14,7 +14,8 @@ namespace Bind
 
     public:
         VertexLayout(Graphics& gfx, std::vector<AttributeDesc> const& attrDescs);
-        void Bind(Graphics& gfx) override;
+        ~VertexLayout() override;
+        void Bind() override;
     };
 }
 

@@ -17,7 +17,8 @@ namespace Bind
     public:
         template <typename T>
         Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit);
-        void Bind(Graphics& gfx) override;
+        ~Texture2D() override;
+        void Bind() override;
 
     protected:
         template <typename T>
@@ -26,7 +27,8 @@ namespace Bind
 
     template <typename T>
     Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit)
-        : id_(0)
+        : Bindable(gfx)
+        , id_(0)
         , unit_(unit)
     {
         Texture2dDesc desc;
@@ -40,7 +42,7 @@ namespace Bind
         DetermineDataType<T>(desc);
 
         data.mem = textureData;
-        gfx.CreateTexture2D(id_, unit_, desc, data);
+        gfx_->CreateTexture2D(id_, unit_, desc, data);
     }
 
     template <>

@@ -33,10 +33,10 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    Bind::Shader shader(gfx);
-    shader.Attach(gfx, ShaderStage::Vert, "shader/VolumetricModel.vert");
-    shader.Attach(gfx, ShaderStage::Frag, "shader/VolumetricModel.frag");
-    shader.Link(gfx);
+    auto shader = std::make_shared<Bind::Shader>(gfx);
+    shader->Attach(ShaderStage::Vert, "shader/VolumetricModel.vert");
+    shader->Attach(ShaderStage::Frag, "shader/VolumetricModel.frag");
+    shader->Link();
 
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     ub_.vert.modelMat = glm::mat4(1.0f);
@@ -62,7 +62,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->textureCoords, 2));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->positions, 3));
-    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(shader);
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
     AddBind(texColor_);
     AddBind(texPattern_);
@@ -71,6 +71,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
 void VolumetricModel::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
+
     glVertexBindingDivisor(2, 1); // FIXME: Move to VertexArray bindable
     glVertexBindingDivisor(3, 1);
 
@@ -89,13 +90,13 @@ void VolumetricModel::Update(Graphics& gfx)
         {
             Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
-                vb->Update(gfx, world.volModel->textureCoords);
+                vb->Update(world.volModel->textureCoords);
             }
         }
         {
             Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
-                ub->Update(gfx, ub_);
+                ub->Update(ub_);
             }
         }
     }

@@ -16,7 +16,8 @@ void Graphics::CreateVertexLayout(GLuint& layout, AttributeDesc const* attrDescs
     glBindVertexArray(layout);
     for (int i = 0; i < numAttrs; i++) {
         glEnableVertexAttribArray(index + i);
-        glVertexAttribFormat(index + i, attrDescs[i].numValues, attrDescs[i].valueType, attrDescs[i].shouldNormalize, 0);
+        glVertexAttribFormat(index + i, attrDescs[i].numValues, attrDescs[i].valueType, attrDescs[i].shouldNormalize,
+                             0);
     }
 }
 
@@ -161,6 +162,21 @@ void Graphics::ClearBuffer(float red, float green, float blue) const
 void Graphics::DeleteVertexLayout(GLuint& layout)
 {
     glDeleteVertexArrays(1, &layout);
+}
+
+void Graphics::DeleteVertexBuffer(GLuint& buffer)
+{
+    glDeleteBuffers(1, &buffer);
+}
+
+void Graphics::DeleteTexture(GLuint& texture)
+{
+    glDeleteTextures(1, &texture);
+}
+
+void Graphics::DeleteShaderProgram(GLuint& program)
+{
+    glDeleteProgram(program);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const

@@ -27,10 +27,10 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    Bind::Shader shader(gfx);
-    shader.Attach(gfx, ShaderStage::Vert, "shader/LatticeFace.vert");
-    shader.Attach(gfx, ShaderStage::Frag, "shader/LatticeFace.frag");
-    shader.Link(gfx);
+    auto shader = std::make_shared<Bind::Shader>(gfx);
+    shader->Attach(ShaderStage::Vert, "shader/LatticeFace.vert");
+    shader->Attach(ShaderStage::Frag, "shader/LatticeFace.frag");
+    shader->Link();
 
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     ub_.vert.modelMat = glm::mat4(1.0f);
@@ -49,7 +49,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(shader);
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
 }
@@ -79,13 +79,13 @@ void LatticeFace::Update(Graphics& gfx)
                     v.texcoord = world.latticeMesh.textureCoords[i];
                     vertices[i] = v;
                 }
-                vb->Update(gfx, vertices);
+                vb->Update(vertices);
             }
         }
         {
             Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
-                ub->Update(gfx, ub_);
+                ub->Update(ub_);
             }
         }
     }

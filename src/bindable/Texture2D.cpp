@@ -4,9 +4,14 @@
 
 namespace Bind
 {
-    void Texture2D::Bind(Graphics& gfx)
+    Texture2D::~Texture2D()
     {
-        gfx.SetTexture(GL_TEXTURE_2D, id_, unit_);
+        gfx_->DeleteTexture(id_);
+    }
+
+    void Texture2D::Bind()
+    {
+        gfx_->SetTexture(GL_TEXTURE_2D, id_, unit_);
     }
 
     template <>

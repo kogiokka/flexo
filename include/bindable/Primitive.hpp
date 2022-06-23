@@ -15,7 +15,8 @@ namespace Bind
 
     public:
         Primitive(Graphics& gfx, GLenum mode);
-        void Bind(Graphics& gfx) override;
+        ~Primitive() override;
+        void Bind();
     };
 }
 

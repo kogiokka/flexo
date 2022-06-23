@@ -27,10 +27,10 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    Bind::Shader shader(gfx);
-    shader.Attach(gfx, ShaderStage::Vert, "shader/PolygonalModel.vert");
-    shader.Attach(gfx, ShaderStage::Frag, "shader/PolygonalModel.frag");
-    shader.Link(gfx);
+    auto shader = std::make_shared<Bind::Shader>(gfx);
+    shader->Attach(ShaderStage::Vert, "shader/PolygonalModel.vert");
+    shader->Attach(ShaderStage::Frag, "shader/PolygonalModel.frag");
+    shader->Link();
 
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     ub_.vert.modelMat = glm::mat4(1.0f);
@@ -48,7 +48,7 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(shader);
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
@@ -68,7 +68,7 @@ void PolygonalModel::Update(Graphics& gfx)
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (buf != nullptr) {
-            buf->Update(gfx, ub_);
+            buf->Update(ub_);
             break;
         }
     }

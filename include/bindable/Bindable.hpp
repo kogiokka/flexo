@@ -7,9 +7,13 @@ namespace Bind
 {
     class Bindable
     {
+    protected:
+        Graphics* gfx_;
+
     public:
-        virtual void Bind(Graphics& gfx) = 0;
-        virtual ~Bindable() = default;
+        Bindable(Graphics& gfx);
+        virtual void Bind() = 0;
+        virtual ~Bindable() = 0;
     };
 }
 

@@ -21,9 +21,10 @@ namespace Bind
 
     public:
         Shader(Graphics& gfx);
-        void Attach(Graphics& gfx, ShaderStage stage, std::string const& filepath);
-        void Link(Graphics& gfx);
-        void Bind(Graphics& gfx) override;
+        ~Shader() override;
+        void Bind() override;
+        void Attach(ShaderStage stage, std::string const& filepath);
+        void Link();
     };
 }
 

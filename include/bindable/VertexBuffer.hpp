@@ -22,9 +22,10 @@ namespace Bind
     public:
         template <typename T>
         VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib = 0);
-        void Bind(Graphics& gfx) override;
+        ~VertexBuffer();
+        void Bind() override;
         template <typename T>
-        void Update(Graphics& gfx, std::vector<T> const& vertices);
+        void Update(std::vector<T> const& vertices);
         GLuint GetStartAttrib() const;
         GLuint GetCount() const;
 
@@ -35,7 +36,8 @@ namespace Bind
 
     template <typename T>
     VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib)
-        : id_(0)
+        : Bindable(gfx)
+        , id_(0)
         , count_(vertices.size())
         , startAttrib_(startAttrib)
         , numAttrs_(0)
@@ -51,7 +53,7 @@ namespace Bind
 
         SetAttribMemLayout<T>();
 
-        gfx.CreateBuffer(id_, desc, data);
+        gfx_->CreateBuffer(id_, desc, data);
     }
 
     template <>
@@ -66,9 +68,9 @@ namespace Bind
     void VertexBuffer::SetAttribMemLayout<glm::vec2>();
 
     template <typename T>
-    void VertexBuffer::Update(Graphics& gfx, std::vector<T> const& vertices)
+    void VertexBuffer::Update(std::vector<T> const& vertices)
     {
-        gfx.UpdateVertexBuffer(id_, 0, vertices.size() * sizeof(T), vertices.data());
+        gfx_->UpdateVertexBuffer(id_, 0, vertices.size() * sizeof(T), vertices.data());
     }
 }
 

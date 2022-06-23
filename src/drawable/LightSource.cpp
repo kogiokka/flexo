@@ -27,10 +27,10 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    Bind::Shader shader(gfx);
-    shader.Attach(gfx, ShaderStage::Vert, "shader/LightSource.vert");
-    shader.Attach(gfx, ShaderStage::Frag, "shader/LightSource.frag");
-    shader.Link(gfx);
+    auto shader = std::make_shared<Bind::Shader>(gfx);
+    shader->Attach(ShaderStage::Vert, "shader/LightSource.vert");
+    shader->Attach(ShaderStage::Frag, "shader/LightSource.frag");
+    shader->Link();
 
     scaling_ = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
     ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
@@ -40,7 +40,7 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(shader);
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
@@ -58,7 +58,7 @@ void LightSource::Update(Graphics& gfx)
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (buf != nullptr) {
-            buf->Update(gfx, ub_);
+            buf->Update(ub_);
             break;
         }
     }
