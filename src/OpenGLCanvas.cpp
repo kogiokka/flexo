@@ -7,6 +7,9 @@
 
 #include <glm/gtx/string_cast.hpp>
 
+#include "InputData.hpp"
+#include "Lattice.hpp"
+#include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
@@ -295,7 +298,6 @@ void OpenGLCanvas::UpdateScene()
     if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
         || rendopt & RenderOption_LatticeFace) {
         BuildLatticeMesh();
-        // renderer_->UpdateLatticeMeshBuffer();
     }
 }
 

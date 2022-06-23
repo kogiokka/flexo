@@ -1,14 +1,12 @@
 #ifndef RENDERER_H
 #define RENDERER_H
 
-#include "Mesh.hpp"
-#include "Vertex.hpp"
+#include <memory>
+
+#include <glad/glad.h>
+#include <glm/glm.hpp>
 
 #include "Graphics.hpp"
-#include "bindable/IndexBuffer.hpp"
-#include "bindable/Primitive.hpp"
-#include "bindable/Texture2D.hpp"
-#include "bindable/VertexBuffer.hpp"
 #include "drawable/Drawable.hpp"
 #include "drawable/LatticeEdge.hpp"
 #include "drawable/LatticeFace.hpp"
@@ -16,13 +14,6 @@
 #include "drawable/LightSource.hpp"
 #include "drawable/PolygonalModel.hpp"
 #include "drawable/VolumetricModel.hpp"
-
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-
-#include <array>
-#include <memory>
-#include <vector>
 
 using BufferType = int;
 using ShaderType = int;
@@ -57,4 +48,5 @@ public:
 };
 
 extern RenderOption rendopt;
+
 #endif

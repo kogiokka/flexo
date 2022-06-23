@@ -1,7 +1,5 @@
-#pragma once
-
-#include "OpenGLCanvas.hpp"
-#include "Lattice.hpp"
+#ifndef MAIN_WINDOW_H
+#define MAIN_WINDOW_H
 
 #include <wx/button.h>
 #include <wx/dcclient.h>
@@ -13,6 +11,9 @@
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
 #include <wx/timer.h>
+
+#include "Lattice.hpp"
+#include "OpenGLCanvas.hpp"
 
 class MainWindow : public wxFrame
 {
@@ -63,3 +64,5 @@ public:
 
     wxDECLARE_EVENT_TABLE();
 };
+
+#endif

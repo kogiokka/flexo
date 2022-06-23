@@ -1,12 +1,13 @@
-#pragma once
-
-#include "RandomNumber.hpp"
+#ifndef RANDOM_INT_NUMBER_H
+#define RANDOM_INT_NUMBER_H
 
 #include <array>
 #include <cstdint>
 #include <random>
 #include <type_traits>
 #include <vector>
+
+#include "RandomNumber.hpp"
 
 template <typename T>
 class RandomIntNumber : public RandomNumber<T>
@@ -85,3 +86,5 @@ std::array<T, S> RandomIntNumber<T>::vector()
     }
     return vec;
 }
+
+#endif

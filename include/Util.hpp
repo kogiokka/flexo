@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UTIL_H
+#define UTIL_H
 
 #include <regex>
 #include <stdexcept>
@@ -14,10 +15,12 @@ public:
 
 namespace util
 {
-namespace str
-{
-    std::vector<std::string> split(std::string const& target, std::string const& pattern);
+    namespace str
+    {
+        std::vector<std::string> split(std::string const& target, std::string const& pattern);
 
-    bool startsWith(std::string const& target, std::string const& prefix);
+        bool startsWith(std::string const& target, std::string const& prefix);
+    }
 }
-}
+
+#endif

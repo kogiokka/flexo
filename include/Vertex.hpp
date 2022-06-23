@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VERTEX_H
+#define VERTEX_H
 
 #include <glm/glm.hpp>
 
@@ -24,3 +25,5 @@ struct VertexPNT {
     Normal normal;
     TextureCoord texcoord;
 };
+
+#endif

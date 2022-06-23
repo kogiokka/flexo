@@ -1,4 +1,5 @@
-#pragma once
+#ifndef LOGGER_H
+#define LOGGER_H
 
 #include <iostream>
 #include <string>
@@ -34,3 +35,5 @@ namespace Logger
         void registerGLDebugCallback();
     }
 }
+
+#endif

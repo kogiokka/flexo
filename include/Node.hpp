@@ -1,4 +1,5 @@
-#pragma once
+#ifndef NODE_H
+#define NODE_H
 
 #include <vector>
 
@@ -22,3 +23,5 @@ public:
     std::vector<float>& Weights();
     std::vector<float> const& Weights() const;
 };
+
+#endif

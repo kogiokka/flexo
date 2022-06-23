@@ -1,10 +1,10 @@
-#include "Lattice.hpp"
-#include "common/Logger.hpp"
-
 #include <cmath>
 #include <fstream>
 #include <limits>
 #include <sstream>
+
+#include "Lattice.hpp"
+#include "common/Logger.hpp"
 
 Lattice::Lattice(int width, int height)
     : width_(width)

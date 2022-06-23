@@ -1,10 +1,10 @@
-#include "MainWindow.hpp"
-#include "World.hpp"
+#include <filesystem>
+#include <string>
+#include <vector>
 
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/filedlg.h>
-#include <wx/glcanvas.h>
 #include <wx/menu.h>
 #include <wx/statbox.h>
 #include <wx/stattext.h>
@@ -13,10 +13,8 @@
 #include <wx/utils.h>
 #include <wx/valnum.h>
 
-#include <filesystem>
-#include <string>
-#include <glm/gtx/string_cast.hpp>
-#include <vector>
+#include "MainWindow.hpp"
+#include "World.hpp"
 
 enum {
     BTN_PLAY_PAUSE = wxID_HIGHEST + 1,
@@ -431,4 +429,3 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_SLIDER(SLIDER_TRANSPARENCY, MainWindow::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, MainWindow::OnTimerUIUpdate)
 wxEND_EVENT_TABLE()
-

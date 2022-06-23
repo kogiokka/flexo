@@ -1,6 +1,7 @@
-#pragma once
+#ifndef IMAGE_H
+#define IMAGE_H
 
-#include "stb_image.h"
+#include <stb_image.h>
 
 struct Image {
     unsigned char* data;
@@ -13,3 +14,5 @@ struct Image {
     Image& operator=(Image&& other);
     ~Image();
 };
+
+#endif

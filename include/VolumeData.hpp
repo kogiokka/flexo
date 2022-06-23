@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VOLUME_DATA_H
+#define VOLUME_DATA_H
 
 #include <optional>
 #include <string>
@@ -72,3 +73,5 @@ T VolumeData::endianBig2Little(T const& value)
 
     return result;
 }
+
+#endif

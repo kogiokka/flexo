@@ -1,9 +1,10 @@
-#pragma once
+#ifndef CAMERA_H
+#define CAMERA_H
+
+#include <tuple>
 
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-
-#include <tuple>
 
 class Camera
 {
@@ -72,3 +73,5 @@ private:
     glm::vec3 CartesianCoord(float theta, float phi) const;
     inline float RoundGuard(float radian);
 };
+
+#endif

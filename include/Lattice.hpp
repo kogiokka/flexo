@@ -1,14 +1,14 @@
-#pragma once
+#ifndef LATTICE_H
+#define LATTICE_H
 
-#include "InputData.hpp"
-#include "Node.hpp"
-#include "RandomRealNumber.hpp"
-
-#include <array>
 #include <condition_variable>
 #include <mutex>
 #include <thread>
 #include <vector>
+
+#include "InputData.hpp"
+#include "Node.hpp"
+#include "RandomRealNumber.hpp"
 
 using LatticeFlags = int;
 
@@ -59,3 +59,5 @@ private:
     glm::ivec2 FindBMU(glm::vec3 const& input) const;
     void UpdateNeighborhood(glm::vec3 input, Node const& bmu, float radius);
 };
+
+#endif

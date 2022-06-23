@@ -1,11 +1,12 @@
-#pragma once
-
-#include "RandomNumber.hpp"
+#ifndef RANDOM_REAL_NUMBER_H
+#define RANDOM_REAL_NUMBER_H
 
 #include <array>
 #include <random>
 #include <type_traits>
 #include <vector>
+
+#include "RandomNumber.hpp"
 
 template <typename T>
 class RandomRealNumber : public RandomNumber<T>
@@ -62,3 +63,5 @@ std::array<T, S> RandomRealNumber<T>::vector()
     }
     return vec;
 }
+
+#endif

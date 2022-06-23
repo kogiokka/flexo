@@ -1,19 +1,16 @@
-#pragma once
+#ifndef OPENGL_CANVAS_H
+#define OPENGL_CANVAS_H
 
-#include "glad/glad.h"
-#include "InputData.hpp"
-#include "Lattice.hpp"
-#include "Mesh.hpp"
-#include "Renderer.hpp"
-#include "VolumeData.hpp"
+#include <memory>
+
+#include <glad/glad.h> // before <wx/glcanvas.h>
 
 #include <wx/dcclient.h>
 #include <wx/gdicmn.h>
 #include <wx/glcanvas.h>
 #include <wx/string.h>
 
-#include <memory>
-#include <string>
+#include "Renderer.hpp"
 
 class OpenGLCanvas : public wxGLCanvas
 {
@@ -48,3 +45,5 @@ private:
 
     wxDECLARE_EVENT_TABLE();
 };
+
+#endif

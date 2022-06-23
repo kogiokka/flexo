@@ -1,7 +1,5 @@
 #include "Renderer.hpp"
 #include "World.hpp"
-#include "common/Logger.hpp"
-#include <cstdlib>
 
 RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 

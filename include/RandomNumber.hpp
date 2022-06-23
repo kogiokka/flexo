@@ -1,4 +1,5 @@
-#pragma once
+#ifndef RANDOM_NUMBER_H
+#define RANDOM_NUMBER_H
 
 #include <array>
 #include <cstddef>
@@ -32,3 +33,5 @@ template <typename T>
 RandomNumber<T>::~RandomNumber()
 {
 }
+
+#endif
