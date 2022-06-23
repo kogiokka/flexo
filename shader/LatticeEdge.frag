@@ -6,18 +6,17 @@ struct UniformBuffer_Vert {
 };
 
 struct UniformBuffer_Frag {
-    vec3 lightColor;
+    vec3 color;
 };
 
-layout (std140, binding = 0) uniform UniformBuffer {
+layout(std140, binding = 0) uniform UniformBuffer {
     UniformBuffer_Vert vert;
     UniformBuffer_Frag frag;
 } ubo;
 
-layout (location = 0) in vec3 position;
+out vec4 outColor;
 
 void main()
 {
-    gl_Position = ubo.vert.viewProjMat * ubo.vert.modelMat * vec4(position, 1.0);
+    outColor = vec4(ubo.frag.color, 1.0);
 }
-

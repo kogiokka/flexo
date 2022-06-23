@@ -1,13 +1,10 @@
 #pragma once
 
-#include "VertexArray.hpp"
-
 #include "glad/glad.h"
 #include "InputData.hpp"
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "Renderer.hpp"
-#include "Shader.hpp"
 #include "VolumeData.hpp"
 
 #include <wx/dcclient.h>
@@ -39,7 +36,6 @@ public:
     void ResetCamera();
     void ResetLattice();
     void ToggleRenderOption(RenderOption opt);
-    void ToggleWatermarkTexture();
     void SetModelColorAlpha(float alpha);
     void OpenInputDataFile(wxString const& path);
     bool GetRenderOptionState(RenderOption opt) const;

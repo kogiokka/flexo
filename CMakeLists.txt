@@ -39,9 +39,7 @@ PRIVATE
     "src/MainWindow.cpp"
     "src/OpenGLCanvas.cpp"
     "src/Camera.cpp"
-    "src/Shader.cpp"
     "src/Renderer.cpp"
-    "src/VertexArray.cpp"
     "src/Lattice.cpp"
     "src/Mesh.cpp"
     "src/Node.cpp"
@@ -54,13 +52,29 @@ PRIVATE
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
     "src/assetlib/STL/STLImporter.cpp"
+
+    "src/Graphics.cpp"
+    "src/bindable/Bindable.cpp"
+    "src/bindable/Primitive.cpp"
+    "src/bindable/VertexLayout.cpp"
+    "src/bindable/IndexBuffer.cpp"
+    "src/bindable/UniformBuffer.cpp"
+    "src/bindable/VertexBuffer.cpp"
+    "src/bindable/Texture2D.cpp"
+    "src/bindable/Shader.cpp"
+    "src/drawable/Drawable.cpp"
+    "src/drawable/PolygonalModel.cpp"
+    "src/drawable/VolumetricModel.cpp"
+    "src/drawable/LightSource.cpp"
+    "src/drawable/LatticeVertex.cpp"
+    "src/drawable/LatticeEdge.cpp"
+    "src/drawable/LatticeFace.cpp"
 )
 
 target_include_directories(som-demo
 PRIVATE
     "include/"
 )
-
 
 target_link_libraries(som-demo PRIVATE
     glad

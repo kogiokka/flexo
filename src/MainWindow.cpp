@@ -294,7 +294,7 @@ void MainWindow::OnButtonWatermark(wxCommandEvent&)
         textureCoords.push_back(coord);
     }
     world.volModel->textureCoords = textureCoords;
-    canvas_->ToggleWatermarkTexture();
+    world.isWatermarked = true;
 }
 
 void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)

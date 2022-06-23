@@ -10,6 +10,7 @@ BreakConstructorInitializers: BeforeComma
 ColumnLimit:      120
 ContinuationIndentWidth: 4
 IndentWidth: 4
+NamespaceIndentation: All
 MacroBlockBegin: "wxBEGIN_EVENT_TABLE.*"
 MacroBlockEnd: "wxEND_EVENT_TABLE.*"
 PointerAlignment: Left

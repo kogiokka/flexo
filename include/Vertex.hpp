@@ -10,6 +10,7 @@ using TextureCoord = glm::vec2;
 struct VertexPN {
     Position position;
     Normal normal;
+    static float* Offsets();
 };
 
 struct VertexPNC {

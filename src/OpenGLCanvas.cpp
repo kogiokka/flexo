@@ -158,7 +158,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
         world.polyModel = std::make_unique<Mesh>(stlImp.ReadFile(path.ToStdString()));
         renderer_->LoadPolygonalModel();
     } else if (path.EndsWith(".toml")) {
-        world.volModel = std::make_unique<VolumetricModel>();
+        world.volModel = std::make_unique<VolModel>();
         auto& [data, pos, texcoord] = *world.volModel;
 
         if (!data.read(path.ToStdString())) {
@@ -267,11 +267,6 @@ void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
     }
 }
 
-void OpenGLCanvas::ToggleWatermarkTexture()
-{
-    renderer_->SetWatermarkTexture();
-}
-
 bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
 {
     return rendopt & opt;
@@ -300,7 +295,7 @@ void OpenGLCanvas::UpdateScene()
     if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
         || rendopt & RenderOption_LatticeFace) {
         BuildLatticeMesh();
-        renderer_->UpdateLatticeMeshBuffer();
+        // renderer_->UpdateLatticeMeshBuffer();
     }
 }
 
@@ -408,7 +403,7 @@ void OpenGLCanvas::BuildLatticeMesh()
         }
     }
 
-    world.neuronPositions = positions;
+    world.neurons.positions = positions;
     world.latticeMesh = mesh;
 }
 
