@@ -255,7 +255,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     }
     center = (max + min) * 0.5f;
 
-    Logger::info("%s\n", glm::to_string(center).c_str());
+    Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
     world.dataset = std::make_unique<InputData>(posData);
     renderer_->GetCamera().SetCenter(center.x, center.y, center.z);
     renderer_->LoadLattice();
