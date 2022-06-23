@@ -5,8 +5,7 @@
 
 void VertexBuffer::Bind(Graphics& gfx)
 {
-    int const numBuffers = offsets_.size();
-    gfx.SetVertexBuffers(startAttrib_, numBuffers, std::vector<GLuint>(numBuffers, id_).data(), offsets_.data(),
+    gfx.SetVertexBuffers(startAttrib_, numAttrs_, std::vector<GLuint>(numAttrs_, id_).data(), offsets_.data(),
                          strides_.data());
 }
 
@@ -21,36 +20,41 @@ GLuint VertexBuffer::GetCount() const
 }
 
 template <>
-void VertexBuffer::SetOffsets<VertexPN>()
+void VertexBuffer::SetAttribMemLayout<VertexPN>()
 {
+    numAttrs_ = 2;
     offsets_ = { offsetof(VertexPN, position), offsetof(VertexPN, normal) };
-    strides_ = std::vector<GLsizei>(2, sizeof(VertexPN));
+    strides_ = std::vector<GLsizei>(numAttrs_, sizeof(VertexPN));
 }
 
 template <>
-void VertexBuffer::SetOffsets<VertexPNT>()
+void VertexBuffer::SetAttribMemLayout<VertexPNT>()
 {
+    numAttrs_ = 3;
     offsets_ = { offsetof(VertexPNT, position), offsetof(VertexPNT, normal), offsetof(VertexPNT, texcoord) };
-    strides_ = std::vector<GLsizei>(3, sizeof(VertexPNT));
+    strides_ = std::vector<GLsizei>(numAttrs_, sizeof(VertexPNT));
 }
 
 template <>
-void VertexBuffer::SetOffsets<VertexPNC>()
+void VertexBuffer::SetAttribMemLayout<VertexPNC>()
 {
+    numAttrs_ = 3;
     offsets_ = { offsetof(VertexPNC, position), offsetof(VertexPNC, normal), offsetof(VertexPNC, color) };
-    strides_ = std::vector<GLsizei>(3, sizeof(VertexPNC));
+    strides_ = std::vector<GLsizei>(numAttrs_, sizeof(VertexPNC));
 }
 
 template <>
-void VertexBuffer::SetOffsets<glm::vec3>()
+void VertexBuffer::SetAttribMemLayout<glm::vec3>()
 {
+    numAttrs_ = 1;
     offsets_ = { 0 };
-    strides_ = std::vector<GLsizei>(1, sizeof(glm::vec3));
+    strides_ = std::vector<GLsizei>(numAttrs_, sizeof(glm::vec3));
 }
 
 template <>
-void VertexBuffer::SetOffsets<glm::vec2>()
+void VertexBuffer::SetAttribMemLayout<glm::vec2>()
 {
+    numAttrs_ = 1;
     offsets_ = { 0 };
-    strides_ = std::vector<GLsizei>(1, sizeof(glm::vec2));
+    strides_ = std::vector<GLsizei>(numAttrs_, sizeof(glm::vec2));
 }

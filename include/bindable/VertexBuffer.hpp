@@ -13,6 +13,7 @@ protected:
     GLuint id_;
     GLuint count_;
     GLuint startAttrib_;
+    int numAttrs_;
     std::vector<GLintptr> offsets_;
     std::vector<GLsizei> strides_;
 
@@ -27,7 +28,7 @@ public:
 
 protected:
     template <typename T>
-    void SetOffsets();
+    void SetAttribMemLayout();
 };
 
 template <typename T>
@@ -35,6 +36,7 @@ VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint
     : id_(0)
     , count_(vertices.size())
     , startAttrib_(startAttrib)
+    , numAttrs_(0)
 {
     BufferDesc desc;
     BufferData data;
@@ -45,21 +47,21 @@ VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint
     desc.stride = sizeof(T);
     data.mem = vertices.data();
 
-    SetOffsets<T>();
+    SetAttribMemLayout<T>();
 
     gfx.CreateBuffer(id_, desc, data);
 }
 
 template <>
-void VertexBuffer::SetOffsets<VertexPN>();
+void VertexBuffer::SetAttribMemLayout<VertexPN>();
 template <>
-void VertexBuffer::SetOffsets<VertexPNT>();
+void VertexBuffer::SetAttribMemLayout<VertexPNT>();
 template <>
-void VertexBuffer::SetOffsets<VertexPNC>();
+void VertexBuffer::SetAttribMemLayout<VertexPNC>();
 template <>
-void VertexBuffer::SetOffsets<glm::vec3>();
+void VertexBuffer::SetAttribMemLayout<glm::vec3>();
 template <>
-void VertexBuffer::SetOffsets<glm::vec2>();
+void VertexBuffer::SetAttribMemLayout<glm::vec2>();
 
 template <typename T>
 void VertexBuffer::Update(Graphics& gfx, std::vector<T> const& vertices)
