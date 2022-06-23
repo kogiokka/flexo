@@ -14,7 +14,7 @@ class InputData
 public:
     InputData();
     InputData(std::vector<glm::vec3> const& positions);
-    glm::vec3 const& getInput();
+    glm::vec3 const& GetInput();
 };
 
 #endif

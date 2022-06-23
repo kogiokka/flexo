@@ -47,7 +47,7 @@ void Lattice::TrainInternal(InputData& dataset)
         std::unique_lock lk(mut_);
         cv_.wait(lk, [this] { return this->isTraining_ || this->isQuit_; });
 
-        glm::vec3 const input = dataset.getInput();
+        glm::vec3 const input = dataset.GetInput();
         float const progress = static_cast<float>(iterCap_ - iterRemained_);
 
         neighborhoodRadius_ = initRadius_ * expf(-progress / timeConst_);

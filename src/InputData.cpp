@@ -12,7 +12,7 @@ InputData::InputData(std::vector<glm::vec3> const& positions)
     rng_.setRange(0, pos_.size() - 1);
 }
 
-glm::vec3 const& InputData::getInput()
+glm::vec3 const& InputData::GetInput()
 {
     return pos_[rng_.scalar()];
 }
