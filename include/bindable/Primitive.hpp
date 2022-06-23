@@ -3,17 +3,20 @@
 
 #include <glad/glad.h>
 
-#include "bindable/Bindable.hpp"
 #include "Graphics.hpp"
+#include "bindable/Bindable.hpp"
 
-class Primitive : public Bindable
+namespace Bind
 {
-protected:
-    GLenum mode_;
+    class Primitive : public Bindable
+    {
+    protected:
+        GLenum mode_;
 
-public:
-    Primitive(Graphics& gfx, GLenum mode);
-    void Bind(Graphics& gfx) override;
-};
+    public:
+        Primitive(Graphics& gfx, GLenum mode);
+        void Bind(Graphics& gfx) override;
+    };
+}
 
 #endif

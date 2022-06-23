@@ -41,8 +41,8 @@ class VolumetricModel : public Drawable
 
     GLuint count_;
     UniformBlock ub_;
-    std::shared_ptr<Texture2D> texColor_;
-    std::shared_ptr<Texture2D> texPattern_;
+    std::shared_ptr<Bind::Texture2D> texColor_;
+    std::shared_ptr<Bind::Texture2D> texPattern_;
 
 public:
     VolumetricModel(Graphics& gfx, Mesh const& mesh);

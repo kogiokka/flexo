@@ -27,7 +27,7 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    Shader shader(gfx);
+    Bind::Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/PolygonalModel.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/PolygonalModel.frag");
     shader.Link(gfx);
@@ -45,11 +45,11 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     ub_.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     ub_.frag.material.shininess = 32.0f;
 
-    AddBind(std::make_shared<VertexLayout>(gfx, attrs));
-    AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<Shader>(std::move(shader)));
-    AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
+    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
 void PolygonalModel::Draw(Graphics& gfx) const
@@ -66,7 +66,7 @@ void PolygonalModel::Update(Graphics& gfx)
     ub_.frag.light.position = world.lightPos;
 
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
-        UniformBuffer<UniformBlock>* buf = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());
+        Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (buf != nullptr) {
             buf->Update(gfx, ub_);
             break;

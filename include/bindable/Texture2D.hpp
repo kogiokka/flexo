@@ -6,45 +6,48 @@
 
 #include <vector>
 
-class Texture2D : public Bindable
+namespace Bind
 {
-protected:
-    GLuint id_;
-    GLuint unit_;
+    class Texture2D : public Bindable
+    {
+    protected:
+        GLuint id_;
+        GLuint unit_;
 
-public:
+    public:
+        template <typename T>
+        Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit);
+        void Bind(Graphics& gfx) override;
+
+    protected:
+        template <typename T>
+        void DetermineDataType(Texture2dDesc& desc) const;
+    };
+
     template <typename T>
-    Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit);
-    void Bind(Graphics& gfx) override;
+    Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit)
+        : id_(0)
+        , unit_(unit)
+    {
+        Texture2dDesc desc;
+        BufferData data;
 
-protected:
-    template <typename T>
-    void DetermineDataType(Texture2dDesc& desc) const;
-};
+        desc.width = width;
+        desc.height = height;
+        desc.textureFormat = GL_RGBA;
+        desc.pixelFormat = GL_RGBA;
 
-template <typename T>
-Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit)
-    : id_(0)
-    , unit_(unit)
-{
-    Texture2dDesc desc;
-    BufferData data;
+        DetermineDataType<T>(desc);
 
-    desc.width = width;
-    desc.height = height;
-    desc.textureFormat = GL_RGBA;
-    desc.pixelFormat = GL_RGBA;
+        data.mem = textureData;
+        gfx.CreateTexture2D(id_, unit_, desc, data);
+    }
 
-    DetermineDataType<T>(desc);
+    template <>
+    void Texture2D::DetermineDataType<float>(Texture2dDesc& desc) const;
 
-    data.mem = textureData;
-    gfx.CreateTexture2D(id_, unit_, desc, data);
+    template <>
+    void Texture2D::DetermineDataType<unsigned char>(Texture2dDesc& desc) const;
 }
-
-template <>
-void Texture2D::DetermineDataType<float>(Texture2dDesc& desc) const;
-
-template <>
-void Texture2D::DetermineDataType<unsigned char>(Texture2dDesc& desc) const;
 
 #endif

@@ -13,16 +13,18 @@
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 
-class Shader : public Bindable
+namespace Bind
 {
-    GLuint id_;
-    std::unordered_map<std::string, GLint> uniformLocations_;
+    class Shader : public Bindable
+    {
+        GLuint id_;
 
-public:
-    Shader(Graphics& gfx);
-    void Attach(Graphics& gfx, ShaderStage stage, std::string const& filepath);
-    void Link(Graphics& gfx);
-    void Bind(Graphics& gfx) override;
-};
+    public:
+        Shader(Graphics& gfx);
+        void Attach(Graphics& gfx, ShaderStage stage, std::string const& filepath);
+        void Link(Graphics& gfx);
+        void Bind(Graphics& gfx) override;
+    };
+}
 
 #endif

@@ -33,7 +33,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    Shader shader(gfx);
+    Bind::Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/VolumetricModel.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/VolumetricModel.frag");
     shader.Link(gfx);
@@ -53,17 +53,17 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     ub_.vert.isWatermarked = false;
 
     float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    texColor_ = std::make_shared<Texture2D>(gfx, color, 1, 1, GL_TEXTURE0);
+    texColor_ = std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, GL_TEXTURE0);
     auto const& [img, w, h, ch] = world.pattern;
-    texPattern_ = std::make_shared<Texture2D>(gfx, img, w, h, GL_TEXTURE1);
+    texPattern_ = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
-    AddBind(std::make_shared<VertexLayout>(gfx, attrs));
-    AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->textureCoords, 2));
-    AddBind(std::make_shared<VertexBuffer>(gfx, world.volModel->positions, 3));
-    AddBind(std::make_shared<Shader>(std::move(shader)));
-    AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
+    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->textureCoords, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->positions, 3));
+    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
     AddBind(texColor_);
     AddBind(texPattern_);
 }
@@ -87,13 +87,13 @@ void VolumetricModel::Update(Graphics& gfx)
 
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         {
-            VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
+            Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
                 vb->Update(gfx, world.volModel->textureCoords);
             }
         }
         {
-            UniformBuffer<UniformBlock>* ub = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());
+            Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
                 ub->Update(gfx, ub_);
             }

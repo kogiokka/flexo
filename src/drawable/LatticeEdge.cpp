@@ -24,7 +24,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
 
     std::vector<glm::vec3> vertices = mesh.positions;
 
-    Shader shader(gfx);
+    Bind::Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/LatticeEdge.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/LatticeEdge.frag");
     shader.Link(gfx);
@@ -33,14 +33,14 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     ub_.vert.modelMat = glm::mat4(1.0f);
     ub_.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
-    ibo_ = std::make_shared<IndexBuffer>(gfx, world.latticeEdges);
+    ibo_ = std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges);
 
-    AddBind(std::make_shared<VertexLayout>(gfx, attrs));
-    AddBind(std::make_shared<Primitive>(gfx, GL_LINES));
-    AddBind(std::make_shared<VertexBuffer>(gfx, vertices));
+    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(ibo_);
-    AddBind(std::make_shared<Shader>(std::move(shader)));
-    AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
+    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
 void LatticeEdge::Draw(Graphics& gfx) const
@@ -55,13 +55,13 @@ void LatticeEdge::Update(Graphics& gfx)
 
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         {
-            VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
+            Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
                 vb->Update(gfx, world.neurons.positions);
             }
         }
         {
-            UniformBuffer<UniformBlock>* ub = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());
+            Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
                 ub->Update(gfx, ub_);
             }

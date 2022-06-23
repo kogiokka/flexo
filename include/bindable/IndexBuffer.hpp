@@ -8,16 +8,19 @@
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 
-class IndexBuffer : public Bindable
+namespace Bind
 {
-protected:
-    GLuint id_;
-    GLuint count_;
+    class IndexBuffer : public Bindable
+    {
+    protected:
+        GLuint id_;
+        GLuint count_;
 
-public:
-    IndexBuffer(Graphics& gfx, std::vector<unsigned int> const& indices);
-    void Bind(Graphics& gfx) override;
-    GLuint GetCount() const;
-};
+    public:
+        IndexBuffer(Graphics& gfx, std::vector<unsigned int> const& indices);
+        void Bind(Graphics& gfx) override;
+        GLuint GetCount() const;
+    };
+}
 
 #endif

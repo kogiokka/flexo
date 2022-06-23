@@ -30,7 +30,7 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
 
     count_ = vertices.size();
 
-    Shader shader(gfx);
+    Bind::Shader shader(gfx);
     shader.Attach(gfx, ShaderStage::Vert, "shader/LatticeVertex.vert");
     shader.Attach(gfx, ShaderStage::Frag, "shader/LatticeVertex.frag");
     shader.Link(gfx);
@@ -48,12 +48,12 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     ub_.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     ub_.frag.material.shininess = 256.0f;
 
-    AddBind(std::make_shared<VertexLayout>(gfx, attrs));
-    AddBind(std::make_shared<Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<VertexBuffer>(gfx, world.neurons.positions, 2));
-    AddBind(std::make_shared<Shader>(std::move(shader)));
-    AddBind(std::make_shared<UniformBuffer<UniformBlock>>(gfx, ub_));
+    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.neurons.positions, 2));
+    AddBind(std::make_shared<Bind::Shader>(std::move(shader)));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
 }
 
 void LatticeVertex::Draw(Graphics& gfx) const
@@ -74,13 +74,13 @@ void LatticeVertex::Update(Graphics& gfx)
 
     for (auto it = binds_.begin(); it != binds_.end(); it++) {
         {
-            VertexBuffer* vb = dynamic_cast<VertexBuffer*>(it->get());
+            Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
                 vb->Update(gfx, world.neurons.positions);
             }
         }
         {
-            UniformBuffer<UniformBlock>* ub = dynamic_cast<UniformBuffer<UniformBlock>*>(it->get());
+            Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
                 ub->Update(gfx, ub_);
             }

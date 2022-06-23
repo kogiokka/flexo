@@ -6,13 +6,16 @@
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 
-class VertexLayout : public Bindable
+namespace Bind
 {
-    GLuint id_;
+    class VertexLayout : public Bindable
+    {
+        GLuint id_;
 
-public:
-    VertexLayout(Graphics& gfx, std::vector<AttributeDesc> const& attrDescs);
-    void Bind(Graphics& gfx) override;
-};
+    public:
+        VertexLayout(Graphics& gfx, std::vector<AttributeDesc> const& attrDescs);
+        void Bind(Graphics& gfx) override;
+    };
+}
 
 #endif
