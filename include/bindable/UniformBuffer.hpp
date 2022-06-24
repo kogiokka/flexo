@@ -43,7 +43,7 @@ namespace Bind
     template <typename T>
     UniformBuffer<T>::~UniformBuffer()
     {
-        gfx_->DeleteTexture(id_);
+        gfx_->DeleteBuffer(id_);
     }
 
     template <typename T>
@@ -55,7 +55,7 @@ namespace Bind
     template <typename T>
     void UniformBuffer<T>::Update(T const& uniformBlock)
     {
-        gfx_->UpdateUniformBuffer<T>(id_, uniformBlock);
+        gfx_->UpdateBuffer(id_, GL_UNIFORM_BUFFER, 0, sizeof(T), &uniformBlock);
     }
 }
 

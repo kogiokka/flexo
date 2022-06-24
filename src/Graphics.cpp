@@ -164,7 +164,7 @@ void Graphics::DeleteVertexLayout(GLuint& layout)
     glDeleteVertexArrays(1, &layout);
 }
 
-void Graphics::DeleteVertexBuffer(GLuint& buffer)
+void Graphics::DeleteBuffer(GLuint& buffer)
 {
     glDeleteBuffers(1, &buffer);
 }
@@ -194,10 +194,10 @@ Camera& Graphics::GetCamera()
     return camera_;
 }
 
-void Graphics::UpdateVertexBuffer(GLuint const buffer, GLintptr offset, GLsizei byteWidth, void const* data)
+void Graphics::UpdateBuffer(GLuint const buffer, GLenum target, GLintptr offset, GLsizei byteWidth, void const* data)
 {
-    glBindBuffer(GL_ARRAY_BUFFER, buffer);
-    glBufferSubData(GL_ARRAY_BUFFER, offset, byteWidth, data);
+    glBindBuffer(target, buffer);
+    glBufferSubData(target, offset, byteWidth, data);
 }
 
 bool Graphics::IsShaderCompiled(GLuint const shaderObject)

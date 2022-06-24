@@ -5,7 +5,7 @@ namespace Bind
 {
     VertexBuffer::~VertexBuffer()
     {
-        gfx_->DeleteVertexBuffer(id_);
+        gfx_->DeleteBuffer(id_);
     }
 
     void VertexBuffer::Bind()

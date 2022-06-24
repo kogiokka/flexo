@@ -87,7 +87,7 @@ public:
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 
     void DeleteVertexLayout(GLuint& layout);
-    void DeleteVertexBuffer(GLuint& buffer);
+    void DeleteBuffer(GLuint& buffer);
     void DeleteTexture(GLuint& texture);
     void DeleteShaderProgram(GLuint& program);
     void ClearBuffer(float red, float green, float blue) const;
@@ -96,9 +96,7 @@ public:
     glm::vec3 GetCameraPosition() const;
     Camera& GetCamera();
 
-    void UpdateVertexBuffer(GLuint const buffer, GLintptr offset, GLsizei byteWidth, void const* data);
-    template <typename T>
-    void UpdateUniformBuffer(GLuint const uniform, T const& uniformBlock);
+    void UpdateBuffer(GLuint const buffer, GLenum target, GLintptr offset, GLsizei byteWidth, void const* data);
 
     void Draw(GLsizei vertexCount);
     void DrawIndexed(GLsizei indexCount);
@@ -108,12 +106,5 @@ private:
     int UniformLocation(std::string const& uniformName) const;
     bool IsShaderCompiled(GLuint const shaderObject);
 };
-
-template <typename T>
-void Graphics::UpdateUniformBuffer(GLuint const uniform, T const& uniformBlock)
-{
-    glBindBuffer(GL_UNIFORM_BUFFER, uniform);
-    glBufferSubData(GL_UNIFORM_BUFFER, 0, sizeof(T), &uniformBlock);
-}
 
 #endif

@@ -70,7 +70,7 @@ namespace Bind
     template <typename T>
     void VertexBuffer::Update(std::vector<T> const& vertices)
     {
-        gfx_->UpdateVertexBuffer(id_, 0, vertices.size() * sizeof(T), vertices.data());
+        gfx_->UpdateBuffer(id_, GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(T), vertices.data());
     }
 }
 
