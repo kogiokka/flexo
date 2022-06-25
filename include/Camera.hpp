@@ -6,6 +6,12 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+struct SphericalCoord {
+    float r;
+    float theta;
+    float phi;
+};
+
 class Camera
 {
     glm::vec3 position_;
@@ -14,39 +20,20 @@ class Camera
     glm::vec3 vecSide_;
     glm::vec3 vecUp_;
     glm::vec3 center_;
-    float phi_;
-    float theta_;
-    float radius_;
+    SphericalCoord coord_;
     float aspectRatio_;
     float viewVolumeWidth_;
-    float rateMove_;
-    float rateRotate_;
     float zoom_;
-    int dirHorizontal_;
 
     std::tuple<int, int, float, float> originRotate_;
     std::tuple<float, float, glm::vec3> originTranslate_;
 
 public:
-    enum class Translate {
-        Up,
-        Down,
-        Left,
-        Right,
-        Forward,
-        Backward,
-    };
-    enum class Rotate {
-        Clockwise,
-        CounterClockwise,
-        PitchUp,
-        PitchDown,
-    };
     enum class Projection {
         Orthographic,
         Perspective,
     };
-    Camera(int width, int height, Projection projectionType = Camera::Projection::Orthographic);
+    Camera(int width, int height);
     ~Camera();
     void SetAspectRatio(float ratio);
     void SetAspectRatio(int width, int height);
@@ -54,14 +41,13 @@ public:
     void SetTheta(float theta);
     void SetPhi(float phi);
     void SetViewVolumeWidth(float width);
+    glm::vec3& GetCenter();
+    float& GetZoom();
+    glm::vec3& GetVectorUp();
+    glm::vec3& GetVectorSide();
+    glm::vec3& GetVectorForward();
+    SphericalCoord& GetCoordinates();
     void UpdateViewCoord();
-    void InitDragRotation(int x, int y);
-    void InitDragTranslation(int x, int y);
-    void DragRotation(int x, int y);
-    void DragTranslation(int x, int y);
-    void WheelZoom(int direction);
-    void Moving(Camera::Translate direction);
-    void Turning(Camera::Rotate direction);
     void SetProjection(Camera::Projection projection);
     glm::mat4 ViewProjectionMatrix() const;
     glm::mat4 ViewMatrix() const;

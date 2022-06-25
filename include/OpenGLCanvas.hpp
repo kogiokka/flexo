@@ -2,6 +2,7 @@
 #define OPENGL_CANVAS_H
 
 #include <memory>
+#include <tuple>
 
 #include <glad/glad.h> // before <wx/glcanvas.h>
 
@@ -17,6 +18,11 @@ class OpenGLCanvas : public wxGLCanvas
     bool isGLLoaded_;
     std::unique_ptr<wxGLContext> context_;
     std::unique_ptr<Renderer> renderer_;
+    float rateMove_;
+    float rateRotate_;
+    int dirHorizontal_;
+    std::tuple<int, int, float, float> originRotate_;
+    std::tuple<float, float, glm::vec3> originTranslate_;
 
 public:
     OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id = wxID_ANY,
@@ -42,6 +48,7 @@ private:
     void UpdateScene();
     void UpdateLatticeEdges();
     void BuildLatticeMesh();
+    inline float RoundGuard(float radian);
 
     wxDECLARE_EVENT_TABLE();
 };

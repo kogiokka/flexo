@@ -16,12 +16,19 @@
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
 
+float static constexpr MATH_PI = 3.14159265f;
+float static constexpr MATH_PI_DIV_4 = MATH_PI * 0.25f;
+float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
+
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
                            wxSize const& size, long style, wxString const& name)
     : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
     , isGLLoaded_(false)
     , context_(nullptr)
     , renderer_(nullptr)
+    , rateMove_(0.4f)
+    , rateRotate_(0.005f)
+    , dirHorizontal_(1)
 {
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
@@ -110,32 +117,64 @@ void OpenGLCanvas::OnSize(wxSizeEvent&)
 
 void OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
-    renderer_->GetCamera().WheelZoom(event.GetWheelRotation() / 120);
+    assert(direction == 1 || direction == -1);
+
+    int direction = event.GetWheelRotation() / 120;
+    float& zoom = renderer_->GetCamera().GetZoom();
+    float const tmp_zoom = zoom + direction * -0.02f;
+    constexpr float min = 0.01f;
+    constexpr float max = 10.0f;
+
+    if (tmp_zoom < min) {
+        zoom = min;
+    } else if (tmp_zoom >= max) {
+        zoom = max;
+    } else {
+        zoom = tmp_zoom;
+    }
 }
 
 void OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    renderer_->GetCamera().InitDragTranslation(x, y);
+    originTranslate_ = std::make_tuple(x, y, renderer_->GetCamera().GetCenter());
 }
 
 void OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    renderer_->GetCamera().InitDragRotation(x, y);
+    auto& coord = renderer_->GetCamera().GetCoordinates();
+    // Change rotating direction if the camera passes through the polars.
+    // Theta is guaranteed to be on either [0, pi] or (pi, 2 * pi).
+    if (coord.theta > MATH_PI)
+        dirHorizontal_ = -1;
+    else
+        dirHorizontal_ = 1;
+
+    originRotate_ = std::make_tuple(x, y, coord.phi, coord.theta);
 }
 
 void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
+
+    auto& cam = renderer_->GetCamera();
+
     if (event.LeftIsDown()) {
-        renderer_->GetCamera().DragTranslation(x, y);
+        auto const& [oX, oY, oTarget] = originTranslate_;
+        cam.GetCenter()
+            = oTarget + (-(x - oX) * cam.GetVectorSide() + (y - oY) * cam.GetVectorUp()) * rateMove_ * cam.GetZoom();
+        cam.UpdateViewCoord();
     }
     if (event.RightIsDown()) {
-        renderer_->GetCamera().DragRotation(x, y);
+        auto const& [oX, oY, oPhi, oTheta] = originRotate_;
+        auto& coord = cam.GetCoordinates();
+        coord.phi = RoundGuard(dirHorizontal_ * -(x - oX) * rateRotate_ + oPhi);
+        coord.theta = RoundGuard(-(y - oY) * rateRotate_ + oTheta);
+        cam.UpdateViewCoord();
     }
 }
 
@@ -416,6 +455,17 @@ void OpenGLCanvas::BuildLatticeMesh()
 
     world.neurons.positions = positions;
     world.latticeMesh = mesh;
+}
+
+// Restrict both phi and theta within 0 and 360 degrees.
+float OpenGLCanvas::RoundGuard(float radian)
+{
+    if (radian < 0.0f)
+        return radian + MATH_2_MUL_PI;
+    else if (radian > MATH_2_MUL_PI)
+        return radian - MATH_2_MUL_PI;
+    else
+        return radian;
 }
 
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
