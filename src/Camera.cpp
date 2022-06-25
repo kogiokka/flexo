@@ -19,7 +19,7 @@ Camera::Camera(int width, int height, Camera::Projection projectionType)
     , viewVolumeWidth_(300.f)
     , rateMove_(0.4f)
     , rateRotate_(0.005f)
-    , zoom_(0.8f)
+    , zoom_(1.0f)
     , dirHorizontal_(1)
     , projectionType_(projectionType)
 {
@@ -111,6 +111,11 @@ void Camera::SetPhi(float phi)
     UpdateViewCoord();
 }
 
+void Camera::SetViewVolumeWidth(float width)
+{
+    viewVolumeWidth_ = width;
+}
+
 void Camera::SetTheta(float theta)
 {
     phi_ = RoundGuard(theta);
@@ -125,7 +130,7 @@ void Camera::WheelZoom(int direction)
     case Projection::Orthographic: {
         float const tmp_zoom = zoom_ + direction * -0.02f;
         constexpr float min = 0.01f;
-        constexpr float max = 1.0f;
+        constexpr float max = 10.0f;
 
         if (tmp_zoom < min) {
             zoom_ = min;

@@ -53,6 +53,7 @@ public:
     void SetCenter(float x, float y, float z);
     void SetTheta(float theta);
     void SetPhi(float phi);
+    void SetViewVolumeWidth(float width);
     void UpdateViewCoord();
     void InitDragRotation(int x, int y);
     void InitDragTranslation(int x, int y);

@@ -259,6 +259,15 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     world.dataset = std::make_unique<InputData>(posData);
     renderer_->GetCamera().SetCenter(center.x, center.y, center.z);
     renderer_->LoadLattice();
+
+    float maxWidth = max.x;
+    if (maxWidth < max.y) {
+        maxWidth = max.y;
+    }
+    if (maxWidth < max.z) {
+        maxWidth = max.z;
+    }
+    renderer_->GetCamera().SetViewVolumeWidth(maxWidth);
 }
 
 void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
