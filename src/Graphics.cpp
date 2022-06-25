@@ -186,7 +186,7 @@ glm::mat4 Graphics::GetViewProjectionMatrix() const
 
 glm::vec3 Graphics::GetCameraPosition() const
 {
-    return m_camera.Position();
+    return m_camera.position;
 }
 
 Camera& Graphics::GetCamera()

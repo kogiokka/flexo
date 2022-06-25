@@ -104,7 +104,7 @@ void OpenGLCanvas::OnSize(wxSizeEvent&)
     wxSize const size = GetClientSize() * GetContentScaleFactor();
 
     if (m_renderer != nullptr) {
-        m_renderer->GetCamera().SetAspectRatio(size.x, size.y);
+        m_renderer->GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
     }
 
     // Guard for SetCurrent and calling GL functions
@@ -120,7 +120,7 @@ void OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
     assert(direction == 1 || direction == -1);
 
     int direction = event.GetWheelRotation() / 120;
-    float& zoom = m_renderer->GetCamera().GetZoom();
+    float& zoom = m_renderer->GetCamera().zoom;
     float const tmp_zoom = zoom + direction * -0.02f;
     constexpr float min = 0.01f;
     constexpr float max = 10.0f;
@@ -138,14 +138,14 @@ void OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    m_originTranslate = std::make_tuple(x, y, m_renderer->GetCamera().GetCenter());
+    m_originTranslate = std::make_tuple(x, y, m_renderer->GetCamera().center);
 }
 
 void OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    auto& coord = m_renderer->GetCamera().GetCoordinates();
+    auto& coord = m_renderer->GetCamera().coord;
     // Change rotating direction if the camera passes through the polars.
     // Theta is guaranteed to be on either [0, pi] or (pi, 2 * pi).
     if (coord.theta > MATH_PI)
@@ -165,13 +165,12 @@ void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
 
     if (event.LeftIsDown()) {
         auto const& [oX, oY, oTarget] = m_originTranslate;
-        cam.GetCenter()
-            = oTarget + (-(x - oX) * cam.GetVectorSide() + (y - oY) * cam.GetVectorUp()) * m_rateMove * cam.GetZoom();
+        cam.center = oTarget + (-(x - oX) * cam.basis.sideway + (y - oY) * cam.basis.up) * m_rateMove * cam.zoom;
         cam.UpdateViewCoord();
     }
     if (event.RightIsDown()) {
         auto const& [oX, oY, oPhi, oTheta] = m_originRotate;
-        auto& coord = cam.GetCoordinates();
+        auto& coord = cam.coord;
         coord.phi = RoundGuard(m_dirHorizontal * -(x - oX) * m_rateRotate + oPhi);
         coord.theta = RoundGuard(-(y - oY) * m_rateRotate + oTheta);
         cam.UpdateViewCoord();
@@ -296,17 +295,19 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
 
     Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
     world.dataset = std::make_unique<InputData>(posData);
-    m_renderer->GetCamera().SetCenter(center.x, center.y, center.z);
+    m_renderer->GetCamera().center = center;
+    m_renderer->GetCamera().UpdateViewCoord();
     m_renderer->LoadLattice();
 
-    float maxWidth = max.x;
-    if (maxWidth < max.y) {
-        maxWidth = max.y;
+    glm::vec3 diff = max - min;
+    float size = diff.x;
+    if (size < diff.y) {
+        size = diff.y;
     }
-    if (maxWidth < max.z) {
-        maxWidth = max.z;
+    if (size < diff.z) {
+        size = diff.z;
     }
-    m_renderer->GetCamera().SetViewVolumeWidth(maxWidth);
+    m_renderer->GetCamera().volumeSize = size;
 }
 
 void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
