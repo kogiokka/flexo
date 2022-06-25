@@ -2,7 +2,7 @@
 
 void Drawable::Draw(Graphics&) const
 {
-    for (auto& b : binds_) {
+    for (auto& b : m_binds) {
         b->Bind();
     }
 }
@@ -11,5 +11,5 @@ void Drawable::Update(Graphics&) { }
 
 void Drawable::AddBind(std::shared_ptr<Bind::Bindable> bind)
 {
-    binds_.push_back(bind);
+    m_binds.push_back(bind);
 }

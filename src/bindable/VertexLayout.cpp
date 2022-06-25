@@ -5,16 +5,16 @@ namespace Bind
     VertexLayout::VertexLayout(Graphics& gfx, std::vector<AttributeDesc> const& attrDescs)
         : Bindable(gfx)
     {
-        gfx_->CreateVertexLayout(id_, attrDescs.data(), attrDescs.size());
+        m_gfx->CreateVertexLayout(m_id, attrDescs.data(), attrDescs.size());
     }
 
     VertexLayout::~VertexLayout()
     {
-        gfx_->DeleteVertexLayout(id_);
+        m_gfx->DeleteVertexLayout(m_id);
     }
 
     void VertexLayout::Bind()
     {
-        gfx_->SetVertexLayout(id_);
+        m_gfx->SetVertexLayout(m_id);
     }
 }

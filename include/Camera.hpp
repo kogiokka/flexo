@@ -14,19 +14,19 @@ struct SphericalCoord {
 
 class Camera
 {
-    glm::vec3 position_;
-    glm::vec3 worldUp_;
-    glm::vec3 vecForward_;
-    glm::vec3 vecSide_;
-    glm::vec3 vecUp_;
-    glm::vec3 center_;
-    SphericalCoord coord_;
-    float aspectRatio_;
-    float viewVolumeWidth_;
-    float zoom_;
+    glm::vec3 m_position;
+    glm::vec3 m_worldUp;
+    glm::vec3 m_vecForward;
+    glm::vec3 m_vecSide;
+    glm::vec3 m_vecUp;
+    glm::vec3 m_center;
+    SphericalCoord m_coord;
+    float m_aspectRatio;
+    float m_viewVolumeWidth;
+    float m_zoom;
 
-    std::tuple<int, int, float, float> originRotate_;
-    std::tuple<float, float, glm::vec3> originTranslate_;
+    std::tuple<int, int, float, float> m_originRotate;
+    std::tuple<float, float, glm::vec3> m_originTranslate;
 
 public:
     enum class Projection {
@@ -56,7 +56,7 @@ public:
     glm::vec3 const ForwardVector() const;
 
 private:
-    Projection projectionType_;
+    Projection m_projectionType;
     glm::vec3 CartesianCoord(float theta, float phi) const;
     inline float RoundGuard(float radian);
 };

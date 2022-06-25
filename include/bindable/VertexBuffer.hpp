@@ -12,12 +12,12 @@ namespace Bind
     class VertexBuffer : public Bindable
     {
     protected:
-        GLuint id_;
-        GLuint count_;
-        GLuint startAttrib_;
-        int numAttrs_;
-        std::vector<GLintptr> offsets_;
-        std::vector<GLsizei> strides_;
+        GLuint m_id;
+        GLuint m_count;
+        GLuint m_startAttrib;
+        int m_numAttrs;
+        std::vector<GLintptr> m_offsets;
+        std::vector<GLsizei> m_strides;
 
     public:
         template <typename T>
@@ -37,10 +37,10 @@ namespace Bind
     template <typename T>
     VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib)
         : Bindable(gfx)
-        , id_(0)
-        , count_(vertices.size())
-        , startAttrib_(startAttrib)
-        , numAttrs_(0)
+        , m_id(0)
+        , m_count(vertices.size())
+        , m_startAttrib(startAttrib)
+        , m_numAttrs(0)
     {
         BufferDesc desc;
         BufferData data;
@@ -53,7 +53,7 @@ namespace Bind
 
         SetAttribMemLayout<T>();
 
-        gfx_->CreateBuffer(id_, desc, data);
+        m_gfx->CreateBuffer(m_id, desc, data);
     }
 
     template <>
@@ -70,7 +70,7 @@ namespace Bind
     template <typename T>
     void VertexBuffer::Update(std::vector<T> const& vertices)
     {
-        gfx_->UpdateBuffer(id_, GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(T), vertices.data());
+        m_gfx->UpdateBuffer(m_id, GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(T), vertices.data());
     }
 }
 

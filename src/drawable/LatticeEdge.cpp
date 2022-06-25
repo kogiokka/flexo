@@ -13,8 +13,8 @@
 #include "drawable/LatticeEdge.hpp"
 
 LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
-    : ibo_(nullptr)
-    , ub_ {}
+    : m_ibo(nullptr)
+    , m_ub {}
 {
     assert(mesh.HasPositions());
 
@@ -29,31 +29,31 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     shader->Attach(ShaderStage::Frag, "shader/LatticeEdge.frag");
     shader->Link();
 
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.modelMat = glm::mat4(1.0f);
-    ub_.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.vert.modelMat = glm::mat4(1.0f);
+    m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
-    ibo_ = std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges);
+    m_ibo = std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges);
 
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(ibo_);
+    AddBind(m_ibo);
     AddBind(shader);
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 
 void LatticeEdge::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
-    gfx.DrawIndexed(ibo_->GetCount());
+    gfx.DrawIndexed(m_ibo->GetCount());
 }
 
 void LatticeEdge::Update(Graphics& gfx)
 {
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
 
-    for (auto it = binds_.begin(); it != binds_.end(); it++) {
+    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         {
             Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
@@ -63,7 +63,7 @@ void LatticeEdge::Update(Graphics& gfx)
         {
             Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
-                ub->Update(ub_);
+                ub->Update(m_ub);
             }
         }
     }

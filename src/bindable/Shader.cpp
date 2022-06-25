@@ -5,26 +5,26 @@ namespace Bind
     Shader::Shader(Graphics& gfx)
         : Bindable(gfx)
     {
-        gfx_->CreateShaderProgram(id_);
+        m_gfx->CreateShaderProgram(m_id);
     }
 
     Shader::~Shader()
     {
-        gfx_->DeleteShaderProgram(id_);
+        m_gfx->DeleteShaderProgram(m_id);
     }
 
     void Shader::Bind()
     {
-        gfx_->SetShaderProgram(id_);
+        m_gfx->SetShaderProgram(m_id);
     }
 
     void Shader::Link()
     {
-        gfx_->LinkShaderProgram(id_);
+        m_gfx->LinkShaderProgram(m_id);
     }
 
     void Shader::Attach(ShaderStage stage, std::string const& filepath)
     {
-        gfx_->AttachShaderStage(id_, stage, filepath);
+        m_gfx->AttachShaderStage(m_id, stage, filepath);
     }
 }

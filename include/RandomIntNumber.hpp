@@ -12,7 +12,7 @@
 template <typename T>
 class RandomIntNumber : public RandomNumber<T>
 {
-    std::uniform_int_distribution<T> range_;
+    std::uniform_int_distribution<T> m_range;
 
 public:
     RandomIntNumber();
@@ -27,14 +27,14 @@ public:
 template <typename T>
 RandomIntNumber<T>::RandomIntNumber()
     : RandomNumber<T>()
-    , range_()
+    , m_range()
 {
 }
 
 template <typename T>
 RandomIntNumber<T>::RandomIntNumber(T min, T max)
     : RandomNumber<T>()
-    , range_ { min, max }
+    , m_range { min, max }
 {
     using namespace std;
 
@@ -54,13 +54,13 @@ RandomIntNumber<T>::RandomIntNumber(T min, T max)
 template <typename T>
 void RandomIntNumber<T>::setRange(T min, T max)
 {
-    range_ = std::uniform_int_distribution<T>(min, max);
+    m_range = std::uniform_int_distribution<T>(min, max);
 }
 
 template <typename T>
 T RandomIntNumber<T>::scalar()
 {
-    return range_(this->engine_);
+    return m_range(this->m_engine);
 }
 
 template <typename T>
@@ -70,7 +70,7 @@ std::vector<T> RandomIntNumber<T>::vector(std::size_t dimension)
 
     vec.reserve(dimension);
     for (std::size_t i = 0; i < dimension; ++i) {
-        vec.push_back(range_(this->engine_));
+        vec.push_back(m_range(this->m_engine));
     }
 
     return vec;
@@ -82,7 +82,7 @@ std::array<T, S> RandomIntNumber<T>::vector()
 {
     std::array<T, S> vec;
     for (auto i = 0; i < S; ++i) {
-        vec[i] = range_(this->engine_);
+        vec[i] = m_range(this->m_engine);
     }
     return vec;
 }

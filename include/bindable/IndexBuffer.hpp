@@ -13,8 +13,8 @@ namespace Bind
     class IndexBuffer : public Bindable
     {
     protected:
-        GLuint id_;
-        GLuint count_;
+        GLuint m_id;
+        GLuint m_count;
 
     public:
         IndexBuffer(Graphics& gfx, std::vector<unsigned int> const& indices);

@@ -11,8 +11,8 @@ namespace Bind
     class Texture2D : public Bindable
     {
     protected:
-        GLuint id_;
-        GLuint unit_;
+        GLuint m_id;
+        GLuint m_unit;
 
     public:
         template <typename T>
@@ -28,8 +28,8 @@ namespace Bind
     template <typename T>
     Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit)
         : Bindable(gfx)
-        , id_(0)
-        , unit_(unit)
+        , m_id(0)
+        , m_unit(unit)
     {
         Texture2dDesc desc;
         BufferData data;
@@ -42,7 +42,7 @@ namespace Bind
         DetermineDataType<T>(desc);
 
         data.mem = textureData;
-        gfx_->CreateTexture2D(id_, unit_, desc, data);
+        m_gfx->CreateTexture2D(m_id, m_unit, desc, data);
     }
 
     template <>

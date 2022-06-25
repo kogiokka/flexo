@@ -11,10 +11,10 @@
 #include <fstream>
 
 VolumeData::VolumeData()
-    : info_ {}
-    , field_(0)
-    , sampleType_(SampleType::Unknown)
-    , endianness_(Endian::Invalid)
+    : m_info {}
+    , m_field(0)
+    , m_sampleType(SampleType::Unknown)
+    , m_endianness(Endian::Invalid)
 {
 }
 
@@ -25,17 +25,17 @@ bool VolumeData::read(std::string const& inf)
     using namespace std;
     namespace fs = std::filesystem;
 
-    info_.read(inf);
+    m_info.read(inf);
 
     if (!checkInfoIntegrity()) {
         return false;
     }
 
-    auto const resolution = *info_.resolution;
-    auto const voxelSize = *info_.voxelSize;
-    string const& sampleTypeStr = *info_.sampleType;
-    string const& endiannessStr = *info_.endianness;
-    string const& rawFilePath = *info_.rawFile;
+    auto const resolution = *m_info.resolution;
+    auto const voxelSize = *m_info.voxelSize;
+    string const& sampleTypeStr = *m_info.sampleType;
+    string const& endiannessStr = *m_info.endianness;
+    string const& rawFilePath = *m_info.rawFile;
 
     if (resolution.x <= 0 || resolution.y <= 0 || resolution.z <= 0) {
         Logger::error(R"(%s: "resolution" values should be positive.)", inf.c_str());
@@ -48,28 +48,28 @@ bool VolumeData::read(std::string const& inf)
     }
 
     if (sampleTypeStr == "unsigned char") {
-        sampleType_ = SampleType::UnsignedChar;
+        m_sampleType = SampleType::UnsignedChar;
     } else if (sampleTypeStr == "unsigned short") {
-        sampleType_ = SampleType::UnsignedShort;
+        m_sampleType = SampleType::UnsignedShort;
     } else if (sampleTypeStr == "float") {
-        sampleType_ = SampleType::Float;
+        m_sampleType = SampleType::Float;
     } else if (sampleTypeStr == "short") {
-        sampleType_ = SampleType::Short;
+        m_sampleType = SampleType::Short;
     } else {
         Logger::error("Unknown sample type: \"%s\"", sampleTypeStr.c_str());
         return false;
     }
 
     if (endiannessStr == "little") {
-        endianness_ = Endian::Little;
+        m_endianness = Endian::Little;
     } else if (endiannessStr == "big") {
-        endianness_ = Endian::Big;
+        m_endianness = Endian::Big;
     } else {
         Logger::error("Invalid endianness: \"%s\"", endiannessStr.c_str());
         return false;
     }
 
-    field_.clear();
+    m_field.clear();
     ifstream rawFile(rawFilePath, ios::binary);
     if (rawFile.fail()) {
         Logger::error(R"(Failed to read RAW file: "%s")", rawFilePath.c_str());
@@ -77,41 +77,41 @@ bool VolumeData::read(std::string const& inf)
     }
 
     auto rawFileSize = fs::file_size(rawFilePath);
-    switch (sampleType_) {
+    switch (m_sampleType) {
     case SampleType::UnsignedChar: {
         vector<uint8_t> buffer(rawFileSize);
         rawFile.read(reinterpret_cast<char*>(buffer.data()), rawFileSize);
-        field_.assign(buffer.begin(), buffer.end());
+        m_field.assign(buffer.begin(), buffer.end());
     } break;
     case SampleType::UnsignedShort: {
         vector<uint16_t> buffer(rawFileSize / sizeof(uint16_t));
         rawFile.read(reinterpret_cast<char*>(buffer.data()), rawFileSize);
-        if (endianness_ == Endian::Big) {
+        if (m_endianness == Endian::Big) {
             for (auto& n : buffer) {
                 n = endianBig2Little<unsigned short>(n);
             }
         }
-        field_.assign(buffer.begin(), buffer.end());
+        m_field.assign(buffer.begin(), buffer.end());
     } break;
     case SampleType::Float: {
         vector<float> buffer(rawFileSize / sizeof(float));
         rawFile.read(reinterpret_cast<char*>(buffer.data()), rawFileSize);
-        if (endianness_ == Endian::Big) {
+        if (m_endianness == Endian::Big) {
             for (auto& n : buffer) {
                 n = endianBig2Little<float>(n);
             }
         }
-        field_.assign(buffer.begin(), buffer.end());
+        m_field.assign(buffer.begin(), buffer.end());
     } break;
     case SampleType::Short: {
         vector<int16_t> buffer(rawFileSize / sizeof(int16_t));
         rawFile.read(reinterpret_cast<char*>(buffer.data()), rawFileSize);
-        if (endianness_ == Endian::Big) {
+        if (m_endianness == Endian::Big) {
             for (auto& n : buffer) {
                 n = endianBig2Little<short>(n);
             }
         }
-        field_.assign(buffer.begin(), buffer.end());
+        m_field.assign(buffer.begin(), buffer.end());
     } break;
     default:
         break;
@@ -124,26 +124,26 @@ bool VolumeData::read(std::string const& inf)
 
 bool VolumeData::checkInfoIntegrity() const
 {
-    return info_.resolution && info_.voxelSize && info_.endianness && info_.sampleType && info_.rawFile;
+    return m_info.resolution && m_info.voxelSize && m_info.endianness && m_info.sampleType && m_info.rawFile;
 }
 
 glm::ivec3 VolumeData::resolution() const
 {
-    assert(info_.resolution);
-    return *info_.resolution;
+    assert(m_info.resolution);
+    return *m_info.resolution;
 }
 
 glm::vec3 VolumeData::voxelSize() const
 {
-    assert(info_.voxelSize);
-    return *info_.voxelSize;
+    assert(m_info.voxelSize);
+    return *m_info.voxelSize;
 }
 
 glm::vec3 VolumeData::volumeSize() const
 {
-    assert(info_.resolution && info_.voxelSize);
-    auto const& reso = *info_.resolution;
-    auto const& vs = *info_.voxelSize;
+    assert(m_info.resolution && m_info.voxelSize);
+    auto const& reso = *m_info.resolution;
+    auto const& vs = *m_info.voxelSize;
     return {
         reso.x * vs.x,
         reso.y * vs.y,
@@ -153,40 +153,40 @@ glm::vec3 VolumeData::volumeSize() const
 
 std::vector<float>& VolumeData::data()
 {
-    return field_;
+    return m_field;
 }
 
 std::vector<float> const& VolumeData::data() const
 {
-    return field_;
+    return m_field;
 }
 
 float VolumeData::min() const
 {
-    return *std::min_element(field_.begin(), field_.end());
+    return *std::min_element(m_field.begin(), m_field.end());
 }
 
 float VolumeData::max() const
 {
-    return *std::max_element(field_.begin(), field_.end());
+    return *std::max_element(m_field.begin(), m_field.end());
 }
 
 std::size_t VolumeData::index(int x, int y, int z) const
 {
-    assert(info_.resolution);
+    assert(m_info.resolution);
 
-    auto const& reso = *info_.resolution;
+    auto const& reso = *m_info.resolution;
     return static_cast<std::size_t>(x + y * reso.x + z * reso.y * reso.x);
 }
 
 float VolumeData::value(int x, int y, int z) const
 {
-    return field_[index(x, y, z)];
+    return m_field[index(x, y, z)];
 }
 
 float VolumeData::value(std::size_t index) const
 {
-    return field_[index];
+    return m_field[index];
 }
 
 void VolumeData::Info::read(std::string const& file)

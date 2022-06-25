@@ -23,16 +23,16 @@ float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
                            wxSize const& size, long style, wxString const& name)
     : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
-    , isGLLoaded_(false)
-    , context_(nullptr)
-    , renderer_(nullptr)
-    , rateMove_(0.4f)
-    , rateRotate_(0.005f)
-    , dirHorizontal_(1)
+    , m_isGLLoaded(false)
+    , m_context(nullptr)
+    , m_renderer(nullptr)
+    , m_rateMove(0.4f)
+    , m_rateRotate(0.005f)
+    , m_dirHorizontal(1)
 {
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
-    context_ = std::make_unique<wxGLContext>(this, nullptr, &attrs);
+    m_context = std::make_unique<wxGLContext>(this, nullptr, &attrs);
 }
 
 OpenGLCanvas::~OpenGLCanvas() { }
@@ -40,25 +40,25 @@ OpenGLCanvas::~OpenGLCanvas() { }
 void OpenGLCanvas::OnPaint(wxPaintEvent&)
 {
     wxPaintDC dc(this);
-    SetCurrent(*context_);
+    SetCurrent(*m_context);
 
     glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     UpdateScene();
 
-    renderer_->Render();
+    m_renderer->Render();
 
     SwapBuffers();
 }
 
 void OpenGLCanvas::InitGL()
 {
-    SetCurrent(*context_);
+    SetCurrent(*m_context);
 
-    isGLLoaded_ = gladLoadGL();
+    m_isGLLoaded = gladLoadGL();
 
-    assert(isGLLoaded_);
+    assert(m_isGLLoaded);
 
 #ifndef NDEBUG
     glDebugMessageCallback(
@@ -85,7 +85,7 @@ void OpenGLCanvas::InitGL()
     BuildLatticeMesh();
     UpdateLatticeEdges();
 
-    renderer_ = std::make_unique<Renderer>(size.x, size.y);
+    m_renderer = std::make_unique<Renderer>(size.x, size.y);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -99,19 +99,19 @@ void OpenGLCanvas::InitGL()
 
 void OpenGLCanvas::OnSize(wxSizeEvent&)
 {
-    assert(context_.get() != nullptr);
+    assert(m_context.get() != nullptr);
 
     wxSize const size = GetClientSize() * GetContentScaleFactor();
 
-    if (renderer_ != nullptr) {
-        renderer_->GetCamera().SetAspectRatio(size.x, size.y);
+    if (m_renderer != nullptr) {
+        m_renderer->GetCamera().SetAspectRatio(size.x, size.y);
     }
 
     // Guard for SetCurrent and calling GL functions
-    if (!IsShownOnScreen() || !isGLLoaded_)
+    if (!IsShownOnScreen() || !m_isGLLoaded)
         return;
 
-    SetCurrent(*context_);
+    SetCurrent(*m_context);
     glViewport(0, 0, size.x, size.y);
 }
 
@@ -120,7 +120,7 @@ void OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
     assert(direction == 1 || direction == -1);
 
     int direction = event.GetWheelRotation() / 120;
-    float& zoom = renderer_->GetCamera().GetZoom();
+    float& zoom = m_renderer->GetCamera().GetZoom();
     float const tmp_zoom = zoom + direction * -0.02f;
     constexpr float min = 0.01f;
     constexpr float max = 10.0f;
@@ -138,22 +138,22 @@ void OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    originTranslate_ = std::make_tuple(x, y, renderer_->GetCamera().GetCenter());
+    m_originTranslate = std::make_tuple(x, y, m_renderer->GetCamera().GetCenter());
 }
 
 void OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    auto& coord = renderer_->GetCamera().GetCoordinates();
+    auto& coord = m_renderer->GetCamera().GetCoordinates();
     // Change rotating direction if the camera passes through the polars.
     // Theta is guaranteed to be on either [0, pi] or (pi, 2 * pi).
     if (coord.theta > MATH_PI)
-        dirHorizontal_ = -1;
+        m_dirHorizontal = -1;
     else
-        dirHorizontal_ = 1;
+        m_dirHorizontal = 1;
 
-    originRotate_ = std::make_tuple(x, y, coord.phi, coord.theta);
+    m_originRotate = std::make_tuple(x, y, coord.phi, coord.theta);
 }
 
 void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
@@ -161,19 +161,19 @@ void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
 
-    auto& cam = renderer_->GetCamera();
+    auto& cam = m_renderer->GetCamera();
 
     if (event.LeftIsDown()) {
-        auto const& [oX, oY, oTarget] = originTranslate_;
+        auto const& [oX, oY, oTarget] = m_originTranslate;
         cam.GetCenter()
-            = oTarget + (-(x - oX) * cam.GetVectorSide() + (y - oY) * cam.GetVectorUp()) * rateMove_ * cam.GetZoom();
+            = oTarget + (-(x - oX) * cam.GetVectorSide() + (y - oY) * cam.GetVectorUp()) * m_rateMove * cam.GetZoom();
         cam.UpdateViewCoord();
     }
     if (event.RightIsDown()) {
-        auto const& [oX, oY, oPhi, oTheta] = originRotate_;
+        auto const& [oX, oY, oPhi, oTheta] = m_originRotate;
         auto& coord = cam.GetCoordinates();
-        coord.phi = RoundGuard(dirHorizontal_ * -(x - oX) * rateRotate_ + oPhi);
-        coord.theta = RoundGuard(-(y - oY) * rateRotate_ + oTheta);
+        coord.phi = RoundGuard(m_dirHorizontal * -(x - oX) * m_rateRotate + oPhi);
+        coord.theta = RoundGuard(-(y - oY) * m_rateRotate + oTheta);
         cam.UpdateViewCoord();
     }
 }
@@ -181,7 +181,7 @@ void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
 void OpenGLCanvas::ResetCamera()
 {
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    renderer_->GetCamera() = Camera(size.x, size.y);
+    m_renderer->GetCamera() = Camera(size.x, size.y);
 }
 
 void OpenGLCanvas::OpenInputDataFile(wxString const& path)
@@ -194,11 +194,11 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     if (path.EndsWith(".obj")) {
         OBJImporter objImp;
         world.polyModel = std::make_unique<Mesh>(objImp.ReadFile(path.ToStdString()));
-        renderer_->LoadPolygonalModel();
+        m_renderer->LoadPolygonalModel();
     } else if (path.EndsWith(".stl")) {
         STLImporter stlImp;
         world.polyModel = std::make_unique<Mesh>(stlImp.ReadFile(path.ToStdString()));
-        renderer_->LoadPolygonalModel();
+        m_renderer->LoadPolygonalModel();
     } else if (path.EndsWith(".toml")) {
         world.volModel = std::make_unique<VolModel>();
         auto& [data, pos, texcoord] = *world.volModel;
@@ -257,7 +257,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
         }
 
         texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
-        renderer_->LoadVolumetricModel();
+        m_renderer->LoadVolumetricModel();
         Logger::info("%lu voxels will be rendered.", pos.size());
     }
 
@@ -296,8 +296,8 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
 
     Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
     world.dataset = std::make_unique<InputData>(posData);
-    renderer_->GetCamera().SetCenter(center.x, center.y, center.z);
-    renderer_->LoadLattice();
+    m_renderer->GetCamera().SetCenter(center.x, center.y, center.z);
+    m_renderer->LoadLattice();
 
     float maxWidth = max.x;
     if (maxWidth < max.y) {
@@ -306,7 +306,7 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     if (maxWidth < max.z) {
         maxWidth = max.z;
     }
-    renderer_->GetCamera().SetViewVolumeWidth(maxWidth);
+    m_renderer->GetCamera().SetViewVolumeWidth(maxWidth);
 }
 
 void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
@@ -327,7 +327,7 @@ void OpenGLCanvas::ResetLattice()
 {
     BuildLatticeMesh();
     UpdateLatticeEdges();
-    renderer_->LoadLattice();
+    m_renderer->LoadLattice();
 }
 
 void OpenGLCanvas::SetModelColorAlpha(float alpha)

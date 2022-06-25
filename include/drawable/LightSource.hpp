@@ -22,9 +22,9 @@ class LightSource : public Drawable
         Frag frag;
     };
 
-    GLuint count_;
-    glm::mat4 scaling_;
-    UniformBlock ub_;
+    GLuint m_count;
+    glm::mat4 m_scaling;
+    UniformBlock m_ub;
 
 public:
     LightSource(Graphics& gfx, Mesh const& mesh);

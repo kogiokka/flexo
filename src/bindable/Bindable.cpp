@@ -4,7 +4,7 @@ namespace Bind
 {
     Bindable::Bindable(Graphics& gfx)
     {
-        gfx_ = &gfx;
+        m_gfx = &gfx;
     }
 
     Bindable::~Bindable() { }

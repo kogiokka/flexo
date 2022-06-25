@@ -38,8 +38,8 @@ class LatticeFace : public Drawable
         Frag frag;
     };
 
-    GLuint count_;
-    UniformBlock ub_;
+    GLuint m_count;
+    UniformBlock m_ub;
 
 public:
     LatticeFace(Graphics& gfx, Mesh const& mesh);

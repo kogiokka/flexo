@@ -5,9 +5,9 @@
 
 class Node
 {
-    int x_;
-    int y_;
-    std::vector<float> weights_;
+    int m_x;
+    int m_y;
+    std::vector<float> m_weights;
 
 public:
     Node(int x, int y, std::vector<float> initWeights);

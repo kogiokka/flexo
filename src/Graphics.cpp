@@ -5,7 +5,7 @@
 #include "common/Logger.hpp"
 
 Graphics::Graphics(int width, int height)
-    : camera_(width, height)
+    : m_camera(width, height)
 {
 }
 
@@ -104,7 +104,7 @@ void Graphics::SetVertexLayout(GLuint const layout)
 
 void Graphics::SetPrimitive(GLenum primitive)
 {
-    ctx_.primitive = primitive;
+    m_ctx.primitive = primitive;
 }
 
 void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
@@ -118,8 +118,8 @@ void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buff
 void Graphics::SetIndexBuffer(GLuint buffer, GLenum elementDataType, const GLvoid* offsetOfFirstIndex)
 {
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
-    ctx_.elementDataType = elementDataType;
-    ctx_.offsetOfFirstIndex = offsetOfFirstIndex;
+    m_ctx.elementDataType = elementDataType;
+    m_ctx.offsetOfFirstIndex = offsetOfFirstIndex;
 }
 
 void Graphics::SetTexture(GLenum target, GLuint texture, GLuint unit)
@@ -135,17 +135,17 @@ void Graphics::SetShaderProgram(GLuint program)
 
 void Graphics::Draw(GLsizei vertexCount)
 {
-    glDrawArrays(ctx_.primitive, 0, vertexCount);
+    glDrawArrays(m_ctx.primitive, 0, vertexCount);
 }
 
 void Graphics::DrawIndexed(GLsizei indexCount)
 {
-    glDrawElements(ctx_.primitive, indexCount, ctx_.elementDataType, ctx_.offsetOfFirstIndex);
+    glDrawElements(m_ctx.primitive, indexCount, m_ctx.elementDataType, m_ctx.offsetOfFirstIndex);
 }
 
 void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCount)
 {
-    glDrawArraysInstanced(ctx_.primitive, 0, vertexCountPerInstance, instanceCount);
+    glDrawArraysInstanced(m_ctx.primitive, 0, vertexCountPerInstance, instanceCount);
 }
 
 void Graphics::SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex)
@@ -181,17 +181,17 @@ void Graphics::DeleteShaderProgram(GLuint& program)
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const
 {
-    return camera_.ViewProjectionMatrix();
+    return m_camera.ViewProjectionMatrix();
 }
 
 glm::vec3 Graphics::GetCameraPosition() const
 {
-    return camera_.Position();
+    return m_camera.Position();
 }
 
 Camera& Graphics::GetCamera()
 {
-    return camera_;
+    return m_camera;
 }
 
 void Graphics::UpdateBuffer(GLuint const buffer, GLenum target, GLintptr offset, GLsizei byteWidth, void const* data)

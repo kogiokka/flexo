@@ -17,24 +17,24 @@
 
 class MainWindow : public wxFrame
 {
-    int widthLat_;
-    int heightLat_;
-    int iterationCap_;
-    float initLearningRate_;
-    LatticeFlags latFlags_;
+    int m_widthLat;
+    int m_heightLat;
+    int m_iterationCap;
+    float m_initLearningRate;
+    LatticeFlags m_latFlags;
 
-    wxButton* btnPlayPause_;
-    wxButton* btnWatermark_;
-    wxButton* btnConfirm_;
-    wxTimer* timerUIUpdate_;
-    wxPanel* panel_;
-    wxTextCtrl* tcIterCurr_;
-    wxTextCtrl* tcLatWidth_;
-    wxTextCtrl* tcLatHeight_;
-    wxTextCtrl* tcIterCap_;
-    wxTextCtrl* tcInitLearningRate_;
-    wxSlider* slider_;
-    OpenGLCanvas* canvas_;
+    wxButton* m_btnPlayPause;
+    wxButton* m_btnWatermark;
+    wxButton* m_btnConfirm;
+    wxTimer* m_timerUIUpdate;
+    wxPanel* m_panel;
+    wxTextCtrl* m_tcIterCurr;
+    wxTextCtrl* m_tcLatWidth;
+    wxTextCtrl* m_tcLatHeight;
+    wxTextCtrl* m_tcIterCap;
+    wxTextCtrl* m_tcInitLearningRate;
+    wxSlider* m_slider;
+    OpenGLCanvas* m_canvas;
 
     void CreateOpenGLCanvas();
     wxStaticBoxSizer* CreatePanelStaticBox1();

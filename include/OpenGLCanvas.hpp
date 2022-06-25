@@ -15,14 +15,14 @@
 
 class OpenGLCanvas : public wxGLCanvas
 {
-    bool isGLLoaded_;
-    std::unique_ptr<wxGLContext> context_;
-    std::unique_ptr<Renderer> renderer_;
-    float rateMove_;
-    float rateRotate_;
-    int dirHorizontal_;
-    std::tuple<int, int, float, float> originRotate_;
-    std::tuple<float, float, glm::vec3> originTranslate_;
+    bool m_isGLLoaded;
+    std::unique_ptr<wxGLContext> m_context;
+    std::unique_ptr<Renderer> m_renderer;
+    float m_rateMove;
+    float m_rateRotate;
+    int m_dirHorizontal;
+    std::tuple<int, int, float, float> m_originRotate;
+    std::tuple<float, float, glm::vec3> m_originTranslate;
 
 public:
     OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id = wxID_ANY,

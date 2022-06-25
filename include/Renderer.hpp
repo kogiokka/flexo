@@ -19,7 +19,7 @@ using BufferType = int;
 using ShaderType = int;
 using RenderOption = int;
 
-enum RenderOption_ : int {
+enum m_RenderOption : int {
     RenderOption_Model = 1 << 0,
     RenderOption_LatticeVertex = 1 << 1,
     RenderOption_LatticeEdge = 1 << 2,
@@ -29,14 +29,14 @@ enum RenderOption_ : int {
 
 class Renderer
 {
-    Graphics gfx_;
+    Graphics m_gfx;
 
-    std::unique_ptr<PolygonalModel> polyModel_;
-    std::unique_ptr<LightSource> lightSource_;
-    std::unique_ptr<VolumetricModel> volModel_;
-    std::unique_ptr<LatticeVertex> latticeVert_;
-    std::unique_ptr<LatticeEdge> latticeEdge_;
-    std::unique_ptr<LatticeFace> latticeFace_;
+    std::unique_ptr<PolygonalModel> m_polyModel;
+    std::unique_ptr<LightSource> m_lightSource;
+    std::unique_ptr<VolumetricModel> m_volModel;
+    std::unique_ptr<LatticeVertex> m_latticeVert;
+    std::unique_ptr<LatticeEdge> m_latticeEdge;
+    std::unique_ptr<LatticeFace> m_latticeFace;
 
 public:
     Renderer(int width, int height);

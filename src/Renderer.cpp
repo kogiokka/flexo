@@ -4,15 +4,15 @@
 RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
 
 Renderer::Renderer(int width, int height)
-    : gfx_(width, height)
-    , polyModel_(nullptr)
-    , lightSource_(nullptr)
-    , volModel_(nullptr)
-    , latticeVert_(nullptr)
-    , latticeEdge_(nullptr)
-    , latticeFace_(nullptr)
+    : m_gfx(width, height)
+    , m_polyModel(nullptr)
+    , m_lightSource(nullptr)
+    , m_volModel(nullptr)
+    , m_latticeVert(nullptr)
+    , m_latticeEdge(nullptr)
+    , m_latticeFace(nullptr)
 {
-    lightSource_ = std::make_unique<LightSource>(gfx_, world.uvsphere);
+    m_lightSource = std::make_unique<LightSource>(m_gfx, world.uvsphere);
 }
 
 void Renderer::Render()
@@ -22,58 +22,58 @@ void Renderer::Render()
     }
 
     if (rendopt & RenderOption_LightSource) {
-        lightSource_->Update(gfx_);
-        lightSource_->Draw(gfx_);
+        m_lightSource->Update(m_gfx);
+        m_lightSource->Draw(m_gfx);
     }
 
     if (rendopt & RenderOption_LatticeVertex) {
-        latticeVert_->Update(gfx_);
-        latticeVert_->Draw(gfx_);
+        m_latticeVert->Update(m_gfx);
+        m_latticeVert->Draw(m_gfx);
     }
 
     if (rendopt & RenderOption_Model) {
-        if (world.polyModel && polyModel_) {
-            polyModel_->Update(gfx_);
-            polyModel_->Draw(gfx_);
+        if (world.polyModel && m_polyModel) {
+            m_polyModel->Update(m_gfx);
+            m_polyModel->Draw(m_gfx);
         } else if (world.volModel != nullptr) {
             glEnable(GL_CULL_FACE); // FIXME: VertexArrray bindable?
             glCullFace(GL_BACK);
-            volModel_->Update(gfx_);
-            volModel_->Draw(gfx_);
+            m_volModel->Update(m_gfx);
+            m_volModel->Draw(m_gfx);
             glDisable(GL_CULL_FACE);
         }
     }
 
     if (rendopt & RenderOption_LatticeEdge) {
-        latticeEdge_->Update(gfx_);
-        latticeEdge_->Draw(gfx_);
+        m_latticeEdge->Update(m_gfx);
+        m_latticeEdge->Draw(m_gfx);
     }
 
     if (rendopt & RenderOption_LatticeFace) {
-        latticeFace_->Update(gfx_);
-        latticeFace_->Draw(gfx_);
+        m_latticeFace->Update(m_gfx);
+        m_latticeFace->Draw(m_gfx);
     }
 }
 
 void Renderer::LoadPolygonalModel()
 {
     assert(world.polyModel);
-    polyModel_ = std::make_unique<PolygonalModel>(gfx_, *world.polyModel);
+    m_polyModel = std::make_unique<PolygonalModel>(m_gfx, *world.polyModel);
 }
 
 void Renderer::LoadLattice()
 {
-    latticeVert_ = std::make_unique<LatticeVertex>(gfx_, world.uvsphere);
-    latticeEdge_ = std::make_unique<LatticeEdge>(gfx_, world.neurons);
-    latticeFace_ = std::make_unique<LatticeFace>(gfx_, world.latticeMesh);
+    m_latticeVert = std::make_unique<LatticeVertex>(m_gfx, world.uvsphere);
+    m_latticeEdge = std::make_unique<LatticeEdge>(m_gfx, world.neurons);
+    m_latticeFace = std::make_unique<LatticeFace>(m_gfx, world.latticeMesh);
 }
 
 void Renderer::LoadVolumetricModel()
 {
-    volModel_ = std::make_unique<VolumetricModel>(gfx_, world.cube);
+    m_volModel = std::make_unique<VolumetricModel>(m_gfx, world.cube);
 }
 
 Camera& Renderer::GetCamera()
 {
-    return gfx_.GetCamera();
+    return m_gfx.GetCamera();
 }

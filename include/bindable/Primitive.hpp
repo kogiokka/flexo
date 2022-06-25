@@ -11,7 +11,7 @@ namespace Bind
     class Primitive : public Bindable
     {
     protected:
-        GLenum mode_;
+        GLenum m_mode;
 
     public:
         Primitive(Graphics& gfx, GLenum mode);

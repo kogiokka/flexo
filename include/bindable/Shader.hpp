@@ -17,7 +17,7 @@ namespace Bind
 {
     class Shader : public Bindable
     {
-        GLuint id_;
+        GLuint m_id;
 
     public:
         Shader(Graphics& gfx);

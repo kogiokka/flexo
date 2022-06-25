@@ -6,12 +6,12 @@ namespace Bind
 {
     Texture2D::~Texture2D()
     {
-        gfx_->DeleteTexture(id_);
+        m_gfx->DeleteTexture(m_id);
     }
 
     void Texture2D::Bind()
     {
-        gfx_->SetTexture(GL_TEXTURE_2D, id_, unit_);
+        m_gfx->SetTexture(GL_TEXTURE_2D, m_id, m_unit);
     }
 
     template <>

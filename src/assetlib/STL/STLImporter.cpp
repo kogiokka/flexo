@@ -8,7 +8,7 @@
 
 bool STLImporter::IsAsciiSTL() const
 {
-    std::string_view solidStr(reinterpret_cast<const char*>(buffer_.data()), 5);
+    std::string_view solidStr(reinterpret_cast<const char*>(m_buffer.data()), 5);
     return solidStr == "solid";
 }
 
@@ -29,7 +29,7 @@ Mesh STLImporter::ImportAsciiSTL()
 
     using namespace std;
 
-    istringstream iss(std::string(buffer_.cbegin(), buffer_.cend()));
+    istringstream iss(std::string(m_buffer.cbegin(), m_buffer.cend()));
 
     vector<string> const keywords = {
         "solid", "facet", "normal", "outer", "loop", "vertex", "vertex", "vertex", "endloop", "endfacet", "endsolid",
@@ -103,8 +103,8 @@ Mesh STLImporter::ImportBinarySTL()
 {
     Mesh mesh;
 
-    unsigned int* numTriangles = reinterpret_cast<unsigned int*>(buffer_.data() + 80);
-    Triangle* triangles = reinterpret_cast<Triangle*>(buffer_.data() + 84);
+    unsigned int* numTriangles = reinterpret_cast<unsigned int*>(m_buffer.data() + 80);
+    Triangle* triangles = reinterpret_cast<Triangle*>(m_buffer.data() + 84);
 
     for (unsigned int i = 0; i < *numTriangles; i++) {
         mesh.normals.push_back(triangles[i].n);

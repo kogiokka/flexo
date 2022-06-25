@@ -7,15 +7,15 @@ float static constexpr MATH_PI_DIV_4 = MATH_PI * 0.25f;
 float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
 
 Camera::Camera(int width, int height)
-    : position_ {}
-    , worldUp_ { 0.0f, 1.0f, 0.0f }
-    , vecForward_ {}
-    , vecSide_ {}
-    , vecUp_ {}
-    , center_ { 0.0f, 0.0f, 0.0f }
-    , coord_ { 500.0f, 1.25f, 0.0f }
-    , viewVolumeWidth_(300.f)
-    , zoom_(1.0f)
+    : m_position {}
+    , m_worldUp { 0.0f, 1.0f, 0.0f }
+    , m_vecForward {}
+    , m_vecSide {}
+    , m_vecUp {}
+    , m_center { 0.0f, 0.0f, 0.0f }
+    , m_coord { 500.0f, 1.25f, 0.0f }
+    , m_viewVolumeWidth(300.f)
+    , m_zoom(1.0f)
 {
     SetAspectRatio(width, height);
     UpdateViewCoord();
@@ -40,87 +40,87 @@ void Camera::UpdateViewCoord()
     using namespace glm;
 
     // Set world-up vector as an offsetted camera-to-origin vector.
-    worldUp_ = -1.0f * CartesianCoord(coord_.phi, coord_.theta + MATH_PI_DIV_4);
-    position_ = center_ + coord_.r * CartesianCoord(coord_.phi, coord_.theta);
-    vecForward_ = normalize(center_ - position_);
-    vecSide_ = normalize(cross(vecForward_, worldUp_));
-    vecUp_ = cross(vecSide_, vecForward_);
+    m_worldUp = -1.0f * CartesianCoord(m_coord.phi, m_coord.theta + MATH_PI_DIV_4);
+    m_position = m_center + m_coord.r * CartesianCoord(m_coord.phi, m_coord.theta);
+    m_vecForward = normalize(m_center - m_position);
+    m_vecSide = normalize(cross(m_vecForward, m_worldUp));
+    m_vecUp = cross(m_vecSide, m_vecForward);
 }
 
 void Camera::SetAspectRatio(float ratio)
 {
-    aspectRatio_ = ratio;
+    m_aspectRatio = ratio;
 }
 
 void Camera::SetAspectRatio(int width, int height)
 {
-    aspectRatio_ = static_cast<float>(width) / static_cast<float>(height);
+    m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 }
 
 void Camera::SetCenter(float x, float y, float z)
 {
-    center_ = glm::vec3 { x, y, z };
+    m_center = glm::vec3 { x, y, z };
     UpdateViewCoord();
 }
 
 void Camera::SetPhi(float phi)
 {
-    coord_.theta = RoundGuard(phi);
+    m_coord.theta = RoundGuard(phi);
     UpdateViewCoord();
 }
 
 void Camera::SetViewVolumeWidth(float width)
 {
-    viewVolumeWidth_ = width;
+    m_viewVolumeWidth = width;
 }
 
 void Camera::SetTheta(float theta)
 {
-    coord_.phi = RoundGuard(theta);
+    m_coord.phi = RoundGuard(theta);
     UpdateViewCoord();
 }
 
 glm::vec3& Camera::GetCenter()
 {
-    return center_;
+    return m_center;
 }
 
 float& Camera::GetZoom()
 {
-    return zoom_;
+    return m_zoom;
 }
 
 glm::vec3& Camera::GetVectorUp()
 {
-    return vecUp_;
+    return m_vecUp;
 }
 
 glm::vec3& Camera::GetVectorSide()
 {
-    return vecSide_;
+    return m_vecSide;
 }
 
 glm::vec3& Camera::GetVectorForward()
 {
-    return vecForward_;
+    return m_vecForward;
 }
 
 SphericalCoord& Camera::GetCoordinates()
 {
-    return coord_;
+    return m_coord;
 }
 
 glm::mat4 Camera::ViewMatrix() const
 {
-    return glm::lookAt(position_, center_, worldUp_);
+    return glm::lookAt(m_position, m_center, m_worldUp);
 }
 
 glm::mat4 Camera::ProjectionMatrix() const
 {
-    assert(aspectRatio_ != 0.0);
+    assert(m_aspectRatio != 0.0);
 
-    float const v = viewVolumeWidth_ * aspectRatio_ * zoom_;
-    float const h = viewVolumeWidth_ * zoom_;
+    float const v = m_viewVolumeWidth * m_aspectRatio * m_zoom;
+    float const h = m_viewVolumeWidth * m_zoom;
 
     return glm::ortho(-v, v, -h, h, 0.1f, 1000.f);
 }
@@ -132,17 +132,17 @@ glm::mat4 Camera::ViewProjectionMatrix() const
 
 void Camera::SetProjection(Camera::Projection projection)
 {
-    projectionType_ = projection;
+    m_projectionType = projection;
 }
 
 glm::vec3 const Camera::Position() const
 {
-    return position_;
+    return m_position;
 }
 
 glm::vec3 const Camera::ForwardVector() const
 {
-    return vecForward_;
+    return m_vecForward;
 }
 
 // Restrict both phi and theta within 0 and 360 degrees.

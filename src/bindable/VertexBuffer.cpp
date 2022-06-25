@@ -5,62 +5,62 @@ namespace Bind
 {
     VertexBuffer::~VertexBuffer()
     {
-        gfx_->DeleteBuffer(id_);
+        m_gfx->DeleteBuffer(m_id);
     }
 
     void VertexBuffer::Bind()
     {
-        gfx_->SetVertexBuffers(startAttrib_, numAttrs_, std::vector<GLuint>(numAttrs_, id_).data(), offsets_.data(),
-                               strides_.data());
+        m_gfx->SetVertexBuffers(m_startAttrib, m_numAttrs, std::vector<GLuint>(m_numAttrs, m_id).data(), m_offsets.data(),
+                               m_strides.data());
     }
 
     GLuint VertexBuffer::GetStartAttrib() const
     {
-        return startAttrib_;
+        return m_startAttrib;
     }
 
     GLuint VertexBuffer::GetCount() const
     {
-        return count_;
+        return m_count;
     }
 
     template <>
     void VertexBuffer::SetAttribMemLayout<VertexPN>()
     {
-        numAttrs_ = 2;
-        offsets_ = { offsetof(VertexPN, position), offsetof(VertexPN, normal) };
-        strides_ = std::vector<GLsizei>(numAttrs_, sizeof(VertexPN));
+        m_numAttrs = 2;
+        m_offsets = { offsetof(VertexPN, position), offsetof(VertexPN, normal) };
+        m_strides = std::vector<GLsizei>(m_numAttrs, sizeof(VertexPN));
     }
 
     template <>
     void VertexBuffer::SetAttribMemLayout<VertexPNT>()
     {
-        numAttrs_ = 3;
-        offsets_ = { offsetof(VertexPNT, position), offsetof(VertexPNT, normal), offsetof(VertexPNT, texcoord) };
-        strides_ = std::vector<GLsizei>(numAttrs_, sizeof(VertexPNT));
+        m_numAttrs = 3;
+        m_offsets = { offsetof(VertexPNT, position), offsetof(VertexPNT, normal), offsetof(VertexPNT, texcoord) };
+        m_strides = std::vector<GLsizei>(m_numAttrs, sizeof(VertexPNT));
     }
 
     template <>
     void VertexBuffer::SetAttribMemLayout<VertexPNC>()
     {
-        numAttrs_ = 3;
-        offsets_ = { offsetof(VertexPNC, position), offsetof(VertexPNC, normal), offsetof(VertexPNC, color) };
-        strides_ = std::vector<GLsizei>(numAttrs_, sizeof(VertexPNC));
+        m_numAttrs = 3;
+        m_offsets = { offsetof(VertexPNC, position), offsetof(VertexPNC, normal), offsetof(VertexPNC, color) };
+        m_strides = std::vector<GLsizei>(m_numAttrs, sizeof(VertexPNC));
     }
 
     template <>
     void VertexBuffer::SetAttribMemLayout<glm::vec3>()
     {
-        numAttrs_ = 1;
-        offsets_ = { 0 };
-        strides_ = std::vector<GLsizei>(numAttrs_, sizeof(glm::vec3));
+        m_numAttrs = 1;
+        m_offsets = { 0 };
+        m_strides = std::vector<GLsizei>(m_numAttrs, sizeof(glm::vec3));
     }
 
     template <>
     void VertexBuffer::SetAttribMemLayout<glm::vec2>()
     {
-        numAttrs_ = 1;
-        offsets_ = { 0 };
-        strides_ = std::vector<GLsizei>(numAttrs_, sizeof(glm::vec2));
+        m_numAttrs = 1;
+        m_offsets = { 0 };
+        m_strides = std::vector<GLsizei>(m_numAttrs, sizeof(glm::vec2));
     }
 }

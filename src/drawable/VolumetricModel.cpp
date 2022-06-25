@@ -11,10 +11,10 @@
 #include "drawable/VolumetricModel.hpp"
 
 VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
-    : count_(0)
-    , ub_ {}
-    , texColor_(nullptr)
-    , texPattern_(nullptr)
+    : m_count(0)
+    , m_ub {}
+    , m_texColor(nullptr)
+    , m_texPattern(nullptr)
 {
     std::vector<AttributeDesc> attrs = {
         { "position", 3, GL_FLOAT, GL_FALSE }, // 0
@@ -31,31 +31,31 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
-    count_ = vertices.size();
+    m_count = vertices.size();
 
     auto shader = std::make_shared<Bind::Shader>(gfx);
     shader->Attach(ShaderStage::Vert, "shader/VolumetricModel.vert");
     shader->Attach(ShaderStage::Frag, "shader/VolumetricModel.frag");
     shader->Link();
 
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.modelMat = glm::mat4(1.0f);
-    ub_.vert.alpha = world.modelColorAlpha;
-    ub_.vert.viewPos = gfx.GetCameraPosition();
-    ub_.vert.light.position = gfx.GetCameraPosition();
-    ub_.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
-    ub_.vert.light.diffusion = glm::vec3(0.8f, 0.8f, 0.8f);
-    ub_.vert.light.specular = glm::vec3(0.8f, 0.8f, 0.8f);
-    ub_.vert.material.ambient = glm::vec3(0.3f, 0.3f, 0.3f);
-    ub_.vert.material.diffusion = glm::vec3(0.6f, 0.6f, 0.6f);
-    ub_.vert.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
-    ub_.vert.material.shininess = 256.0f;
-    ub_.vert.isWatermarked = false;
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.vert.modelMat = glm::mat4(1.0f);
+    m_ub.vert.alpha = world.modelColorAlpha;
+    m_ub.vert.viewPos = gfx.GetCameraPosition();
+    m_ub.vert.light.position = gfx.GetCameraPosition();
+    m_ub.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
+    m_ub.vert.light.diffusion = glm::vec3(0.8f, 0.8f, 0.8f);
+    m_ub.vert.light.specular = glm::vec3(0.8f, 0.8f, 0.8f);
+    m_ub.vert.material.ambient = glm::vec3(0.3f, 0.3f, 0.3f);
+    m_ub.vert.material.diffusion = glm::vec3(0.6f, 0.6f, 0.6f);
+    m_ub.vert.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
+    m_ub.vert.material.shininess = 256.0f;
+    m_ub.vert.isWatermarked = false;
 
     float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    texColor_ = std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, GL_TEXTURE0);
+    m_texColor = std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, GL_TEXTURE0);
     auto const& [img, w, h, ch] = world.pattern;
-    texPattern_ = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
+    m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
@@ -63,9 +63,9 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->textureCoords, 2));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->positions, 3));
     AddBind(shader);
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
-    AddBind(texColor_);
-    AddBind(texPattern_);
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
+    AddBind(m_texColor);
+    AddBind(m_texPattern);
 }
 
 void VolumetricModel::Draw(Graphics& gfx) const
@@ -75,18 +75,18 @@ void VolumetricModel::Draw(Graphics& gfx) const
     glVertexBindingDivisor(2, 1); // FIXME: Move to VertexArray bindable
     glVertexBindingDivisor(3, 1);
 
-    gfx.DrawInstanced(count_, world.volModel->positions.size());
+    gfx.DrawInstanced(m_count, world.volModel->positions.size());
 }
 
 void VolumetricModel::Update(Graphics& gfx)
 {
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.alpha = world.modelColorAlpha;
-    ub_.vert.viewPos = gfx.GetCameraPosition();
-    ub_.vert.light.position = gfx.GetCameraPosition();
-    ub_.vert.isWatermarked = world.isWatermarked;
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.vert.alpha = world.modelColorAlpha;
+    m_ub.vert.viewPos = gfx.GetCameraPosition();
+    m_ub.vert.light.position = gfx.GetCameraPosition();
+    m_ub.vert.isWatermarked = world.isWatermarked;
 
-    for (auto it = binds_.begin(); it != binds_.end(); it++) {
+    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         {
             Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
@@ -96,7 +96,7 @@ void VolumetricModel::Update(Graphics& gfx)
         {
             Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
-                ub->Update(ub_);
+                ub->Update(m_ub);
             }
         }
     }

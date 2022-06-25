@@ -19,7 +19,7 @@ public:
     void AddBind(std::shared_ptr<Bind::Bindable> bind);
 
 protected:
-    std::vector<std::shared_ptr<Bind::Bindable>> binds_;
+    std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
 };
 
 #endif

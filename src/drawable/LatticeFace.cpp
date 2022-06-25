@@ -25,24 +25,24 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
-    count_ = vertices.size();
+    m_count = vertices.size();
 
     auto shader = std::make_shared<Bind::Shader>(gfx);
     shader->Attach(ShaderStage::Vert, "shader/LatticeFace.vert");
     shader->Attach(ShaderStage::Frag, "shader/LatticeFace.frag");
     shader->Link();
 
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.modelMat = glm::mat4(1.0f);
-    ub_.frag.viewPos = gfx.GetCameraPosition();
-    ub_.frag.light.position = world.lightPos;
-    ub_.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-    ub_.frag.light.diffusion = glm::vec3(0.5f, 0.4f, 0.5f);
-    ub_.frag.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-    ub_.frag.material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-    ub_.frag.material.diffusion = glm::vec3(1.0f, 1.0f, 1.0f);
-    ub_.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
-    ub_.frag.material.shininess = 32.0f;
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.vert.modelMat = glm::mat4(1.0f);
+    m_ub.frag.viewPos = gfx.GetCameraPosition();
+    m_ub.frag.light.position = world.lightPos;
+    m_ub.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
+    m_ub.frag.light.diffusion = glm::vec3(0.5f, 0.4f, 0.5f);
+    m_ub.frag.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_ub.frag.material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_ub.frag.material.diffusion = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
+    m_ub.frag.material.shininess = 32.0f;
 
     auto const& [img, w, h, ch] = world.pattern;
 
@@ -50,23 +50,23 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(shader);
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
 }
 
 void LatticeFace::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
-    gfx.Draw(count_);
+    gfx.Draw(m_count);
 }
 
 void LatticeFace::Update(Graphics& gfx)
 {
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.frag.viewPos = gfx.GetCameraPosition();
-    ub_.frag.light.position = world.lightPos;
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.frag.viewPos = gfx.GetCameraPosition();
+    m_ub.frag.light.position = world.lightPos;
 
-    for (auto it = binds_.begin(); it != binds_.end(); it++) {
+    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         {
             Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
@@ -85,7 +85,7 @@ void LatticeFace::Update(Graphics& gfx)
         {
             Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
             if (ub != nullptr) {
-                ub->Update(ub_);
+                ub->Update(m_ub);
             }
         }
     }

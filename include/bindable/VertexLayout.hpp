@@ -10,7 +10,7 @@ namespace Bind
 {
     class VertexLayout : public Bindable
     {
-        GLuint id_;
+        GLuint m_id;
 
     public:
         VertexLayout(Graphics& gfx, std::vector<AttributeDesc> const& attrDescs);

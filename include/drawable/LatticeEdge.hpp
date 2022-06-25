@@ -26,8 +26,8 @@ class LatticeEdge : public Drawable
         Frag frag;
     };
 
-    std::shared_ptr<Bind::IndexBuffer> ibo_;
-    UniformBlock ub_;
+    std::shared_ptr<Bind::IndexBuffer> m_ibo;
+    UniformBlock m_ub;
 
 public:
     LatticeEdge(Graphics& gfx, Mesh const& mesh);

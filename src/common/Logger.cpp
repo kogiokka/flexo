@@ -46,7 +46,7 @@ namespace Logger::GL
         using Type = GLenum;
         using Severity = GLenum;
 
-        enum Type_ : GLenum {
+        enum m_Type : GLenum {
             Type_Error = GL_DEBUG_TYPE_ERROR,
             Type_DeprecatedBehavior = GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR,
             Type_UndefinedBehavior = GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR,
@@ -58,7 +58,7 @@ namespace Logger::GL
             Type_PushGroup = GL_DEBUG_TYPE_PUSH_GROUP,
         };
 
-        enum Severity_ : GLenum {
+        enum m_Severity : GLenum {
             Severity_High = GL_DEBUG_SEVERITY_HIGH,
             Severity_Medium = GL_DEBUG_SEVERITY_MEDIUM,
             Severity_Low = GL_DEBUG_SEVERITY_LOW,

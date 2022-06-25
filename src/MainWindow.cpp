@@ -38,16 +38,16 @@ enum {
 
 MainWindow::MainWindow(wxWindow* parent)
     : wxFrame(parent, wxID_ANY, "Self-organizing Map Demo", wxDefaultPosition, wxSize(1200, 800))
-    , latFlags_(LatticeFlags_CyclicNone)
-    , timerUIUpdate_(nullptr)
-    , panel_(nullptr)
-    , tcIterCurr_(nullptr)
-    , tcLatWidth_(nullptr)
-    , tcLatHeight_(nullptr)
-    , tcIterCap_(nullptr)
-    , tcInitLearningRate_(nullptr)
-    , slider_(nullptr)
-    , canvas_(nullptr)
+    , m_latFlags(LatticeFlags_CyclicNone)
+    , m_timerUIUpdate(nullptr)
+    , m_panel(nullptr)
+    , m_tcIterCurr(nullptr)
+    , m_tcLatWidth(nullptr)
+    , m_tcLatHeight(nullptr)
+    , m_tcIterCap(nullptr)
+    , m_tcInitLearningRate(nullptr)
+    , m_slider(nullptr)
+    , m_canvas(nullptr)
 {
     SetMinSize(wxSize(600, 400));
     Center();
@@ -66,21 +66,21 @@ MainWindow::MainWindow(wxWindow* parent)
 
     this->SetMenuBar(menubar);
 
-    iterationCap_ = 50000;
-    initLearningRate_ = 0.15f;
+    m_iterationCap = 50000;
+    m_initLearningRate = 0.15f;
 
     float const ratio = static_cast<float>(world.pattern.width) / static_cast<float>(world.pattern.height);
-    heightLat_ = 128;
-    widthLat_ = static_cast<int>(heightLat_ * ratio);
-    world.lattice = std::make_unique<Lattice>(widthLat_, heightLat_);
+    m_heightLat = 128;
+    m_widthLat = static_cast<int>(m_heightLat * ratio);
+    world.lattice = std::make_unique<Lattice>(m_widthLat, m_heightLat);
     CreateOpenGLCanvas();
 
-    panel_ = new wxPanel(this, wxID_ANY);
+    m_panel = new wxPanel(this, wxID_ANY);
 
     auto rootLayout = new wxBoxSizer(wxHORIZONTAL);
     // Proportion: Panel 1 to GLCanvas 3
-    rootLayout->Add(panel_, 1, wxGROW | wxALL, 0);
-    rootLayout->Add(canvas_, 3, wxGROW | wxALL, 0);
+    rootLayout->Add(m_panel, 1, wxGROW | wxALL, 0);
+    rootLayout->Add(m_canvas, 3, wxGROW | wxALL, 0);
     this->SetSizer(rootLayout);
     this->Layout();
 
@@ -88,32 +88,32 @@ MainWindow::MainWindow(wxWindow* parent)
     panelLayout->Add(CreatePanelStaticBox1(), 0, wxGROW | wxALL, 10);
     panelLayout->Add(CreatePanelStaticBox2(), 0, wxGROW | wxALL, 10);
     panelLayout->Add(CreatePanelStaticBox3(), 0, wxGROW | wxALL, 10);
-    panel_->SetSizer(panelLayout);
+    m_panel->SetSizer(panelLayout);
 
-    timerUIUpdate_ = new wxTimer(this, TIMER_UI_UPDATE);
-    timerUIUpdate_->Start(16); // 16 ms (60 fps)
+    m_timerUIUpdate = new wxTimer(this, TIMER_UI_UPDATE);
+    m_timerUIUpdate->Start(16); // 16 ms (60 fps)
 }
 
 MainWindow::~MainWindow()
 {
     // It seems that manually deleting widgets is unnecessary.
     // Using delete on wxPanel will cause some delay when the frame closes.
-    timerUIUpdate_->Stop();
-    delete canvas_;
-    delete timerUIUpdate_;
+    m_timerUIUpdate->Stop();
+    delete m_canvas;
+    delete m_timerUIUpdate;
 }
 
 inline void MainWindow::CreateOpenGLCanvas()
 {
     wxGLAttributes attrs;
     attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-    canvas_ = new OpenGLCanvas(this, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
-    canvas_->SetFocus();
+    m_canvas = new OpenGLCanvas(this, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
+    m_canvas->SetFocus();
 }
 
 inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox1()
 {
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Settings");
+    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, m_panel, "SOM Settings");
     auto const box = boxLayout->GetStaticBox();
 
     auto iterCapLabel = new wxStaticText(box, wxID_ANY, "Iteration Cap: ");
@@ -127,26 +127,26 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox1()
     validDimen.SetRange(1, 512);
     validLearnRate.SetRange(0.0f, 1.0f);
 
-    tcIterCap_ = new wxTextCtrl(box, TC_SET_ITERATION_CAP, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
+    m_tcIterCap = new wxTextCtrl(box, TC_SET_ITERATION_CAP, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
                                 validIterCap);
-    tcInitLearningRate_ = new wxTextCtrl(box, TC_SET_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+    m_tcInitLearningRate = new wxTextCtrl(box, TC_SET_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                          wxTE_CENTER, validLearnRate);
-    tcLatWidth_ = new wxTextCtrl(box, TC_SET_LAT_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
+    m_tcLatWidth = new wxTextCtrl(box, TC_SET_LAT_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
                                  validDimen);
-    tcLatHeight_ = new wxTextCtrl(box, TC_SET_LAT_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
+    m_tcLatHeight = new wxTextCtrl(box, TC_SET_LAT_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
                                   validDimen);
-    *tcIterCap_ << iterationCap_;
-    *tcInitLearningRate_ << initLearningRate_;
-    *tcLatWidth_ << widthLat_;
-    *tcLatHeight_ << heightLat_;
+    *m_tcIterCap << m_iterationCap;
+    *m_tcInitLearningRate << m_initLearningRate;
+    *m_tcLatWidth << m_widthLat;
+    *m_tcLatHeight << m_heightLat;
 
     auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
     auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
-    chkBox1->SetValue(latFlags_ & LatticeFlags_CyclicX);
-    chkBox2->SetValue(latFlags_ & LatticeFlags_CyclicY);
+    chkBox1->SetValue(m_latFlags & LatticeFlags_CyclicX);
+    chkBox2->SetValue(m_latFlags & LatticeFlags_CyclicY);
 
-    btnConfirm_ = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
-    btnConfirm_->Disable();
+    m_btnConfirm = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
+    m_btnConfirm->Disable();
 
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
@@ -154,46 +154,46 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox1()
     auto row4 = new wxBoxSizer(wxHORIZONTAL);
     auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
     row1->Add(iterCapLabel, 1, sizerFlag, 5);
-    row1->Add(tcIterCap_, 1, sizerFlag, 5);
+    row1->Add(m_tcIterCap, 1, sizerFlag, 5);
     row2->Add(learnRateLabel, 1, sizerFlag, 5);
-    row2->Add(tcInitLearningRate_, 1, sizerFlag, 5);
+    row2->Add(m_tcInitLearningRate, 1, sizerFlag, 5);
     row3->Add(dimenLabel, 1, sizerFlag, 5);
-    row3->Add(tcLatWidth_, 1, sizerFlag, 5);
-    row3->Add(tcLatHeight_, 1, sizerFlag, 5);
+    row3->Add(m_tcLatWidth, 1, sizerFlag, 5);
+    row3->Add(m_tcLatHeight, 1, sizerFlag, 5);
     row4->Add(chkBox1, 1, sizerFlag, 5);
     row4->Add(chkBox2, 1, sizerFlag, 5);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row4, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(btnConfirm_, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(m_btnConfirm, 0, wxGROW | wxALL, 10);
 
     return boxLayout;
 }
 
 inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox2()
 {
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "SOM Control");
+    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, m_panel, "SOM Control");
     auto const box = boxLayout->GetStaticBox();
 
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
 
-    btnPlayPause_ = new wxButton(box, BTN_PLAY_PAUSE, "Start");
-    btnPlayPause_->Disable();
+    m_btnPlayPause = new wxButton(box, BTN_PLAY_PAUSE, "Start");
+    m_btnPlayPause->Disable();
 
-    btnWatermark_ = new wxButton(box, BTN_WATERMARK, "Watermark");
-    btnWatermark_->Disable();
+    m_btnWatermark = new wxButton(box, BTN_WATERMARK, "Watermark");
+    m_btnWatermark->Disable();
 
     auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
-    tcIterCurr_ = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
-    tcIterCurr_->SetCanFocus(false);
+    m_tcIterCurr = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+    m_tcIterCurr->SetCanFocus(false);
 
     row1->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-    row1->Add(tcIterCurr_, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-    row2->Add(btnPlayPause_, 1, wxGROW | wxLEFT | wxRIGHT, 5);
-    row3->Add(btnWatermark_, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    row1->Add(m_tcIterCurr, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row2->Add(m_btnPlayPause, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    row3->Add(m_btnWatermark, 1, wxGROW | wxLEFT | wxRIGHT, 5);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
     boxLayout->Add(row3, 0, wxGROW | wxALL, 10);
@@ -203,7 +203,7 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox2()
 
 inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
 {
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, panel_, "Rendering Options");
+    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, m_panel, "Rendering Options");
     auto const box = boxLayout->GetStaticBox();
 
     auto row1 = new wxBoxSizer(wxVERTICAL);
@@ -213,14 +213,14 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
     auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
     auto chkBox4 = new wxCheckBox(box, CB_RENDEROPT_LAT_FACE, "Lattice Face");
     auto chkBox5 = new wxCheckBox(box, CB_RENDEROPT_LIGHT_SOURCE, "Light Source");
-    chkBox1->SetValue(canvas_->GetRenderOptionState(RenderOption_Model));
-    chkBox2->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeVertex));
-    chkBox3->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeEdge));
-    chkBox4->SetValue(canvas_->GetRenderOptionState(RenderOption_LatticeFace));
-    chkBox5->SetValue(canvas_->GetRenderOptionState(RenderOption_LightSource));
+    chkBox1->SetValue(m_canvas->GetRenderOptionState(RenderOption_Model));
+    chkBox2->SetValue(m_canvas->GetRenderOptionState(RenderOption_LatticeVertex));
+    chkBox3->SetValue(m_canvas->GetRenderOptionState(RenderOption_LatticeEdge));
+    chkBox4->SetValue(m_canvas->GetRenderOptionState(RenderOption_LatticeFace));
+    chkBox5->SetValue(m_canvas->GetRenderOptionState(RenderOption_LightSource));
     auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Model Transparency (%)");
-    int const sliderInit = static_cast<int>(100.0f - canvas_->GetModelTransparency() * 100.0f);
-    slider_ = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
+    int const sliderInit = static_cast<int>(100.0f - m_canvas->GetModelTransparency() * 100.0f);
+    m_slider = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
                            wxSL_HORIZONTAL | wxSL_LABELS | wxSL_INVERSE);
     row1->Add(chkBox1, 0, wxGROW | wxALL, 5);
     row1->Add(chkBox2, 0, wxGROW | wxALL, 5);
@@ -228,7 +228,7 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
     row1->Add(chkBox4, 0, wxGROW | wxALL, 5);
     row1->Add(chkBox5, 0, wxGROW | wxALL, 5);
     row2->Add(surfAlphaLabel, 0, wxGROW);
-    row2->Add(slider_, 0, wxGROW);
+    row2->Add(m_slider, 0, wxGROW);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 10);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
 
@@ -237,24 +237,24 @@ inline wxStaticBoxSizer* MainWindow::CreatePanelStaticBox3()
 
 void MainWindow::InitializeGL()
 {
-    canvas_->InitGL();
+    m_canvas->InitGL();
 }
 
 void MainWindow::OnTimerUIUpdate(wxTimerEvent&)
 {
-    if (tcIterCurr_ != nullptr) {
+    if (m_tcIterCurr != nullptr) {
         assert(world.lattice != nullptr);
-        tcIterCurr_->Clear();
-        *tcIterCurr_ << world.lattice->CurrentIteration();
+        m_tcIterCurr->Clear();
+        *m_tcIterCurr << world.lattice->CurrentIteration();
 
         if (world.lattice->IsTrainingDone()) {
-            btnWatermark_->Enable();
+            m_btnWatermark->Enable();
         } else {
-            btnWatermark_->Disable();
+            m_btnWatermark->Disable();
         }
     }
-    if (canvas_ != nullptr) {
-        canvas_->Refresh();
+    if (m_canvas != nullptr) {
+        m_canvas->Refresh();
     }
 }
 
@@ -262,10 +262,10 @@ void MainWindow::OnButtonPlayPause(wxCommandEvent&)
 {
     assert(world.lattice != nullptr);
     world.lattice->ToggleTraining();
-    if (btnPlayPause_->GetLabel() == "Start") {
-        btnPlayPause_->SetLabel("Pause");
+    if (m_btnPlayPause->GetLabel() == "Start") {
+        m_btnPlayPause->SetLabel("Pause");
     } else {
-        btnPlayPause_->SetLabel("Start");
+        m_btnPlayPause->SetLabel("Start");
     }
 }
 
@@ -299,84 +299,84 @@ void MainWindow::OnButtonConfirmAndReset(wxCommandEvent&)
 {
     long tmpLong;
     double tmpDouble;
-    if (tcLatWidth_->GetValue().ToLong(&tmpLong)) {
-        widthLat_ = tmpLong;
+    if (m_tcLatWidth->GetValue().ToLong(&tmpLong)) {
+        m_widthLat = tmpLong;
     } else {
         SetStatusText("Invalid lattice width!");
         return;
     }
-    if (tcLatHeight_->GetValue().ToLong(&tmpLong)) {
-        heightLat_ = tmpLong;
+    if (m_tcLatHeight->GetValue().ToLong(&tmpLong)) {
+        m_heightLat = tmpLong;
     } else {
         SetStatusText("Invalid lattice height!");
         return;
     }
-    if (tcIterCap_->GetValue().ToLong(&tmpLong)) {
-        iterationCap_ = tmpLong;
+    if (m_tcIterCap->GetValue().ToLong(&tmpLong)) {
+        m_iterationCap = tmpLong;
     } else {
         SetStatusText("Invalid lattice height!");
         return;
     }
-    if (tcInitLearningRate_->GetValue().ToDouble(&tmpDouble)) {
-        initLearningRate_ = static_cast<float>(tmpDouble);
+    if (m_tcInitLearningRate->GetValue().ToDouble(&tmpDouble)) {
+        m_initLearningRate = static_cast<float>(tmpDouble);
     } else {
         SetStatusText("Invalid initial learning rate!");
         return;
     }
 
     assert(world.dataset != nullptr);
-    world.lattice = std::make_unique<Lattice>(widthLat_, heightLat_);
-    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_, latFlags_);
-    btnPlayPause_->SetLabel("Start");
-    canvas_->ResetLattice();
+    world.lattice = std::make_unique<Lattice>(m_widthLat, m_heightLat);
+    world.lattice->Train(*world.dataset, m_initLearningRate, m_iterationCap, m_latFlags);
+    m_btnPlayPause->SetLabel("Start");
+    m_canvas->ResetLattice();
 }
 
 void MainWindow::OnCheckboxInputDataset(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(RenderOption_Model);
+    m_canvas->ToggleRenderOption(RenderOption_Model);
 }
 
 void MainWindow::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(RenderOption_LatticeVertex);
+    m_canvas->ToggleRenderOption(RenderOption_LatticeVertex);
 }
 
 void MainWindow::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(RenderOption_LatticeEdge);
+    m_canvas->ToggleRenderOption(RenderOption_LatticeEdge);
 }
 
 void MainWindow::OnCheckboxLatticeFace(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(RenderOption_LatticeFace);
+    m_canvas->ToggleRenderOption(RenderOption_LatticeFace);
 }
 
 void MainWindow::OnCheckboxLightSource(wxCommandEvent&)
 {
-    canvas_->ToggleRenderOption(RenderOption_LightSource);
+    m_canvas->ToggleRenderOption(RenderOption_LightSource);
 }
 
 void MainWindow::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
 {
-    latFlags_ ^= LatticeFlags_CyclicX;
+    m_latFlags ^= LatticeFlags_CyclicX;
 }
 
 void MainWindow::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
 {
-    latFlags_ ^= LatticeFlags_CyclicY;
+    m_latFlags ^= LatticeFlags_CyclicY;
 }
 
 void MainWindow::OnSliderTransparency(wxCommandEvent&)
 {
-    float const range = static_cast<float>(slider_->GetMax() - slider_->GetMin());
-    float const value = static_cast<float>(slider_->GetValue());
+    float const range = static_cast<float>(m_slider->GetMax() - m_slider->GetMin());
+    float const value = static_cast<float>(m_slider->GetValue());
     float const alpha = (range - value) / range;
-    canvas_->SetModelColorAlpha(alpha);
+    m_canvas->SetModelColorAlpha(alpha);
 }
 
 void MainWindow::OnMenuCameraReset(wxCommandEvent&)
 {
-    canvas_->ResetCamera();
+    m_canvas->ResetCamera();
 }
 
 void MainWindow::OnOpenFile(wxCommandEvent&)
@@ -399,12 +399,12 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
     // wxBusyCursor wait;
     auto const filepath = dialog.GetPath().ToStdString();
     defaultDir = fs::path(filepath).parent_path().string();
-    canvas_->OpenInputDataFile(filepath);
+    m_canvas->OpenInputDataFile(filepath);
 
     assert(world.dataset != nullptr);
-    world.lattice->Train(*world.dataset, initLearningRate_, iterationCap_, latFlags_);
-    btnConfirm_->Enable();
-    btnPlayPause_->Enable();
+    world.lattice->Train(*world.dataset, m_initLearningRate, m_iterationCap, m_latFlags);
+    m_btnConfirm->Enable();
+    m_btnPlayPause->Enable();
 }
 
 void MainWindow::OnExit([[maybe_unused]] wxCommandEvent& evt)

@@ -25,40 +25,40 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
-    count_ = vertices.size();
+    m_count = vertices.size();
 
     auto shader = std::make_shared<Bind::Shader>(gfx);
     shader->Attach(ShaderStage::Vert, "shader/LightSource.vert");
     shader->Attach(ShaderStage::Frag, "shader/LightSource.frag");
     shader->Link();
 
-    scaling_ = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * scaling_;
-    ub_.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_scaling = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * m_scaling;
+    m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(shader);
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, ub_));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 
 void LightSource::Draw(Graphics& gfx) const
 {
     Drawable::Draw(gfx);
-    gfx.Draw(count_);
+    gfx.Draw(m_count);
 }
 
 void LightSource::Update(Graphics& gfx)
 {
-    ub_.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    ub_.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * scaling_;
+    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
+    m_ub.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * m_scaling;
 
-    for (auto it = binds_.begin(); it != binds_.end(); it++) {
+    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (buf != nullptr) {
-            buf->Update(ub_);
+            buf->Update(m_ub);
             break;
         }
     }

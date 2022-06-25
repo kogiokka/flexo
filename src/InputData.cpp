@@ -1,18 +1,18 @@
 #include "InputData.hpp"
 
 InputData::InputData()
-    : pos_()
-    , rng_()
+    : m_pos()
+    , m_rng()
 {
 }
 
 InputData::InputData(std::vector<glm::vec3> const& positions)
-    : pos_(positions)
+    : m_pos(positions)
 {
-    rng_.setRange(0, pos_.size() - 1);
+    m_rng.setRange(0, m_pos.size() - 1);
 }
 
 glm::vec3 const& InputData::GetInput()
 {
-    return pos_[rng_.scalar()];
+    return m_pos[m_rng.scalar()];
 }

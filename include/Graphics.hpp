@@ -66,8 +66,8 @@ class Graphics
         const GLvoid* offsetOfFirstIndex;
     };
 
-    Context ctx_;
-    Camera camera_;
+    Context m_ctx;
+    Camera m_camera;
 
 public:
     Graphics(int width, int height);

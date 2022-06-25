@@ -21,10 +21,10 @@ class VolumeData
     enum class SampleType { Unknown, UnsignedChar, UnsignedShort, Float, Short };
     enum class Endian { Invalid, Little, Big };
 
-    VolumeData::Info info_;
-    std::vector<float> field_;
-    SampleType sampleType_;
-    Endian endianness_;
+    VolumeData::Info m_info;
+    std::vector<float> m_field;
+    SampleType m_sampleType;
+    Endian m_endianness;
 
 public:
     VolumeData();

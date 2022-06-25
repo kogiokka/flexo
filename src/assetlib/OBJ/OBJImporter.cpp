@@ -13,7 +13,7 @@ Mesh OBJImporter::ReadFile(std::string const& filename)
 
     Slurp(filename);
 
-    istringstream iss(string(buffer_.cbegin(), buffer_.cend()));
+    istringstream iss(string(m_buffer.cbegin(), m_buffer.cend()));
 
     string token;
     glm::vec3 p, n;

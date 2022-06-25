@@ -12,7 +12,7 @@
 
 using LatticeFlags = int;
 
-enum LatticeFlags_ : int {
+enum m_LatticeFlags : int {
     LatticeFlags_CyclicNone = 0,
     LatticeFlags_CyclicX,
     LatticeFlags_CyclicY,
@@ -20,24 +20,24 @@ enum LatticeFlags_ : int {
 
 class Lattice
 {
-    int width_;
-    int height_;
-    int iterCap_;
-    int iterRemained_;
-    float initRate_;
-    float currRate_;
-    float neighborhoodRadius_;
-    float timeConst_;
-    float initRadius_;
-    bool isTraining_;
-    bool isTrainingDone_;
-    bool isQuit_;
-    LatticeFlags flags_;
-    RandomRealNumber<float> RNG_;
-    std::vector<Node> neurons_;
-    std::thread worker_;
-    std::mutex mut_;
-    std::condition_variable cv_;
+    int m_width;
+    int m_height;
+    int m_iterCap;
+    int m_iterRemained;
+    float m_initRate;
+    float m_currRate;
+    float m_neighborhoodRadius;
+    float m_timeConst;
+    float m_initRadius;
+    bool m_isTraining;
+    bool m_isTrainingDone;
+    bool m_isQuit;
+    LatticeFlags m_flags;
+    RandomRealNumber<float> m_RNG;
+    std::vector<Node> m_neurons;
+    std::thread m_worker;
+    std::mutex m_mut;
+    std::condition_variable m_cv;
 
 public:
     Lattice(int width, int height);

@@ -8,8 +8,8 @@
 
 class InputData
 {
-    std::vector<glm::vec3> pos_;
-    RandomIntNumber<unsigned int> rng_;
+    std::vector<glm::vec3> m_pos;
+    RandomIntNumber<unsigned int> m_rng;
 
 public:
     InputData();

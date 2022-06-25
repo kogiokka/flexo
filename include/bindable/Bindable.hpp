@@ -8,7 +8,7 @@ namespace Bind
     class Bindable
     {
     protected:
-        Graphics* gfx_;
+        Graphics* m_gfx;
 
     public:
         Bindable(Graphics& gfx);
