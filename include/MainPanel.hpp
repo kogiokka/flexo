@@ -22,12 +22,6 @@ class MainPanel : public wxPanel
     friend MainWindow;
     std::shared_ptr<Lattice> m_lattice;
 
-    LatticeFlags m_latFlags;
-    int m_latticeWidth;
-    int m_latticeHeight;
-    int m_iterationCap;
-    float m_initLearningRate;
-
     OpenGLCanvas* m_canvas;
     wxButton* m_btnPlayPause;
     wxButton* m_btnWatermark;
@@ -43,8 +37,7 @@ class MainPanel : public wxPanel
 public:
     MainPanel(wxWindow* parent = nullptr);
     ~MainPanel();
-    void SetLattice(std::shared_ptr<Lattice> lattice);
-    void SetupTraning();
+    void SetupTraining();
     void SetOpenGLCanvas(OpenGLCanvas* canvas);
 
 private:

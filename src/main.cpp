@@ -1,39 +1,49 @@
 #include <memory>
 
-#include <wx/app.h>
-
 #include "MainPanel.hpp"
 #include "MainWindow.hpp"
 #include "OpenGLCanvas.hpp"
+#include "WatermarkingApp.hpp"
 #include "World.hpp"
 
-class VolumetricModelWatermarking : public wxApp
+WatermarkingApp::WatermarkingApp()
 {
-public:
-    virtual bool OnInit() override;
-    virtual int OnExit() override;
-    virtual void OnUnhandledException() override;
-};
+    float const ratio = static_cast<float>(world.pattern.width) / static_cast<float>(world.pattern.height);
+    m_conf.height = 128;
+    m_conf.width = static_cast<int>(m_conf.height * ratio);
+    m_conf.maxIterations = 50000;
+    m_conf.initialRate = 0.15f;
+}
 
-bool VolumetricModelWatermarking::OnInit()
+TrainingConfig& WatermarkingApp::GetTrainingConfig()
+{
+    return m_conf;
+}
+
+void WatermarkingApp::ToggleLatticeFlags(LatticeFlags flag)
+{
+    m_conf.flags ^= flag;
+}
+
+void WatermarkingApp::CreateLattice()
+{
+    world.lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
+    world.lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
+    world.lattice->Train(*world.dataset);
+}
+
+bool WatermarkingApp::OnInit()
 {
     if (!wxApp::OnInit()) {
         return false;
     }
 
-    float const ratio = static_cast<float>(world.pattern.width) / static_cast<float>(world.pattern.height);
-    int latticeHeight = 128;
-    int latticeWidth = static_cast<int>(latticeHeight * ratio);
-    int iterationCap = 50000;
-    float initLearningRate = 0.15f;
-
-    world.lattice = std::make_unique<Lattice>(latticeWidth, latticeHeight);
-    world.lattice->SetTrainingParameters(initLearningRate, iterationCap, LatticeFlags_CyclicNone);
+    // FIXME
+    world.lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
+    world.lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
 
     MainWindow* window = new MainWindow();
-
     MainPanel* panel = new MainPanel(window);
-    panel->SetLattice(world.lattice);
 
     wxGLAttributes attrs;
     attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
@@ -51,14 +61,14 @@ bool VolumetricModelWatermarking::OnInit()
     return true;
 }
 
-void VolumetricModelWatermarking::OnUnhandledException()
+void WatermarkingApp::OnUnhandledException()
 {
     throw;
 }
 
-int VolumetricModelWatermarking::OnExit()
+int WatermarkingApp::OnExit()
 {
     return wxApp::OnExit();
 }
 
-IMPLEMENT_APP(VolumetricModelWatermarking)
+wxIMPLEMENT_APP(WatermarkingApp);

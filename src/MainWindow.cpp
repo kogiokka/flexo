@@ -74,7 +74,7 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
     assert(m_mainPanel != nullptr);
     assert(world.dataset != nullptr);
 
-    m_mainPanel->SetupTraning();
+    m_mainPanel->SetupTraining();
     m_mainPanel->m_btnConfirm->Enable();
     m_mainPanel->m_btnPlayPause->Enable();
 }

@@ -9,7 +9,10 @@
 #include <wx/valnum.h>
 
 #include "MainPanel.hpp"
+#include "WatermarkingApp.hpp"
 #include "World.hpp"
+
+wxDECLARE_APP(WatermarkingApp);
 
 enum {
     TC_SET_ITERATION_CAP = wxID_HIGHEST + 1,
@@ -50,36 +53,26 @@ MainPanel::~MainPanel()
     m_updateTimer->Stop();
 }
 
-void MainPanel::SetLattice(std::shared_ptr<Lattice> lattice)
+void MainPanel::SetupTraining()
 {
-    m_lattice = lattice;
+    auto& [width, height, rate, cap, flags] = wxGetApp().GetTrainingConfig();
 
-    *m_tcIterCap << m_lattice->IterationCap();
-    *m_tcInitLearningRate << m_lattice->InitialRate();
-    *m_tcLatWidth << m_lattice->Width();
-    *m_tcLatHeight << m_lattice->Height();
-}
-
-void MainPanel::SetupTraning()
-{
     long tmpLong;
     double tmpDouble;
     if (m_tcLatWidth->GetValue().ToLong(&tmpLong)) {
-        m_latticeWidth = tmpLong;
+        width = tmpLong;
     }
     if (m_tcLatHeight->GetValue().ToLong(&tmpLong)) {
-        m_latticeHeight = tmpLong;
+        height = tmpLong;
     }
     if (m_tcIterCap->GetValue().ToLong(&tmpLong)) {
-        m_iterationCap = tmpLong;
+        cap = tmpLong;
     }
     if (m_tcInitLearningRate->GetValue().ToDouble(&tmpDouble)) {
-        m_initLearningRate = static_cast<float>(tmpDouble);
+        rate = static_cast<float>(tmpDouble);
     }
 
-    world.lattice = std::make_unique<Lattice>(m_latticeWidth, m_latticeHeight);
-    world.lattice->SetTrainingParameters(m_initLearningRate, m_iterationCap, m_latFlags);
-    world.lattice->Train(*world.dataset);
+    wxGetApp().CreateLattice();
 }
 
 void MainPanel::SetOpenGLCanvas(OpenGLCanvas* canvas)
@@ -103,6 +96,7 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox1()
     validDimen.SetRange(1, 512);
     validLearnRate.SetRange(0.0f, 1.0f);
 
+    auto& [width, height, rate, cap, flags] = wxGetApp().GetTrainingConfig();
     m_tcIterCap = new wxTextCtrl(box, TC_SET_ITERATION_CAP, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                  wxTE_CENTER, validIterCap);
     m_tcInitLearningRate = new wxTextCtrl(box, TC_SET_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
@@ -111,11 +105,15 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox1()
                                   validDimen);
     m_tcLatHeight = new wxTextCtrl(box, TC_SET_LAT_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
                                    validDimen);
+    *m_tcIterCap << cap;
+    *m_tcInitLearningRate << rate;
+    *m_tcLatWidth << width;
+    *m_tcLatHeight << height;
 
     auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
     auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
-    chkBox1->SetValue(m_latFlags & LatticeFlags_CyclicX);
-    chkBox2->SetValue(m_latFlags & LatticeFlags_CyclicY);
+    chkBox1->SetValue(flags & LatticeFlags_CyclicX);
+    chkBox2->SetValue(flags & LatticeFlags_CyclicY);
 
     m_btnConfirm = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
     m_btnConfirm->Disable();
@@ -236,7 +234,7 @@ void MainPanel::OnButtonWatermark(wxCommandEvent&)
 void MainPanel::OnButtonConfirmAndReset(wxCommandEvent&)
 {
     assert(world.dataset != nullptr);
-    SetupTraning();
+    SetupTraining();
     m_btnPlayPause->SetLabel("Start");
     m_canvas->ResetLattice();
 }
@@ -288,12 +286,12 @@ void MainPanel::OnCheckboxLightSource(wxCommandEvent&)
 
 void MainPanel::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
 {
-    m_latFlags ^= LatticeFlags_CyclicX;
+    wxGetApp().ToggleLatticeFlags(LatticeFlags_CyclicX);
 }
 
 void MainPanel::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
 {
-    m_latFlags ^= LatticeFlags_CyclicY;
+    wxGetApp().ToggleLatticeFlags(LatticeFlags_CyclicY);
 }
 
 void MainPanel::OnSliderTransparency(wxCommandEvent&)
