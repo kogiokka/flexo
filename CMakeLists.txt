@@ -37,7 +37,9 @@ target_sources(som-demo
 PRIVATE
     "src/main.cpp"
     "src/MainWindow.cpp"
+    "src/MainPanel.cpp"
     "src/OpenGLCanvas.cpp"
+
     "src/Camera.cpp"
     "src/Renderer.cpp"
     "src/Lattice.cpp"

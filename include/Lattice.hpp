@@ -49,7 +49,8 @@ public:
     float CurrentRate() const;
     float InitialRate() const;
     float NeighborhoodRadius() const;
-    void Train(InputData& dataset, float rate, int iterations, LatticeFlags flags);
+    void SetTrainingParameters(float initialRate, int maxIterations, LatticeFlags flags);
+    void Train(InputData& dataset);
     std::vector<Node> const& Neurons() const;
     void ToggleTraining();
     bool IsTrainingDone() const;

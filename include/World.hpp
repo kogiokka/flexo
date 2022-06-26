@@ -24,7 +24,7 @@ struct World {
     float modelColorAlpha = 0.8f;
     std::unique_ptr<InputData> dataset;
 
-    std::unique_ptr<Lattice> lattice;
+    std::shared_ptr<Lattice> lattice;
 
     Mesh uvsphere;
     Mesh cube;

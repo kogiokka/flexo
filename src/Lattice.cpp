@@ -41,6 +41,13 @@ Lattice::~Lattice()
     }
 }
 
+void Lattice::SetTrainingParameters(float initialRate, int maxIterations, LatticeFlags flags)
+{
+    m_initRate = initialRate;
+    m_iterCap = maxIterations;
+    m_flags = flags;
+}
+
 void Lattice::TrainInternal(InputData& dataset)
 {
     while (m_iterRemained > 0 && not m_isQuit) {
@@ -75,15 +82,12 @@ void Lattice::TrainInternal(InputData& dataset)
     m_isTrainingDone = true;
 }
 
-void Lattice::Train(InputData& dataset, float rate, int iterations, LatticeFlags flags)
+void Lattice::Train(InputData& dataset)
 {
-    m_flags = flags;
-    m_iterCap = iterations;
-    m_iterRemained = iterations;
-    m_initRate = rate;
-    m_currRate = rate;
+    m_iterRemained = m_iterCap;
+    m_currRate = m_initRate;
     m_initRadius = sqrt(static_cast<float>(m_width * m_width + m_height * m_height)) * 0.5f;
-    m_timeConst = iterations / logf(m_initRadius);
+    m_timeConst = m_iterCap / logf(m_initRadius);
     m_isTrainingDone = false;
 
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", m_iterCap, m_initRate);

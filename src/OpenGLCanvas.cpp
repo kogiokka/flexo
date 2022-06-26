@@ -16,6 +16,10 @@
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
 
+enum {
+    TIMER_UI_UPDATE,
+};
+
 float static constexpr MATH_PI = 3.14159265f;
 float static constexpr MATH_PI_DIV_4 = MATH_PI * 0.25f;
 float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
@@ -33,9 +37,15 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wx
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
     m_context = std::make_unique<wxGLContext>(this, nullptr, &attrs);
+
+    m_updateTimer = new wxTimer(this, TIMER_UI_UPDATE);
+    m_updateTimer->Start(16); // 16 ms (60 fps)
 }
 
-OpenGLCanvas::~OpenGLCanvas() { }
+OpenGLCanvas::~OpenGLCanvas()
+{
+    m_updateTimer->Stop();
+}
 
 void OpenGLCanvas::OnPaint(wxPaintEvent&)
 {
@@ -117,8 +127,6 @@ void OpenGLCanvas::OnSize(wxSizeEvent&)
 
 void OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
-    assert(direction == 1 || direction == -1);
-
     int direction = event.GetWheelRotation() / 120;
     float& zoom = m_renderer->GetCamera().zoom;
     float const tmp_zoom = zoom + direction * -0.02f;
@@ -175,6 +183,11 @@ void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
         coord.theta = RoundGuard(-(y - oY) * m_rateRotate + oTheta);
         cam.UpdateViewCoord();
     }
+}
+
+void OpenGLCanvas::OnUpdateTimer(wxTimerEvent&)
+{
+    Refresh();
 }
 
 void OpenGLCanvas::ResetCamera()
@@ -310,15 +323,6 @@ void OpenGLCanvas::OpenInputDataFile(wxString const& path)
     m_renderer->GetCamera().volumeSize = size;
 }
 
-void OpenGLCanvas::ToggleRenderOption(RenderOption opt)
-{
-    if (rendopt & opt) {
-        rendopt -= opt;
-    } else {
-        rendopt += opt;
-    }
-}
-
 bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
 {
     return rendopt & opt;
@@ -329,12 +333,6 @@ void OpenGLCanvas::ResetLattice()
     BuildLatticeMesh();
     UpdateLatticeEdges();
     m_renderer->LoadLattice();
-}
-
-void OpenGLCanvas::SetModelColorAlpha(float alpha)
-{
-    // The range between 0.0 and 1.0 should be handled by UI
-    world.modelColorAlpha = alpha;
 }
 
 float OpenGLCanvas::GetModelTransparency() const
@@ -476,4 +474,5 @@ wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
     EVT_LEFT_DOWN(OpenGLCanvas::OnMouseLeftDown)
     EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
     EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
+    EVT_TIMER(TIMER_UI_UPDATE, OpenGLCanvas::OnUpdateTimer)
 wxEND_EVENT_TABLE()
