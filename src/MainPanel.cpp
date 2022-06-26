@@ -189,7 +189,7 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox3()
     chkBox4->SetValue(m_canvas->GetRenderOptionState(RenderOption_LatticeFace));
     chkBox5->SetValue(m_canvas->GetRenderOptionState(RenderOption_LightSource));
     auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Model Transparency (%)");
-    int const sliderInit = static_cast<int>(100.0f - m_canvas->GetModelTransparency() * 100.0f);
+    int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
     m_slider = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
                             wxSL_HORIZONTAL | wxSL_LABELS | wxSL_INVERSE);
     row1->Add(chkBox1, 0, wxGROW | wxALL, 5);
@@ -242,7 +242,7 @@ void MainPanel::OnButtonConfirmAndReset(wxCommandEvent&)
 void MainPanel::OnButtonPlayPause(wxCommandEvent&)
 {
     assert(world.lattice != nullptr);
-    world.lattice->ToggleTraining();
+    wxGetApp().ToggleTraining();
     if (m_btnPlayPause->GetLabel() == "Start") {
         m_btnPlayPause->SetLabel("Pause");
     } else {
@@ -305,9 +305,9 @@ void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
 {
     if (m_tcIterCurr != nullptr) {
         m_tcIterCurr->Clear();
-        *m_tcIterCurr << world.lattice->CurrentIteration();
+        *m_tcIterCurr << wxGetApp().GetLattice().CurrentIteration();
 
-        if (world.lattice->IsTrainingDone()) {
+        if (wxGetApp().GetLattice().IsTrainingDone()) {
             m_btnWatermark->Enable();
         } else {
             m_btnWatermark->Disable();

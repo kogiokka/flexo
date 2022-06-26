@@ -6,8 +6,8 @@
 #include <vector>
 
 #include "Image.hpp"
-#include "Lattice.hpp"
 #include "Mesh.hpp"
+#include "Lattice.hpp"
 #include "RandomIntNumber.hpp"
 #include "VolumeData.hpp"
 
@@ -23,8 +23,6 @@ struct World {
 
     float modelColorAlpha = 0.8f;
     std::unique_ptr<InputData> dataset;
-
-    std::shared_ptr<Lattice> lattice;
 
     Mesh uvsphere;
     Mesh cube;

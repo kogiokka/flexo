@@ -43,12 +43,9 @@ public:
     void ResetLattice();
     void OpenInputDataFile(wxString const& path);
     bool GetRenderOptionState(RenderOption opt) const;
-    float GetModelTransparency() const;
 
 private:
     void UpdateScene();
-    void UpdateLatticeEdges();
-    void BuildLatticeMesh();
     inline float RoundGuard(float radian);
 
     wxDECLARE_EVENT_TABLE();

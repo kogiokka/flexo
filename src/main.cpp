@@ -5,6 +5,7 @@
 #include "OpenGLCanvas.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
+#include "assetlib/STL/STLImporter.hpp"
 
 WatermarkingApp::WatermarkingApp()
 {
@@ -13,6 +14,21 @@ WatermarkingApp::WatermarkingApp()
     m_conf.width = static_cast<int>(m_conf.height * ratio);
     m_conf.maxIterations = 50000;
     m_conf.initialRate = 0.15f;
+}
+
+void WatermarkingApp::OnUnhandledException()
+{
+    throw;
+}
+
+int WatermarkingApp::OnExit()
+{
+    return wxApp::OnExit();
+}
+
+Lattice const& WatermarkingApp::GetLattice()
+{
+    return *m_lattice;
 }
 
 TrainingConfig& WatermarkingApp::GetTrainingConfig()
@@ -25,11 +41,16 @@ void WatermarkingApp::ToggleLatticeFlags(LatticeFlags flag)
     m_conf.flags ^= flag;
 }
 
+void WatermarkingApp::ToggleTraining()
+{
+    m_lattice->ToggleTraining();
+}
+
 void WatermarkingApp::CreateLattice()
 {
-    world.lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
-    world.lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
-    world.lattice->Train(*world.dataset);
+    m_lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
+    m_lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
+    m_lattice->Train(*world.dataset);
 }
 
 bool WatermarkingApp::OnInit()
@@ -39,8 +60,12 @@ bool WatermarkingApp::OnInit()
     }
 
     // FIXME
-    world.lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
-    world.lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
+    m_lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
+    m_lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
+
+    STLImporter stlImp;
+    world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
+    world.cube = stlImp.ReadFile("res/models/cube.stl");
 
     MainWindow* window = new MainWindow();
     MainPanel* panel = new MainPanel(window);
@@ -61,14 +86,112 @@ bool WatermarkingApp::OnInit()
     return true;
 }
 
-void WatermarkingApp::OnUnhandledException()
+void WatermarkingApp::BuildLatticeMesh()
 {
-    throw;
+    if (m_lattice->IsTrainingDone()) {
+        return;
+    }
+
+    Mesh mesh;
+
+    std::vector<glm::vec3> positions;
+
+    // Positions
+    auto const& neurons = m_lattice->Neurons();
+    positions.reserve(neurons.size());
+    for (Node const& n : neurons) {
+        positions.emplace_back(n[0], n[1], n[2]);
+    }
+
+    int const width = m_lattice->Width();
+    int const height = m_lattice->Height();
+    float const divisor = 1.1f; // FIXME
+
+    for (int y = 0; y < height - 1; ++y) {
+        for (int x = 0; x < width - 1; ++x) {
+
+            unsigned int const idx = y * width + x;
+            glm::vec3 p1, p2, p3, p4;
+            glm::vec3 n1, n2, n3, n4;
+            glm::vec2 t1, t2, t3, t4;
+            Face f1, f2;
+
+            /**
+             *  4-----3
+             *  |     |
+             *  |     |
+             *  1-----2
+             */
+            p1 = positions[idx]; // [x, y]
+            p2 = positions[idx + 1]; // [x + 1, y]
+            p3 = positions[idx + width + 1]; // [x + 1, y + 1]
+            p4 = positions[idx + width]; // [x, y + 1]
+
+            // Normals
+            n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+            n4 = glm::normalize(glm::cross(p3 - p1, p4 - p3));
+
+            if (isnan(n1.x) || isnan(n1.y) || isnan(n1.z)) {
+                n1 = glm::vec3(0.0f, 0.0f, 0.0f);
+            }
+            if (isnan(n2.x) || isnan(n2.y) || isnan(n2.z)) {
+                n2 = glm::vec3(0.0f, 0.0f, 0.0f);
+            }
+
+            n3 = (n2 + n4) * 0.5f;
+            n1 = (n2 + n4) * 0.5f;
+
+            // TextureCoords
+            t1 = glm::vec2(x / divisor, y / divisor);
+            t2 = glm::vec2((x + 1) / divisor, y / divisor);
+            t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
+            t4 = glm::vec2(x / divisor, (y + 1) / divisor);
+
+            mesh.positions.push_back(p1);
+            mesh.positions.push_back(p2);
+            mesh.positions.push_back(p3);
+            mesh.positions.push_back(p1);
+            mesh.positions.push_back(p3);
+            mesh.positions.push_back(p4);
+            mesh.normals.push_back(n1);
+            mesh.normals.push_back(n2);
+            mesh.normals.push_back(n3);
+            mesh.normals.push_back(n1);
+            mesh.normals.push_back(n3);
+            mesh.normals.push_back(n4);
+            mesh.textureCoords.push_back(t1);
+            mesh.textureCoords.push_back(t2);
+            mesh.textureCoords.push_back(t3);
+            mesh.textureCoords.push_back(t1);
+            mesh.textureCoords.push_back(t3);
+            mesh.textureCoords.push_back(t4);
+        }
+    }
+
+    world.neurons.positions = positions;
+    world.latticeMesh = mesh;
 }
 
-int WatermarkingApp::OnExit()
+void WatermarkingApp::UpdateLatticeEdges()
 {
-    return wxApp::OnExit();
+    std::vector<unsigned int> indices;
+
+    int const width = m_lattice->Width();
+    int const height = m_lattice->Height();
+    for (int i = 0; i < height - 1; ++i) {
+        for (int j = 0; j < width - 1; ++j) {
+            indices.push_back(i * width + j);
+            indices.push_back(i * width + j + 1);
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back(i * width + j);
+        }
+    }
+
+    world.latticeEdges = indices;
 }
 
 wxIMPLEMENT_APP(WatermarkingApp);

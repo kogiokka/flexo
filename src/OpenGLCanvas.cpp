@@ -11,10 +11,13 @@
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
+#include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
+
+wxDECLARE_APP(WatermarkingApp);
 
 enum {
     TIMER_UI_UPDATE,
@@ -88,12 +91,9 @@ void OpenGLCanvas::InitGL()
     wxSize const size = GetClientSize() * GetContentScaleFactor();
     assert(size.x > 0 && size.y > 0);
 
-    STLImporter stlImp;
-    world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
-    world.cube = stlImp.ReadFile("res/models/cube.stl");
-
-    BuildLatticeMesh();
-    UpdateLatticeEdges();
+    // FIXME
+    wxGetApp().BuildLatticeMesh();
+    wxGetApp().UpdateLatticeEdges();
 
     m_renderer = std::make_unique<Renderer>(size.x, size.y);
 
@@ -196,6 +196,7 @@ void OpenGLCanvas::ResetCamera()
     m_renderer->GetCamera() = Camera(size.x, size.y);
 }
 
+// FIXME: Move to the app
 void OpenGLCanvas::OpenInputDataFile(wxString const& path)
 {
     world.polyModel = nullptr;
@@ -328,132 +329,21 @@ bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
     return rendopt & opt;
 }
 
+// FIXME
 void OpenGLCanvas::ResetLattice()
 {
-    BuildLatticeMesh();
-    UpdateLatticeEdges();
+    wxGetApp().BuildLatticeMesh();
+    wxGetApp().UpdateLatticeEdges();
     m_renderer->LoadLattice();
 }
 
-float OpenGLCanvas::GetModelTransparency() const
-{
-    return world.modelColorAlpha;
-}
-
+// FIXME
 void OpenGLCanvas::UpdateScene()
 {
     if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
         || rendopt & RenderOption_LatticeFace) {
-        BuildLatticeMesh();
+        wxGetApp().BuildLatticeMesh();
     }
-}
-
-void OpenGLCanvas::UpdateLatticeEdges()
-{
-    std::vector<unsigned int> indices;
-
-    int const width = world.lattice->Width();
-    int const height = world.lattice->Height();
-    for (int i = 0; i < height - 1; ++i) {
-        for (int j = 0; j < width - 1; ++j) {
-            indices.push_back(i * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back(i * width + j);
-        }
-    }
-
-    world.latticeEdges = indices;
-}
-
-void OpenGLCanvas::BuildLatticeMesh()
-{
-    if (world.lattice->IsTrainingDone()) {
-        return;
-    }
-
-    Mesh mesh;
-
-    std::vector<glm::vec3> positions;
-
-    // Positions
-    auto const& neurons = world.lattice->Neurons();
-    positions.reserve(neurons.size());
-    for (Node const& n : neurons) {
-        positions.emplace_back(n[0], n[1], n[2]);
-    }
-
-    int const width = world.lattice->Width();
-    int const height = world.lattice->Height();
-    float const divisor = 1.1f; // FIXME
-
-    for (int y = 0; y < height - 1; ++y) {
-        for (int x = 0; x < width - 1; ++x) {
-
-            unsigned int const idx = y * width + x;
-            glm::vec3 p1, p2, p3, p4;
-            glm::vec3 n1, n2, n3, n4;
-            glm::vec2 t1, t2, t3, t4;
-            Face f1, f2;
-
-            /**
-             *  4-----3
-             *  |     |
-             *  |     |
-             *  1-----2
-             */
-            p1 = positions[idx]; // [x, y]
-            p2 = positions[idx + 1]; // [x + 1, y]
-            p3 = positions[idx + width + 1]; // [x + 1, y + 1]
-            p4 = positions[idx + width]; // [x, y + 1]
-
-            // Normals
-            n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-            n4 = glm::normalize(glm::cross(p3 - p1, p4 - p3));
-
-            if (isnan(n1.x) || isnan(n1.y) || isnan(n1.z)) {
-                n1 = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-            if (isnan(n2.x) || isnan(n2.y) || isnan(n2.z)) {
-                n2 = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-
-            n3 = (n2 + n4) * 0.5f;
-            n1 = (n2 + n4) * 0.5f;
-
-            // TextureCoords
-            t1 = glm::vec2(x / divisor, y / divisor);
-            t2 = glm::vec2((x + 1) / divisor, y / divisor);
-            t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
-            t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-
-            mesh.positions.push_back(p1);
-            mesh.positions.push_back(p2);
-            mesh.positions.push_back(p3);
-            mesh.positions.push_back(p1);
-            mesh.positions.push_back(p3);
-            mesh.positions.push_back(p4);
-            mesh.normals.push_back(n1);
-            mesh.normals.push_back(n2);
-            mesh.normals.push_back(n3);
-            mesh.normals.push_back(n1);
-            mesh.normals.push_back(n3);
-            mesh.normals.push_back(n4);
-            mesh.textureCoords.push_back(t1);
-            mesh.textureCoords.push_back(t2);
-            mesh.textureCoords.push_back(t3);
-            mesh.textureCoords.push_back(t1);
-            mesh.textureCoords.push_back(t3);
-            mesh.textureCoords.push_back(t4);
-        }
-    }
-
-    world.neurons.positions = positions;
-    world.latticeMesh = mesh;
 }
 
 // Restrict both phi and theta within 0 and 360 degrees.
