@@ -207,28 +207,7 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox3()
 
 void MainPanel::OnButtonWatermark(wxCommandEvent&)
 {
-    assert(world.lattice);
-    assert(world.volModel);
-
-    // Update the texture coordinates of the Volumetric Model.
-    std::vector<glm::vec2> textureCoords;
-    textureCoords.reserve(world.volModel->textureCoords.size());
-
-    for (glm::vec3 const& vp : world.volModel->positions) {
-        glm::vec2 coord = world.latticeMesh.textureCoords.front();
-        float minDist = glm::distance(vp, world.latticeMesh.positions.front());
-        // TODO: Deal with the duplicate calculations
-        for (unsigned int i = 1; i < world.latticeMesh.positions.size(); i++) {
-            auto dist = glm::distance(vp, world.latticeMesh.positions[i]);
-            if (dist < minDist) {
-                minDist = dist;
-                coord = world.latticeMesh.textureCoords[i];
-            }
-        }
-        textureCoords.push_back(coord);
-    }
-    world.volModel->textureCoords = textureCoords;
-    world.isWatermarked = true;
+    wxGetApp().DoWatermark();
 }
 
 void MainPanel::OnButtonConfirmAndReset(wxCommandEvent&)

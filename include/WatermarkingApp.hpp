@@ -29,6 +29,7 @@ public:
     TrainingConfig& GetTrainingConfig();
     void ToggleLatticeFlags(LatticeFlags flag);
     void ToggleTraining();
+    void DoWatermark();
     void CreateLattice();
     void BuildLatticeMesh();
     void UpdateLatticeEdges();
