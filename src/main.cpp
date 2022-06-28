@@ -26,9 +26,14 @@ int WatermarkingApp::OnExit()
     return wxApp::OnExit();
 }
 
-Lattice const& WatermarkingApp::GetLattice()
+Lattice const& WatermarkingApp::GetLattice() const
 {
     return *m_lattice;
+}
+
+SelfOrganizingMap const& WatermarkingApp::GetSOM() const
+{
+    return *m_som;
 }
 
 TrainingConfig& WatermarkingApp::GetTrainingConfig()
@@ -43,12 +48,11 @@ void WatermarkingApp::ToggleLatticeFlags(LatticeFlags flag)
 
 void WatermarkingApp::ToggleTraining()
 {
-    m_lattice->ToggleTraining();
+    m_som->ToggleTraining();
 }
 
 void WatermarkingApp::DoWatermark()
 {
-    assert(world.lattice);
     assert(world.volModel);
 
     // Update the texture coordinates of the Volumetric Model.
@@ -75,8 +79,9 @@ void WatermarkingApp::DoWatermark()
 void WatermarkingApp::CreateLattice()
 {
     m_lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
-    m_lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
-    m_lattice->Train(*world.dataset);
+    m_lattice->SetFlags(m_conf.flags);
+    m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
+    m_som->Train(*m_lattice, *world.dataset);
 }
 
 bool WatermarkingApp::OnInit()
@@ -87,7 +92,8 @@ bool WatermarkingApp::OnInit()
 
     // FIXME
     m_lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
-    m_lattice->SetTrainingParameters(m_conf.initialRate, m_conf.maxIterations, m_conf.flags);
+    m_lattice->SetFlags(m_conf.flags);
+    m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
 
     STLImporter stlImp;
     world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
@@ -114,7 +120,7 @@ bool WatermarkingApp::OnInit()
 
 void WatermarkingApp::BuildLatticeMesh()
 {
-    if (m_lattice->IsTrainingDone()) {
+    if (m_som->IsTrainingDone()) {
         return;
     }
 

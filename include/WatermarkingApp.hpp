@@ -6,6 +6,7 @@
 #include <wx/app.h>
 
 #include "Lattice.hpp"
+#include "SelfOrganizingMap.hpp"
 
 struct TrainingConfig {
     int width;
@@ -17,6 +18,7 @@ struct TrainingConfig {
 
 class WatermarkingApp : public wxApp
 {
+    std::unique_ptr<SelfOrganizingMap> m_som;
     std::unique_ptr<Lattice> m_lattice;
     TrainingConfig m_conf;
 
@@ -25,7 +27,8 @@ public:
     virtual bool OnInit() override;
     virtual int OnExit() override;
     virtual void OnUnhandledException() override;
-    Lattice const& GetLattice();
+    Lattice const& GetLattice() const;
+    SelfOrganizingMap const& GetSOM() const;
     TrainingConfig& GetTrainingConfig();
     void ToggleLatticeFlags(LatticeFlags flag);
     void ToggleTraining();

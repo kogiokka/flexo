@@ -71,6 +71,8 @@ PRIVATE
     "src/drawable/LatticeVertex.cpp"
     "src/drawable/LatticeEdge.cpp"
     "src/drawable/LatticeFace.cpp"
+
+    "src/SelfOrganizingMap.cpp"
 )
 
 target_include_directories(som-demo

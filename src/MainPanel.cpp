@@ -220,7 +220,6 @@ void MainPanel::OnButtonConfirmAndReset(wxCommandEvent&)
 
 void MainPanel::OnButtonPlayPause(wxCommandEvent&)
 {
-    assert(world.lattice != nullptr);
     wxGetApp().ToggleTraining();
     if (m_btnPlayPause->GetLabel() == "Start") {
         m_btnPlayPause->SetLabel("Pause");
@@ -284,9 +283,9 @@ void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
 {
     if (m_tcIterCurr != nullptr) {
         m_tcIterCurr->Clear();
-        *m_tcIterCurr << wxGetApp().GetLattice().CurrentIteration();
+        *m_tcIterCurr << wxGetApp().GetSOM().GetIterations();
 
-        if (wxGetApp().GetLattice().IsTrainingDone()) {
+        if (wxGetApp().GetSOM().IsTrainingDone()) {
             m_btnWatermark->Enable();
         } else {
             m_btnWatermark->Disable();
