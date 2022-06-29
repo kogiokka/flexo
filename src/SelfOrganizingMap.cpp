@@ -25,22 +25,22 @@ SelfOrganizingMap::~SelfOrganizingMap()
     }
 }
 
-void SelfOrganizingMap::Train(Lattice& lattice, InputData& dataset)
+void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, InputData& dataset)
 {
     m_initialNeighborhood
-        = sqrt(static_cast<float>(lattice.m_width * lattice.m_width + lattice.m_height * lattice.m_height)) * 0.5f;
+        = sqrt(static_cast<float>(lattice->m_width * lattice->m_width + lattice->m_height * lattice->m_height)) * 0.5f;
     m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", m_maxIterations, m_initialRate);
 
-    void (SelfOrganizingMap::*TrainInternal)(Lattice&, InputData&) = &SelfOrganizingMap::TrainInternal;
-    m_worker = std::thread(TrainInternal, std::ref(*this), std::ref(lattice), std::ref(dataset));
+    void (SelfOrganizingMap::*TrainInternal)(std::shared_ptr<Lattice>, InputData&) = &SelfOrganizingMap::TrainInternal;
+    m_worker = std::thread(TrainInternal, std::ref(*this), lattice, std::ref(dataset));
 
     Logger::info("Training worker created");
     Logger::info("Training has been paused");
 }
 
-void SelfOrganizingMap::TrainInternal(Lattice& lattice, InputData& dataset)
+void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, InputData& dataset)
 {
     while ((m_iterations <= m_maxIterations) && !m_isDone) {
         std::unique_lock lk(m_mut);
@@ -52,21 +52,21 @@ void SelfOrganizingMap::TrainInternal(Lattice& lattice, InputData& dataset)
         m_neighborhood = m_initialNeighborhood * expf(-progress / m_timeConstant);
         m_rate = m_initialRate * expf(-progress / static_cast<float>(m_maxIterations - m_iterations));
 
-        glm::ivec2 const index = FindBMU(lattice, input);
-        Node& bmu = lattice.m_neurons[index.x + index.y * lattice.m_width];
-        UpdateNeighborhood(lattice, input, bmu, m_neighborhood);
+        glm::ivec2 const index = FindBMU(*lattice, input);
+        Node& bmu = lattice->m_neurons[index.x + index.y * lattice->m_width];
+        UpdateNeighborhood(*lattice, input, bmu, m_neighborhood);
 
-        if (lattice.m_flags & LatticeFlags_CyclicX) {
-            for (int y = 0; y < lattice.m_height; y++) {
-                lattice.m_neurons[y * lattice.m_width + lattice.m_width - 1]
-                    = lattice.m_neurons[y * lattice.m_width + 0];
+        if (lattice->m_flags & LatticeFlags_CyclicX) {
+            for (int y = 0; y < lattice->m_height; y++) {
+                lattice->m_neurons[y * lattice->m_width + lattice->m_width - 1]
+                    = lattice->m_neurons[y * lattice->m_width + 0];
             }
         }
 
-        if (lattice.m_flags & LatticeFlags_CyclicY) {
-            for (int x = 0; x < lattice.m_width; x++) {
-                lattice.m_neurons[(lattice.m_height - 1) * lattice.m_width + x]
-                    = lattice.m_neurons[0 * lattice.m_width + x];
+        if (lattice->m_flags & LatticeFlags_CyclicY) {
+            for (int x = 0; x < lattice->m_width; x++) {
+                lattice->m_neurons[(lattice->m_height - 1) * lattice->m_width + x]
+                    = lattice->m_neurons[0 * lattice->m_width + x];
             }
         }
 

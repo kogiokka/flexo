@@ -18,8 +18,8 @@ struct TrainingConfig {
 
 class WatermarkingApp : public wxApp
 {
-    std::unique_ptr<SelfOrganizingMap> m_som;
-    std::unique_ptr<Lattice> m_lattice;
+    std::shared_ptr<SelfOrganizingMap> m_som;
+    std::shared_ptr<Lattice> m_lattice;
     TrainingConfig m_conf;
 
 public:

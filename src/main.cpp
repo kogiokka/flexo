@@ -78,10 +78,10 @@ void WatermarkingApp::DoWatermark()
 
 void WatermarkingApp::CreateLattice()
 {
-    m_lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
+    m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->SetFlags(m_conf.flags);
     m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
-    m_som->Train(*m_lattice, *world.dataset);
+    m_som->Train(m_lattice, *world.dataset);
 }
 
 bool WatermarkingApp::OnInit()
@@ -91,7 +91,7 @@ bool WatermarkingApp::OnInit()
     }
 
     // FIXME
-    m_lattice = std::make_unique<Lattice>(m_conf.width, m_conf.height);
+    m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->SetFlags(m_conf.flags);
     m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
 

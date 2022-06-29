@@ -2,9 +2,11 @@
 #define SELF_ORGANIZING_MAP_H
 
 #include <condition_variable>
-#include <glm/glm.hpp>
+#include <memory>
 #include <mutex>
 #include <thread>
+
+#include <glm/glm.hpp>
 
 #include "InputData.hpp"
 #include "Lattice.hpp"
@@ -28,13 +30,13 @@ class SelfOrganizingMap
 public:
     SelfOrganizingMap(float initialRate, int maxIterations);
     ~SelfOrganizingMap();
-    void Train(Lattice& lattice, InputData& dataset);
+    void Train(std::shared_ptr<Lattice> lattice, InputData& dataset);
     void ToggleTraining();
     bool IsTrainingDone() const;
     int GetIterations() const;
 
 private:
-    void TrainInternal(Lattice& lattice, InputData& dataset);
+    void TrainInternal(std::shared_ptr<Lattice> lattice, InputData& dataset);
     glm::ivec2 FindBMU(Lattice const& lattice, glm::vec3 const& input) const;
     void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius);
 };

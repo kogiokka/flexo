@@ -12,7 +12,7 @@ Lattice::Lattice(int width, int height)
     , m_height(height)
     , m_flags(LatticeFlags_CyclicNone)
 {
-    RandomRealNumber<float> rng(-1.0f, 1.0f);
+    RandomRealNumber<float> rng(-10.0f, 10.0f);
 
     for (int j = 0; j < m_height; ++j) {
         for (int i = 0; i < m_width; ++i) {
