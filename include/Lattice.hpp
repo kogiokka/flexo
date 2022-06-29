@@ -17,22 +17,14 @@ enum LatticeFlags_ : int {
     LatticeFlags_CyclicY,
 };
 
-class SelfOrganizingMap;
-
-class Lattice
+struct Lattice
 {
-    friend SelfOrganizingMap;
-    int m_width;
-    int m_height;
-    LatticeFlags m_flags;
-    std::vector<Node> m_neurons;
+    int width;
+    int height;
+    LatticeFlags flags;
+    std::vector<Node> neurons;
 
-public:
     Lattice(int width, int height);
-    int Width() const;
-    int Height() const;
-    std::vector<Node> const& Neurons() const;
-    void SetFlags(LatticeFlags flags);
 };
 
 #endif

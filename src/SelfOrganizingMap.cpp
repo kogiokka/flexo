@@ -28,7 +28,7 @@ SelfOrganizingMap::~SelfOrganizingMap()
 void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, InputData& dataset)
 {
     m_initialNeighborhood
-        = sqrt(static_cast<float>(lattice->m_width * lattice->m_width + lattice->m_height * lattice->m_height)) * 0.5f;
+        = sqrt(static_cast<float>(lattice->width * lattice->width + lattice->height * lattice->height)) * 0.5f;
     m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", m_maxIterations, m_initialRate);
@@ -53,20 +53,20 @@ void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, InputDat
         m_rate = m_initialRate * expf(-progress / static_cast<float>(m_maxIterations - m_iterations));
 
         glm::ivec2 const index = FindBMU(*lattice, input);
-        Node& bmu = lattice->m_neurons[index.x + index.y * lattice->m_width];
+        Node& bmu = lattice->neurons[index.x + index.y * lattice->width];
         UpdateNeighborhood(*lattice, input, bmu, m_neighborhood);
 
-        if (lattice->m_flags & LatticeFlags_CyclicX) {
-            for (int y = 0; y < lattice->m_height; y++) {
-                lattice->m_neurons[y * lattice->m_width + lattice->m_width - 1]
-                    = lattice->m_neurons[y * lattice->m_width + 0];
+        if (lattice->flags & LatticeFlags_CyclicX) {
+            for (int y = 0; y < lattice->height; y++) {
+                lattice->neurons[y * lattice->width + lattice->width - 1]
+                    = lattice->neurons[y * lattice->width + 0];
             }
         }
 
-        if (lattice->m_flags & LatticeFlags_CyclicY) {
-            for (int x = 0; x < lattice->m_width; x++) {
-                lattice->m_neurons[(lattice->m_height - 1) * lattice->m_width + x]
-                    = lattice->m_neurons[0 * lattice->m_width + x];
+        if (lattice->flags & LatticeFlags_CyclicY) {
+            for (int x = 0; x < lattice->width; x++) {
+                lattice->neurons[(lattice->height - 1) * lattice->width + x]
+                    = lattice->neurons[0 * lattice->width + x];
             }
         }
 
@@ -80,11 +80,11 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice const& lattice, glm::vec3 const& i
 {
     glm::ivec2 idx;
     float distMin = std::numeric_limits<float>::max();
-    for (int i = 0; i < lattice.m_width; i++) {
-        for (int j = 0; j < lattice.m_height; j++) {
+    for (int i = 0; i < lattice.width; i++) {
+        for (int j = 0; j < lattice.height; j++) {
             float sum = 0;
-            for (int k = 0; k < lattice.m_neurons.front().Dimension(); k++) {
-                float const diff = input[k] - lattice.m_neurons[i + j * lattice.m_width][k];
+            for (int k = 0; k < lattice.neurons.front().Dimension(); k++) {
+                float const diff = input[k] - lattice.neurons[i + j * lattice.width][k];
                 sum += (diff * diff);
             }
             if (distMin > sum) {
@@ -101,29 +101,29 @@ void SelfOrganizingMap::UpdateNeighborhood(Lattice& lattice, glm::vec3 input, No
     int const rad = static_cast<int>(radius);
     int const radSqr = rad * rad;
 
-    int w = lattice.Width() - 1;
-    int h = lattice.Height() - 1;
+    int w = lattice.width - 1;
+    int h = lattice.height - 1;
     for (int x = bmu.X() - rad; x <= bmu.X() + rad; x++) {
         int modX = x;
-        if (lattice.m_flags & LatticeFlags_CyclicX) {
+        if (lattice.flags & LatticeFlags_CyclicX) {
             modX = ((x % w) + w) % w;
         } else {
-            if (x < 0 || x >= lattice.m_width)
+            if (x < 0 || x >= lattice.width)
                 continue;
         }
         for (int y = bmu.Y() - rad; y <= bmu.Y() + rad; y++) {
             int modY = y;
-            if (lattice.m_flags & LatticeFlags_CyclicY) {
+            if (lattice.flags & LatticeFlags_CyclicY) {
                 modY = ((y % h) + h) % h;
             } else {
-                if (y < 0 || y >= lattice.m_height)
+                if (y < 0 || y >= lattice.height)
                     continue;
             }
             float const dx = bmu.X() - x;
             float const dy = bmu.Y() - y;
             float const distToBmuSqr = dx * dx + dy * dy;
             if (distToBmuSqr < radSqr) {
-                Node& node = lattice.m_neurons[modX + modY * lattice.m_width];
+                Node& node = lattice.neurons[modX + modY * lattice.width];
                 float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
                 for (int k = 0; k < node.Dimension(); ++k) {
                     node[k] += m_rate * influence * (input[k] - node[k]);

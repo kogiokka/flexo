@@ -79,7 +79,7 @@ void WatermarkingApp::DoWatermark()
 void WatermarkingApp::CreateLattice()
 {
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
-    m_lattice->SetFlags(m_conf.flags);
+    m_lattice->flags  = m_conf.flags;
     m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
     m_som->Train(m_lattice, *world.dataset);
 }
@@ -92,7 +92,7 @@ bool WatermarkingApp::OnInit()
 
     // FIXME
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
-    m_lattice->SetFlags(m_conf.flags);
+    m_lattice->flags  = m_conf.flags;
     m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
 
     STLImporter stlImp;
@@ -129,14 +129,14 @@ void WatermarkingApp::BuildLatticeMesh()
     std::vector<glm::vec3> positions;
 
     // Positions
-    auto const& neurons = m_lattice->Neurons();
+    auto const& neurons = m_lattice->neurons;
     positions.reserve(neurons.size());
     for (Node const& n : neurons) {
         positions.emplace_back(n[0], n[1], n[2]);
     }
 
-    int const width = m_lattice->Width();
-    int const height = m_lattice->Height();
+    int const width = m_lattice->width;
+    int const height = m_lattice->height;
     float const divisor = 1.1f; // FIXME
 
     for (int y = 0; y < height - 1; ++y) {
@@ -208,8 +208,8 @@ void WatermarkingApp::UpdateLatticeEdges()
 {
     std::vector<unsigned int> indices;
 
-    int const width = m_lattice->Width();
-    int const height = m_lattice->Height();
+    int const width = m_lattice->width;
+    int const height = m_lattice->height;
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);

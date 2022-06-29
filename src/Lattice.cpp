@@ -8,35 +8,15 @@
 #include "common/Logger.hpp"
 
 Lattice::Lattice(int width, int height)
-    : m_width(width)
-    , m_height(height)
-    , m_flags(LatticeFlags_CyclicNone)
+    : width(width)
+    , height(height)
+    , flags(LatticeFlags_CyclicNone)
 {
     RandomRealNumber<float> rng(-10.0f, 10.0f);
 
-    for (int j = 0; j < m_height; ++j) {
-        for (int i = 0; i < m_width; ++i) {
-            m_neurons.emplace_back(i, j, rng.vector(3));
+    for (int j = 0; j < height; ++j) {
+        for (int i = 0; i < width; ++i) {
+            neurons.emplace_back(i, j, rng.vector(3));
         }
     }
-}
-
-int Lattice::Width() const
-{
-    return m_width;
-}
-
-int Lattice::Height() const
-{
-    return m_height;
-}
-
-std::vector<Node> const& Lattice::Neurons() const
-{
-    return m_neurons;
-}
-
-void Lattice::SetFlags(LatticeFlags flags)
-{
-    m_flags = flags;
 }
