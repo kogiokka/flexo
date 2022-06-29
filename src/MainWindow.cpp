@@ -2,20 +2,17 @@
 #include <string>
 #include <vector>
 
-#include <wx/button.h>
-#include <wx/checkbox.h>
 #include <wx/filedlg.h>
 #include <wx/menu.h>
-#include <wx/statbox.h>
-#include <wx/stattext.h>
 #include <wx/string.h>
-#include <wx/textctrl.h>
 #include <wx/utils.h>
-#include <wx/valnum.h>
 
 #include "MainWindow.hpp"
+#include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
+
+wxDECLARE_APP(WatermarkingApp);
 
 MainWindow::MainWindow(wxWindow* parent)
     : wxFrame(parent, wxID_ANY, "Self-organizing Map Demo", wxDefaultPosition, wxSize(1200, 800))
@@ -69,7 +66,7 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
     // wxBusyCursor wait;
     auto const filepath = dialog.GetPath().ToStdString();
     defaultDir = fs::path(filepath).parent_path().string();
-    m_canvas->OpenInputDataFile(filepath);
+    wxGetApp().OpenInputDataFile(filepath);
 
     assert(m_mainPanel != nullptr);
     assert(world.dataset != nullptr);

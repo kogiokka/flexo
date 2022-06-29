@@ -13,8 +13,6 @@
 #include "OpenGLCanvas.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
-#include "assetlib/OBJ/OBJImporter.hpp"
-#include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
 
 wxDECLARE_APP(WatermarkingApp);
@@ -68,9 +66,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
 void OpenGLCanvas::InitGL()
 {
     SetCurrent(*m_context);
-
     m_isGLLoaded = gladLoadGL();
-
     assert(m_isGLLoaded);
 
 #ifndef NDEBUG
@@ -88,14 +84,9 @@ void OpenGLCanvas::InitGL()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-    wxSize const size = GetClientSize() * GetContentScaleFactor();
-    assert(size.x > 0 && size.y > 0);
-
     // FIXME
     wxGetApp().BuildLatticeMesh();
     wxGetApp().UpdateLatticeEdges();
-
-    m_renderer = std::make_unique<Renderer>(size.x, size.y);
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
@@ -107,13 +98,18 @@ void OpenGLCanvas::InitGL()
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
 }
 
+void OpenGLCanvas::SetRenderer(std::shared_ptr<Renderer> renderer)
+{
+    m_renderer = renderer;
+}
+
 void OpenGLCanvas::OnSize(wxSizeEvent&)
 {
     assert(m_context.get() != nullptr);
 
     wxSize const size = GetClientSize() * GetContentScaleFactor();
 
-    if (m_renderer != nullptr) {
+    if (m_renderer) {
         m_renderer->GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
     }
 
@@ -194,134 +190,6 @@ void OpenGLCanvas::ResetCamera()
 {
     wxSize const size = GetClientSize() * GetContentScaleFactor();
     m_renderer->GetCamera() = Camera(size.x, size.y);
-}
-
-// FIXME: Move to the app
-void OpenGLCanvas::OpenInputDataFile(wxString const& path)
-{
-    world.polyModel = nullptr;
-    world.volModel = nullptr;
-
-    std::vector<glm::vec3> posData;
-
-    if (path.EndsWith(".obj")) {
-        OBJImporter objImp;
-        world.polyModel = std::make_unique<Mesh>(objImp.ReadFile(path.ToStdString()));
-        m_renderer->LoadPolygonalModel();
-    } else if (path.EndsWith(".stl")) {
-        STLImporter stlImp;
-        world.polyModel = std::make_unique<Mesh>(stlImp.ReadFile(path.ToStdString()));
-        m_renderer->LoadPolygonalModel();
-    } else if (path.EndsWith(".toml")) {
-        world.volModel = std::make_unique<VolModel>();
-        auto& [data, pos, texcoord] = *world.volModel;
-
-        if (!data.read(path.ToStdString())) {
-            Logger::error(R"(Failed to read volumetric model: "%s")", path.ToStdString().c_str());
-            return;
-        }
-
-        const int model = 252;
-        const int isovalue = 0;
-        auto reso = world.volModel->data.resolution();
-        for (int x = 0; x < reso.x; x++) {
-            for (int y = 0; y < reso.y; y++) {
-                for (int z = 0; z < reso.z; z++) {
-                    if (data.value(x, y, z) >= model) {
-                        if (x + 1 < reso.x) {
-                            if (data.value(x + 1, y, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
-                        }
-                        if (x - 1 >= 0) {
-                            if (data.value(x - 1, y, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
-                        }
-                        if (y + 1 < reso.y) {
-                            if (data.value(x, y + 1, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
-                        }
-                        if (y - 1 >= 0) {
-                            if (data.value(x, y - 1, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
-                        }
-                        if (z + 1 < reso.z) {
-                            if (data.value(x, y, z + 1) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
-                        }
-                        if (z - 1 >= 0) {
-                            if (data.value(x, y, z - 1) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
-        m_renderer->LoadVolumetricModel();
-        Logger::info("%lu voxels will be rendered.", pos.size());
-    }
-
-    const float FLOAT_MAX = std::numeric_limits<float>::max();
-    glm::vec3 center;
-    glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
-    glm::vec3 max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
-
-    if (world.polyModel != nullptr) {
-        posData = world.polyModel->positions;
-    } else if (world.volModel != nullptr) {
-        posData = world.volModel->positions;
-    }
-
-    for (auto const& p : posData) {
-        if (p.x > max.x) {
-            max.x = p.x;
-        }
-        if (p.y > max.y) {
-            max.y = p.y;
-        }
-        if (p.z > max.z) {
-            max.z = p.z;
-        }
-        if (p.x < min.x) {
-            min.x = p.x;
-        }
-        if (p.y < min.y) {
-            min.y = p.y;
-        }
-        if (p.z < min.z) {
-            min.z = p.z;
-        }
-    }
-    center = (max + min) * 0.5f;
-
-    Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
-    world.dataset = std::make_unique<InputData>(posData);
-    m_renderer->GetCamera().center = center;
-    m_renderer->GetCamera().UpdateViewCoord();
-    m_renderer->LoadLattice();
-
-    glm::vec3 diff = max - min;
-    float size = diff.x;
-    if (size < diff.y) {
-        size = diff.y;
-    }
-    if (size < diff.z) {
-        size = diff.z;
-    }
-    m_renderer->GetCamera().volumeSize = size;
 }
 
 bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const

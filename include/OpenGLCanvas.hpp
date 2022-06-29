@@ -18,7 +18,7 @@ class OpenGLCanvas : public wxGLCanvas
 {
     bool m_isGLLoaded;
     std::unique_ptr<wxGLContext> m_context;
-    std::unique_ptr<Renderer> m_renderer;
+    std::shared_ptr<Renderer> m_renderer;
     float m_rateMove;
     float m_rateRotate;
     int m_dirHorizontal;
@@ -39,9 +39,9 @@ public:
     void OnMouseRightDown(wxMouseEvent& event);
     void OnUpdateTimer(wxTimerEvent& event);
     void InitGL();
+    void SetRenderer(std::shared_ptr<Renderer> renderer);
     void ResetCamera();
     void ResetLattice();
-    void OpenInputDataFile(wxString const& path);
     bool GetRenderOptionState(RenderOption opt) const;
 
 private:
