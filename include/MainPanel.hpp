@@ -37,7 +37,7 @@ class MainPanel : public wxPanel
 public:
     MainPanel(wxWindow* parent = nullptr);
     ~MainPanel();
-    void SetupTraining();
+    void ResetLattice();
     void SetOpenGLCanvas(OpenGLCanvas* canvas);
 
 private:

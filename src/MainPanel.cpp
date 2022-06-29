@@ -53,7 +53,8 @@ MainPanel::~MainPanel()
     m_updateTimer->Stop();
 }
 
-void MainPanel::SetupTraining()
+// FIXME
+void MainPanel::ResetLattice()
 {
     auto& [width, height, rate, cap, flags] = wxGetApp().GetTrainingConfig();
 
@@ -71,7 +72,6 @@ void MainPanel::SetupTraining()
     if (m_tcInitLearningRate->GetValue().ToDouble(&tmpDouble)) {
         rate = static_cast<float>(tmpDouble);
     }
-
     wxGetApp().CreateLattice();
 }
 
@@ -212,8 +212,7 @@ void MainPanel::OnButtonWatermark(wxCommandEvent&)
 
 void MainPanel::OnButtonConfirmAndReset(wxCommandEvent&)
 {
-    assert(world.dataset != nullptr);
-    SetupTraining();
+    ResetLattice();
     m_btnPlayPause->SetLabel("Start");
     m_canvas->ResetLattice();
 }

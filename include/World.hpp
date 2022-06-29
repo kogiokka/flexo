@@ -11,12 +11,6 @@
 #include "RandomIntNumber.hpp"
 #include "VolumeData.hpp"
 
-struct VolModel {
-    VolumeData data;
-    std::vector<glm::vec3> positions;
-    std::vector<glm::vec2> textureCoords;
-};
-
 struct World {
     World();
     ~World();
@@ -27,9 +21,8 @@ struct World {
     Mesh cube;
     Mesh latticeMesh;
     Mesh neurons;
+    std::shared_ptr<Mesh> theModel;
     std::vector<unsigned int> latticeEdges;
-    std::unique_ptr<Mesh> polyModel;
-    std::unique_ptr<VolModel> volModel;
     Image pattern;
     glm::vec3 lightPos;
     bool isWatermarked;

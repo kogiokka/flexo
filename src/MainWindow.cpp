@@ -64,14 +64,19 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
 
     // Why wxBusyCursor does not work here?
     // wxBusyCursor wait;
-    auto const filepath = dialog.GetPath().ToStdString();
-    defaultDir = fs::path(filepath).parent_path().string();
-    wxGetApp().OpenInputDataFile(filepath);
+    wxString const filepath = dialog.GetPath();
+    defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
+
+    if (filepath.EndsWith(".toml")) {
+        wxGetApp().ImportVolumetricModel(filepath);
+    } else {
+        wxGetApp().ImportPolygonalModel(filepath);
+    }
 
     assert(m_mainPanel != nullptr);
-    assert(world.dataset != nullptr);
 
-    m_mainPanel->SetupTraining();
+    // FIXME
+    m_mainPanel->ResetLattice();
     m_mainPanel->m_btnConfirm->Enable();
     m_mainPanel->m_btnPlayPause->Enable();
 }
@@ -100,3 +105,4 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_MENU(wxID_EXIT, MainWindow::OnExit)
     EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
 wxEND_EVENT_TABLE()
+

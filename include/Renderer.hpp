@@ -41,7 +41,7 @@ class Renderer
 public:
     Renderer(int width, int height);
     void Render();
-    void LoadPolygonalModel();
+    void LoadPolygonalModel(Mesh const& mesh);
     void LoadLattice();
     void LoadVolumetricModel();
     Camera& GetCamera();

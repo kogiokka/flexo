@@ -60,8 +60,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->textureCoords, 2));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.volModel->positions, 3));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.theModel->textureCoords, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.theModel->positions, 3));
     AddBind(shader);
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
     AddBind(m_texColor);
@@ -75,7 +75,7 @@ void VolumetricModel::Draw(Graphics& gfx) const
     glVertexBindingDivisor(2, 1); // FIXME: Move to VertexArray bindable
     glVertexBindingDivisor(3, 1);
 
-    gfx.DrawInstanced(m_count, world.volModel->positions.size());
+    gfx.DrawInstanced(m_count, world.theModel->positions.size());
 }
 
 void VolumetricModel::Update(Graphics& gfx)
@@ -90,7 +90,7 @@ void VolumetricModel::Update(Graphics& gfx)
         {
             Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
             if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
-                vb->Update(world.volModel->textureCoords);
+                vb->Update(world.theModel->textureCoords);
             }
         }
         {

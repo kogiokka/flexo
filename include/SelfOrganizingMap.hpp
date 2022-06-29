@@ -30,13 +30,13 @@ class SelfOrganizingMap
 public:
     SelfOrganizingMap(float initialRate, int maxIterations);
     ~SelfOrganizingMap();
-    void Train(std::shared_ptr<Lattice> lattice, InputData& dataset);
+    void Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
     void ToggleTraining();
     bool IsTrainingDone() const;
     int GetIterations() const;
 
 private:
-    void TrainInternal(std::shared_ptr<Lattice> lattice, InputData& dataset);
+    void TrainInternal(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
     glm::ivec2 FindBMU(Lattice const& lattice, glm::vec3 const& input) const;
     void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius);
 };

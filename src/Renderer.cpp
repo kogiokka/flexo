@@ -17,7 +17,7 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::Render()
 {
-    if (world.polyModel == nullptr && world.volModel == nullptr) {
+    if (!world.theModel) {
         return;
     }
 
@@ -32,10 +32,10 @@ void Renderer::Render()
     }
 
     if (rendopt & RenderOption_Model) {
-        if (world.polyModel && m_polyModel) {
+        if (world.theModel->HasNormals()) { // FIXME Is this reliable?
             m_polyModel->Update(m_gfx);
             m_polyModel->Draw(m_gfx);
-        } else if (world.volModel != nullptr) {
+        } else {
             glEnable(GL_CULL_FACE); // FIXME: VertexArrray bindable?
             glCullFace(GL_BACK);
             m_volModel->Update(m_gfx);
@@ -55,10 +55,9 @@ void Renderer::Render()
     }
 }
 
-void Renderer::LoadPolygonalModel()
+void Renderer::LoadPolygonalModel(Mesh const& mesh)
 {
-    assert(world.polyModel);
-    m_polyModel = std::make_unique<PolygonalModel>(m_gfx, *world.polyModel);
+    m_polyModel = std::make_unique<PolygonalModel>(m_gfx, mesh);
 }
 
 void Renderer::LoadLattice()

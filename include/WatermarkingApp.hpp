@@ -2,11 +2,15 @@
 #define WATERMARKING_APP_H
 
 #include <memory>
+#include <vector>
 
+#include <glm/glm.hpp>
 #include <wx/app.h>
 
 #include "InputData.hpp"
 #include "Lattice.hpp"
+#include "Mesh.hpp"
+#include "OpenGLCanvas.hpp"
 #include "Renderer.hpp"
 #include "SelfOrganizingMap.hpp"
 
@@ -23,7 +27,7 @@ class WatermarkingApp : public wxApp
     std::shared_ptr<SelfOrganizingMap> m_som;
     std::shared_ptr<Lattice> m_lattice;
     std::shared_ptr<Renderer> m_renderer;
-    std::unique_ptr<InputData> dataset;
+    std::shared_ptr<InputData> m_dataset;
     TrainingConfig m_conf;
 
 public:
@@ -40,7 +44,9 @@ public:
     void CreateLattice();
     void BuildLatticeMesh();
     void UpdateLatticeEdges();
-    void OpenInputDataFile(wxString const& path);
+    void ImportPolygonalModel(wxString const& path);
+    void ImportVolumetricModel(wxString const& path);
+    void SetCameraView(std::vector<glm::vec3> positions);
 };
 
 #endif

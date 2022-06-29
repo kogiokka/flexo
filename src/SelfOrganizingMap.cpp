@@ -25,7 +25,7 @@ SelfOrganizingMap::~SelfOrganizingMap()
     }
 }
 
-void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, InputData& dataset)
+void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
 {
     m_initialNeighborhood
         = sqrt(static_cast<float>(lattice->width * lattice->width + lattice->height * lattice->height)) * 0.5f;
@@ -33,20 +33,21 @@ void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, InputData& datas
 
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", m_maxIterations, m_initialRate);
 
-    void (SelfOrganizingMap::*TrainInternal)(std::shared_ptr<Lattice>, InputData&) = &SelfOrganizingMap::TrainInternal;
-    m_worker = std::thread(TrainInternal, std::ref(*this), lattice, std::ref(dataset));
+    void (SelfOrganizingMap::*TrainInternal)(std::shared_ptr<Lattice>, std::shared_ptr<InputData>)
+        = &SelfOrganizingMap::TrainInternal;
+    m_worker = std::thread(TrainInternal, std::ref(*this), lattice, dataset);
 
     Logger::info("Training worker created");
     Logger::info("Training has been paused");
 }
 
-void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, InputData& dataset)
+void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
 {
     while ((m_iterations <= m_maxIterations) && !m_isDone) {
         std::unique_lock lk(m_mut);
         m_cv.wait(lk, [this] { return m_isTraining || m_isDone; });
 
-        glm::vec3 const input = dataset.GetInput();
+        glm::vec3 const input = dataset->GetInput();
         float const progress = static_cast<float>(m_iterations);
 
         m_neighborhood = m_initialNeighborhood * expf(-progress / m_timeConstant);
@@ -58,15 +59,13 @@ void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, InputDat
 
         if (lattice->flags & LatticeFlags_CyclicX) {
             for (int y = 0; y < lattice->height; y++) {
-                lattice->neurons[y * lattice->width + lattice->width - 1]
-                    = lattice->neurons[y * lattice->width + 0];
+                lattice->neurons[y * lattice->width + lattice->width - 1] = lattice->neurons[y * lattice->width + 0];
             }
         }
 
         if (lattice->flags & LatticeFlags_CyclicY) {
             for (int x = 0; x < lattice->width; x++) {
-                lattice->neurons[(lattice->height - 1) * lattice->width + x]
-                    = lattice->neurons[0 * lattice->width + x];
+                lattice->neurons[(lattice->height - 1) * lattice->width + x] = lattice->neurons[0 * lattice->width + x];
             }
         }
 

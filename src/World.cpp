@@ -5,8 +5,7 @@ World world;
 
 World::World()
 {
-    polyModel = nullptr;
-    volModel = nullptr;
+    theModel = nullptr;
     const char* imgFile = "res/images/checkerboard_64x64.png";
     pattern = Image(imgFile, 0, STBI_rgb_alpha);
     Logger::info("Hello from World");

@@ -5,7 +5,6 @@
 
 #include "MainPanel.hpp"
 #include "MainWindow.hpp"
-#include "OpenGLCanvas.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
@@ -16,6 +15,7 @@ WatermarkingApp::WatermarkingApp()
     : m_som(nullptr)
     , m_lattice(nullptr)
     , m_renderer(nullptr)
+    , m_dataset(nullptr)
 {
     float const ratio = static_cast<float>(world.pattern.width) / static_cast<float>(world.pattern.height);
     m_conf.height = 128;
@@ -61,13 +61,13 @@ void WatermarkingApp::ToggleTraining()
 
 void WatermarkingApp::DoWatermark()
 {
-    assert(world.volModel);
+    assert(world.theModel);
 
     // Update the texture coordinates of the Volumetric Model.
     std::vector<glm::vec2> textureCoords;
-    textureCoords.reserve(world.volModel->textureCoords.size());
+    textureCoords.reserve(world.theModel->textureCoords.size());
 
-    for (glm::vec3 const& vp : world.volModel->positions) {
+    for (glm::vec3 const& vp : world.theModel->positions) {
         glm::vec2 coord = world.latticeMesh.textureCoords.front();
         float minDist = glm::distance(vp, world.latticeMesh.positions.front());
         // TODO: Deal with the duplicate calculations
@@ -80,7 +80,7 @@ void WatermarkingApp::DoWatermark()
         }
         textureCoords.push_back(coord);
     }
-    world.volModel->textureCoords = textureCoords;
+    world.theModel->textureCoords = textureCoords;
     world.isWatermarked = true;
 }
 
@@ -88,8 +88,8 @@ void WatermarkingApp::CreateLattice()
 {
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->flags = m_conf.flags;
-    m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
-    m_som->Train(m_lattice, *dataset);
+    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
+    m_som->Train(m_lattice, m_dataset);
 }
 
 bool WatermarkingApp::OnInit()
@@ -101,7 +101,7 @@ bool WatermarkingApp::OnInit()
     // FIXME
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->flags = m_conf.flags;
-    m_som = std::make_unique<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
+    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
 
     STLImporter stlImp;
     world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
@@ -237,95 +237,99 @@ void WatermarkingApp::UpdateLatticeEdges()
     world.latticeEdges = indices;
 }
 
-void WatermarkingApp::OpenInputDataFile(wxString const& path)
+void WatermarkingApp::ImportPolygonalModel(wxString const& path)
 {
-    world.polyModel = nullptr;
-    world.volModel = nullptr;
-
-    std::vector<glm::vec3> posData;
-
     if (path.EndsWith(".obj")) {
         OBJImporter objImp;
-        world.polyModel = std::make_unique<Mesh>(objImp.ReadFile(path.ToStdString()));
-        m_renderer->LoadPolygonalModel();
+        world.theModel = std::make_shared<Mesh>(objImp.ReadFile(path.ToStdString()));
     } else if (path.EndsWith(".stl")) {
         STLImporter stlImp;
-        world.polyModel = std::make_unique<Mesh>(stlImp.ReadFile(path.ToStdString()));
-        m_renderer->LoadPolygonalModel();
-    } else if (path.EndsWith(".toml")) {
-        world.volModel = std::make_unique<VolModel>();
-        auto& [data, pos, texcoord] = *world.volModel;
+        world.theModel = std::make_shared<Mesh>(stlImp.ReadFile(path.ToStdString()));
+    }
 
-        if (!data.read(path.ToStdString())) {
-            Logger::error(R"(Failed to read volumetric model: "%s")", path.ToStdString().c_str());
-            return;
-        }
+    m_dataset = std::make_shared<InputData>(world.theModel->positions);
+    m_renderer->LoadPolygonalModel(*world.theModel);
+    SetCameraView(world.theModel->positions);
+}
 
-        const int model = 252;
-        const int isovalue = 0;
-        auto reso = world.volModel->data.resolution();
-        for (int x = 0; x < reso.x; x++) {
-            for (int y = 0; y < reso.y; y++) {
-                for (int z = 0; z < reso.z; z++) {
-                    if (data.value(x, y, z) >= model) {
-                        if (x + 1 < reso.x) {
-                            if (data.value(x + 1, y, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
+void WatermarkingApp::ImportVolumetricModel(wxString const& path)
+{
+    VolumeData data;
+
+    world.theModel = std::make_shared<Mesh>();
+    auto& pos = world.theModel->positions;
+    auto& texcoord = world.theModel->textureCoords;
+
+    if (!data.read(path.ToStdString())) {
+        Logger::error(R"(Failed to read volumetric model: "%s")", path.ToStdString().c_str());
+        return;
+    }
+
+    const int model = 252;
+    const int isovalue = 0;
+    auto reso = data.resolution();
+    for (int x = 0; x < reso.x; x++) {
+        for (int y = 0; y < reso.y; y++) {
+            for (int z = 0; z < reso.z; z++) {
+                if (data.value(x, y, z) >= model) {
+                    if (x + 1 < reso.x) {
+                        if (data.value(x + 1, y, z) <= isovalue) {
+                            pos.push_back(glm::vec3 { x, y, z });
+                            continue;
                         }
-                        if (x - 1 >= 0) {
-                            if (data.value(x - 1, y, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
+                    }
+                    if (x - 1 >= 0) {
+                        if (data.value(x - 1, y, z) <= isovalue) {
+                            pos.push_back(glm::vec3 { x, y, z });
+                            continue;
                         }
-                        if (y + 1 < reso.y) {
-                            if (data.value(x, y + 1, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
+                    }
+                    if (y + 1 < reso.y) {
+                        if (data.value(x, y + 1, z) <= isovalue) {
+                            pos.push_back(glm::vec3 { x, y, z });
+                            continue;
                         }
-                        if (y - 1 >= 0) {
-                            if (data.value(x, y - 1, z) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
+                    }
+                    if (y - 1 >= 0) {
+                        if (data.value(x, y - 1, z) <= isovalue) {
+                            pos.push_back(glm::vec3 { x, y, z });
+                            continue;
                         }
-                        if (z + 1 < reso.z) {
-                            if (data.value(x, y, z + 1) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
+                    }
+                    if (z + 1 < reso.z) {
+                        if (data.value(x, y, z + 1) <= isovalue) {
+                            pos.push_back(glm::vec3 { x, y, z });
+                            continue;
                         }
-                        if (z - 1 >= 0) {
-                            if (data.value(x, y, z - 1) <= isovalue) {
-                                pos.push_back(glm::vec3 { x, y, z });
-                                continue;
-                            }
+                    }
+                    if (z - 1 >= 0) {
+                        if (data.value(x, y, z - 1) <= isovalue) {
+                            pos.push_back(glm::vec3 { x, y, z });
+                            continue;
                         }
                     }
                 }
             }
         }
-
-        texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
-        m_renderer->LoadVolumetricModel();
-        Logger::info("%lu voxels will be rendered.", pos.size());
     }
 
+    texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
+    Logger::info("%lu voxels will be rendered.", pos.size());
+
+    m_dataset = std::make_shared<InputData>(pos);
+    m_renderer->LoadVolumetricModel();
+    SetCameraView(pos);
+}
+
+// FIXME: Move it to the renderer
+void WatermarkingApp::SetCameraView(std::vector<glm::vec3> positions)
+{
     const float FLOAT_MAX = std::numeric_limits<float>::max();
     glm::vec3 center;
     glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
     glm::vec3 max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
 
-    if (world.polyModel != nullptr) {
-        posData = world.polyModel->positions;
-    } else if (world.volModel != nullptr) {
-        posData = world.volModel->positions;
-    }
-
-    for (auto const& p : posData) {
+    for (auto const& p : positions) {
         if (p.x > max.x) {
             max.x = p.x;
         }
@@ -347,9 +351,9 @@ void WatermarkingApp::OpenInputDataFile(wxString const& path)
     }
     center = (max + min) * 0.5f;
 
-    Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
-    dataset = std::make_unique<InputData>(posData);
     m_renderer->GetCamera().center = center;
+    Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
+
     m_renderer->GetCamera().UpdateViewCoord();
     m_renderer->LoadLattice();
 
