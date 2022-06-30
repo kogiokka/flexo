@@ -40,16 +40,19 @@ public:
     TrainingConfig& GetTrainingConfig();
     void ToggleLatticeFlags(LatticeFlags flag);
     void ToggleTraining();
-    void DoWatermark();
-    void CreateLattice();
-    void CreateSOMProcedure();
-    void StartTrainining();
-    void StopTrainining();
     void BuildLatticeMesh();
     void UpdateLatticeEdges();
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
     void SetCameraView(std::vector<glm::vec3> positions);
+
+    void OnCmdStartTraining(wxCommandEvent& evt);
+    void OnCmdStopTrainining(wxCommandEvent& evt);
+    void OnCmdDoWatermark(wxCommandEvent& evt);
+    void OnCmdCreateLattice(wxCommandEvent& evt);
+    void OnCmdCreateSOMProcedure(wxCommandEvent& evt);
+
+    wxDECLARE_EVENT_TABLE();
 };
 
 #endif

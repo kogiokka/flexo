@@ -4,6 +4,7 @@
 #include <memory>
 
 #include <wx/button.h>
+#include <wx/event.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
@@ -69,5 +70,11 @@ private:
 
     wxDECLARE_EVENT_TABLE();
 };
+
+wxDECLARE_EVENT(CMD_START_TRAINING, wxCommandEvent);
+wxDECLARE_EVENT(CMD_STOP_TRAINING, wxCommandEvent);
+wxDECLARE_EVENT(CMD_DO_WATERMARK, wxCommandEvent);
+wxDECLARE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
+wxDECLARE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
 
 #endif

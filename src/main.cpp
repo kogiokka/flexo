@@ -11,6 +11,16 @@
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
 
+wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
+    EVT_COMMAND(wxID_ANY, CMD_START_TRAINING, WatermarkingApp::OnCmdStartTraining)
+    EVT_COMMAND(wxID_ANY, CMD_STOP_TRAINING, WatermarkingApp::OnCmdStopTrainining)
+    EVT_COMMAND(wxID_ANY, CMD_DO_WATERMARK, WatermarkingApp::OnCmdDoWatermark)
+    EVT_COMMAND(wxID_ANY, CMD_CREATE_LATTICE, WatermarkingApp::OnCmdCreateLattice)
+    EVT_COMMAND(wxID_ANY, CMD_CREATE_SOM_PROCEDURE, WatermarkingApp::OnCmdCreateSOMProcedure)
+wxEND_EVENT_TABLE()
+
+wxIMPLEMENT_APP(WatermarkingApp);
+
 WatermarkingApp::WatermarkingApp()
     : m_som(nullptr)
     , m_lattice(nullptr)
@@ -61,52 +71,6 @@ void WatermarkingApp::ToggleTraining()
     }
 
     m_som->ToggleTraining();
-}
-
-void WatermarkingApp::DoWatermark()
-{
-    assert(world.theModel);
-
-    // Update the texture coordinates of the Volumetric Model.
-    std::vector<glm::vec2> textureCoords;
-    textureCoords.reserve(world.theModel->textureCoords.size());
-
-    for (glm::vec3 const& vp : world.theModel->positions) {
-        glm::vec2 coord = world.latticeMesh.textureCoords.front();
-        float minDist = glm::distance(vp, world.latticeMesh.positions.front());
-        // TODO: Deal with the duplicate calculations
-        for (unsigned int i = 1; i < world.latticeMesh.positions.size(); i++) {
-            auto dist = glm::distance(vp, world.latticeMesh.positions[i]);
-            if (dist < minDist) {
-                minDist = dist;
-                coord = world.latticeMesh.textureCoords[i];
-            }
-        }
-        textureCoords.push_back(coord);
-    }
-    world.theModel->textureCoords = textureCoords;
-    world.isWatermarked = true;
-}
-
-void WatermarkingApp::CreateLattice()
-{
-    m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
-    m_lattice->flags = m_conf.flags;
-}
-
-void WatermarkingApp::CreateSOMProcedure()
-{
-    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
-}
-
-void WatermarkingApp::StartTrainining()
-{
-    m_som->Train(m_lattice, m_dataset);
-}
-
-void WatermarkingApp::StopTrainining()
-{
-    m_som = nullptr;
 }
 
 bool WatermarkingApp::OnInit()
@@ -380,4 +344,48 @@ void WatermarkingApp::SetCameraView(std::vector<glm::vec3> positions)
     m_renderer->GetCamera().volumeSize = size;
 }
 
-wxIMPLEMENT_APP(WatermarkingApp);
+void WatermarkingApp::OnCmdStartTraining(wxCommandEvent&)
+{
+    m_som->Train(m_lattice, m_dataset);
+}
+
+void WatermarkingApp::OnCmdStopTrainining(wxCommandEvent&)
+{
+    m_som = nullptr;
+}
+
+void WatermarkingApp::OnCmdDoWatermark(wxCommandEvent&)
+{
+    assert(world.theModel);
+
+    // Update the texture coordinates of the Volumetric Model.
+    std::vector<glm::vec2> textureCoords;
+    textureCoords.reserve(world.theModel->textureCoords.size());
+
+    for (glm::vec3 const& vp : world.theModel->positions) {
+        glm::vec2 coord = world.latticeMesh.textureCoords.front();
+        float minDist = glm::distance(vp, world.latticeMesh.positions.front());
+        // TODO: Deal with the duplicate calculations
+        for (unsigned int i = 1; i < world.latticeMesh.positions.size(); i++) {
+            auto dist = glm::distance(vp, world.latticeMesh.positions[i]);
+            if (dist < minDist) {
+                minDist = dist;
+                coord = world.latticeMesh.textureCoords[i];
+            }
+        }
+        textureCoords.push_back(coord);
+    }
+    world.theModel->textureCoords = textureCoords;
+    world.isWatermarked = true;
+}
+
+void WatermarkingApp::OnCmdCreateLattice(wxCommandEvent&)
+{
+    m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
+    m_lattice->flags = m_conf.flags;
+}
+
+void WatermarkingApp::OnCmdCreateSOMProcedure(wxCommandEvent&)
+{
+    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
+}

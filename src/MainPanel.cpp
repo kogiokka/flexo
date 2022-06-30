@@ -15,6 +15,12 @@
 
 wxDECLARE_APP(WatermarkingApp);
 
+wxDEFINE_EVENT(CMD_START_TRAINING, wxCommandEvent);
+wxDEFINE_EVENT(CMD_STOP_TRAINING, wxCommandEvent);
+wxDEFINE_EVENT(CMD_DO_WATERMARK, wxCommandEvent);
+wxDEFINE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
+wxDEFINE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
+
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
     TE_LEARNING_RATE,
@@ -203,18 +209,23 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox3()
 
 void MainPanel::OnButtonWatermark(wxCommandEvent&)
 {
-    wxGetApp().DoWatermark();
+    wxCommandEvent event(CMD_DO_WATERMARK, GetId());
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnButtonConfirmLattice(wxCommandEvent&)
 {
-    wxGetApp().CreateLattice();
+    wxCommandEvent event(CMD_CREATE_LATTICE, GetId());
+    ProcessWindowEvent(event);
+
     m_canvas->ResetLattice();
 }
 
 void MainPanel::OnButtonConfirmSOM(wxCommandEvent&)
 {
-    wxGetApp().CreateSOMProcedure();
+    wxCommandEvent event(CMD_CREATE_SOM_PROCEDURE, GetId());
+    ProcessWindowEvent(event);
+
     m_btnPlayPause->SetLabel("Continue");
 }
 
@@ -223,7 +234,10 @@ void MainPanel::OnButtonStart(wxCommandEvent&)
     if (!wxGetApp().GetSOM()) {
         return;
     }
-    wxGetApp().StartTrainining();
+
+    wxCommandEvent event(CMD_START_TRAINING, GetId());
+    ProcessWindowEvent(event);
+
     m_btnStart->Disable();
     m_btnConfirmLattice->Disable();
     m_btnConfirmSOM->Disable();
@@ -232,7 +246,9 @@ void MainPanel::OnButtonStart(wxCommandEvent&)
 
 void MainPanel::OnButtonStop(wxCommandEvent&)
 {
-    wxGetApp().StopTrainining();
+    wxCommandEvent event(CMD_STOP_TRAINING, GetId());
+    ProcessWindowEvent(event);
+
     m_tcIterations->Clear();
     *m_tcIterations << 0;
     m_btnStart->Enable();
