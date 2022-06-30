@@ -38,16 +38,21 @@ public:
     std::shared_ptr<Lattice> const& GetLattice() const;
     std::shared_ptr<SelfOrganizingMap> const& GetSOM() const;
     TrainingConfig& GetTrainingConfig();
-    void ToggleLatticeFlags(LatticeFlags flag);
-    void ToggleTraining();
     void BuildLatticeMesh();
     void UpdateLatticeEdges();
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
     void SetCameraView(std::vector<glm::vec3> positions);
 
+    void OnSetLatticeWidth(wxCommandEvent& evt);
+    void OnSetLatticeHeight(wxCommandEvent& evt);
+    void OnSetMaxIterations(wxCommandEvent& evt);
+    void OnSetLearningRate(wxCommandEvent& evt);
     void OnCmdStartTraining(wxCommandEvent& evt);
     void OnCmdStopTrainining(wxCommandEvent& evt);
+    void OnCmdPauseTraining(wxCommandEvent& evt);
+    void OnCmdToggleRenderOption(wxCommandEvent& evt);
+    void OnCmdToggleLatticeFlag(wxCommandEvent& evt);
     void OnCmdDoWatermark(wxCommandEvent& evt);
     void OnCmdCreateLattice(wxCommandEvent& evt);
     void OnCmdCreateSOMProcedure(wxCommandEvent& evt);

@@ -10,6 +10,7 @@
 #include <wx/valnum.h>
 
 #include "MainPanel.hpp"
+#include "Renderer.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
 
@@ -17,32 +18,12 @@ wxDECLARE_APP(WatermarkingApp);
 
 wxDEFINE_EVENT(CMD_START_TRAINING, wxCommandEvent);
 wxDEFINE_EVENT(CMD_STOP_TRAINING, wxCommandEvent);
+wxDEFINE_EVENT(CMD_PAUSE_TRAINING, wxCommandEvent);
+wxDEFINE_EVENT(CMD_TOGGLE_RENDER_OPTION, wxCommandEvent);
+wxDEFINE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 wxDEFINE_EVENT(CMD_DO_WATERMARK, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
-
-enum {
-    TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
-    TE_LEARNING_RATE,
-    TE_LATTICE_WIDTH,
-    TE_LATTICE_HEIGHT,
-    BTN_PLAY_PAUSE,
-    BTN_WATERMARK,
-    BTN_CONFIRM_LATTICE,
-    BTN_CONFIRM_SOM,
-    BTN_START,
-    BTN_STOP,
-    SPCTRL_ITERATION_PER_FRAME,
-    CB_RENDEROPT_SURFACE,
-    CB_RENDEROPT_LAT_VERTEX,
-    CB_RENDEROPT_LAT_EDGE,
-    CB_RENDEROPT_LAT_FACE,
-    CB_RENDEROPT_LIGHT_SOURCE,
-    CB_LATTICE_FLAGS_CYCLIC_X,
-    CB_LATTICE_FLAGS_CYCLIC_Y,
-    SLIDER_TRANSPARENCY,
-    TIMER_UI_UPDATE,
-};
 
 MainPanel::MainPanel(wxWindow* parent)
     : wxPanel(parent, wxID_ANY)
@@ -180,7 +161,7 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox3()
 
     auto row1 = new wxBoxSizer(wxVERTICAL);
     auto row2 = new wxBoxSizer(wxVERTICAL);
-    auto chkBox1 = new wxCheckBox(box, CB_RENDEROPT_SURFACE, "Model");
+    auto chkBox1 = new wxCheckBox(box, CB_RENDEROPT_MODEL, "Model");
     auto chkBox2 = new wxCheckBox(box, CB_RENDEROPT_LAT_VERTEX, "Lattice Vertex");
     auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
     auto chkBox4 = new wxCheckBox(box, CB_RENDEROPT_LAT_FACE, "Lattice Face");
@@ -257,9 +238,11 @@ void MainPanel::OnButtonStop(wxCommandEvent&)
     m_btnPlayPause->Disable();
 }
 
-void MainPanel::OnButtonPlayPause(wxCommandEvent&)
+void MainPanel::OnButtonPause(wxCommandEvent&)
 {
-    wxGetApp().ToggleTraining();
+    wxCommandEvent event(CMD_PAUSE_TRAINING, GetId());
+    ProcessWindowEvent(event);
+
     if (m_btnPlayPause->GetLabel() == "Continue") {
         m_btnPlayPause->SetLabel("Pause");
     } else {
@@ -267,80 +250,53 @@ void MainPanel::OnButtonPlayPause(wxCommandEvent&)
     }
 }
 
-void MainPanel::OnTextCtrlLatticeWidth(wxCommandEvent&)
+void MainPanel::OnCheckboxModel(wxCommandEvent&)
 {
-    long tmp;
-    if (m_tcLatticeWidth->GetValue().ToLong(&tmp)) {
-        wxGetApp().GetTrainingConfig().width = tmp;
-    }
-}
-
-void MainPanel::OnTextCtrlLatticeHeight(wxCommandEvent&)
-{
-    long tmp;
-    if (m_tcLatticeHeight->GetValue().ToLong(&tmp)) {
-        wxGetApp().GetTrainingConfig().height = tmp;
-    }
-}
-
-void MainPanel::OnTextCtrlMaxIterations(wxCommandEvent&)
-{
-    long tmp;
-    if (m_tcMaxIterations->GetValue().ToLong(&tmp)) {
-        wxGetApp().GetTrainingConfig().maxIterations = tmp;
-    }
-}
-
-void MainPanel::OnTextCtrlLearningRate(wxCommandEvent&)
-{
-    double tmp;
-    if (m_tcInitialRate->GetValue().ToDouble(&tmp)) {
-        wxGetApp().GetTrainingConfig().initialRate = tmp;
-    }
-}
-
-void MainPanel::ToggleRenderOption(RenderOption opt)
-{
-    if (rendopt & opt) {
-        rendopt -= opt;
-    } else {
-        rendopt += opt;
-    }
-}
-
-void MainPanel::OnCheckboxInputDataset(wxCommandEvent&)
-{
-    ToggleRenderOption(RenderOption_Model);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
+    event.SetInt(RenderOption_Model);
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
-    ToggleRenderOption(RenderOption_LatticeVertex);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
+    event.SetInt(RenderOption_LatticeVertex);
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
-    ToggleRenderOption(RenderOption_LatticeEdge);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
+    event.SetInt(RenderOption_LatticeEdge);
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeFace(wxCommandEvent&)
 {
-    ToggleRenderOption(RenderOption_LatticeFace);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
+    event.SetInt(RenderOption_LatticeFace);
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLightSource(wxCommandEvent&)
 {
-    ToggleRenderOption(RenderOption_LightSource);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
+    event.SetInt(RenderOption_LightSource);
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
 {
-    wxGetApp().ToggleLatticeFlags(LatticeFlags_CyclicX);
+    wxCommandEvent event(CMD_TOGGLE_LATTICE_FLAG, GetId());
+    event.SetInt(LatticeFlags_CyclicX);
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
 {
-    wxGetApp().ToggleLatticeFlags(LatticeFlags_CyclicY);
+    wxCommandEvent event(CMD_TOGGLE_LATTICE_FLAG, GetId());
+    event.SetInt(LatticeFlags_CyclicY);
+    ProcessWindowEvent(event);
 }
 
 void MainPanel::OnSliderTransparency(wxCommandEvent&)
@@ -369,11 +325,11 @@ void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
 wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
     EVT_BUTTON(BTN_START, MainPanel::OnButtonStart)
     EVT_BUTTON(BTN_STOP, MainPanel::OnButtonStop)
-    EVT_BUTTON(BTN_PLAY_PAUSE, MainPanel::OnButtonPlayPause)
+    EVT_BUTTON(BTN_PLAY_PAUSE, MainPanel::OnButtonPause)
     EVT_BUTTON(BTN_WATERMARK, MainPanel::OnButtonWatermark)
     EVT_BUTTON(BTN_CONFIRM_LATTICE, MainPanel::OnButtonConfirmLattice)
     EVT_BUTTON(BTN_CONFIRM_SOM, MainPanel::OnButtonConfirmSOM)
-    EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainPanel::OnCheckboxInputDataset)
+    EVT_CHECKBOX(CB_RENDEROPT_MODEL, MainPanel::OnCheckboxModel)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainPanel::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainPanel::OnCheckboxLatticeEdge)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainPanel::OnCheckboxLatticeFace)
@@ -382,8 +338,4 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, MainPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, MainPanel::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, MainPanel::OnTimerUIUpdate)
-    EVT_TEXT(TE_LATTICE_WIDTH, MainPanel::OnTextCtrlLatticeWidth)
-    EVT_TEXT(TE_LATTICE_HEIGHT, MainPanel::OnTextCtrlLatticeHeight)
-    EVT_TEXT(TE_MAX_ITERATIONS, MainPanel::OnTextCtrlMaxIterations)
-    EVT_TEXT(TE_LEARNING_RATE, MainPanel::OnTextCtrlLearningRate)
 wxEND_EVENT_TABLE()

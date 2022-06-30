@@ -12,8 +12,15 @@
 #include "common/Logger.hpp"
 
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
+    EVT_TEXT(TE_LATTICE_WIDTH, WatermarkingApp::OnSetLatticeWidth)
+    EVT_TEXT(TE_LATTICE_HEIGHT, WatermarkingApp::OnSetLatticeHeight)
+    EVT_TEXT(TE_MAX_ITERATIONS, WatermarkingApp::OnSetMaxIterations)
+    EVT_TEXT(TE_LEARNING_RATE, WatermarkingApp::OnSetLearningRate)
+    EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_OPTION, WatermarkingApp::OnCmdToggleRenderOption)
+    EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
     EVT_COMMAND(wxID_ANY, CMD_START_TRAINING, WatermarkingApp::OnCmdStartTraining)
     EVT_COMMAND(wxID_ANY, CMD_STOP_TRAINING, WatermarkingApp::OnCmdStopTrainining)
+    EVT_COMMAND(wxID_ANY, CMD_PAUSE_TRAINING, WatermarkingApp::OnCmdPauseTraining)
     EVT_COMMAND(wxID_ANY, CMD_DO_WATERMARK, WatermarkingApp::OnCmdDoWatermark)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_LATTICE, WatermarkingApp::OnCmdCreateLattice)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_SOM_PROCEDURE, WatermarkingApp::OnCmdCreateSOMProcedure)
@@ -57,20 +64,6 @@ std::shared_ptr<SelfOrganizingMap> const& WatermarkingApp::GetSOM() const
 TrainingConfig& WatermarkingApp::GetTrainingConfig()
 {
     return m_conf;
-}
-
-void WatermarkingApp::ToggleLatticeFlags(LatticeFlags flag)
-{
-    m_conf.flags ^= flag;
-}
-
-void WatermarkingApp::ToggleTraining()
-{
-    if (!m_som) {
-        return;
-    }
-
-    m_som->ToggleTraining();
 }
 
 bool WatermarkingApp::OnInit()
@@ -344,6 +337,38 @@ void WatermarkingApp::SetCameraView(std::vector<glm::vec3> positions)
     m_renderer->GetCamera().volumeSize = size;
 }
 
+void WatermarkingApp::OnSetLatticeWidth(wxCommandEvent& evt)
+{
+    long tmp;
+    if (evt.GetString().ToLong(&tmp)) {
+        m_conf.width = tmp;
+    }
+}
+
+void WatermarkingApp::OnSetLatticeHeight(wxCommandEvent& evt)
+{
+    long tmp;
+    if (evt.GetString().ToLong(&tmp)) {
+        m_conf.height = tmp;
+    }
+}
+
+void WatermarkingApp::OnSetMaxIterations(wxCommandEvent& evt)
+{
+    long tmp;
+    if (evt.GetString().ToLong(&tmp)) {
+        m_conf.maxIterations = tmp;
+    }
+}
+
+void WatermarkingApp::OnSetLearningRate(wxCommandEvent& evt)
+{
+    double tmp;
+    if (evt.GetString().ToDouble(&tmp)) {
+        m_conf.initialRate = tmp;
+    }
+}
+
 void WatermarkingApp::OnCmdStartTraining(wxCommandEvent&)
 {
     m_som->Train(m_lattice, m_dataset);
@@ -352,6 +377,31 @@ void WatermarkingApp::OnCmdStartTraining(wxCommandEvent&)
 void WatermarkingApp::OnCmdStopTrainining(wxCommandEvent&)
 {
     m_som = nullptr;
+}
+
+void WatermarkingApp::OnCmdPauseTraining(wxCommandEvent&)
+{
+    if (!m_som) {
+        return;
+    }
+
+    m_som->ToggleTraining();
+}
+
+void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
+{
+    RenderOption opt = evt.GetInt();
+    if (rendopt & opt) {
+        rendopt -= opt;
+    } else {
+        rendopt += opt;
+    }
+}
+
+void WatermarkingApp::OnCmdToggleLatticeFlag(wxCommandEvent& evt)
+{
+    LatticeFlags flag = evt.GetInt();
+    m_conf.flags ^= flag;
 }
 
 void WatermarkingApp::OnCmdDoWatermark(wxCommandEvent&)

@@ -12,13 +12,12 @@
 using LatticeFlags = int;
 
 enum LatticeFlags_ : int {
-    LatticeFlags_CyclicNone = 0,
-    LatticeFlags_CyclicX,
-    LatticeFlags_CyclicY,
+    LatticeFlags_CyclicNone = 1 << 0,
+    LatticeFlags_CyclicX = 1 << 1,
+    LatticeFlags_CyclicY = 1 << 2,
 };
 
-struct Lattice
-{
+struct Lattice {
     int width;
     int height;
     LatticeFlags flags;
