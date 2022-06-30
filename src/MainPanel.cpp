@@ -3,6 +3,7 @@
 #include <wx/event.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
+#include <wx/statline.h>
 #include <wx/stattext.h>
 #include <wx/statusbr.h>
 #include <wx/textctrl.h>
@@ -15,13 +16,16 @@
 wxDECLARE_APP(WatermarkingApp);
 
 enum {
-    TC_SET_ITERATION_CAP = wxID_HIGHEST + 1,
-    TC_SET_LEARNING_RATE,
-    TC_SET_LAT_WIDTH,
-    TC_SET_LAT_HEIGHT,
+    TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
+    TE_LEARNING_RATE,
+    TE_LATTICE_WIDTH,
+    TE_LATTICE_HEIGHT,
     BTN_PLAY_PAUSE,
     BTN_WATERMARK,
-    BTN_CONFIRM_AND_RESET,
+    BTN_CONFIRM_LATTICE,
+    BTN_CONFIRM_SOM,
+    BTN_START,
+    BTN_STOP,
     SPCTRL_ITERATION_PER_FRAME,
     CB_RENDEROPT_SURFACE,
     CB_RENDEROPT_LAT_VERTEX,
@@ -53,28 +57,6 @@ MainPanel::~MainPanel()
     m_updateTimer->Stop();
 }
 
-// FIXME
-void MainPanel::ResetLattice()
-{
-    auto& [width, height, rate, cap, flags] = wxGetApp().GetTrainingConfig();
-
-    long tmpLong;
-    double tmpDouble;
-    if (m_tcLatWidth->GetValue().ToLong(&tmpLong)) {
-        width = tmpLong;
-    }
-    if (m_tcLatHeight->GetValue().ToLong(&tmpLong)) {
-        height = tmpLong;
-    }
-    if (m_tcIterCap->GetValue().ToLong(&tmpLong)) {
-        cap = tmpLong;
-    }
-    if (m_tcInitLearningRate->GetValue().ToDouble(&tmpDouble)) {
-        rate = static_cast<float>(tmpDouble);
-    }
-    wxGetApp().CreateLattice();
-}
-
 void MainPanel::SetOpenGLCanvas(OpenGLCanvas* canvas)
 {
     m_canvas = canvas;
@@ -82,61 +64,39 @@ void MainPanel::SetOpenGLCanvas(OpenGLCanvas* canvas)
 
 inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox1()
 {
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, this, "SOM Settings");
+    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, this, "Lattice");
     auto const box = boxLayout->GetStaticBox();
 
-    auto iterCapLabel = new wxStaticText(box, wxID_ANY, "Iteration Cap: ");
-    auto learnRateLabel = new wxStaticText(box, wxID_ANY, "Learning Rate: ");
     auto dimenLabel = new wxStaticText(box, wxID_ANY, "Dimension: ");
 
-    wxIntegerValidator<int> validIterCap;
     wxIntegerValidator<int> validDimen;
-    wxFloatingPointValidator<float> validLearnRate(2, nullptr);
-    validIterCap.SetMin(0);
     validDimen.SetRange(1, 512);
-    validLearnRate.SetRange(0.0f, 1.0f);
 
-    auto& [width, height, rate, cap, flags] = wxGetApp().GetTrainingConfig();
-    m_tcIterCap = new wxTextCtrl(box, TC_SET_ITERATION_CAP, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                 wxTE_CENTER, validIterCap);
-    m_tcInitLearningRate = new wxTextCtrl(box, TC_SET_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                          wxTE_CENTER, validLearnRate);
-    m_tcLatWidth = new wxTextCtrl(box, TC_SET_LAT_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
-                                  validDimen);
-    m_tcLatHeight = new wxTextCtrl(box, TC_SET_LAT_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER,
-                                   validDimen);
-    *m_tcIterCap << cap;
-    *m_tcInitLearningRate << rate;
-    *m_tcLatWidth << width;
-    *m_tcLatHeight << height;
+    m_tcLatticeWidth = new wxTextCtrl(box, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                      wxTE_CENTER, validDimen);
+    m_tcLatticeHeight = new wxTextCtrl(box, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                       wxTE_CENTER, validDimen);
+    *m_tcLatticeWidth << wxGetApp().GetTrainingConfig().width;
+    *m_tcLatticeHeight << wxGetApp().GetTrainingConfig().height;
 
     auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
     auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
-    chkBox1->SetValue(flags & LatticeFlags_CyclicX);
-    chkBox2->SetValue(flags & LatticeFlags_CyclicY);
+    chkBox1->SetValue(wxGetApp().GetTrainingConfig().flags & LatticeFlags_CyclicX);
+    chkBox2->SetValue(wxGetApp().GetTrainingConfig().flags & LatticeFlags_CyclicY);
 
-    m_btnConfirm = new wxButton(box, BTN_CONFIRM_AND_RESET, "Confirm and Reset");
-    m_btnConfirm->Disable();
+    m_btnConfirmLattice = new wxButton(box, BTN_CONFIRM_LATTICE, "Create Lattice");
 
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
-    auto row3 = new wxBoxSizer(wxHORIZONTAL);
-    auto row4 = new wxBoxSizer(wxHORIZONTAL);
     auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
-    row1->Add(iterCapLabel, 1, sizerFlag, 5);
-    row1->Add(m_tcIterCap, 1, sizerFlag, 5);
-    row2->Add(learnRateLabel, 1, sizerFlag, 5);
-    row2->Add(m_tcInitLearningRate, 1, sizerFlag, 5);
-    row3->Add(dimenLabel, 1, sizerFlag, 5);
-    row3->Add(m_tcLatWidth, 1, sizerFlag, 5);
-    row3->Add(m_tcLatHeight, 1, sizerFlag, 5);
-    row4->Add(chkBox1, 1, sizerFlag, 5);
-    row4->Add(chkBox2, 1, sizerFlag, 5);
+    row1->Add(dimenLabel, 1, sizerFlag, 5);
+    row1->Add(m_tcLatticeWidth, 1, sizerFlag, 5);
+    row1->Add(m_tcLatticeHeight, 1, sizerFlag, 5);
+    row2->Add(chkBox1, 1, sizerFlag, 5);
+    row2->Add(chkBox2, 1, sizerFlag, 5);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(row4, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(m_btnConfirm, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(m_btnConfirmLattice, 0, wxGROW | wxALL, 10);
 
     return boxLayout;
 }
@@ -149,24 +109,60 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox2()
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
+    auto row4 = new wxBoxSizer(wxHORIZONTAL);
+    auto row5 = new wxBoxSizer(wxHORIZONTAL);
+    auto row6 = new wxBoxSizer(wxHORIZONTAL);
 
-    m_btnPlayPause = new wxButton(box, BTN_PLAY_PAUSE, "Start");
+    wxIntegerValidator<int> validIterCap;
+    wxFloatingPointValidator<float> validLearnRate(2, nullptr);
+    validIterCap.SetMin(0);
+    validLearnRate.SetRange(0.0f, 1.0f);
+    auto maxIterLabel = new wxStaticText(box, wxID_ANY, "Max Iterations: ");
+    auto learnRateLabel = new wxStaticText(box, wxID_ANY, "Learning Rate: ");
+    m_tcMaxIterations = new wxTextCtrl(box, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                       wxTE_CENTER, validIterCap);
+    m_tcInitialRate = new wxTextCtrl(box, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                     wxTE_CENTER, validLearnRate);
+
+    *m_tcMaxIterations << wxGetApp().GetTrainingConfig().maxIterations;
+    *m_tcInitialRate << wxGetApp().GetTrainingConfig().initialRate;
+
+    m_btnPlayPause = new wxButton(box, BTN_PLAY_PAUSE, "Continue");
     m_btnPlayPause->Disable();
+    m_btnConfirmSOM = new wxButton(box, BTN_CONFIRM_SOM, "Create Procedure");
 
     m_btnWatermark = new wxButton(box, BTN_WATERMARK, "Watermark");
     m_btnWatermark->Disable();
 
-    auto currIterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
-    m_tcIterCurr = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
-    m_tcIterCurr->SetCanFocus(false);
+    auto iterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
+    m_tcIterations = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+    m_tcIterations->SetCanFocus(false);
 
-    row1->Add(currIterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-    row1->Add(m_tcIterCurr, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-    row2->Add(m_btnPlayPause, 1, wxGROW | wxLEFT | wxRIGHT, 5);
-    row3->Add(m_btnWatermark, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    m_btnStart = new wxButton(box, BTN_START, "Start");
+    m_btnStop = new wxButton(box, BTN_STOP, "Stop");
+    m_btnStart->Disable();
+    m_btnStop->Disable();
+
+    auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
+    row1->Add(maxIterLabel, 1, sizerFlag, 5);
+    row1->Add(m_tcMaxIterations, 1, sizerFlag, 5);
+    row2->Add(learnRateLabel, 1, sizerFlag, 5);
+    row2->Add(m_tcInitialRate, 1, sizerFlag, 5);
+    row3->Add(m_btnConfirmSOM, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    auto line = new wxStaticLine(box);
+    row4->Add(iterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row4->Add(m_tcIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row5->Add(m_btnStart, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    row5->Add(m_btnStop, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    row6->Add(m_btnPlayPause, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+    row6->Add(m_btnWatermark, 1, wxGROW | wxLEFT | wxRIGHT, 5);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
-    boxLayout->Add(row3, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
+    boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
+    boxLayout->Add(line, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(row4, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(row5, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(row6, 0, wxGROW | wxALL, 10);
 
     return boxLayout;
 }
@@ -210,20 +206,80 @@ void MainPanel::OnButtonWatermark(wxCommandEvent&)
     wxGetApp().DoWatermark();
 }
 
-void MainPanel::OnButtonConfirmAndReset(wxCommandEvent&)
+void MainPanel::OnButtonConfirmLattice(wxCommandEvent&)
 {
-    ResetLattice();
-    m_btnPlayPause->SetLabel("Start");
+    wxGetApp().CreateLattice();
     m_canvas->ResetLattice();
+}
+
+void MainPanel::OnButtonConfirmSOM(wxCommandEvent&)
+{
+    wxGetApp().CreateSOMProcedure();
+    m_btnPlayPause->SetLabel("Continue");
+}
+
+void MainPanel::OnButtonStart(wxCommandEvent&)
+{
+    if (!wxGetApp().GetSOM()) {
+        return;
+    }
+    wxGetApp().StartTrainining();
+    m_btnStart->Disable();
+    m_btnConfirmLattice->Disable();
+    m_btnConfirmSOM->Disable();
+    m_btnPlayPause->Enable();
+}
+
+void MainPanel::OnButtonStop(wxCommandEvent&)
+{
+    wxGetApp().StopTrainining();
+    m_tcIterations->Clear();
+    *m_tcIterations << 0;
+    m_btnStart->Enable();
+    m_btnConfirmLattice->Enable();
+    m_btnConfirmSOM->Enable();
+    m_btnPlayPause->Disable();
 }
 
 void MainPanel::OnButtonPlayPause(wxCommandEvent&)
 {
     wxGetApp().ToggleTraining();
-    if (m_btnPlayPause->GetLabel() == "Start") {
+    if (m_btnPlayPause->GetLabel() == "Continue") {
         m_btnPlayPause->SetLabel("Pause");
     } else {
-        m_btnPlayPause->SetLabel("Start");
+        m_btnPlayPause->SetLabel("Continue");
+    }
+}
+
+void MainPanel::OnTextCtrlLatticeWidth(wxCommandEvent&)
+{
+    long tmp;
+    if (m_tcLatticeWidth->GetValue().ToLong(&tmp)) {
+        wxGetApp().GetTrainingConfig().width = tmp;
+    }
+}
+
+void MainPanel::OnTextCtrlLatticeHeight(wxCommandEvent&)
+{
+    long tmp;
+    if (m_tcLatticeHeight->GetValue().ToLong(&tmp)) {
+        wxGetApp().GetTrainingConfig().height = tmp;
+    }
+}
+
+void MainPanel::OnTextCtrlMaxIterations(wxCommandEvent&)
+{
+    long tmp;
+    if (m_tcMaxIterations->GetValue().ToLong(&tmp)) {
+        wxGetApp().GetTrainingConfig().maxIterations = tmp;
+    }
+}
+
+void MainPanel::OnTextCtrlLearningRate(wxCommandEvent&)
+{
+    double tmp;
+    if (m_tcInitialRate->GetValue().ToDouble(&tmp)) {
+        wxGetApp().GetTrainingConfig().initialRate = tmp;
     }
 }
 
@@ -280,22 +336,27 @@ void MainPanel::OnSliderTransparency(wxCommandEvent&)
 
 void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
 {
-    if (m_tcIterCurr != nullptr) {
-        m_tcIterCurr->Clear();
-        *m_tcIterCurr << wxGetApp().GetSOM().GetIterations();
+    if (m_tcIterations == nullptr || wxGetApp().GetSOM() == nullptr) {
+        return;
+    }
 
-        if (wxGetApp().GetSOM().IsTrainingDone()) {
-            m_btnWatermark->Enable();
-        } else {
-            m_btnWatermark->Disable();
-        }
+    m_tcIterations->Clear();
+    *m_tcIterations << wxGetApp().GetSOM()->GetIterations();
+
+    if (wxGetApp().GetSOM()->IsTrainingDone()) {
+        m_btnWatermark->Enable();
+    } else {
+        m_btnWatermark->Disable();
     }
 }
 
 wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
+    EVT_BUTTON(BTN_START, MainPanel::OnButtonStart)
+    EVT_BUTTON(BTN_STOP, MainPanel::OnButtonStop)
     EVT_BUTTON(BTN_PLAY_PAUSE, MainPanel::OnButtonPlayPause)
     EVT_BUTTON(BTN_WATERMARK, MainPanel::OnButtonWatermark)
-    EVT_BUTTON(BTN_CONFIRM_AND_RESET, MainPanel::OnButtonConfirmAndReset)
+    EVT_BUTTON(BTN_CONFIRM_LATTICE, MainPanel::OnButtonConfirmLattice)
+    EVT_BUTTON(BTN_CONFIRM_SOM, MainPanel::OnButtonConfirmSOM)
     EVT_CHECKBOX(CB_RENDEROPT_SURFACE, MainPanel::OnCheckboxInputDataset)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainPanel::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainPanel::OnCheckboxLatticeEdge)
@@ -305,4 +366,8 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, MainPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, MainPanel::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, MainPanel::OnTimerUIUpdate)
+    EVT_TEXT(TE_LATTICE_WIDTH, MainPanel::OnTextCtrlLatticeWidth)
+    EVT_TEXT(TE_LATTICE_HEIGHT, MainPanel::OnTextCtrlLatticeHeight)
+    EVT_TEXT(TE_MAX_ITERATIONS, MainPanel::OnTextCtrlMaxIterations)
+    EVT_TEXT(TE_LEARNING_RATE, MainPanel::OnTextCtrlLearningRate)
 wxEND_EVENT_TABLE()

@@ -23,30 +23,39 @@ class MainPanel : public wxPanel
     std::shared_ptr<Lattice> m_lattice;
 
     OpenGLCanvas* m_canvas;
+    wxButton* m_btnStart;
+    wxButton* m_btnStop;
     wxButton* m_btnPlayPause;
     wxButton* m_btnWatermark;
-    wxButton* m_btnConfirm;
-    wxTextCtrl* m_tcIterCurr;
-    wxTextCtrl* m_tcLatWidth;
-    wxTextCtrl* m_tcLatHeight;
-    wxTextCtrl* m_tcIterCap;
-    wxTextCtrl* m_tcInitLearningRate;
+    wxButton* m_btnConfirmLattice;
+    wxButton* m_btnConfirmSOM;
+    wxTextCtrl* m_tcIterations;
+    wxTextCtrl* m_tcLatticeWidth;
+    wxTextCtrl* m_tcLatticeHeight;
+    wxTextCtrl* m_tcMaxIterations;
+    wxTextCtrl* m_tcInitialRate;
     wxSlider* m_slider;
     wxTimer* m_updateTimer;
 
 public:
     MainPanel(wxWindow* parent = nullptr);
     ~MainPanel();
-    void ResetLattice();
     void SetOpenGLCanvas(OpenGLCanvas* canvas);
 
 private:
     wxStaticBoxSizer* CreatePanelStaticBox1();
     wxStaticBoxSizer* CreatePanelStaticBox2();
     wxStaticBoxSizer* CreatePanelStaticBox3();
+    void OnButtonStart(wxCommandEvent& evt);
+    void OnButtonStop(wxCommandEvent& evt);
     void OnButtonPlayPause(wxCommandEvent& evt);
     void OnButtonWatermark(wxCommandEvent& evt);
-    void OnButtonConfirmAndReset(wxCommandEvent& evt);
+    void OnButtonConfirmLattice(wxCommandEvent& evt);
+    void OnButtonConfirmSOM(wxCommandEvent& evt);
+    void OnTextCtrlMaxIterations(wxCommandEvent& evt);
+    void OnTextCtrlLatticeWidth(wxCommandEvent& evt);
+    void OnTextCtrlLatticeHeight(wxCommandEvent& evt);
+    void OnTextCtrlLearningRate(wxCommandEvent& evt);
     void OnCheckboxInputDataset(wxCommandEvent& evt);
     void OnCheckboxLatticeVertex(wxCommandEvent& evt);
     void OnCheckboxLatticeEdge(wxCommandEvent& evt);

@@ -35,13 +35,16 @@ public:
     virtual bool OnInit() override;
     virtual int OnExit() override;
     virtual void OnUnhandledException() override;
-    Lattice const& GetLattice() const;
-    SelfOrganizingMap const& GetSOM() const;
+    std::shared_ptr<Lattice> const& GetLattice() const;
+    std::shared_ptr<SelfOrganizingMap> const& GetSOM() const;
     TrainingConfig& GetTrainingConfig();
     void ToggleLatticeFlags(LatticeFlags flag);
     void ToggleTraining();
     void DoWatermark();
     void CreateLattice();
+    void CreateSOMProcedure();
+    void StartTrainining();
+    void StopTrainining();
     void BuildLatticeMesh();
     void UpdateLatticeEdges();
     void ImportPolygonalModel(wxString const& path);

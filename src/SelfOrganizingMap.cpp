@@ -3,7 +3,7 @@
 
 SelfOrganizingMap::SelfOrganizingMap(float initialRate, int maxIterations)
     : m_isDone(false)
-    , m_isTraining(false)
+    , m_isTraining(true)
     , m_maxIterations(maxIterations)
     , m_initialRate(initialRate)
     , m_worker()
@@ -43,9 +43,12 @@ void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<
 
 void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
 {
-    while ((m_iterations <= m_maxIterations) && !m_isDone) {
+    while (m_iterations < m_maxIterations) {
         std::unique_lock lk(m_mut);
         m_cv.wait(lk, [this] { return m_isTraining || m_isDone; });
+        if (m_isDone) {
+            break;
+        }
 
         glm::vec3 const input = dataset->GetInput();
         float const progress = static_cast<float>(m_iterations);

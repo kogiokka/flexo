@@ -34,14 +34,14 @@ int WatermarkingApp::OnExit()
     return wxApp::OnExit();
 }
 
-Lattice const& WatermarkingApp::GetLattice() const
+std::shared_ptr<Lattice> const& WatermarkingApp::GetLattice() const
 {
-    return *m_lattice;
+    return m_lattice;
 }
 
-SelfOrganizingMap const& WatermarkingApp::GetSOM() const
+std::shared_ptr<SelfOrganizingMap> const& WatermarkingApp::GetSOM() const
 {
-    return *m_som;
+    return m_som;
 }
 
 TrainingConfig& WatermarkingApp::GetTrainingConfig()
@@ -56,6 +56,10 @@ void WatermarkingApp::ToggleLatticeFlags(LatticeFlags flag)
 
 void WatermarkingApp::ToggleTraining()
 {
+    if (!m_som) {
+        return;
+    }
+
     m_som->ToggleTraining();
 }
 
@@ -88,8 +92,21 @@ void WatermarkingApp::CreateLattice()
 {
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->flags = m_conf.flags;
+}
+
+void WatermarkingApp::CreateSOMProcedure()
+{
     m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
+}
+
+void WatermarkingApp::StartTrainining()
+{
     m_som->Train(m_lattice, m_dataset);
+}
+
+void WatermarkingApp::StopTrainining()
+{
+    m_som = nullptr;
 }
 
 bool WatermarkingApp::OnInit()
@@ -101,7 +118,6 @@ bool WatermarkingApp::OnInit()
     // FIXME
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->flags = m_conf.flags;
-    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
 
     STLImporter stlImp;
     world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
@@ -131,10 +147,6 @@ bool WatermarkingApp::OnInit()
 
 void WatermarkingApp::BuildLatticeMesh()
 {
-    if (m_som->IsTrainingDone()) {
-        return;
-    }
-
     Mesh mesh;
 
     std::vector<glm::vec3> positions;

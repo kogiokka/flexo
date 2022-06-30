@@ -73,12 +73,8 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
         wxGetApp().ImportPolygonalModel(filepath);
     }
 
-    assert(m_mainPanel != nullptr);
-
-    // FIXME
-    m_mainPanel->ResetLattice();
-    m_mainPanel->m_btnConfirm->Enable();
-    m_mainPanel->m_btnPlayPause->Enable();
+    m_mainPanel->m_btnStart->Enable();
+    m_mainPanel->m_btnStop->Enable();
 }
 
 void MainWindow::OnExit(wxCommandEvent&)
