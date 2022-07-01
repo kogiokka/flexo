@@ -10,7 +10,7 @@
 #include "bindable/VertexLayout.hpp"
 #include "drawable/VolumetricModel.hpp"
 
-VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
+VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
     : m_count(0)
     , m_ub {}
     , m_texColor(nullptr)
@@ -24,10 +24,10 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     };
 
     std::vector<VertexPN> vertices;
-    for (unsigned int i = 0; i < mesh.positions.size(); i++) {
+    for (unsigned int i = 0; i < instanceMesh.positions.size(); i++) {
         VertexPN v;
-        v.position = mesh.positions[i];
-        v.normal = mesh.normals[i];
+        v.position = instanceMesh.positions[i];
+        v.normal = instanceMesh.normals[i];
         vertices.push_back(v);
     }
 
@@ -40,7 +40,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
 
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.modelMat = glm::mat4(1.0f);
-    m_ub.vert.alpha = world.modelColorAlpha;
     m_ub.vert.viewPos = gfx.GetCameraPosition();
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -60,8 +59,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.theModel->textureCoords, 2));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.theModel->positions, 3));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 3));
     AddBind(shader);
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
     AddBind(m_texColor);
@@ -86,7 +85,6 @@ void VolumetricModel::Update(Graphics& gfx)
     m_isVisible = world.renderFlags & RenderFlag_DrawModel;
 
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    m_ub.vert.alpha = world.modelColorAlpha;
     m_ub.vert.viewPos = gfx.GetCameraPosition();
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.isWatermarked = world.isWatermarked;

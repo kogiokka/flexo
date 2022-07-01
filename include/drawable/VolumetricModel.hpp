@@ -32,7 +32,6 @@ class VolumetricModel : public Drawable
             Light light;
             Material material;
             STD140_ALIGN glm::vec3 viewPos;
-            float alpha;
             bool isWatermarked;
         };
 
@@ -45,7 +44,7 @@ class VolumetricModel : public Drawable
     std::shared_ptr<Bind::Texture2D> m_texPattern;
 
 public:
-    VolumetricModel(Graphics& gfx, Mesh const& mesh);
+    VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
     void Draw(Graphics& gfx) const override;
     void Update(Graphics& gfx) override;
 };

@@ -53,7 +53,7 @@ void Renderer::LoadLattice()
 
 void Renderer::LoadVolumetricModel()
 {
-    m_volModel = std::make_unique<VolumetricModel>(m_gfx, world.cube);
+    m_volModel = std::make_unique<VolumetricModel>(m_gfx, world.cube, *world.theModel);
 }
 
 Camera& Renderer::GetCamera()

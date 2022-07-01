@@ -20,7 +20,6 @@ struct UniformBuffer_Vert {
     Light light;
     Material material;
     vec3 viewPos;
-    float alpha;
     bool isWatermarked;
 };
 
@@ -53,7 +52,7 @@ void main()
     vec3 specular = ubo.vert.light.specular * ubo.vert.material.specular * specularCoef;
 
     if (ubo.vert.isWatermarked) {
-        color = vec4((ambient + diffusion + specular), ubo.vert.alpha) * texture(voxelPattern, textureCoord);
+        color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelPattern, textureCoord);
     } else {
         color = vec4((ambient + diffusion + specular), ubo.vert.alpha) * texture(voxelColor, textureCoord);
     }
