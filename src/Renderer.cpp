@@ -1,8 +1,6 @@
 #include "Renderer.hpp"
 #include "World.hpp"
 
-RenderOption rendopt = RenderOption_Model | RenderOption_LatticeEdge | RenderOption_LatticeVertex;
-
 Renderer::Renderer(int width, int height)
     : m_gfx(width, height)
     , m_polyModel(nullptr)
@@ -21,17 +19,17 @@ void Renderer::Render()
         return;
     }
 
-    if (rendopt & RenderOption_LightSource) {
+    if (world.renderFlags & RenderFlag_DrawLightSource) {
         m_lightSource->Update(m_gfx);
         m_lightSource->Draw(m_gfx);
     }
 
-    if (rendopt & RenderOption_LatticeVertex) {
+    if (world.renderFlags & RenderFlag_DrawLatticeVertex) {
         m_latticeVert->Update(m_gfx);
         m_latticeVert->Draw(m_gfx);
     }
 
-    if (rendopt & RenderOption_Model) {
+    if (world.renderFlags & RenderFlag_DrawModel) {
         if (world.theModel->HasNormals()) { // FIXME Is this reliable?
             m_polyModel->Update(m_gfx);
             m_polyModel->Draw(m_gfx);
@@ -44,12 +42,12 @@ void Renderer::Render()
         }
     }
 
-    if (rendopt & RenderOption_LatticeEdge) {
+    if (world.renderFlags & RenderFlag_DrawLatticeEdge) {
         m_latticeEdge->Update(m_gfx);
         m_latticeEdge->Draw(m_gfx);
     }
 
-    if (rendopt & RenderOption_LatticeFace) {
+    if (world.renderFlags & RenderFlag_DrawLatticeFace) {
         m_latticeFace->Update(m_gfx);
         m_latticeFace->Draw(m_gfx);
     }

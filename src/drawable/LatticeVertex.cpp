@@ -56,17 +56,21 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 
+// FIXME: VertexLayout configurations
 void LatticeVertex::Draw(Graphics& gfx) const
 {
+    if (!m_isVisible) {
+        return;
+    }
     Drawable::Draw(gfx);
-
-    glVertexBindingDivisor(2, 1); // FIXME
-
+    glVertexBindingDivisor(2, 1);
     gfx.DrawInstanced(m_count, world.neurons.positions.size());
 }
 
 void LatticeVertex::Update(Graphics& gfx)
 {
+    m_isVisible = world.renderFlags & RenderFlag_DrawLatticeVertex;
+
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();

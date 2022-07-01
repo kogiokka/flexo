@@ -9,6 +9,10 @@
 
 class Drawable
 {
+protected:
+    bool m_isVisible;
+    std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
+
 public:
     Drawable() = default;
     Drawable(Drawable const&) = delete;
@@ -17,10 +21,6 @@ public:
     virtual void Draw(Graphics& gfx) const;
     virtual void Update(Graphics& gfx);
     void AddBind(std::shared_ptr<Bind::Bindable> bind);
-
-protected:
-    std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
 };
 
 #endif
-

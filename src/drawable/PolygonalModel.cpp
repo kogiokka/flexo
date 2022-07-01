@@ -52,14 +52,20 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 
+// FIXME: VertexLayout configurations
 void PolygonalModel::Draw(Graphics& gfx) const
 {
+    if (!m_isVisible) {
+        return;
+    }
     Drawable::Draw(gfx);
     gfx.Draw(m_count);
 }
 
 void PolygonalModel::Update(Graphics& gfx)
 {
+    m_isVisible = world.renderFlags & RenderFlag_DrawModel;
+
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();

@@ -43,14 +43,20 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 
+// FIXME: VertexLayout configurations
 void LatticeEdge::Draw(Graphics& gfx) const
 {
+    if (!m_isVisible) {
+        return;
+    }
     Drawable::Draw(gfx);
     gfx.DrawIndexed(m_ibo->GetCount());
 }
 
 void LatticeEdge::Update(Graphics& gfx)
 {
+    m_isVisible = world.renderFlags & RenderFlag_DrawLatticeEdge;
+
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {

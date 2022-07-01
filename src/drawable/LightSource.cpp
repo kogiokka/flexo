@@ -44,14 +44,20 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 
+// FIXME: VertexLayout configurations
 void LightSource::Draw(Graphics& gfx) const
 {
+    if (!m_isVisible) {
+        return;
+    }
     Drawable::Draw(gfx);
     gfx.Draw(m_count);
 }
 
 void LightSource::Update(Graphics& gfx)
 {
+    m_isVisible = world.renderFlags & RenderFlag_DrawLightSource;
+
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * m_scaling;
 

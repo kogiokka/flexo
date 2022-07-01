@@ -42,7 +42,6 @@ public:
     void SetRenderer(std::shared_ptr<Renderer> renderer);
     void ResetCamera();
     void ResetLattice();
-    bool GetRenderOptionState(RenderOption opt) const;
 
 private:
     void UpdateScene();

@@ -192,11 +192,6 @@ void OpenGLCanvas::ResetCamera()
     m_renderer->GetCamera() = Camera(size.x, size.y);
 }
 
-bool OpenGLCanvas::GetRenderOptionState(RenderOption opt) const
-{
-    return rendopt & opt;
-}
-
 // FIXME
 void OpenGLCanvas::ResetLattice()
 {
@@ -208,8 +203,8 @@ void OpenGLCanvas::ResetLattice()
 // FIXME
 void OpenGLCanvas::UpdateScene()
 {
-    if (rendopt & RenderOption_LatticeVertex || rendopt & RenderOption_LatticeEdge
-        || rendopt & RenderOption_LatticeFace) {
+    if (world.renderFlags & RenderFlag_DrawLatticeVertex || world.renderFlags & RenderFlag_DrawLatticeEdge
+        || world.renderFlags & RenderFlag_DrawLatticeFace) {
         wxGetApp().BuildLatticeMesh();
     }
 }

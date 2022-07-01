@@ -54,14 +54,20 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
 }
 
+// FIXME: VertexLayout configurations
 void LatticeFace::Draw(Graphics& gfx) const
 {
+    if (!m_isVisible) {
+        return;
+    }
     Drawable::Draw(gfx);
     gfx.Draw(m_count);
 }
 
 void LatticeFace::Update(Graphics& gfx)
 {
+    m_isVisible = world.renderFlags & RenderFlag_DrawLatticeFace;
+
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;

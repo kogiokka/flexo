@@ -15,18 +15,6 @@
 #include "drawable/PolygonalModel.hpp"
 #include "drawable/VolumetricModel.hpp"
 
-using BufferType = int;
-using ShaderType = int;
-using RenderOption = int;
-
-enum m_RenderOption : int {
-    RenderOption_Model = 1 << 0,
-    RenderOption_LatticeVertex = 1 << 1,
-    RenderOption_LatticeEdge = 1 << 2,
-    RenderOption_LatticeFace = 1 << 3,
-    RenderOption_LightSource = 1 << 4,
-};
-
 class Renderer
 {
     Graphics m_gfx;
@@ -46,7 +34,5 @@ public:
     void LoadVolumetricModel();
     Camera& GetCamera();
 };
-
-extern RenderOption rendopt;
 
 #endif

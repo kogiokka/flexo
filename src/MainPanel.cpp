@@ -19,7 +19,7 @@ wxDECLARE_APP(WatermarkingApp);
 wxDEFINE_EVENT(CMD_START_TRAINING, wxCommandEvent);
 wxDEFINE_EVENT(CMD_STOP_TRAINING, wxCommandEvent);
 wxDEFINE_EVENT(CMD_PAUSE_TRAINING, wxCommandEvent);
-wxDEFINE_EVENT(CMD_TOGGLE_RENDER_OPTION, wxCommandEvent);
+wxDEFINE_EVENT(CMD_TOGGLE_RENDER_FLAG, wxCommandEvent);
 wxDEFINE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 wxDEFINE_EVENT(CMD_DO_WATERMARK, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
@@ -166,11 +166,18 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox3()
     auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
     auto chkBox4 = new wxCheckBox(box, CB_RENDEROPT_LAT_FACE, "Lattice Face");
     auto chkBox5 = new wxCheckBox(box, CB_RENDEROPT_LIGHT_SOURCE, "Light Source");
-    chkBox1->SetValue(m_canvas->GetRenderOptionState(RenderOption_Model));
-    chkBox2->SetValue(m_canvas->GetRenderOptionState(RenderOption_LatticeVertex));
-    chkBox3->SetValue(m_canvas->GetRenderOptionState(RenderOption_LatticeEdge));
-    chkBox4->SetValue(m_canvas->GetRenderOptionState(RenderOption_LatticeFace));
-    chkBox5->SetValue(m_canvas->GetRenderOptionState(RenderOption_LightSource));
+    chkBox1->SetValue(true);
+    chkBox2->SetValue(true);
+    chkBox3->SetValue(true);
+    chkBox4->SetValue(false);
+    chkBox5->SetValue(false);
+
+    // Trigger the event to update render flags.
+    wxCommandEvent event;
+    OnCheckboxModel(event);
+    OnCheckboxLatticeVertex(event);
+    OnCheckboxLatticeEdge(event);
+
     auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Model Transparency (%)");
     int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
     m_slider = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
@@ -252,36 +259,36 @@ void MainPanel::OnButtonPause(wxCommandEvent&)
 
 void MainPanel::OnCheckboxModel(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
-    event.SetInt(RenderOption_Model);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    event.SetInt(RenderFlag_DrawModel);
     ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
-    event.SetInt(RenderOption_LatticeVertex);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    event.SetInt(RenderFlag_DrawLatticeVertex);
     ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
-    event.SetInt(RenderOption_LatticeEdge);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    event.SetInt(RenderFlag_DrawLatticeEdge);
     ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLatticeFace(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
-    event.SetInt(RenderOption_LatticeFace);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    event.SetInt(RenderFlag_DrawLatticeFace);
     ProcessWindowEvent(event);
 }
 
 void MainPanel::OnCheckboxLightSource(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_OPTION, GetId());
-    event.SetInt(RenderOption_LightSource);
+    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    event.SetInt(RenderFlag_DrawLightSource);
     ProcessWindowEvent(event);
 }
 

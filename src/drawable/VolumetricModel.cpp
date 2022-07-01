@@ -68,18 +68,23 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& mesh)
     AddBind(m_texPattern);
 }
 
+// FIXME: VertexLayout configurations
 void VolumetricModel::Draw(Graphics& gfx) const
 {
+    if (!m_isVisible) {
+        return;
+    }
+
     Drawable::Draw(gfx);
-
-    glVertexBindingDivisor(2, 1); // FIXME: Move to VertexArray bindable
+    glVertexBindingDivisor(2, 1);
     glVertexBindingDivisor(3, 1);
-
     gfx.DrawInstanced(m_count, world.theModel->positions.size());
 }
 
 void VolumetricModel::Update(Graphics& gfx)
 {
+    m_isVisible = world.renderFlags & RenderFlag_DrawModel;
+
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.alpha = world.modelColorAlpha;
     m_ub.vert.viewPos = gfx.GetCameraPosition();

@@ -16,7 +16,7 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_TEXT(TE_LATTICE_HEIGHT, WatermarkingApp::OnSetLatticeHeight)
     EVT_TEXT(TE_MAX_ITERATIONS, WatermarkingApp::OnSetMaxIterations)
     EVT_TEXT(TE_LEARNING_RATE, WatermarkingApp::OnSetLearningRate)
-    EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_OPTION, WatermarkingApp::OnCmdToggleRenderOption)
+    EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_FLAG, WatermarkingApp::OnCmdToggleRenderOption)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
     EVT_COMMAND(wxID_ANY, CMD_START_TRAINING, WatermarkingApp::OnCmdStartTraining)
     EVT_COMMAND(wxID_ANY, CMD_STOP_TRAINING, WatermarkingApp::OnCmdStopTrainining)
@@ -390,12 +390,8 @@ void WatermarkingApp::OnCmdPauseTraining(wxCommandEvent&)
 
 void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
 {
-    RenderOption opt = evt.GetInt();
-    if (rendopt & opt) {
-        rendopt -= opt;
-    } else {
-        rendopt += opt;
-    }
+    RenderFlag opt = evt.GetInt();
+    world.renderFlags ^= opt;
 }
 
 void WatermarkingApp::OnCmdToggleLatticeFlag(wxCommandEvent& evt)
