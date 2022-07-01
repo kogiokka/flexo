@@ -63,13 +63,15 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox1()
                                       wxTE_CENTER, validDimen);
     m_tcLatticeHeight = new wxTextCtrl(box, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                        wxTE_CENTER, validDimen);
-    *m_tcLatticeWidth << wxGetApp().GetTrainingConfig().width;
-    *m_tcLatticeHeight << wxGetApp().GetTrainingConfig().height;
+    *m_tcLatticeWidth << 64;
+    *m_tcLatticeHeight << 64;
+    m_tcLatticeWidth->SendTextUpdatedEvent();
+    m_tcLatticeHeight->SendTextUpdatedEvent();
 
     auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
     auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
-    chkBox1->SetValue(wxGetApp().GetTrainingConfig().flags & LatticeFlags_CyclicX);
-    chkBox2->SetValue(wxGetApp().GetTrainingConfig().flags & LatticeFlags_CyclicY);
+    chkBox1->SetValue(false);
+    chkBox2->SetValue(false);
 
     m_btnConfirmLattice = new wxButton(box, BTN_CONFIRM_LATTICE, "Create Lattice");
 
@@ -111,8 +113,10 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox2()
     m_tcInitialRate = new wxTextCtrl(box, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                      wxTE_CENTER, validLearnRate);
 
-    *m_tcMaxIterations << wxGetApp().GetTrainingConfig().maxIterations;
-    *m_tcInitialRate << wxGetApp().GetTrainingConfig().initialRate;
+    *m_tcMaxIterations << 50000;
+    *m_tcInitialRate << 0.15f;
+    m_tcMaxIterations->SendTextUpdatedEvent();
+    m_tcInitialRate->SendTextUpdatedEvent();
 
     m_btnPlayPause = new wxButton(box, BTN_PLAY_PAUSE, "Continue");
     m_btnPlayPause->Disable();
@@ -205,8 +209,6 @@ void MainPanel::OnButtonConfirmLattice(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_CREATE_LATTICE, GetId());
     ProcessWindowEvent(event);
-
-    m_canvas->ResetLattice();
 }
 
 void MainPanel::OnButtonConfirmSOM(wxCommandEvent&)

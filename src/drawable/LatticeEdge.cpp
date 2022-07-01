@@ -16,8 +16,6 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     : m_ibo(nullptr)
     , m_ub {}
 {
-    assert(mesh.HasPositions());
-
     std::vector<AttributeDesc> attrs = {
         { "position", 3, GL_FLOAT, GL_FALSE },
     };

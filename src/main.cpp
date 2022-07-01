@@ -33,12 +33,8 @@ WatermarkingApp::WatermarkingApp()
     , m_lattice(nullptr)
     , m_renderer(nullptr)
     , m_dataset(nullptr)
+    , m_conf {}
 {
-    float const ratio = static_cast<float>(world.pattern.width) / static_cast<float>(world.pattern.height);
-    m_conf.height = 128;
-    m_conf.width = static_cast<int>(m_conf.height * ratio);
-    m_conf.maxIterations = 50000;
-    m_conf.initialRate = 0.15f;
 }
 
 void WatermarkingApp::OnUnhandledException()
@@ -51,30 +47,15 @@ int WatermarkingApp::OnExit()
     return wxApp::OnExit();
 }
 
-std::shared_ptr<Lattice> const& WatermarkingApp::GetLattice() const
-{
-    return m_lattice;
-}
-
 std::shared_ptr<SelfOrganizingMap> const& WatermarkingApp::GetSOM() const
 {
     return m_som;
 }
-
-TrainingConfig& WatermarkingApp::GetTrainingConfig()
-{
-    return m_conf;
-}
-
 bool WatermarkingApp::OnInit()
 {
     if (!wxApp::OnInit()) {
         return false;
     }
-
-    // FIXME
-    m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
-    m_lattice->flags = m_conf.flags;
 
     STLImporter stlImp;
     world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
@@ -104,6 +85,10 @@ bool WatermarkingApp::OnInit()
 
 void WatermarkingApp::BuildLatticeMesh()
 {
+    if (!m_lattice) {
+        return;
+    }
+
     Mesh mesh;
 
     std::vector<glm::vec3> positions;
@@ -182,6 +167,9 @@ void WatermarkingApp::BuildLatticeMesh()
 
     world.neurons.positions = positions;
     world.latticeMesh = mesh;
+
+    // FIXME?
+    UpdateLatticeEdges();
 }
 
 void WatermarkingApp::UpdateLatticeEdges()
@@ -429,6 +417,9 @@ void WatermarkingApp::OnCmdCreateLattice(wxCommandEvent&)
 {
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->flags = m_conf.flags;
+    BuildLatticeMesh();
+
+    m_renderer->LoadLattice(); // Change OpenGL vertex buffer's size
 }
 
 void WatermarkingApp::OnCmdCreateSOMProcedure(wxCommandEvent&)

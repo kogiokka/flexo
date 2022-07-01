@@ -41,7 +41,6 @@ public:
     void InitGL();
     void SetRenderer(std::shared_ptr<Renderer> renderer);
     void ResetCamera();
-    void ResetLattice();
 
 private:
     void UpdateScene();

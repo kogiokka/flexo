@@ -84,10 +84,6 @@ void OpenGLCanvas::InitGL()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-    // FIXME
-    wxGetApp().BuildLatticeMesh();
-    wxGetApp().UpdateLatticeEdges();
-
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -190,14 +186,6 @@ void OpenGLCanvas::ResetCamera()
 {
     wxSize const size = GetClientSize() * GetContentScaleFactor();
     m_renderer->GetCamera() = Camera(size.x, size.y);
-}
-
-// FIXME
-void OpenGLCanvas::ResetLattice()
-{
-    wxGetApp().BuildLatticeMesh();
-    wxGetApp().UpdateLatticeEdges();
-    m_renderer->LoadLattice();
 }
 
 // FIXME

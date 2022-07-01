@@ -35,11 +35,8 @@ public:
     virtual bool OnInit() override;
     virtual int OnExit() override;
     virtual void OnUnhandledException() override;
-    std::shared_ptr<Lattice> const& GetLattice() const;
     std::shared_ptr<SelfOrganizingMap> const& GetSOM() const;
-    TrainingConfig& GetTrainingConfig();
     void BuildLatticeMesh();
-    void UpdateLatticeEdges();
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
     void SetCameraView(std::vector<glm::vec3> positions);
@@ -57,6 +54,8 @@ public:
     void OnCmdCreateLattice(wxCommandEvent& evt);
     void OnCmdCreateSOMProcedure(wxCommandEvent& evt);
 
+private:
+    void UpdateLatticeEdges();
     wxDECLARE_EVENT_TABLE();
 };
 
