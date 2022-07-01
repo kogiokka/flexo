@@ -18,7 +18,7 @@
 wxDECLARE_APP(WatermarkingApp);
 
 enum {
-    TIMER_UI_UPDATE,
+    TIMER_CANVAS_UPDATE,
 };
 
 float static constexpr MATH_PI = 3.14159265f;
@@ -39,7 +39,7 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wx
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
     m_context = std::make_unique<wxGLContext>(this, nullptr, &attrs);
 
-    m_updateTimer = new wxTimer(this, TIMER_UI_UPDATE);
+    m_updateTimer = new wxTimer(this, TIMER_CANVAS_UPDATE);
     m_updateTimer->Start(16); // 16 ms (60 fps)
 }
 
@@ -227,5 +227,5 @@ wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
     EVT_LEFT_DOWN(OpenGLCanvas::OnMouseLeftDown)
     EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
     EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
-    EVT_TIMER(TIMER_UI_UPDATE, OpenGLCanvas::OnUpdateTimer)
+    EVT_TIMER(TIMER_CANVAS_UPDATE, OpenGLCanvas::OnUpdateTimer)
 wxEND_EVENT_TABLE()
