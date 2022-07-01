@@ -24,6 +24,7 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_DO_WATERMARK, WatermarkingApp::OnCmdDoWatermark)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_LATTICE, WatermarkingApp::OnCmdCreateLattice)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_SOM_PROCEDURE, WatermarkingApp::OnCmdCreateSOMProcedure)
+    EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_APP(WatermarkingApp);
@@ -425,4 +426,9 @@ void WatermarkingApp::OnCmdCreateLattice(wxCommandEvent&)
 void WatermarkingApp::OnCmdCreateSOMProcedure(wxCommandEvent&)
 {
     m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
+}
+
+void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
+{
+    BuildLatticeMesh();
 }

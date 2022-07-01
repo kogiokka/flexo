@@ -7,6 +7,7 @@
 #include <glad/glad.h> // before <wx/glcanvas.h>
 
 #include <wx/dcclient.h>
+#include <wx/event.h>
 #include <wx/gdicmn.h>
 #include <wx/glcanvas.h>
 #include <wx/string.h>
@@ -48,5 +49,7 @@ private:
 
     wxDECLARE_EVENT_TABLE();
 };
+
+wxDECLARE_EVENT(CMD_REBUILD_LATTICE_MESH, wxCommandEvent);
 
 #endif

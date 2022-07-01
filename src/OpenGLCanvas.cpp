@@ -11,11 +11,10 @@
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
-#include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 
-wxDECLARE_APP(WatermarkingApp);
+wxDEFINE_EVENT(CMD_REBUILD_LATTICE_MESH, wxCommandEvent);
 
 enum {
     TIMER_CANVAS_UPDATE,
@@ -188,12 +187,12 @@ void OpenGLCanvas::ResetCamera()
     m_renderer->GetCamera() = Camera(size.x, size.y);
 }
 
-// FIXME
 void OpenGLCanvas::UpdateScene()
 {
     if (world.renderFlags & RenderFlag_DrawLatticeVertex || world.renderFlags & RenderFlag_DrawLatticeEdge
         || world.renderFlags & RenderFlag_DrawLatticeFace) {
-        wxGetApp().BuildLatticeMesh();
+        wxCommandEvent event(CMD_REBUILD_LATTICE_MESH, GetId());
+        ProcessWindowEvent(event);
     }
 }
 

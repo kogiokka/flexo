@@ -53,6 +53,7 @@ public:
     void OnCmdDoWatermark(wxCommandEvent& evt);
     void OnCmdCreateLattice(wxCommandEvent& evt);
     void OnCmdCreateSOMProcedure(wxCommandEvent& evt);
+    void OnCmdRebuildLatticeMesh(wxCommandEvent& evt);
 
 private:
     void UpdateLatticeEdges();
