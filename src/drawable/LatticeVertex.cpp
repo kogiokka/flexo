@@ -4,10 +4,12 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/Shader.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
+#include "bindable/program/FragmentShaderProgram.hpp"
+#include "bindable/program/ProgramPipeline.hpp"
+#include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeVertex.hpp"
 
 LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
@@ -30,11 +32,6 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
 
     m_count = vertices.size();
 
-    auto shader = std::make_shared<Bind::Shader>(gfx);
-    shader->Attach(ShaderStage::Vert, "shader/LatticeVertex.vert");
-    shader->Attach(ShaderStage::Frag, "shader/LatticeVertex.frag");
-    shader->Link();
-
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.modelMat = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
     m_ub.frag.alpha = world.modelColorAlpha;
@@ -48,11 +45,14 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.frag.material.shininess = 256.0f;
 
+    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.neurons.positions, 2));
-    AddBind(shader);
+    AddBind(pipeline);
+    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert", pipeline->GetId()));
+    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag", pipeline->GetId()));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 

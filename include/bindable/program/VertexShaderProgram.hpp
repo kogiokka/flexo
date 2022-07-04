@@ -15,12 +15,13 @@ namespace Bind
     class VertexShaderProgram : public Bindable
     {
         GLuint m_id;
-        ProgramPipeline* m_pipeline;
+        GLuint m_pipeline;
 
     public:
-        VertexShaderProgram(Graphics& gfx, std::string const& filename, ProgramPipeline* pipeline);
+        VertexShaderProgram(Graphics& gfx, std::string const& filename, GLuint pipeline);
         ~VertexShaderProgram() override;
         virtual void Bind() override;
+        void SetPipeline(GLuint pipeline);
     };
 }
 

@@ -15,13 +15,13 @@
 
 namespace Bind
 {
-    class Shader : public Bindable
+    class ShaderProgram : public Bindable
     {
         GLuint m_id;
 
     public:
-        Shader(Graphics& gfx);
-        ~Shader() override;
+        ShaderProgram(Graphics& gfx);
+        ~ShaderProgram() override;
         void Bind() override;
         void Attach(ShaderStage stage, std::string const& filepath);
         void Link();

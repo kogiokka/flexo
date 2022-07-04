@@ -60,8 +60,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 2));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 3));
     AddBind(pipeline);
-    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", pipeline.get()));
-    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", pipeline.get()));
+    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", pipeline->GetId()));
+    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", pipeline->GetId()));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
     AddBind(m_texColor);
     AddBind(m_texPattern);

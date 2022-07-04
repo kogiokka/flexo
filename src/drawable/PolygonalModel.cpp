@@ -4,10 +4,12 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/Shader.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
+#include "bindable/program/FragmentShaderProgram.hpp"
+#include "bindable/program/ProgramPipeline.hpp"
+#include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/PolygonalModel.hpp"
 
 PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
@@ -27,11 +29,6 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 
     m_count = vertices.size();
 
-    auto shader = std::make_shared<Bind::Shader>(gfx);
-    shader->Attach(ShaderStage::Vert, "shader/PolygonalModel.vert");
-    shader->Attach(ShaderStage::Frag, "shader/PolygonalModel.frag");
-    shader->Link();
-
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.modelMat = glm::mat4(1.0f);
     m_ub.frag.alpha = world.modelColorAlpha;
@@ -45,10 +42,13 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.frag.material.shininess = 32.0f;
 
+    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(shader);
+    AddBind(pipeline);
+    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/PolygonalModel.vert", pipeline->GetId()));
+    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/PolygonalModel.frag", pipeline->GetId()));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 

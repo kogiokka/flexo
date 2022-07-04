@@ -6,10 +6,12 @@
 #include "World.hpp"
 #include "bindable/IndexBuffer.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/Shader.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
+#include "bindable/program/FragmentShaderProgram.hpp"
+#include "bindable/program/ProgramPipeline.hpp"
+#include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeEdge.hpp"
 
 LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
@@ -22,22 +24,20 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
 
     std::vector<glm::vec3> vertices = mesh.positions;
 
-    auto shader = std::make_shared<Bind::Shader>(gfx);
-    shader->Attach(ShaderStage::Vert, "shader/LatticeEdge.vert");
-    shader->Attach(ShaderStage::Frag, "shader/LatticeEdge.frag");
-    shader->Link();
-
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.modelMat = glm::mat4(1.0f);
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
     m_ibo = std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges);
 
+    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(m_ibo);
-    AddBind(shader);
+    AddBind(pipeline);
+    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", pipeline->GetId()));
+    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", pipeline->GetId()));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
 }
 

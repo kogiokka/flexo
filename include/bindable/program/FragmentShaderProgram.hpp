@@ -8,17 +8,16 @@
 
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
-#include "bindable/program/ProgramPipeline.hpp"
 
 namespace Bind
 {
     class FragmentShaderProgram : public Bindable
     {
         GLuint m_id;
-        ProgramPipeline* m_pipeline;
+        GLuint m_pipeline;
 
     public:
-        FragmentShaderProgram(Graphics& gfx, std::string const& filename, ProgramPipeline* pipeline);
+        FragmentShaderProgram(Graphics& gfx, std::string const& filename, GLuint pipeline);
         ~FragmentShaderProgram() override;
         virtual void Bind() override;
     };

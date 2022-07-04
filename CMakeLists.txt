@@ -63,7 +63,7 @@ PRIVATE
     "src/bindable/UniformBuffer.cpp"
     "src/bindable/VertexBuffer.cpp"
     "src/bindable/Texture2D.cpp"
-    "src/bindable/Shader.cpp"
+    "src/bindable/program/ShaderProgram.cpp"
     "src/bindable/program/ProgramPipeline.cpp"
     "src/bindable/program/VertexShaderProgram.cpp"
     "src/bindable/program/FragmentShaderProgram.cpp"
