@@ -57,47 +57,23 @@ void Graphics::CreateProgramPipeline(GLuint& pipeline)
 
 void Graphics::CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename)
 {
-    using namespace std;
-
-    ifstream file;
-    string source;
-
-    file.open(filename.data());
-    if (file.fail()) {
-        Logger::error("Failed to open shader file: %s", filename.c_str());
-    }
-    source.resize(filesystem::file_size(filename));
-    file.read(source.data(), source.size());
-    file.close();
+    std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
-
     program = glCreateShaderProgramv(stage, 1, shaderSourceArray);
 
     CheckProgramStatus(program);
 }
 
-void Graphics::AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filepath)
+void Graphics::AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filename)
 {
-    using namespace std;
-
-    ifstream file;
-    string source;
-
-    file.open(filepath.data());
-    if (file.fail()) {
-        Logger::error("Failed to open shader file: %s", filepath.c_str());
-    }
-    source.resize(filesystem::file_size(filepath));
-    file.read(source.data(), source.size());
-    file.close();
-
+    std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
 
     GLuint shaderObject = glCreateShader(stage);
     glShaderSource(shaderObject, 1, shaderSourceArray, nullptr);
     glCompileShader(shaderObject);
     if (!IsShaderCompiled(shaderObject)) {
-        Logger::error("Shader object compilation error: %s", filepath.c_str());
+        Logger::error("Shader object compilation error: %s", filename.c_str());
     }
     glAttachShader(program, shaderObject);
     glDeleteShader(shaderObject);
@@ -110,17 +86,7 @@ void Graphics::LinkShaderProgram(const GLuint program)
     GLint success;
     glGetProgramiv(program, GL_LINK_STATUS, &success);
 
-    if (success == GL_TRUE)
-        return;
-
-    GLint lenLog;
-    std::string log;
-    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &lenLog);
-    log.resize(lenLog);
-    glGetProgramInfoLog(program, lenLog, nullptr, log.data());
-    glDeleteProgram(program);
-
-    Logger::error("Shader program linking error: %s\n", log.data());
+    CheckProgramStatus(program);
 }
 
 void Graphics::SetVertexLayout(GLuint const layout)
@@ -280,4 +246,20 @@ void Graphics::CheckProgramStatus(GLuint const program)
     glGetProgramInfoLog(program, lenLog, nullptr, log.data());
     glDeleteProgram(program);
     Logger::error("Shader program linking error: %s\n", log.data());
+}
+
+std::string Graphics::SlurpShaderSource(std::string const& filename) const
+{
+    std::ifstream file;
+    std::string source;
+
+    file.open(filename.data());
+    if (file.fail()) {
+        Logger::error("Failed to open shader file: %s", filename.c_str());
+    }
+    source.resize(std::filesystem::file_size(filename));
+    file.read(source.data(), source.size());
+    file.close();
+
+    return source;
 }

@@ -77,7 +77,7 @@ public:
     void CreateShaderProgram(GLuint& program);
     void CreateProgramPipeline(GLuint& pipeline);
     void CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename);
-    void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filepath);
+    void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filename);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
@@ -111,6 +111,7 @@ private:
     int UniformLocation(std::string const& uniformName) const;
     bool IsShaderCompiled(GLuint const shaderObject);
     void CheckProgramStatus(GLuint const programObject);
+    std::string SlurpShaderSource(std::string const& filename) const;
 };
 
 #endif
