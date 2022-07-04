@@ -4,10 +4,12 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
-#include "bindable/Shader.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
+#include "bindable/program/FragmentShaderProgram.hpp"
+#include "bindable/program/ProgramPipeline.hpp"
+#include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/VolumetricModel.hpp"
 
 VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
@@ -33,11 +35,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
 
     m_count = vertices.size();
 
-    auto shader = std::make_shared<Bind::Shader>(gfx);
-    shader->Attach(ShaderStage::Vert, "shader/VolumetricModel.vert");
-    shader->Attach(ShaderStage::Frag, "shader/VolumetricModel.frag");
-    shader->Link();
-
     m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.modelMat = glm::mat4(1.0f);
     m_ub.vert.viewPos = gfx.GetCameraPosition();
@@ -56,12 +53,15 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     auto const& [img, w, h, ch] = world.pattern;
     m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
+    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 2));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 3));
-    AddBind(shader);
+    AddBind(pipeline);
+    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", pipeline.get()));
+    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", pipeline.get()));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
     AddBind(m_texColor);
     AddBind(m_texPattern);

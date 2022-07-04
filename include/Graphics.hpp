@@ -75,6 +75,8 @@ public:
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
     void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data);
     void CreateShaderProgram(GLuint& program);
+    void CreateProgramPipeline(GLuint& pipeline);
+    void CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename);
     void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filepath);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
@@ -84,12 +86,15 @@ public:
     void SetIndexBuffer(GLuint buffer, GLenum elementDataType, GLvoid const* offsetOfFirstIndex);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
     void SetShaderProgram(GLuint program);
+    void SetProgramPipeline(GLuint pipeline);
+    void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 
     void DeleteVertexLayout(GLuint& layout);
     void DeleteBuffer(GLuint& buffer);
     void DeleteTexture(GLuint& texture);
     void DeleteShaderProgram(GLuint& program);
+    void DeleteProgramPipeline(GLuint& pipeline);
     void ClearBuffer(float red, float green, float blue) const;
 
     glm::mat4 GetViewProjectionMatrix() const;
@@ -105,6 +110,7 @@ public:
 private:
     int UniformLocation(std::string const& uniformName) const;
     bool IsShaderCompiled(GLuint const shaderObject);
+    void CheckProgramStatus(GLuint const programObject);
 };
 
 #endif

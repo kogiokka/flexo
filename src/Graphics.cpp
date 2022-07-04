@@ -50,6 +50,32 @@ void Graphics::CreateShaderProgram(GLuint& program)
     program = glCreateProgram();
 }
 
+void Graphics::CreateProgramPipeline(GLuint& pipeline)
+{
+    glGenProgramPipelines(1, &pipeline);
+}
+
+void Graphics::CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename)
+{
+    using namespace std;
+
+    ifstream file;
+    string source;
+
+    file.open(filename.data());
+    if (file.fail()) {
+        Logger::error("Failed to open shader file: %s", filename.c_str());
+    }
+    source.resize(filesystem::file_size(filename));
+    file.read(source.data(), source.size());
+    file.close();
+    char const* const shaderSourceArray[1] = { source.c_str() };
+
+    program = glCreateShaderProgramv(stage, 1, shaderSourceArray);
+
+    CheckProgramStatus(program);
+}
+
 void Graphics::AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filepath)
 {
     using namespace std;
@@ -133,6 +159,18 @@ void Graphics::SetShaderProgram(GLuint program)
     glUseProgram(program);
 }
 
+void Graphics::SetProgramPipeline(GLuint pipeline)
+{
+    glBindProgramPipeline(pipeline);
+}
+
+void Graphics::SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program)
+{
+    glUseProgram(0);
+    glBindProgramPipeline(pipeline);
+    glUseProgramStages(pipeline, stages, program);
+}
+
 void Graphics::Draw(GLsizei vertexCount)
 {
     glDrawArrays(m_ctx.primitive, 0, vertexCount);
@@ -179,6 +217,11 @@ void Graphics::DeleteShaderProgram(GLuint& program)
     glDeleteProgram(program);
 }
 
+void Graphics::DeleteProgramPipeline(GLuint& pipeline)
+{
+    glDeleteProgramPipelines(1, &pipeline);
+}
+
 glm::mat4 Graphics::GetViewProjectionMatrix() const
 {
     return m_camera.ViewProjectionMatrix();
@@ -219,4 +262,22 @@ bool Graphics::IsShaderCompiled(GLuint const shaderObject)
     std::fprintf(stderr, "%s\n", log.data());
 
     return false;
+}
+
+void Graphics::CheckProgramStatus(GLuint const program)
+{
+    GLint success;
+    glGetProgramiv(program, GL_LINK_STATUS, &success);
+
+    if (success == GL_TRUE) {
+        return;
+    }
+
+    GLint lenLog;
+    std::string log;
+    glGetProgramiv(program, GL_INFO_LOG_LENGTH, &lenLog);
+    log.resize(lenLog);
+    glGetProgramInfoLog(program, lenLog, nullptr, log.data());
+    glDeleteProgram(program);
+    Logger::error("Shader program linking error: %s\n", log.data());
 }
