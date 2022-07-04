@@ -4,6 +4,7 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
+#include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -29,8 +30,6 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 
     m_count = vertices.size();
 
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    m_ub.vert.modelMat = glm::mat4(1.0f);
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -49,7 +48,8 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddBind(pipeline);
     AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/PolygonalModel.vert", pipeline->GetId()));
     AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/PolygonalModel.frag", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
+    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
 // FIXME: VertexLayout configurations
@@ -66,7 +66,6 @@ void PolygonalModel::Update(Graphics& gfx)
 {
     m_isVisible = world.renderFlags & RenderFlag_DrawModel;
 
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -78,4 +77,9 @@ void PolygonalModel::Update(Graphics& gfx)
             break;
         }
     }
+}
+
+glm::mat4 PolygonalModel::GetTransformMatrix() const
+{
+    return glm::mat4(1.0f);
 }

@@ -11,11 +11,6 @@
 class LatticeVertex : public Drawable
 {
     struct UniformBlock {
-        struct Vert {
-            glm::mat4 viewProjMat;
-            glm::mat4 modelMat;
-        };
-
         struct Frag {
             struct Light {
                 STD140_ALIGN glm::vec3 position;
@@ -34,8 +29,6 @@ class LatticeVertex : public Drawable
             STD140_ALIGN glm::vec3 viewPos;
             float alpha;
         };
-
-        Vert vert;
         Frag frag;
     };
 
@@ -46,6 +39,7 @@ public:
     LatticeVertex(Graphics& gfx, Mesh const& mesh);
     void Draw(Graphics& gfx) const override;
     void Update(Graphics& gfx) override;
+    glm::mat4 GetTransformMatrix() const override;
 };
 #endif
 

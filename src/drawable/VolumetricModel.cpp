@@ -4,6 +4,7 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
+#include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -35,8 +36,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
 
     m_count = vertices.size();
 
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    m_ub.vert.modelMat = glm::mat4(1.0f);
     m_ub.vert.viewPos = gfx.GetCameraPosition();
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -62,7 +61,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     AddBind(pipeline);
     AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", pipeline->GetId()));
     AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
+    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     AddBind(m_texColor);
     AddBind(m_texPattern);
 }
@@ -84,7 +84,6 @@ void VolumetricModel::Update(Graphics& gfx)
 {
     m_isVisible = world.renderFlags & RenderFlag_DrawModel;
 
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.vert.viewPos = gfx.GetCameraPosition();
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.isWatermarked = world.isWatermarked;
@@ -103,4 +102,9 @@ void VolumetricModel::Update(Graphics& gfx)
             }
         }
     }
+}
+
+glm::mat4 VolumetricModel::GetTransformMatrix() const
+{
+    return glm::mat4(1.0f);
 }

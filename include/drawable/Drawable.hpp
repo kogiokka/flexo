@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+#include <glm/glm.hpp>
+
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 
@@ -20,6 +22,7 @@ public:
 
     virtual void Draw(Graphics& gfx) const;
     virtual void Update(Graphics& gfx);
+    virtual glm::mat4 GetTransformMatrix() const = 0;
     void AddBind(std::shared_ptr<Bind::Bindable> bind);
 };
 

@@ -27,8 +27,6 @@ class VolumetricModel : public Drawable
                 STD140_ALIGN glm::vec3 specular;
                 float shininess;
             };
-            glm::mat4 viewProjMat;
-            glm::mat4 modelMat;
             Light light;
             Material material;
             STD140_ALIGN glm::vec3 viewPos;
@@ -47,6 +45,7 @@ public:
     VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
     void Draw(Graphics& gfx) const override;
     void Update(Graphics& gfx) override;
+    glm::mat4 GetTransformMatrix() const override;
 };
 
 #endif

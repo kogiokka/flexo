@@ -6,6 +6,7 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
+#include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -29,9 +30,6 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 
     m_count = vertices.size();
 
-    m_scaling = glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    m_ub.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * m_scaling;
     m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
@@ -41,7 +39,8 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     AddBind(pipeline);
     AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LightSource.vert", pipeline->GetId()));
     AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LightSource.frag", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
+    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
 // FIXME: VertexLayout configurations
@@ -54,12 +53,9 @@ void LightSource::Draw(Graphics& gfx) const
     gfx.Draw(m_count);
 }
 
-void LightSource::Update(Graphics& gfx)
+void LightSource::Update(Graphics&)
 {
     m_isVisible = world.renderFlags & RenderFlag_DrawLightSource;
-
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    m_ub.vert.modelMat = glm::translate(glm::mat4(1.0f), world.lightPos) * m_scaling;
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
@@ -69,3 +65,9 @@ void LightSource::Update(Graphics& gfx)
         }
     }
 }
+
+glm::mat4 LightSource::GetTransformMatrix() const
+{
+    return glm::translate(glm::mat4(1.0f), world.lightPos) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
+}
+

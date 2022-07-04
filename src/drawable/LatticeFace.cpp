@@ -3,6 +3,7 @@
 #include "World.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/Texture2D.hpp"
+#include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -29,8 +30,6 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 
     m_count = vertices.size();
 
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    m_ub.vert.modelMat = glm::mat4(1.0f);
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
     m_ub.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
@@ -50,7 +49,8 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(pipeline);
     AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeFace.vert", pipeline->GetId()));
     AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeFace.frag", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
+    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
 }
 
@@ -68,7 +68,6 @@ void LatticeFace::Update(Graphics& gfx)
 {
     m_isVisible = world.renderFlags & RenderFlag_DrawLatticeFace;
 
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
 
@@ -95,4 +94,9 @@ void LatticeFace::Update(Graphics& gfx)
             }
         }
     }
+}
+
+glm::mat4 LatticeFace::GetTransformMatrix() const
+{
+    return glm::mat4(1.0f);
 }

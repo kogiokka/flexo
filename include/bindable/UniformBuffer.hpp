@@ -1,5 +1,5 @@
-#ifndef UNIFORM_H
-#define UNIFORM_H
+#ifndef UNIFORM_BUFFER_H
+#define UNIFORM_BUFFER_H
 
 #include <cstring>
 #include <string>
@@ -16,17 +16,36 @@ namespace Bind
         GLuint m_bindingIndex;
 
     public:
-        UniformBuffer(Graphics& gfx, T const& uniformBlock);
+        UniformBuffer(Graphics& gfx, GLuint bindingIndex = 0);
+        UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex = 0);
         ~UniformBuffer();
         void Bind() override;
         void Update(T const& uniformBlock);
     };
 
     template <typename T>
-    UniformBuffer<T>::UniformBuffer(Graphics& gfx, T const& uniformBlock)
+    UniformBuffer<T>::UniformBuffer(Graphics& gfx, GLuint bindingIndex)
         : Bindable(gfx)
         , m_id(0)
-        , m_bindingIndex(0)
+        , m_bindingIndex(bindingIndex)
+    {
+        BufferDesc desc;
+        BufferData data;
+
+        desc.target = GL_UNIFORM_BUFFER;
+        desc.usage = GL_STREAM_DRAW;
+        desc.byteWidth = sizeof(T);
+        desc.stride = sizeof(T);
+
+        data.mem = nullptr;
+        m_gfx->CreateBuffer(m_id, desc, data);
+    }
+
+    template <typename T>
+    UniformBuffer<T>::UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex)
+        : Bindable(gfx)
+        , m_id(0)
+        , m_bindingIndex(bindingIndex)
     {
         BufferDesc desc;
         BufferData data;

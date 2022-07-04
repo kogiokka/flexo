@@ -15,15 +15,18 @@ struct Material {
 };
 
 struct UniformBuffer_Vert {
-    mat4 viewProjMat;
-    mat4 modelMat;
     Light light;
     Material material;
     vec3 viewPos;
     bool isWatermarked;
 };
 
-layout(std140, binding = 0) uniform UniformBuffer {
+layout(std140, binding = 0) uniform Transform {
+    mat4 model;
+    mat4 viewProj;
+} mx;
+
+layout(std140, binding = 1) uniform UniformBuffer {
     UniformBuffer_Vert vert;
 } ubo;
 
@@ -57,6 +60,6 @@ void main()
         color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelColor, textureCoord);
     }
 
-    gl_Position = ubo.vert.viewProjMat * (vec4(translation, 0.0) + ubo.vert.modelMat * vec4(position, 1.0));
+    gl_Position = mx.viewProj * (vec4(translation, 0.0) + mx.model * vec4(position, 1.0));
 }
 

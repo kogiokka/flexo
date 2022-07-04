@@ -21,13 +21,12 @@ struct UniformBuffer_Frag {
     float alpha;
 };
 
-struct UniformBuffer_Vert {
-    mat4 viewProjMat;
-    mat4 modelMat;
-};
+layout(std140, binding = 0) uniform Transform {
+    mat4 model;
+    mat4 viewProj;
+} mx;
 
-layout(std140, binding = 0) uniform UniformBuffer {
-    UniformBuffer_Vert vert;
+layout(std140, binding = 1) uniform UniformBuffer {
     UniformBuffer_Frag frag;
 } ubo;
 

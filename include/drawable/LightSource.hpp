@@ -10,26 +10,21 @@
 class LightSource : public Drawable
 {
     struct UniformBlock {
-        struct Vert {
-            glm::mat4 viewProjMat;
-            glm::mat4 modelMat;
-        };
         struct Frag {
             STD140_ALIGN glm::vec3 lightColor;
         };
 
-        Vert vert;
         Frag frag;
     };
 
     GLuint m_count;
-    glm::mat4 m_scaling;
     UniformBlock m_ub;
 
 public:
     LightSource(Graphics& gfx, Mesh const& mesh);
     void Draw(Graphics& gfx) const override;
     void Update(Graphics& gfx) override;
+    glm::mat4 GetTransformMatrix() const override;
 };
 
 #endif

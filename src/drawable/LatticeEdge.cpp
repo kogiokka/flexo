@@ -6,6 +6,7 @@
 #include "World.hpp"
 #include "bindable/IndexBuffer.hpp"
 #include "bindable/Primitive.hpp"
+#include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/VertexLayout.hpp"
@@ -24,8 +25,6 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
 
     std::vector<glm::vec3> vertices = mesh.positions;
 
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
-    m_ub.vert.modelMat = glm::mat4(1.0f);
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
     m_ibo = std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges);
@@ -38,7 +37,8 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     AddBind(pipeline);
     AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", pipeline->GetId()));
     AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub));
+    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
+    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
 // FIXME: VertexLayout configurations
@@ -51,11 +51,9 @@ void LatticeEdge::Draw(Graphics& gfx) const
     gfx.DrawIndexed(m_ibo->GetCount());
 }
 
-void LatticeEdge::Update(Graphics& gfx)
+void LatticeEdge::Update(Graphics&)
 {
     m_isVisible = world.renderFlags & RenderFlag_DrawLatticeEdge;
-
-    m_ub.vert.viewProjMat = gfx.GetViewProjectionMatrix();
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         {
@@ -71,4 +69,9 @@ void LatticeEdge::Update(Graphics& gfx)
             }
         }
     }
+}
+
+glm::mat4 LatticeEdge::GetTransformMatrix() const
+{
+    return glm::mat4(1.0f);
 }
