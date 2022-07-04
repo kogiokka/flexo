@@ -18,9 +18,9 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     , m_ub {}
 {
     std::vector<AttributeDesc> attrs = {
-        { "position", 3, GL_FLOAT, GL_FALSE }, // 0
-        { "normal", 3, GL_FLOAT, GL_FALSE }, // 1
-        { "translation", 3, GL_FLOAT, GL_FALSE }, // 2
+        { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 0
+        { "normal", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 1
+        { "translation", 3, GL_FLOAT, GL_FALSE, InputClassification::PerInstance }, // 2
     };
 
     std::vector<VertexPN> vertices;
@@ -63,7 +63,6 @@ void LatticeVertex::Draw(Graphics& gfx) const
         return;
     }
     Drawable::Draw(gfx);
-    glVertexBindingDivisor(2, 1);
     gfx.DrawInstanced(m_count, world.neurons.positions.size());
 }
 

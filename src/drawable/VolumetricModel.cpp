@@ -20,10 +20,10 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     , m_texPattern(nullptr)
 {
     std::vector<AttributeDesc> attrs = {
-        { "position", 3, GL_FLOAT, GL_FALSE }, // 0
-        { "normal", 3, GL_FLOAT, GL_FALSE }, // 1
-        { "textureCoord", 2, GL_FLOAT, GL_FALSE }, // 2
-        { "translation", 3, GL_FLOAT, GL_FALSE }, // 3
+        { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 0
+        { "normal", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 1
+        { "textureCoord", 2, GL_FLOAT, GL_FALSE, InputClassification::PerInstance }, // 2
+        { "translation", 3, GL_FLOAT, GL_FALSE, InputClassification::PerInstance }, // 3
     };
 
     std::vector<VertexPN> vertices;
@@ -75,8 +75,6 @@ void VolumetricModel::Draw(Graphics& gfx) const
     }
 
     Drawable::Draw(gfx);
-    glVertexBindingDivisor(2, 1);
-    glVertexBindingDivisor(3, 1);
     gfx.DrawInstanced(m_count, world.theModel->positions.size());
 }
 

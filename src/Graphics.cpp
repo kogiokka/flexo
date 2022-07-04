@@ -11,13 +11,16 @@ Graphics::Graphics(int width, int height)
 
 void Graphics::CreateVertexLayout(GLuint& layout, AttributeDesc const* attrDescs, int const numAttrs)
 {
-    GLuint index = 0;
     glGenVertexArrays(1, &layout);
     glBindVertexArray(layout);
     for (int i = 0; i < numAttrs; i++) {
-        glEnableVertexAttribArray(index + i);
-        glVertexAttribFormat(index + i, attrDescs[i].numValues, attrDescs[i].valueType, attrDescs[i].shouldNormalize,
-                             0);
+        glEnableVertexAttribArray(i);
+        glVertexAttribFormat(i, attrDescs[i].numValues, attrDescs[i].valueType, attrDescs[i].shouldNormalize, 0);
+
+        glVertexBindingDivisor(i, 0);
+        if (attrDescs[i].inputSlotClass == InputClassification::PerInstance) {
+            glVertexBindingDivisor(i, 1);
+        }
     }
 }
 

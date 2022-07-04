@@ -9,11 +9,17 @@
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
+enum class InputClassification {
+    PerVertex,
+    PerInstance,
+};
+
 struct AttributeDesc {
     GLchar const* name;
     GLint numValues;
     GLenum valueType;
     GLboolean shouldNormalize;
+    InputClassification inputSlotClass;
 };
 
 struct BufferDesc {

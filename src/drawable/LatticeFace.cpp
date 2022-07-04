@@ -14,9 +14,9 @@
 LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 {
     std::vector<AttributeDesc> attrs = {
-        { "position", 3, GL_FLOAT, GL_FALSE },
-        { "normal", 3, GL_FLOAT, GL_FALSE },
-        { "textureCoord", 2, GL_FLOAT, GL_FALSE },
+        { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
+        { "normal", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
+        { "textureCoord", 2, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
     };
 
     std::vector<VertexPNT> vertices;

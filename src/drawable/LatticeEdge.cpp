@@ -20,7 +20,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     , m_ub {}
 {
     std::vector<AttributeDesc> attrs = {
-        { "position", 3, GL_FLOAT, GL_FALSE },
+        { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
     };
 
     std::vector<glm::vec3> vertices = mesh.positions;
