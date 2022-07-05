@@ -13,7 +13,7 @@
 #include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeVertex.hpp"
 
-LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
+LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
     : m_ub {}
 {
     std::vector<InputElementDesc> inputs = {
@@ -23,10 +23,10 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     };
 
     std::vector<VertexPN> vertices;
-    for (unsigned int i = 0; i < mesh.positions.size(); i++) {
+    for (unsigned int i = 0; i < instanceMesh.positions.size(); i++) {
         VertexPN v;
-        v.position = mesh.positions[i];
-        v.normal = mesh.normals[i];
+        v.position = instanceMesh.positions[i];
+        v.normal = instanceMesh.normals[i];
         vertices.push_back(v);
     }
 
@@ -45,7 +45,7 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.neurons.positions, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 2));
     AddBind(pipeline);
     AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert", pipeline->GetId()));
     AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag", pipeline->GetId()));

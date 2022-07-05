@@ -35,10 +35,9 @@ class LatticeVertex : public InstancedDrawable
     UniformBlock m_ub;
 
 public:
-    LatticeVertex(Graphics& gfx, Mesh const& mesh);
+    LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
     ~LatticeVertex() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
 };
 #endif
-

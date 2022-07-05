@@ -46,7 +46,7 @@ void Renderer::LoadPolygonalModel(Mesh const& mesh)
 
 void Renderer::LoadLattice()
 {
-    m_latticeVert = std::make_unique<LatticeVertex>(m_gfx, world.uvsphere);
+    m_latticeVert = std::make_unique<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
     m_latticeEdge = std::make_unique<LatticeEdge>(m_gfx, world.neurons);
     m_latticeFace = std::make_unique<LatticeFace>(m_gfx, world.latticeMesh);
 }
