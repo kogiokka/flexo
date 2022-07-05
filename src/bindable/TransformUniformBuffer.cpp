@@ -14,4 +14,4 @@ namespace Bind
         m_buffer.Update({ m_parent.GetTransformMatrix(), m_gfx->GetViewProjectionMatrix() });
         m_buffer.Bind();
     }
-};
+}

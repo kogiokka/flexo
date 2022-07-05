@@ -22,5 +22,5 @@ namespace Bind
     void VertexShaderProgram::SetPipeline(GLuint pipeline)
     {
         m_pipeline = pipeline;
-    };
+    }
 }
