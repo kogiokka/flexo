@@ -6,9 +6,9 @@
 #include "Graphics.hpp"
 #include "Mesh.hpp"
 #include "bindable/Texture2D.hpp"
-#include "drawable/Drawable.hpp"
+#include "drawable/InstancedDrawable.hpp"
 
-class LatticeVertex : public Drawable
+class LatticeVertex : public InstancedDrawable
 {
     struct UniformBlock {
         struct Frag {
@@ -32,12 +32,11 @@ class LatticeVertex : public Drawable
         Frag frag;
     };
 
-    GLuint m_count;
     UniformBlock m_ub;
 
 public:
     LatticeVertex(Graphics& gfx, Mesh const& mesh);
-    void Draw(Graphics& gfx) const override;
+    ~LatticeVertex() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
 };

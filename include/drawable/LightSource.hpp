@@ -17,12 +17,11 @@ class LightSource : public Drawable
         Frag frag;
     };
 
-    GLuint m_count;
     UniformBlock m_ub;
 
 public:
     LightSource(Graphics& gfx, Mesh const& mesh);
-    void Draw(Graphics& gfx) const override;
+    ~LightSource() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
 };

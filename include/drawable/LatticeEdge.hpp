@@ -8,9 +8,9 @@
 #include "Graphics.hpp"
 #include "Mesh.hpp"
 #include "bindable/IndexBuffer.hpp"
-#include "drawable/Drawable.hpp"
+#include "drawable/IndexedDrawable.hpp"
 
-class LatticeEdge : public Drawable
+class LatticeEdge : public IndexedDrawable
 {
     struct UniformBlock {
         struct Frag {
@@ -20,12 +20,11 @@ class LatticeEdge : public Drawable
         Frag frag;
     };
 
-    std::shared_ptr<Bind::IndexBuffer> m_ibo;
     UniformBlock m_ub;
 
 public:
     LatticeEdge(Graphics& gfx, Mesh const& mesh);
-    void Draw(Graphics& gfx) const override;
+    ~LatticeEdge() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
 };

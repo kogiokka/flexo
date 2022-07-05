@@ -67,16 +67,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     AddBind(m_texPattern);
 }
 
-// FIXME: VertexLayout configurations
-void VolumetricModel::Draw(Graphics& gfx) const
-{
-    if (!m_isVisible) {
-        return;
-    }
-
-    Drawable::Draw(gfx);
-    gfx.DrawInstanced(m_count, world.theModel->positions.size());
-}
+VolumetricModel::~VolumetricModel() { }
 
 void VolumetricModel::Update(Graphics& gfx)
 {

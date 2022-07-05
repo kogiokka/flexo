@@ -8,9 +8,9 @@
 #include "Graphics.hpp"
 #include "Mesh.hpp"
 #include "bindable/Texture2D.hpp"
-#include "drawable/Drawable.hpp"
+#include "drawable/InstancedDrawable.hpp"
 
-class VolumetricModel : public Drawable
+class VolumetricModel : public InstancedDrawable
 {
     struct UniformBlock {
         struct Vert {
@@ -43,7 +43,7 @@ class VolumetricModel : public Drawable
 
 public:
     VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
-    void Draw(Graphics& gfx) const override;
+    ~VolumetricModel() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
 };

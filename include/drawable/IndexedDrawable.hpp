@@ -1,5 +1,5 @@
-#ifndef DRAWABLE_H
-#define DRAWABLE_H
+#ifndef INDEXED_DRAWABLE_H
+#define INDEXED_DRAWABLE_H
 
 #include <memory>
 #include <vector>
@@ -8,17 +8,17 @@
 
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
-#include "bindable/VertexBuffer.hpp"
+#include "bindable/IndexBuffer.hpp"
 #include "drawable/DrawableBase.hpp"
 
-class Drawable : public DrawableBase
+class IndexedDrawable : public DrawableBase
 {
-    Bind::VertexBuffer const* m_buffer;
+    Bind::IndexBuffer const* m_buffer;
 
 public:
-    Drawable();
-    Drawable(Drawable const&) = delete;
-    virtual ~Drawable() = default;
+    IndexedDrawable();
+    IndexedDrawable(IndexedDrawable const&) = delete;
+    virtual ~IndexedDrawable() = default;
 
     virtual void Draw(Graphics& gfx) const override;
     virtual void Update(Graphics& gfx) override;
@@ -27,3 +27,4 @@ public:
 };
 
 #endif
+

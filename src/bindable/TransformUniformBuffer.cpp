@@ -2,7 +2,7 @@
 
 namespace Bind
 {
-    TransformUniformBuffer::TransformUniformBuffer(Graphics& gfx, Drawable const& parent)
+    TransformUniformBuffer::TransformUniformBuffer(Graphics& gfx, DrawableBase const& parent)
         : Bindable(gfx)
         , m_buffer(gfx)
         , m_parent(parent)

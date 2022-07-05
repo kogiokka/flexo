@@ -28,8 +28,6 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
-    m_count = vertices.size();
-
     m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
@@ -43,15 +41,7 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
-// FIXME: VertexLayout configurations
-void LightSource::Draw(Graphics& gfx) const
-{
-    if (!m_isVisible) {
-        return;
-    }
-    Drawable::Draw(gfx);
-    gfx.Draw(m_count);
-}
+LightSource::~LightSource() { }
 
 void LightSource::Update(Graphics&)
 {

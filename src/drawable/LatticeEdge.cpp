@@ -16,8 +16,7 @@
 #include "drawable/LatticeEdge.hpp"
 
 LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
-    : m_ibo(nullptr)
-    , m_ub {}
+    : m_ub {}
 {
     std::vector<AttributeDesc> attrs = {
         { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
@@ -27,13 +26,11 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
 
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
-    m_ibo = std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges);
-
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(m_ibo);
+    AddBind(std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges));
     AddBind(pipeline);
     AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", pipeline->GetId()));
     AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", pipeline->GetId()));
@@ -41,15 +38,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
-// FIXME: VertexLayout configurations
-void LatticeEdge::Draw(Graphics& gfx) const
-{
-    if (!m_isVisible) {
-        return;
-    }
-    Drawable::Draw(gfx);
-    gfx.DrawIndexed(m_ibo->GetCount());
-}
+LatticeEdge::~LatticeEdge() {};
 
 void LatticeEdge::Update(Graphics&)
 {

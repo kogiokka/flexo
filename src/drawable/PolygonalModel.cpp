@@ -28,8 +28,6 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
-    m_count = vertices.size();
-
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -52,15 +50,7 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
-// FIXME: VertexLayout configurations
-void PolygonalModel::Draw(Graphics& gfx) const
-{
-    if (!m_isVisible) {
-        return;
-    }
-    Drawable::Draw(gfx);
-    gfx.Draw(m_count);
-}
+PolygonalModel::~PolygonalModel() { }
 
 void PolygonalModel::Update(Graphics& gfx)
 {

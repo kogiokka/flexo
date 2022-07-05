@@ -14,8 +14,7 @@
 #include "drawable/LatticeVertex.hpp"
 
 LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
-    : m_count(0)
-    , m_ub {}
+    : m_ub {}
 {
     std::vector<AttributeDesc> attrs = {
         { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 0
@@ -30,8 +29,6 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
         v.normal = mesh.normals[i];
         vertices.push_back(v);
     }
-
-    m_count = vertices.size();
 
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
@@ -56,15 +53,7 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
-// FIXME: VertexLayout configurations
-void LatticeVertex::Draw(Graphics& gfx) const
-{
-    if (!m_isVisible) {
-        return;
-    }
-    Drawable::Draw(gfx);
-    gfx.DrawInstanced(m_count, world.neurons.positions.size());
-}
+LatticeVertex::~LatticeVertex() { }
 
 void LatticeVertex::Update(Graphics& gfx)
 {

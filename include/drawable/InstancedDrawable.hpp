@@ -1,5 +1,5 @@
-#ifndef DRAWABLE_H
-#define DRAWABLE_H
+#ifndef INSTANCED_DRAWABLE_H
+#define INSTANCED_DRAWABLE_H
 
 #include <memory>
 #include <vector>
@@ -11,14 +11,15 @@
 #include "bindable/VertexBuffer.hpp"
 #include "drawable/DrawableBase.hpp"
 
-class Drawable : public DrawableBase
+class InstancedDrawable : public DrawableBase
 {
-    Bind::VertexBuffer const* m_buffer;
+    Bind::VertexBuffer const* m_instance;
+    Bind::VertexBuffer const* m_perInstanceData;
 
 public:
-    Drawable();
-    Drawable(Drawable const&) = delete;
-    virtual ~Drawable() = default;
+    InstancedDrawable();
+    InstancedDrawable(InstancedDrawable const&) = delete;
+    virtual ~InstancedDrawable() = default;
 
     virtual void Draw(Graphics& gfx) const override;
     virtual void Update(Graphics& gfx) override;

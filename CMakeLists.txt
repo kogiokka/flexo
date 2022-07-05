@@ -69,6 +69,8 @@ PRIVATE
     "src/bindable/program/VertexShaderProgram.cpp"
     "src/bindable/program/FragmentShaderProgram.cpp"
     "src/drawable/Drawable.cpp"
+    "src/drawable/IndexedDrawable.cpp"
+    "src/drawable/InstancedDrawable.cpp"
     "src/drawable/PolygonalModel.cpp"
     "src/drawable/VolumetricModel.cpp"
     "src/drawable/LightSource.cpp"

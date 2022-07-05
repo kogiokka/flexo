@@ -33,12 +33,11 @@ class LatticeFace : public Drawable
         Frag frag;
     };
 
-    GLuint m_count;
     UniformBlock m_ub;
 
 public:
     LatticeFace(Graphics& gfx, Mesh const& mesh);
-    void Draw(Graphics& gfx) const override;
+    ~LatticeFace() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
 };

@@ -28,8 +28,6 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
-    m_count = vertices.size();
-
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
     m_ub.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
@@ -54,15 +52,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
 }
 
-// FIXME: VertexLayout configurations
-void LatticeFace::Draw(Graphics& gfx) const
-{
-    if (!m_isVisible) {
-        return;
-    }
-    Drawable::Draw(gfx);
-    gfx.Draw(m_count);
-}
+LatticeFace::~LatticeFace() { }
 
 void LatticeFace::Update(Graphics& gfx)
 {
