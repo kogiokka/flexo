@@ -36,7 +36,6 @@ class VolumetricModel : public InstancedDrawable
         Vert vert;
     };
 
-    GLuint m_count;
     UniformBlock m_ub;
     std::shared_ptr<Bind::Texture2D> m_texColor;
     std::shared_ptr<Bind::Texture2D> m_texPattern;

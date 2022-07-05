@@ -14,8 +14,7 @@
 #include "drawable/VolumetricModel.hpp"
 
 VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
-    : m_count(0)
-    , m_ub {}
+    : m_ub {}
     , m_texColor(nullptr)
     , m_texPattern(nullptr)
 {
@@ -33,8 +32,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
         v.normal = instanceMesh.normals[i];
         vertices.push_back(v);
     }
-
-    m_count = vertices.size();
 
     m_ub.vert.viewPos = gfx.GetCameraPosition();
     m_ub.vert.light.position = gfx.GetCameraPosition();
