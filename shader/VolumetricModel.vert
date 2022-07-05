@@ -38,7 +38,9 @@ layout (location = 3) in vec3 translation;
 layout (binding = 0) uniform sampler2D voxelColor;
 layout (binding = 1) uniform sampler2D voxelPattern;
 
-out vec4 color;
+out VertOut {
+    vec4 color;
+} outData;
 
 void main()
 {
@@ -55,9 +57,9 @@ void main()
     vec3 specular = ubo.vert.light.specular * ubo.vert.material.specular * specularCoef;
 
     if (ubo.vert.isWatermarked) {
-        color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelPattern, textureCoord);
+        outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelPattern, textureCoord);
     } else {
-        color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelColor, textureCoord);
+        outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelColor, textureCoord);
     }
 
     gl_Position = mx.viewProj * (vec4(translation, 0.0) + mx.model * vec4(position, 1.0));

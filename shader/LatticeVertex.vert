@@ -34,12 +34,14 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec3 translation;
 
-out vec3 posFrag;
-out vec3 normFrag;
+out VertOut {
+    vec3 position;
+    vec3 normal;
+} outData;
 
 void main()
 {
     gl_Position = mx.viewProj * (vec4(translation, 0.0) + mx.model * vec4(position, 1.0));
-    posFrag = position;
-    normFrag= normal;
+    outData.position = position;
+    outData.normal = normal;
 }

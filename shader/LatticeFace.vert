@@ -33,14 +33,17 @@ layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 layout (location = 2) in vec2 textureCoord;
 
-out vec3 posFrag ;
-out vec3 normFrag ;
-out vec2 textureCoordFrag ;
+out VertOut {
+    vec3 position;
+    vec3 normal;
+    vec2 textureCoord;
+} outData;
 
 void main()
 {
-  gl_Position = mx.viewProj * mx.model * vec4(position, 1.0);
-  posFrag = vec3(mx.model * vec4(position, 1.0));
-  normFrag = mat3(transpose(inverse(mx.model))) * normal;
-  textureCoordFrag = textureCoord;
+    gl_Position = mx.viewProj * mx.model * vec4(position, 1.0);
+
+    outData.position = vec3(mx.model * vec4(position, 1.0));
+    outData.normal = mat3(transpose(inverse(mx.model))) * normal;
+    outData.textureCoord = textureCoord;
 }

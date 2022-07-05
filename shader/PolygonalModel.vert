@@ -33,12 +33,14 @@ layout (std140, binding = 1) uniform UniformBuffer {
 layout (location = 0) in vec3 position;
 layout (location = 1) in vec3 normal;
 
-out vec3 posFrag;
-out vec3 normFrag;
+out VertOut {
+    vec3 position;
+    vec3 normal;
+} outData;
 
 void main()
 {
      gl_Position = mx.viewProj * mx.model * vec4(position, 1.0);
-     posFrag = position;
-     normFrag  = normal;
+     outData.position = position;
+     outData.normal = normal;
 }

@@ -1,9 +1,12 @@
 #version 430
 
-in vec4 color;
+in VertOut {
+    vec4 color;
+} inData;
+
 out vec4 outColor;
 
 void main()
 {
-    outColor = color;
+    outColor = inData.color;
 }

@@ -31,15 +31,18 @@ layout(std140, binding = 1) uniform UniformBuffer {
 
 layout (binding = 0) uniform sampler2D pattern;
 
-in vec3 posFrag;
-in vec3 normFrag;
-in vec2 textureCoordFrag;
+in VertOut {
+    vec3 position;
+    vec3 normal;
+    vec2 textureCoord;
+} inData;
+
 out vec4 outColor;
 
 void main()
 {
-  vec3 norm = normalize(normFrag);
-  vec3 lightDir = normalize(ubo.frag.light.position - posFrag);
+  vec3 norm = normalize(inData.normal);
+  vec3 lightDir = normalize(ubo.frag.light.position - inData.position);
 
   float diffuseCoef = dot(norm, lightDir);
   if (diffuseCoef < 0.0) {
@@ -48,11 +51,11 @@ void main()
   }
 
   vec3 reflectDir = reflect(-lightDir, norm);
-  vec3 viewDir = normalize(ubo.frag.viewPos - posFrag);
+  vec3 viewDir = normalize(ubo.frag.viewPos - inData.position);
   float specularCoef = pow(max(dot(viewDir, reflectDir), 0.0), ubo.frag.material.shininess);
 
   vec3 ambient = ubo.frag.light.ambient * ubo.frag.material.ambient;
   vec3 diffusion = ubo.frag.light.diffusion * ubo.frag.material.diffusion * diffuseCoef;
   vec3 specular = ubo.frag.light.specular * ubo.frag.material.specular * specularCoef;
-  outColor = vec4((ambient + diffusion + specular), 1.0f) * texture(pattern, textureCoordFrag);
+  outColor = vec4((ambient + diffusion + specular), 1.0f) * texture(pattern, inData.textureCoord);
 }
