@@ -9,16 +9,17 @@ Graphics::Graphics(int width, int height)
 {
 }
 
-void Graphics::CreateVertexLayout(GLuint& layout, AttributeDesc const* attrDescs, int const numAttrs)
+void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements)
 {
     glGenVertexArrays(1, &layout);
     glBindVertexArray(layout);
-    for (int i = 0; i < numAttrs; i++) {
+    for (int i = 0; i < numElements; i++) {
         glEnableVertexAttribArray(i);
-        glVertexAttribFormat(i, attrDescs[i].numValues, attrDescs[i].valueType, attrDescs[i].shouldNormalize, 0);
+        glVertexAttribFormat(i, inputElementDesc[i].numValues, inputElementDesc[i].valueType,
+                             inputElementDesc[i].shouldNormalize, 0);
 
         glVertexBindingDivisor(i, 0);
-        if (attrDescs[i].inputSlotClass == InputClassification::PerInstance) {
+        if (inputElementDesc[i].inputSlotClass == InputClassification::PerInstance) {
             glVertexBindingDivisor(i, 1);
         }
     }
@@ -92,7 +93,7 @@ void Graphics::LinkShaderProgram(const GLuint program)
     CheckProgramStatus(program);
 }
 
-void Graphics::SetVertexLayout(GLuint const layout)
+void Graphics::SetInputLayout(GLuint const layout)
 {
     glBindVertexArray(layout);
 }
@@ -166,7 +167,7 @@ void Graphics::ClearBuffer(float red, float green, float blue) const
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
-void Graphics::DeleteVertexLayout(GLuint& layout)
+void Graphics::DeleteInputLayout(GLuint& layout)
 {
     glDeleteVertexArrays(1, &layout);
 }

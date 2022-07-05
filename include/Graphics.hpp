@@ -14,7 +14,7 @@ enum class InputClassification {
     PerInstance,
 };
 
-struct AttributeDesc {
+struct InputElementDesc {
     GLchar const* name;
     GLint numValues;
     GLenum valueType;
@@ -77,7 +77,7 @@ class Graphics
 
 public:
     Graphics(int width, int height);
-    void CreateVertexLayout(GLuint& layout, AttributeDesc const* attrDescs, int const numAttrs);
+    void CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements);
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
     void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data);
     void CreateShaderProgram(GLuint& program);
@@ -88,7 +88,7 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
                           GLsizei const* strides);
-    void SetVertexLayout(GLuint const layout);
+    void SetInputLayout(GLuint const layout);
     void SetIndexBuffer(GLuint buffer, GLenum elementDataType, GLvoid const* offsetOfFirstIndex);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
     void SetShaderProgram(GLuint program);
@@ -96,7 +96,7 @@ public:
     void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 
-    void DeleteVertexLayout(GLuint& layout);
+    void DeleteInputLayout(GLuint& layout);
     void DeleteBuffer(GLuint& buffer);
     void DeleteTexture(GLuint& texture);
     void DeleteShaderProgram(GLuint& program);

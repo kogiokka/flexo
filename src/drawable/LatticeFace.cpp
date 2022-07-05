@@ -1,19 +1,19 @@
 #include "drawable/LatticeFace.hpp"
 #include "Vertex.hpp"
 #include "World.hpp"
+#include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/Texture2D.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
-#include "bindable/VertexLayout.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
 #include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
 
 LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<AttributeDesc> attrs = {
+    std::vector<InputElementDesc> inputs = {
         { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
         { "normal", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
         { "textureCoord", 2, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
@@ -41,7 +41,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     auto const& [img, w, h, ch] = world.pattern;
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(pipeline);

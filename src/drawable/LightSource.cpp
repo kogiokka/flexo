@@ -5,18 +5,18 @@
 
 #include "Vertex.hpp"
 #include "World.hpp"
+#include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
-#include "bindable/VertexLayout.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
 #include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
 
 LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<AttributeDesc> attrs = {
+    std::vector<InputElementDesc> inputs = {
         { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
     };
 
@@ -31,7 +31,7 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(pipeline);
@@ -60,4 +60,3 @@ glm::mat4 LightSource::GetTransformMatrix() const
 {
     return glm::translate(glm::mat4(1.0f), world.lightPos) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
 }
-

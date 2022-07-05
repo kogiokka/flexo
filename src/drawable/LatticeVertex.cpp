@@ -3,11 +3,11 @@
 
 #include "Vertex.hpp"
 #include "World.hpp"
+#include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
-#include "bindable/VertexLayout.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
 #include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
@@ -16,7 +16,7 @@
 LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     : m_ub {}
 {
-    std::vector<AttributeDesc> attrs = {
+    std::vector<InputElementDesc> inputs = {
         { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 0
         { "normal", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 1
         { "translation", 3, GL_FLOAT, GL_FALSE, InputClassification::PerInstance }, // 2
@@ -42,7 +42,7 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.material.shininess = 256.0f;
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, world.neurons.positions, 2));

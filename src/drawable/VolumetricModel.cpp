@@ -3,11 +3,11 @@
 
 #include "Vertex.hpp"
 #include "World.hpp"
+#include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
-#include "bindable/VertexLayout.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
 #include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
@@ -19,7 +19,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     , m_texColor(nullptr)
     , m_texPattern(nullptr)
 {
-    std::vector<AttributeDesc> attrs = {
+    std::vector<InputElementDesc> inputs = {
         { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 0
         { "normal", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex }, // 1
         { "textureCoord", 2, GL_FLOAT, GL_FALSE, InputClassification::PerInstance }, // 2
@@ -53,7 +53,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 2));

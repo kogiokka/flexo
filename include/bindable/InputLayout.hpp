@@ -8,13 +8,13 @@
 
 namespace Bind
 {
-    class VertexLayout : public Bindable
+    class InputLayout : public Bindable
     {
         GLuint m_id;
 
     public:
-        VertexLayout(Graphics& gfx, std::vector<AttributeDesc> const& attrDescs);
-        ~VertexLayout() override;
+        InputLayout(Graphics& gfx, std::vector<InputElementDesc> const& inputElementDesc);
+        ~InputLayout() override;
         void Bind() override;
     };
 }

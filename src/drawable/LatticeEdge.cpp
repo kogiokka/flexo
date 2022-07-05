@@ -5,11 +5,11 @@
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/IndexBuffer.hpp"
+#include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
-#include "bindable/VertexLayout.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
 #include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
@@ -18,7 +18,7 @@
 LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     : m_ub {}
 {
-    std::vector<AttributeDesc> attrs = {
+    std::vector<InputElementDesc> inputs = {
         { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
     };
 
@@ -27,7 +27,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::VertexLayout>(gfx, attrs));
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges));

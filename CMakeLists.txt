@@ -58,7 +58,7 @@ PRIVATE
     "src/Graphics.cpp"
     "src/bindable/Bindable.cpp"
     "src/bindable/Primitive.cpp"
-    "src/bindable/VertexLayout.cpp"
+    "src/bindable/InputLayout.cpp"
     "src/bindable/IndexBuffer.cpp"
     "src/bindable/UniformBuffer.cpp"
     "src/bindable/VertexBuffer.cpp"
