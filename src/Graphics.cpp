@@ -15,9 +15,8 @@ void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputEl
     glBindVertexArray(layout);
     for (int i = 0; i < numElements; i++) {
         glEnableVertexAttribArray(i);
-        glVertexAttribFormat(i, inputElementDesc[i].numValues, inputElementDesc[i].valueType,
-                             inputElementDesc[i].shouldNormalize, 0);
-
+        auto const& [size, type, normalized] = ExtractGLAttribFormat(inputElementDesc[i].format);
+        glVertexAttribFormat(i, size, type, normalized, 0);
         glVertexBindingDivisor(i, 0);
         if (inputElementDesc[i].inputSlotClass == InputClassification::PerInstance) {
             glVertexBindingDivisor(i, 1);
@@ -266,4 +265,28 @@ std::string Graphics::SlurpShaderSource(std::string const& filename) const
     file.close();
 
     return source;
+}
+
+Graphics::GLAttribFormat Graphics::ExtractGLAttribFormat(InputFormat format) const
+{
+    switch (format) {
+    case InputFormat::Float2:
+        return GLAttribFormat { 2, GL_FLOAT, GL_FALSE };
+        break;
+    case InputFormat::Float3:
+        return GLAttribFormat { 3, GL_FLOAT, GL_FALSE };
+        break;
+    case InputFormat::Uint2:
+        return GLAttribFormat { 2, GL_UNSIGNED_INT, GL_FALSE };
+        break;
+    case InputFormat::Uint3:
+        return GLAttribFormat { 3, GL_UNSIGNED_INT, GL_FALSE };
+        break;
+    case InputFormat::Uint2Norm:
+        return GLAttribFormat { 2, GL_UNSIGNED_INT, GL_TRUE };
+        break;
+    case InputFormat::Uint3Norm:
+        return GLAttribFormat { 3, GL_UNSIGNED_INT, GL_TRUE };
+        break;
+    }
 }

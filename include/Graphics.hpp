@@ -14,11 +14,18 @@ enum class InputClassification {
     PerInstance,
 };
 
+enum class InputFormat {
+    Float2,
+    Float3,
+    Uint2,
+    Uint3,
+    Uint2Norm,
+    Uint3Norm,
+};
+
 struct InputElementDesc {
     GLchar const* name;
-    GLint numValues;
-    GLenum valueType;
-    GLboolean shouldNormalize;
+    InputFormat format;
     InputClassification inputSlotClass;
 };
 
@@ -72,6 +79,12 @@ class Graphics
         const GLvoid* offsetOfFirstIndex;
     };
 
+    struct GLAttribFormat {
+        GLint size;
+        GLenum type;
+        GLboolean normalized;
+    };
+
     Context m_ctx;
     Camera m_camera;
 
@@ -118,6 +131,7 @@ private:
     bool IsShaderCompiled(GLuint const shaderObject);
     void CheckProgramStatus(GLuint const programObject);
     std::string SlurpShaderSource(std::string const& filename) const;
+    GLAttribFormat ExtractGLAttribFormat(InputFormat format) const;
 };
 
 #endif

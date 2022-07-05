@@ -17,7 +17,7 @@
 LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 {
     std::vector<InputElementDesc> inputs = {
-        { "position", 3, GL_FLOAT, GL_FALSE, InputClassification::PerVertex },
+        { "position", InputFormat::Float3, InputClassification::PerVertex },
     };
 
     std::vector<VertexPN> vertices;
