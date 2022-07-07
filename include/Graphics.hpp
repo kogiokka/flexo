@@ -51,20 +51,6 @@ struct BufferData {
     const void* mem;
 };
 
-struct LightUniform {
-    glm::vec3 position;
-    glm::vec3 ambient;
-    glm::vec3 diffusion;
-    glm::vec3 specular;
-};
-
-struct MaterialUniform {
-    glm::vec3 ambient;
-    glm::vec3 diffusion;
-    glm::vec3 specular;
-    float shininess;
-};
-
 enum ShaderStage : GLenum {
     Vert = GL_VERTEX_SHADER,
     Tesc = GL_TESS_CONTROL_SHADER,
