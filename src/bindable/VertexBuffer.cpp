@@ -10,8 +10,8 @@ namespace Bind
 
     void VertexBuffer::Bind()
     {
-        m_gfx->SetVertexBuffers(m_startAttrib, m_numAttrs, std::vector<GLuint>(m_numAttrs, m_id).data(), m_offsets.data(),
-                                m_strides.data());
+        const GLintptr offset = 0;
+        m_gfx->SetVertexBuffers(m_startAttrib, 1, &m_id, &offset, &m_stride);
     }
 
     GLuint VertexBuffer::GetStartAttrib() const
@@ -24,9 +24,3 @@ namespace Bind
         return m_count;
     }
 }
-
-
-
-
-
-

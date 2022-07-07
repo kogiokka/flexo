@@ -13,11 +13,9 @@ namespace Bind
     {
     protected:
         GLuint m_id;
-        GLuint m_count;
         GLuint m_startAttrib;
-        int m_numAttrs;
-        std::vector<GLintptr> m_offsets;
-        std::vector<GLsizei> m_strides;
+        GLsizei m_stride;
+        GLuint m_count;
 
     public:
         template <typename T>
@@ -38,9 +36,9 @@ namespace Bind
     VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib)
         : Bindable(gfx)
         , m_id(0)
-        , m_count(vertices.size())
         , m_startAttrib(startAttrib)
-        , m_numAttrs(0)
+        , m_stride(sizeof(T))
+        , m_count(vertices.size())
     {
         BufferDesc desc;
         BufferData data;
@@ -48,12 +46,8 @@ namespace Bind
         desc.target = GL_ARRAY_BUFFER;
         desc.usage = GL_DYNAMIC_DRAW;
         desc.byteWidth = sizeof(T) * vertices.size();
-        desc.stride = sizeof(T);
+        desc.stride = m_stride;
         data.mem = vertices.data();
-
-        m_numAttrs = 1;
-        m_offsets = { 0 };
-        m_strides = { sizeof(T) };
 
         m_gfx->CreateBuffer(m_id, desc, data);
     }
