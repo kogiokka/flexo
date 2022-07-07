@@ -14,12 +14,13 @@ void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputEl
     glGenVertexArrays(1, &layout);
     glBindVertexArray(layout);
     for (int i = 0; i < numElements; i++) {
+        auto const& desc = inputElementDesc[i];
         glEnableVertexAttribArray(i);
-        auto const& [size, type, normalized] = ExtractGLAttribFormat(inputElementDesc[i].format);
+        auto const& [size, type, normalized] = ExtractGLAttribFormat(desc.format);
         glVertexAttribFormat(i, size, type, normalized, 0);
         glVertexBindingDivisor(i, 0);
-        if (inputElementDesc[i].inputSlotClass == InputClassification::PerInstance) {
-            glVertexBindingDivisor(i, 1);
+        if (desc.inputSlotClass == InputClassification::PerInstance) {
+            glVertexBindingDivisor(i, desc.instanceDataStepRate);
         }
     }
 }

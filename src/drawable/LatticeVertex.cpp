@@ -17,9 +17,9 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     : m_ub {}
 {
     std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float3, InputClassification::PerVertex }, // 0
-        { "normal", InputFormat::Float3, InputClassification::PerVertex }, // 1
-        { "translation", InputFormat::Float3, InputClassification::PerInstance }, // 2
+        { "position", InputFormat::Float3, InputClassification::PerVertex, 0 }, // 0
+        { "normal", InputFormat::Float3, InputClassification::PerVertex, 0 }, // 1
+        { "translation", InputFormat::Float3, InputClassification::PerInstance, 1 }, // 2
     };
 
     std::vector<VertexPN> vertices;

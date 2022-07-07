@@ -27,6 +27,7 @@ struct InputElementDesc {
     GLchar const* name;
     InputFormat format;
     InputClassification inputSlotClass;
+    GLuint instanceDataStepRate;
 };
 
 struct BufferDesc {
