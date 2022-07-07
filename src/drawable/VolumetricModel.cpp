@@ -19,10 +19,10 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     , m_texPattern(nullptr)
 {
     std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float3, InputClassification::PerVertex, 0 }, // 0
-        { "normal", InputFormat::Float3, InputClassification::PerVertex, 0 }, // 1
-        { "textureCoord", InputFormat::Float2, InputClassification::PerInstance, 1 }, // 2
-        { "translation", InputFormat::Float3, InputClassification::PerInstance, 1 }, // 3
+        { "position", InputFormat::Float3, 0, InputClassification::PerVertex, 0 }, // 0
+        { "normal", InputFormat::Float3, 1, InputClassification::PerVertex, 0 }, // 1
+        { "textureCoord", InputFormat::Float2, 2, InputClassification::PerInstance, 1 }, // 2
+        { "translation", InputFormat::Float3, 3, InputClassification::PerInstance, 1 }, // 3
     };
 
     std::vector<VertexPN> vertices;

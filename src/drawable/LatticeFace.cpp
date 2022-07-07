@@ -14,9 +14,9 @@
 LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 {
     std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float3, InputClassification::PerVertex, 0 },
-        { "normal", InputFormat::Float3, InputClassification::PerVertex, 0 },
-        { "textureCoord", InputFormat::Float2, InputClassification::PerVertex, 0 },
+        { "position", InputFormat::Float3, 0, InputClassification::PerVertex, 0 },
+        { "normal", InputFormat::Float3, 1, InputClassification::PerVertex, 0 },
+        { "textureCoord", InputFormat::Float2, 2, InputClassification::PerVertex, 0 },
     };
 
     std::vector<VertexPNT> vertices;

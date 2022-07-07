@@ -18,9 +18,10 @@ void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputEl
         glEnableVertexAttribArray(i);
         auto const& [size, type, normalized] = ExtractGLAttribFormat(desc.format);
         glVertexAttribFormat(i, size, type, normalized, 0);
-        glVertexBindingDivisor(i, 0);
+        glVertexAttribBinding(i, desc.inputSlot);
+        glVertexBindingDivisor(desc.inputSlot, 0);
         if (desc.inputSlotClass == InputClassification::PerInstance) {
-            glVertexBindingDivisor(i, desc.instanceDataStepRate);
+            glVertexBindingDivisor(desc.inputSlot, desc.instanceDataStepRate);
         }
     }
 }

@@ -26,6 +26,7 @@ enum class InputFormat {
 struct InputElementDesc {
     GLchar const* name;
     InputFormat format;
+    GLuint inputSlot;
     InputClassification inputSlotClass;
     GLuint instanceDataStepRate;
 };
