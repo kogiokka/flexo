@@ -9,16 +9,22 @@ Graphics::Graphics(int width, int height)
 {
 }
 
-void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements)
+void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements,
+                                 GLuint const programWithInputSignature)
 {
     glGenVertexArrays(1, &layout);
     glBindVertexArray(layout);
     for (int i = 0; i < numElements; i++) {
         auto const& desc = inputElementDesc[i];
-        glEnableVertexAttribArray(i);
+        GLint location = glGetAttribLocation(programWithInputSignature, desc.semanticName);
+        if (location == -1) {
+            Logger::info("Invalid semantic name: %s", desc.semanticName);
+            return;
+        }
+        glEnableVertexAttribArray(location);
         auto const& [size, type, normalized] = ExtractGLAttribFormat(desc.format);
-        glVertexAttribFormat(i, size, type, normalized, desc.byteOffset);
-        glVertexAttribBinding(i, desc.inputSlot);
+        glVertexAttribFormat(location, size, type, normalized, desc.byteOffset);
+        glVertexAttribBinding(location, desc.inputSlot);
         glVertexBindingDivisor(desc.inputSlot, 0);
         if (desc.inputSlotClass == InputClassification::PerInstance) {
             glVertexBindingDivisor(desc.inputSlot, desc.instanceDataStepRate);

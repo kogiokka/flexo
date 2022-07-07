@@ -31,12 +31,15 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LightSource.vert", pipeline->GetId());
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LightSource.frag", pipeline->GetId());
+    AddBind(pipeline);
+    AddBind(vs);
+    AddBind(fs);
+
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(pipeline);
-    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LightSource.vert", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LightSource.frag", pipeline->GetId()));
     AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }

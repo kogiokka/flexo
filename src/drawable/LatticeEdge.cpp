@@ -27,13 +27,16 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", pipeline->GetId());
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", pipeline->GetId());
+    AddBind(pipeline);
+    AddBind(vs);
+    AddBind(fs);
+
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges));
-    AddBind(pipeline);
-    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", pipeline->GetId()));
     AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }

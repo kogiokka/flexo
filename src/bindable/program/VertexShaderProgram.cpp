@@ -23,4 +23,10 @@ namespace Bind
     {
         m_pipeline = pipeline;
     }
+
+    GLuint VertexShaderProgram::GetId() const
+    {
+        return m_id;
+    }
 }
+

@@ -41,12 +41,15 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     auto const& [img, w, h, ch] = world.pattern;
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs));
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeFace.vert", pipeline->GetId());
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeFace.frag", pipeline->GetId());
+
+    AddBind(vs);
+    AddBind(fs);
+    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(pipeline);
-    AddBind(std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeFace.vert", pipeline->GetId()));
-    AddBind(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeFace.frag", pipeline->GetId()));
     AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));

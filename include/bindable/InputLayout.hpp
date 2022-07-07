@@ -5,6 +5,7 @@
 
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "bindable/program/VertexShaderProgram.hpp"
 
 namespace Bind
 {
@@ -13,7 +14,8 @@ namespace Bind
         GLuint m_id;
 
     public:
-        InputLayout(Graphics& gfx, std::vector<InputElementDesc> const& inputElementDesc);
+        InputLayout(Graphics& gfx, std::vector<InputElementDesc> const& inputElementDesc,
+                    VertexShaderProgram const* programWithInputSignature);
         ~InputLayout() override;
         void Bind() override;
     };

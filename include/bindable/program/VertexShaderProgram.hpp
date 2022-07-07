@@ -22,6 +22,7 @@ namespace Bind
         ~VertexShaderProgram() override;
         virtual void Bind() override;
         void SetPipeline(GLuint pipeline);
+        GLuint GetId() const;
     };
 }
 

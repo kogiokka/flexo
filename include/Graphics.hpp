@@ -24,7 +24,7 @@ enum class InputFormat {
 };
 
 struct InputElementDesc {
-    GLchar const* name;
+    GLchar const* semanticName;
     InputFormat format;
     GLuint inputSlot;
     GLuint byteOffset;
@@ -79,7 +79,8 @@ class Graphics
 
 public:
     Graphics(int width, int height);
-    void CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements);
+    void CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements,
+                           GLuint const programWithInputSignature);
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
     void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data);
     void CreateShaderProgram(GLuint& program);
