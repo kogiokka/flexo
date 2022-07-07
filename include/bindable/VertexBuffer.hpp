@@ -51,21 +51,12 @@ namespace Bind
         desc.stride = sizeof(T);
         data.mem = vertices.data();
 
-        SetAttribMemLayout<T>();
+        m_numAttrs = 1;
+        m_offsets = { 0 };
+        m_strides = { sizeof(T) };
 
         m_gfx->CreateBuffer(m_id, desc, data);
     }
-
-    template <>
-    void VertexBuffer::SetAttribMemLayout<VertexPN>();
-    template <>
-    void VertexBuffer::SetAttribMemLayout<VertexPNT>();
-    template <>
-    void VertexBuffer::SetAttribMemLayout<VertexPNC>();
-    template <>
-    void VertexBuffer::SetAttribMemLayout<glm::vec3>();
-    template <>
-    void VertexBuffer::SetAttribMemLayout<glm::vec2>();
 
     template <typename T>
     void VertexBuffer::Update(std::vector<T> const& vertices)
