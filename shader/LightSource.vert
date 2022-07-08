@@ -13,7 +13,7 @@ layout (std140, binding = 1) uniform UniformBuffer {
     UniformBuffer_Frag frag;
 } ubo;
 
-layout (location = 0) in vec3 position;
+in vec3 position;
 
 void main()
 {

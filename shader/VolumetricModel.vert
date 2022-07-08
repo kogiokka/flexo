@@ -30,10 +30,10 @@ layout(std140, binding = 1) uniform UniformBuffer {
     UniformBuffer_Vert vert;
 } ubo;
 
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 textureCoord;
-layout (location = 3) in vec3 translation;
+in vec3 position;
+in vec3 normal;
+in vec2 textureCoord;
+in vec3 translation;
 
 layout (binding = 0) uniform sampler2D voxelColor;
 layout (binding = 1) uniform sampler2D voxelPattern;

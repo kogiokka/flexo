@@ -29,9 +29,9 @@ layout(std140, binding = 1) uniform UniformBuffer {
     UniformBuffer_Frag frag;
 } ubo;
 
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 textureCoord;
+in vec3 position;
+in vec3 normal;
+in vec2 textureCoord;
 
 out VertOut {
     vec3 position;

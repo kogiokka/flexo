@@ -16,8 +16,8 @@
 PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 {
     std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float3, 0, offsetof(VertexPN, position), InputClassification::PerVertex, 0 }, // 0
-        { "normal", InputFormat::Float3, 0, offsetof(VertexPN, normal), InputClassification::PerVertex, 0 }, // 1
+        { "position", InputFormat::Float3, 0, offsetof(VertexPN, position), InputClassification::PerVertex, 0 },
+        { "normal", InputFormat::Float3, 0, offsetof(VertexPN, normal), InputClassification::PerVertex, 0 },
     };
 
     std::vector<VertexPN> vertices;
