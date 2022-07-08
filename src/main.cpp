@@ -25,6 +25,7 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_LATTICE, WatermarkingApp::OnCmdCreateLattice)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_SOM_PROCEDURE, WatermarkingApp::OnCmdCreateSOMProcedure)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
+    EVT_COMMAND(wxID_ANY, CMD_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_APP(WatermarkingApp);
@@ -438,4 +439,83 @@ void WatermarkingApp::OnCmdCreateSOMProcedure(wxCommandEvent&)
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
 {
     BuildLatticeMesh();
+}
+
+void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
+{
+    Mesh mesh;
+
+    m_bbox = CalculateBoundingBox(world.theModel->positions);
+
+    if (evt.GetId() == CMD_GENERATE_MODEL_DOME) {
+        auto const& [max, min] = m_bbox;
+        float const radius = glm::length((max - min) * 0.5f);
+        glm::vec3 const center = (max + min) * 0.5f;
+
+        std::vector<glm::vec3> temp;
+        int numLong = 50;
+        int numLat = 30;
+        float deltaLong = glm::radians(360.0f / numLong);
+        float deltaLat = glm::radians(180.0f / numLat);
+        for (int i = numLat; i >= 0; i--) {
+            for (int j = 0; j <= numLong; j++) {
+                float const sinPhi = sinf(deltaLong * j);
+                float const cosPhi = cosf(deltaLong * j);
+                float const sinTheta = sinf(deltaLat * i);
+                float const cosTheta = cosf(deltaLat * i);
+                temp.emplace_back(sinTheta * cosPhi, cosTheta, -sinTheta * sinPhi);
+            }
+        }
+
+        for (int i = 0; i < numLat; i++) {
+            for (int j = 0; j < numLong; j++) {
+                /**
+                 *  4-----3
+                 *  |     |
+                 *  |     |
+                 *  1-----2
+                 */
+                glm::vec3 p1, p2, p3, p4;
+                glm::vec3 n1, n2, n3, n4;
+
+                int idx = i * numLong + j;
+                p1 = center + radius * temp[idx]; // [x, y]
+                p2 = center + radius * temp[idx + 1]; // [x + 1, y]
+                p3 = center + radius * temp[idx + numLong + 1]; // [x + 1, y + 1]
+                p4 = center + radius * temp[idx + numLong]; // [x, y + 1]
+
+                // Normals
+                n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
+                n4 = glm::normalize(glm::cross(p3 - p1, p4 - p3));
+
+                if (isnan(n1.x) || isnan(n1.y) || isnan(n1.z)) {
+                    n1 = glm::vec3(0.0f, 0.0f, 0.0f);
+                }
+                if (isnan(n2.x) || isnan(n2.y) || isnan(n2.z)) {
+                    n2 = glm::vec3(0.0f, 0.0f, 0.0f);
+                }
+
+                n3 = (n2 + n4) * 0.5f;
+                n1 = (n2 + n4) * 0.5f;
+                mesh.positions.push_back(p1);
+                mesh.positions.push_back(p2);
+                mesh.positions.push_back(p3);
+                mesh.positions.push_back(p1);
+                mesh.positions.push_back(p3);
+                mesh.positions.push_back(p4);
+                mesh.normals.push_back(n1);
+                mesh.normals.push_back(n2);
+                mesh.normals.push_back(n3);
+                mesh.normals.push_back(n1);
+                mesh.normals.push_back(n3);
+                mesh.normals.push_back(n4);
+            }
+        }
+    }
+
+    world.theModel = std::make_shared<Mesh>(mesh);
+    m_dataset = std::make_shared<InputData>(world.theModel->positions);
+    m_renderer->LoadPolygonalModel(*world.theModel);
+    m_bbox = CalculateBoundingBox(world.theModel->positions);
+    SetCameraView(m_bbox);
 }

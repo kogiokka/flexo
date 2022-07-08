@@ -61,6 +61,7 @@ public:
     void OnCmdCreateLattice(wxCommandEvent& evt);
     void OnCmdCreateSOMProcedure(wxCommandEvent& evt);
     void OnCmdRebuildLatticeMesh(wxCommandEvent& evt);
+    void OnMenuGenerateModel(wxCommandEvent& evt);
 
 private:
     void UpdateLatticeEdges();

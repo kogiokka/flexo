@@ -30,8 +30,11 @@ public:
     void OnMenuCameraReset(wxCommandEvent& evt);
     void SetMainPanel(MainPanel* panel);
     void SetOpenGLCanvas(OpenGLCanvas* canvas);
+    void OnMenuGenerateModelDome(wxCommandEvent& evt);
 
     wxDECLARE_EVENT_TABLE();
 };
+
+wxDECLARE_EVENT(CMD_GENERATE_MODEL_DOME, wxCommandEvent);
 
 #endif
