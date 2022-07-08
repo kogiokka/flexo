@@ -56,7 +56,9 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
-LatticeVertex::~LatticeVertex() { }
+LatticeVertex::~LatticeVertex()
+{
+}
 
 void LatticeVertex::Update(Graphics& gfx)
 {

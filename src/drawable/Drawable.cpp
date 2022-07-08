@@ -15,7 +15,9 @@ void Drawable::Draw(Graphics& gfx) const
     }
 }
 
-void Drawable::Update(Graphics&) { }
+void Drawable::Update(Graphics&)
+{
+}
 
 void Drawable::AddBind(std::shared_ptr<Bind::Bindable> bind)
 {

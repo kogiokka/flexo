@@ -16,7 +16,9 @@ void InstancedDrawable::Draw(Graphics& gfx) const
     }
 }
 
-void InstancedDrawable::Update(Graphics&) { }
+void InstancedDrawable::Update(Graphics&)
+{
+}
 
 void InstancedDrawable::AddBind(std::shared_ptr<Bind::Bindable> bind)
 {

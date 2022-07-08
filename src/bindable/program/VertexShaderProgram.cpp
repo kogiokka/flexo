@@ -29,4 +29,3 @@ namespace Bind
         return m_id;
     }
 }
-

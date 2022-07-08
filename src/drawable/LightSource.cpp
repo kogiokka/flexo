@@ -44,7 +44,9 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
-LightSource::~LightSource() { }
+LightSource::~LightSource()
+{
+}
 
 void LightSource::Update(Graphics&)
 {

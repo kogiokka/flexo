@@ -101,4 +101,3 @@ wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_MENU(wxID_EXIT, MainWindow::OnExit)
     EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
 wxEND_EVENT_TABLE()
-

@@ -2,8 +2,10 @@ BasedOnStyle: WebKit
 Language:     Cpp
 AlignAfterOpenBracket: true
 AlwaysBreakTemplateDeclarations: true
-AllowShortFunctionsOnASingleLine: Inline
-AllowShortIfStatementsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Always
+AllowShortCaseLabelsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
+AllowShortIfStatementsOnASingleLine: Never
 BreakBeforeBraces: Linux
 BreakStringLiterals: true
 BreakConstructorInitializers: BeforeComma

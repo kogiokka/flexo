@@ -7,5 +7,7 @@ namespace Bind
         m_gfx = &gfx;
     }
 
-    Bindable::~Bindable() { }
+    Bindable::~Bindable()
+    {
+    }
 }

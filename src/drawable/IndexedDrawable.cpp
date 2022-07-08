@@ -15,7 +15,9 @@ void IndexedDrawable::Draw(Graphics& gfx) const
     }
 }
 
-void IndexedDrawable::Update(Graphics&) { }
+void IndexedDrawable::Update(Graphics&)
+{
+}
 
 void IndexedDrawable::AddBind(std::shared_ptr<Bind::Bindable> bind)
 {

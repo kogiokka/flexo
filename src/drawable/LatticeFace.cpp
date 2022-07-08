@@ -55,7 +55,9 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
 }
 
-LatticeFace::~LatticeFace() { }
+LatticeFace::~LatticeFace()
+{
+}
 
 void LatticeFace::Update(Graphics& gfx)
 {

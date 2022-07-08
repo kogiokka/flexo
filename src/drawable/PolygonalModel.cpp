@@ -53,7 +53,9 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
 }
 
-PolygonalModel::~PolygonalModel() { }
+PolygonalModel::~PolygonalModel()
+{
+}
 
 void PolygonalModel::Update(Graphics& gfx)
 {

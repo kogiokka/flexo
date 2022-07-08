@@ -94,4 +94,3 @@ Mesh OBJImporter::BuildMesh(OBJModel const& model) const
 
     return mesh;
 }
-

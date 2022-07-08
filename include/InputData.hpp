@@ -1,7 +1,6 @@
 #ifndef INCLUDE_DATA_H
 #define INCLUDE_DATA_H
 
-
 #include <glm/glm.hpp>
 
 #include "RandomIntNumber.hpp"

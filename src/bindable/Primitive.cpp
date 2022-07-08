@@ -8,7 +8,9 @@ namespace Bind
     {
     }
 
-    Primitive::~Primitive() { }
+    Primitive::~Primitive()
+    {
+    }
 
     void Primitive::Bind()
     {

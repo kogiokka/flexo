@@ -19,9 +19,18 @@ namespace Bind
         m_gfx->CreateBuffer(m_id, desc, data);
     }
 
-    IndexBuffer::~IndexBuffer() { m_gfx->DeleteBuffer(m_id); }
+    IndexBuffer::~IndexBuffer()
+    {
+        m_gfx->DeleteBuffer(m_id);
+    }
 
-    void IndexBuffer::Bind() { m_gfx->SetIndexBuffer(m_id, GL_UNSIGNED_INT, 0); }
+    void IndexBuffer::Bind()
+    {
+        m_gfx->SetIndexBuffer(m_id, GL_UNSIGNED_INT, 0);
+    }
 
-    GLuint IndexBuffer::GetCount() const { return m_count; }
+    GLuint IndexBuffer::GetCount() const
+    {
+        return m_count;
+    }
 }

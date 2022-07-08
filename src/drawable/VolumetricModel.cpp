@@ -67,7 +67,9 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     AddBind(m_texPattern);
 }
 
-VolumetricModel::~VolumetricModel() { }
+VolumetricModel::~VolumetricModel()
+{
+}
 
 void VolumetricModel::Update(Graphics& gfx)
 {

@@ -20,4 +20,6 @@ World::World()
     renderFlags = 0;
 }
 
-World::~World() { }
+World::~World()
+{
+}
