@@ -23,6 +23,15 @@ enum class InputFormat {
     Uint3Norm,
 };
 
+enum class ShaderStage {
+    Vert,
+    Tesc,
+    Tese,
+    Geom,
+    Frag,
+    Comp,
+};
+
 struct InputElementDesc {
     GLchar const* semanticName;
     InputFormat format;
@@ -49,15 +58,6 @@ struct Texture2dDesc {
 
 struct BufferData {
     const void* mem;
-};
-
-enum ShaderStage : GLenum {
-    Vert = GL_VERTEX_SHADER,
-    Tesc = GL_TESS_CONTROL_SHADER,
-    Tese = GL_TESS_EVALUATION_SHADER,
-    Geom = GL_GEOMETRY_SHADER,
-    Frag = GL_FRAGMENT_SHADER,
-    Comp = GL_COMPUTE_SHADER,
 };
 
 class Graphics
@@ -121,7 +121,11 @@ private:
     bool IsShaderCompiled(GLuint const shaderObject);
     void CheckProgramStatus(GLuint const programObject);
     std::string SlurpShaderSource(std::string const& filename) const;
-    GLAttribFormat ExtractGLAttribFormat(InputFormat format) const;
+
+    struct Enum {
+        static GLAttribFormat Resolve(InputFormat const format);
+        static GLenum Resolve(ShaderStage const stage);
+    };
 };
 
 #endif

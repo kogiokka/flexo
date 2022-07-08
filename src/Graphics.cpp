@@ -22,7 +22,7 @@ void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputEl
             return;
         }
         glEnableVertexAttribArray(location);
-        auto const& [size, type, normalized] = ExtractGLAttribFormat(desc.format);
+        auto const& [size, type, normalized] = Enum::Resolve(desc.format);
         glVertexAttribFormat(location, size, type, normalized, desc.byteOffset);
         glVertexAttribBinding(location, desc.inputSlot);
         glVertexBindingDivisor(desc.inputSlot, 0);
@@ -70,7 +70,7 @@ void Graphics::CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, 
 {
     std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
-    program = glCreateShaderProgramv(stage, 1, shaderSourceArray);
+    program = glCreateShaderProgramv(Enum::Resolve(stage), 1, shaderSourceArray);
 
     CheckProgramStatus(program);
 }
@@ -80,7 +80,7 @@ void Graphics::AttachShaderStage(GLuint const program, ShaderStage stage, std::s
     std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
 
-    GLuint shaderObject = glCreateShader(stage);
+    GLuint shaderObject = glCreateShader(Enum::Resolve(stage));
     glShaderSource(shaderObject, 1, shaderSourceArray, nullptr);
     glCompileShader(shaderObject);
     if (!IsShaderCompiled(shaderObject)) {
@@ -275,7 +275,25 @@ std::string Graphics::SlurpShaderSource(std::string const& filename) const
     return source;
 }
 
-Graphics::GLAttribFormat Graphics::ExtractGLAttribFormat(InputFormat format) const
+GLenum Graphics::Enum::Resolve(ShaderStage const stage)
+{
+    switch (stage) {
+    case ShaderStage::Vert:
+        return GL_VERTEX_SHADER;
+    case ShaderStage::Tesc:
+        return GL_TESS_CONTROL_SHADER;
+    case ShaderStage::Tese:
+        return GL_TESS_EVALUATION_SHADER;
+    case ShaderStage::Geom:
+        return GL_GEOMETRY_SHADER;
+    case ShaderStage::Frag:
+        return GL_FRAGMENT_SHADER;
+    case ShaderStage::Comp:
+        return GL_COMPUTE_SHADER;
+    }
+}
+
+Graphics::GLAttribFormat Graphics::Enum::Resolve(InputFormat const format)
 {
     switch (format) {
     case InputFormat::Float2:
