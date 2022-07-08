@@ -24,11 +24,17 @@ struct TrainingConfig {
 
 class WatermarkingApp : public wxApp
 {
+    struct BoundingBox {
+        glm::vec3 max;
+        glm::vec3 min;
+    };
+
     std::shared_ptr<SelfOrganizingMap> m_som;
     std::shared_ptr<Lattice> m_lattice;
     std::shared_ptr<Renderer> m_renderer;
     std::shared_ptr<InputData> m_dataset;
     TrainingConfig m_conf;
+    BoundingBox m_bbox;
 
 public:
     WatermarkingApp();
@@ -39,7 +45,8 @@ public:
     void BuildLatticeMesh();
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
-    void SetCameraView(std::vector<glm::vec3> positions);
+    void SetCameraView(BoundingBox box);
+    BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
     void OnSetLatticeWidth(wxCommandEvent& evt);
     void OnSetLatticeHeight(wxCommandEvent& evt);

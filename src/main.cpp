@@ -35,6 +35,7 @@ WatermarkingApp::WatermarkingApp()
     , m_renderer(nullptr)
     , m_dataset(nullptr)
     , m_conf {}
+    , m_bbox {}
 {
 }
 
@@ -207,7 +208,8 @@ void WatermarkingApp::ImportPolygonalModel(wxString const& path)
 
     m_dataset = std::make_shared<InputData>(world.theModel->positions);
     m_renderer->LoadPolygonalModel(*world.theModel);
-    SetCameraView(world.theModel->positions);
+    m_bbox = CalculateBoundingBox(world.theModel->positions);
+    SetCameraView(m_bbox);
 }
 
 void WatermarkingApp::ImportVolumetricModel(wxString const& path)
@@ -276,14 +278,13 @@ void WatermarkingApp::ImportVolumetricModel(wxString const& path)
 
     m_dataset = std::make_shared<InputData>(pos);
     m_renderer->LoadVolumetricModel();
-    SetCameraView(pos);
+    m_bbox = CalculateBoundingBox(world.theModel->positions);
+    SetCameraView(m_bbox);
 }
 
-// FIXME: Move it to the renderer
-void WatermarkingApp::SetCameraView(std::vector<glm::vec3> positions)
+WatermarkingApp::BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positions)
 {
     const float FLOAT_MAX = std::numeric_limits<float>::max();
-    glm::vec3 center;
     glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
     glm::vec3 max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
 
@@ -307,8 +308,14 @@ void WatermarkingApp::SetCameraView(std::vector<glm::vec3> positions)
             min.z = p.z;
         }
     }
-    center = (max + min) * 0.5f;
+    return { max, min };
+}
 
+// FIXME: Move it to the renderer
+void WatermarkingApp::SetCameraView(BoundingBox box)
+{
+    auto const& [max, min] = box;
+    glm::vec3 center = (max + min) * 0.5f;
     m_renderer->GetCamera().center = center;
     Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
 
