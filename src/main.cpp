@@ -453,16 +453,18 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
         glm::vec3 const center = (max + min) * 0.5f;
 
         std::vector<glm::vec3> temp;
-        int numLong = 50;
-        int numLat = 30;
+        int numLong = 60;
+        int numLat = 60;
         float deltaLong = glm::radians(360.0f / numLong);
         float deltaLat = glm::radians(180.0f / numLat);
-        for (int i = numLat; i >= 0; i--) {
+        for (int i = 0; i <= numLat; i++) {
             for (int j = 0; j <= numLong; j++) {
-                float const sinPhi = sinf(deltaLong * j);
-                float const cosPhi = cosf(deltaLong * j);
-                float const sinTheta = sinf(deltaLat * i);
-                float const cosTheta = cosf(deltaLat * i);
+                float const theta = deltaLat * i;
+                float const phi = glm::radians(180.0f) - deltaLong * j;
+                float const sinTheta = sinf(theta);
+                float const cosTheta = cosf(theta);
+                float const sinPhi = sinf(phi);
+                float const cosPhi = cosf(phi);
                 temp.emplace_back(sinTheta * cosPhi, cosTheta, -sinTheta * sinPhi);
             }
         }
@@ -478,25 +480,17 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
                 glm::vec3 p1, p2, p3, p4;
                 glm::vec3 n1, n2, n3, n4;
 
-                int idx = i * numLong + j;
+                int idx = i * (numLong + 1) + j;
                 p1 = center + radius * temp[idx]; // [x, y]
                 p2 = center + radius * temp[idx + 1]; // [x + 1, y]
-                p3 = center + radius * temp[idx + numLong + 1]; // [x + 1, y + 1]
-                p4 = center + radius * temp[idx + numLong]; // [x, y + 1]
+                p3 = center + radius * temp[idx + numLong + 1 + 1]; // [x + 1, y + 1]
+                p4 = center + radius * temp[idx + numLong + 1]; // [x, y + 1]
 
                 // Normals
-                n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-                n4 = glm::normalize(glm::cross(p3 - p1, p4 - p3));
-
-                if (isnan(n1.x) || isnan(n1.y) || isnan(n1.z)) {
-                    n1 = glm::vec3(0.0f, 0.0f, 0.0f);
-                }
-                if (isnan(n2.x) || isnan(n2.y) || isnan(n2.z)) {
-                    n2 = glm::vec3(0.0f, 0.0f, 0.0f);
-                }
-
-                n3 = (n2 + n4) * 0.5f;
-                n1 = (n2 + n4) * 0.5f;
+                n1 = p1 - center;
+                n2 = p2 - center;
+                n3 = p3 - center;
+                n4 = p4 - center;
                 mesh.positions.push_back(p1);
                 mesh.positions.push_back(p2);
                 mesh.positions.push_back(p3);
