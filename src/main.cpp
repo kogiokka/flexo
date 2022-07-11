@@ -455,8 +455,8 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
     if (evt.GetId() == CMD_GENERATE_MODEL_DOME) {
         auto const& [max, min] = m_bbox;
         float const radius = glm::length((max - min) * 0.5f);
-        int const numSegments = 3;
-        int const numRings = 3;
+        int const numSegments = 60;
+        int const numRings = 60;
 
         glm::vec3 const center = (max + min) * 0.5f;
         float deltaLong = glm::radians(360.0f) / numSegments;
