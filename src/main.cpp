@@ -443,6 +443,11 @@ void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
 
 void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
 {
+    if (world.theModel == nullptr) {
+        Logger::info("You have to load a model into the scene first!");
+        return;
+    }
+
     Mesh mesh;
 
     m_bbox = CalculateBoundingBox(world.theModel->positions);
