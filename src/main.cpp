@@ -25,6 +25,7 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_LATTICE, WatermarkingApp::OnCmdCreateLattice)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_SOM_PROCEDURE, WatermarkingApp::OnCmdCreateSOMProcedure)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
+    EVT_COMMAND(wxID_ANY, CMD_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_APP(WatermarkingApp);
@@ -438,4 +439,107 @@ void WatermarkingApp::OnCmdCreateSOMProcedure(wxCommandEvent&)
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
 {
     BuildLatticeMesh();
+}
+
+void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
+{
+    if (world.theModel == nullptr) {
+        Logger::info("You have to load a model into the scene first!");
+        return;
+    }
+
+    Mesh mesh;
+
+    m_bbox = CalculateBoundingBox(world.theModel->positions);
+
+    if (evt.GetId() == CMD_GENERATE_MODEL_DOME) {
+        auto const& [max, min] = m_bbox;
+        float const radius = glm::length((max - min) * 0.5f);
+        int const numSegments = 60;
+        int const numRings = 60;
+
+        glm::vec3 const center = (max + min) * 0.5f;
+        float deltaLong = glm::radians(360.0f) / numSegments;
+        float deltaLat = glm::radians(180.0f) / numRings;
+
+        Mesh temp;
+        temp.positions.resize((numRings - 1) * numSegments + 2);
+        temp.normals.resize((numRings - 1) * numSegments + 2);
+        temp.positions.front() = center + radius * glm::vec3(0.0f, cos(0.0f), 0.0f);
+        temp.positions.back() = center + radius * glm::vec3(0.0f, cos(glm::radians(180.0f)), 0.0f);
+        temp.normals.front() = radius * glm::vec3(0.0f, cos(0.0f), 0.0f);
+        temp.normals.back() = radius * glm::vec3(0.0f, cos(glm::radians(180.0f)), 0.0f);
+
+        // Iterate through the rings without the first and the last.
+        for (int i = 1; i < numRings; i++) {
+            for (int j = 0; j < numSegments; j++) {
+                float const theta = deltaLat * i;
+                float const phi = glm::radians(180.0f) - deltaLong * j;
+                glm::vec3 const coord =  radius * glm::vec3(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
+                int const idx = (i - 1) * numSegments + j + 1;
+                temp.positions[idx] = center + coord;
+                temp.normals[idx] = coord;
+            }
+        }
+
+        for (int j = 0; j < numSegments; j++) {
+            mesh.positions.push_back(temp.positions[0]);
+            mesh.positions.push_back(temp.positions[(j + 1) % numSegments + 1]);
+            mesh.positions.push_back(temp.positions[j % numSegments + 1]);
+            mesh.normals.push_back(temp.normals[0]);
+            mesh.normals.push_back(temp.normals[(j + 1) % numSegments + 1]);
+            mesh.normals.push_back(temp.normals[j % numSegments + 1]);
+        }
+
+        for (int i = 0; i < numRings - 2; i++) {
+            for (int j = 0; j < numSegments; j++) {
+                /**
+                 *  4---3
+                 *  |   |
+                 *  1---2
+                 */
+                int k1 = (i * numSegments + (j % numSegments)) + 1;
+                int k2 = (i * numSegments + ((j + 1) % numSegments)) + 1;
+                int k3 = ((i + 1) * numSegments + ((j + 1) % numSegments)) + 1;
+                int k4 = ((i + 1) * numSegments + (j % numSegments)) + 1;
+                glm::vec3 p1, p2, p3, p4;
+                glm::vec3 n1, n2, n3, n4;
+                p1 = temp.positions[k1]; // [x, y]
+                p2 = temp.positions[k2]; // [x + 1, y]
+                p3 = temp.positions[k3]; // [x + 1, y + 1]
+                p4 = temp.positions[k4]; // [x, y + 1]
+                n1 = temp.normals[k1];
+                n2 = temp.normals[k2];
+                n3 = temp.normals[k3];
+                n4 = temp.normals[k4];
+
+                mesh.positions.push_back(p1);
+                mesh.positions.push_back(p2);
+                mesh.positions.push_back(p3);
+                mesh.positions.push_back(p1);
+                mesh.positions.push_back(p3);
+                mesh.positions.push_back(p4);
+                mesh.normals.push_back(n1);
+                mesh.normals.push_back(n2);
+                mesh.normals.push_back(n3);
+                mesh.normals.push_back(n1);
+                mesh.normals.push_back(n3);
+                mesh.normals.push_back(n4);
+            }
+        }
+        for (int j = 0; j < numSegments; j++) {
+            mesh.positions.push_back(temp.positions[((numRings - 2) * numSegments + 1) + (j % numSegments)]);
+            mesh.positions.push_back(temp.positions[((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments)]);
+            mesh.positions.push_back(temp.positions.back());
+            mesh.normals.push_back(temp.normals[((numRings - 2) * numSegments + 1) + (j % numSegments)]);
+            mesh.normals.push_back(temp.normals[((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments)]);
+            mesh.normals.push_back(temp.normals.back());
+        }
+    }
+
+    world.theModel = std::make_shared<Mesh>(mesh);
+    m_dataset = std::make_shared<InputData>(world.theModel->positions);
+    m_renderer->LoadPolygonalModel(*world.theModel);
+    m_bbox = CalculateBoundingBox(world.theModel->positions);
+    SetCameraView(m_bbox);
 }

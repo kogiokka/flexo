@@ -13,6 +13,7 @@
 #include "common/Logger.hpp"
 
 wxDECLARE_APP(WatermarkingApp);
+wxDEFINE_EVENT(CMD_GENERATE_MODEL_DOME, wxCommandEvent);
 
 MainWindow::MainWindow(wxWindow* parent)
     : wxFrame(parent, wxID_ANY, "Self-organizing Map Demo", wxDefaultPosition, wxSize(1200, 800))
@@ -29,9 +30,13 @@ MainWindow::MainWindow(wxWindow* parent)
     auto cameraMenu = new wxMenu;
     cameraMenu->Append(wxID_REFRESH, "Reset");
 
+    auto modelsMenu = new wxMenu;
+    modelsMenu->Append(CMD_GENERATE_MODEL_DOME, "Generate Dome");
+
     auto menubar = new wxMenuBar;
     menubar->Append(fileMenu, "&File");
     menubar->Append(cameraMenu, "&Camera");
+    menubar->Append(modelsMenu, "&Models");
 
     this->SetMenuBar(menubar);
 
@@ -96,8 +101,17 @@ void MainWindow::SetOpenGLCanvas(OpenGLCanvas* canvas)
     Layout();
 }
 
+// FIXME: Why do I need this?
+void MainWindow::OnMenuGenerateModelDome(wxCommandEvent&)
+{
+    wxCommandEvent event(CMD_GENERATE_MODEL_DOME);
+    event.SetId(CMD_GENERATE_MODEL_DOME);
+    ProcessWindowEvent(event);
+}
+
 wxBEGIN_EVENT_TABLE(MainWindow, wxFrame)
     EVT_MENU(wxID_OPEN, MainWindow::OnOpenFile)
     EVT_MENU(wxID_EXIT, MainWindow::OnExit)
     EVT_MENU(wxID_REFRESH, MainWindow::OnMenuCameraReset)
+    EVT_MENU(CMD_GENERATE_MODEL_DOME, MainWindow::OnMenuGenerateModelDome)
 wxEND_EVENT_TABLE()
