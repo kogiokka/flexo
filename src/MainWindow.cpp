@@ -8,12 +8,11 @@
 #include <wx/utils.h>
 
 #include "MainWindow.hpp"
-#include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 
-wxDECLARE_APP(WatermarkingApp);
 wxDEFINE_EVENT(CMD_GENERATE_MODEL_DOME, wxCommandEvent);
+wxDEFINE_EVENT(CMD_IMPORT_MODEL, wxCommandEvent);
 
 MainWindow::MainWindow(wxWindow* parent)
     : wxFrame(parent, wxID_ANY, "Self-organizing Map Demo", wxDefaultPosition, wxSize(1200, 800))
@@ -24,7 +23,7 @@ MainWindow::MainWindow(wxWindow* parent)
     CreateStatusBar();
 
     auto fileMenu = new wxMenu;
-    fileMenu->Append(wxID_OPEN, "Open Model");
+    fileMenu->Append(wxID_OPEN, "Import model");
     fileMenu->Append(wxID_EXIT, "Exit");
 
     auto cameraMenu = new wxMenu;
@@ -72,11 +71,9 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
     wxString const filepath = dialog.GetPath();
     defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
 
-    if (filepath.EndsWith(".toml")) {
-        wxGetApp().ImportVolumetricModel(filepath);
-    } else {
-        wxGetApp().ImportPolygonalModel(filepath);
-    }
+    wxCommandEvent event(CMD_IMPORT_MODEL);
+    event.SetString(filepath);
+    ProcessWindowEvent(event);
 
     m_mainPanel->m_btnStart->Enable();
     m_mainPanel->m_btnStop->Enable();

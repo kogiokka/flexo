@@ -26,6 +26,7 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_CREATE_SOM_PROCEDURE, WatermarkingApp::OnCmdCreateSOMProcedure)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
     EVT_COMMAND(wxID_ANY, CMD_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
+    EVT_COMMAND(wxID_ANY, CMD_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_APP(WatermarkingApp);
@@ -475,7 +476,7 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
             for (int j = 0; j < numSegments; j++) {
                 float const theta = deltaLat * i;
                 float const phi = glm::radians(180.0f) - deltaLong * j;
-                glm::vec3 const coord =  radius * glm::vec3(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
+                glm::vec3 const coord = radius * glm::vec3(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
                 int const idx = (i - 1) * numSegments + j + 1;
                 temp.positions[idx] = center + coord;
                 temp.normals[idx] = coord;
@@ -542,4 +543,14 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
     m_renderer->LoadPolygonalModel(*world.theModel);
     m_bbox = CalculateBoundingBox(world.theModel->positions);
     SetCameraView(m_bbox);
+}
+
+void WatermarkingApp::OnMenuImportModel(wxCommandEvent& evt)
+{
+    wxString const filepath = evt.GetString();
+    if (filepath.EndsWith(".toml")) {
+        ImportVolumetricModel(filepath);
+    } else {
+        ImportPolygonalModel(filepath);
+    }
 }

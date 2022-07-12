@@ -36,5 +36,6 @@ public:
 };
 
 wxDECLARE_EVENT(CMD_GENERATE_MODEL_DOME, wxCommandEvent);
+wxDECLARE_EVENT(CMD_IMPORT_MODEL, wxCommandEvent);
 
 #endif
