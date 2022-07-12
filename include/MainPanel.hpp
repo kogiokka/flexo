@@ -84,6 +84,8 @@ private:
     void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& evt);
     void OnSliderTransparency(wxCommandEvent& evt);
     void OnTimerUIUpdate(wxTimerEvent& evt);
+    void OnUpdateStartButton(wxUpdateUIEvent& evt);
+    void OnUpdateStopButton(wxUpdateUIEvent& evt);
 
     wxDECLARE_EVENT_TABLE();
 };

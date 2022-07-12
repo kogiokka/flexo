@@ -19,7 +19,6 @@
 class MainWindow : public wxFrame
 {
     OpenGLCanvas* m_canvas;
-    MainPanel* m_mainPanel;
     wxSizer* m_rootLayout;
 
     void OnOpenFile(wxCommandEvent& evt);

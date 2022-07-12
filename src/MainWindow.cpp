@@ -74,9 +74,6 @@ void MainWindow::OnOpenFile(wxCommandEvent&)
     wxCommandEvent event(CMD_IMPORT_MODEL);
     event.SetString(filepath);
     ProcessWindowEvent(event);
-
-    m_mainPanel->m_btnStart->Enable();
-    m_mainPanel->m_btnStop->Enable();
 }
 
 void MainWindow::OnExit(wxCommandEvent&)
@@ -86,7 +83,6 @@ void MainWindow::OnExit(wxCommandEvent&)
 
 void MainWindow::SetMainPanel(MainPanel* panel)
 {
-    m_mainPanel = panel;
     m_rootLayout->Add(panel, 1, wxGROW | wxALL, 0);
     Layout();
 }

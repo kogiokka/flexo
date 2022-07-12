@@ -331,6 +331,20 @@ void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
     }
 }
 
+void MainPanel::OnUpdateStartButton(wxUpdateUIEvent& evt)
+{
+    if (world.theModel) {
+        evt.Enable(true);
+    }
+}
+
+void MainPanel::OnUpdateStopButton(wxUpdateUIEvent& evt)
+{
+    if (world.theModel) {
+        evt.Enable(true);
+    }
+}
+
 wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
     EVT_BUTTON(BTN_START, MainPanel::OnButtonStart)
     EVT_BUTTON(BTN_STOP, MainPanel::OnButtonStop)
@@ -347,4 +361,6 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, MainPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, MainPanel::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, MainPanel::OnTimerUIUpdate)
+    EVT_UPDATE_UI(BTN_START, MainPanel::OnUpdateStartButton)
+    EVT_UPDATE_UI(BTN_STOP, MainPanel::OnUpdateStopButton)
 wxEND_EVENT_TABLE()
