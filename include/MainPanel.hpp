@@ -16,8 +16,6 @@
 #include "Lattice.hpp"
 #include "OpenGLCanvas.hpp"
 
-class MainWindow;
-
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
     TE_LEARNING_RATE,
@@ -43,7 +41,6 @@ enum {
 
 class MainPanel : public wxPanel
 {
-    friend MainWindow;
     std::shared_ptr<Lattice> m_lattice;
 
     OpenGLCanvas* m_canvas;
