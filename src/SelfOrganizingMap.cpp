@@ -147,12 +147,22 @@ void SelfOrganizingMap::ToggleTraining()
     }
 }
 
-bool SelfOrganizingMap::IsTrainingDone() const
+bool SelfOrganizingMap::IsDone() const
 {
     return m_isDone;
+}
+
+bool SelfOrganizingMap::IsTraining() const
+{
+    return m_isTraining;
 }
 
 int SelfOrganizingMap::GetIterations() const
 {
     return m_iterations;
+}
+
+float SelfOrganizingMap::GetNeighborhood() const
+{
+    return m_neighborhood;
 }

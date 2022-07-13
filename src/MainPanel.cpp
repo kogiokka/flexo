@@ -56,7 +56,7 @@ void MainPanel::PopulateProjectPage()
 {
     wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
 
-    std::array<wxBoxSizer*, 9> rows;
+    std::array<wxBoxSizer*, 10> rows;
     for (wxBoxSizer*& sizer : rows) {
         sizer = new wxBoxSizer(wxHORIZONTAL);
     }
@@ -76,7 +76,8 @@ void MainPanel::PopulateProjectPage()
     m_tcInitialRate->SendTextUpdatedEvent();
     m_btnConfirmSOM = new wxButton(page, BTN_CONFIRM_SOM, "Create Procedure");
 
-    rows[0]->Add(new wxStaticText(page, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    rows[0]->Add(new wxStaticText(page, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
+                 5);
     rows[0]->Add(m_tcMaxIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     rows[1]->Add(new wxStaticText(page, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     rows[1]->Add(m_tcInitialRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
@@ -121,8 +122,13 @@ void MainPanel::PopulateProjectPage()
 
     m_tcIterations = new wxTextCtrl(page, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
     m_tcIterations->SetCanFocus(false);
+    m_tcNeighborhood
+        = new wxTextCtrl(page, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+    m_tcNeighborhood->SetCanFocus(false);
     rows[8]->Add(new wxStaticText(page, wxID_ANY, "Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     rows[8]->Add(m_tcIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    rows[9]->Add(new wxStaticText(page, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    rows[9]->Add(m_tcNeighborhood, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
 
     wxBoxSizer* const boxLayout = new wxBoxSizer(wxVERTICAL);
     boxLayout->Add(rows[0], 0, wxGROW | wxALL, 5);
@@ -137,6 +143,7 @@ void MainPanel::PopulateProjectPage()
     boxLayout->Add(rows[7], 0, wxGROW | wxALL, 5);
     boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
     boxLayout->Add(rows[8], 0, wxGROW | wxALL, 10);
+    boxLayout->Add(rows[9], 0, wxGROW | wxALL, 10);
     page->SetSizer(boxLayout);
 
     m_notebook->AddPage(page, "Project");
@@ -307,10 +314,14 @@ void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
         return;
     }
 
-    m_tcIterations->Clear();
-    *m_tcIterations << wxGetApp().GetSOM()->GetIterations();
+    if (wxGetApp().GetSOM()->IsTraining()) {
+        m_tcIterations->Clear();
+        *m_tcIterations << wxGetApp().GetSOM()->GetIterations();
+        m_tcNeighborhood->Clear();
+        *m_tcNeighborhood << wxGetApp().GetSOM()->GetNeighborhood();
+    }
 
-    if (wxGetApp().GetSOM()->IsTrainingDone()) {
+    if (wxGetApp().GetSOM()->IsDone()) {
         m_btnWatermark->Enable();
     } else {
         m_btnWatermark->Disable();

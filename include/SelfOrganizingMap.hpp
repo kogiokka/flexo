@@ -32,8 +32,10 @@ public:
     ~SelfOrganizingMap();
     void Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
     void ToggleTraining();
-    bool IsTrainingDone() const;
+    bool IsDone() const;
+    bool IsTraining() const;
     int GetIterations() const;
+    float GetNeighborhood() const;
 
 private:
     void TrainInternal(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);

@@ -52,6 +52,7 @@ class MainPanel : public wxPanel
     wxButton* m_btnConfirmLattice;
     wxButton* m_btnConfirmSOM;
     wxTextCtrl* m_tcIterations;
+    wxTextCtrl* m_tcNeighborhood;
     wxTextCtrl* m_tcLatticeWidth;
     wxTextCtrl* m_tcLatticeHeight;
     wxTextCtrl* m_tcMaxIterations;
