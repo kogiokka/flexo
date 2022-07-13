@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <wx/notebook.h>
 #include <wx/button.h>
 #include <wx/event.h>
 #include <wx/panel.h>
@@ -46,6 +47,7 @@ class MainPanel : public wxPanel
     std::shared_ptr<Lattice> m_lattice;
 
     OpenGLCanvas* m_canvas;
+    wxNotebook* m_notebook;
     wxButton* m_btnStart;
     wxButton* m_btnStop;
     wxButton* m_btnPlayPause;
@@ -66,9 +68,8 @@ public:
     void SetOpenGLCanvas(OpenGLCanvas* canvas);
 
 private:
-    wxStaticBoxSizer* CreatePanelStaticBox1();
-    wxStaticBoxSizer* CreatePanelStaticBox2();
-    wxStaticBoxSizer* CreatePanelStaticBox3();
+    void PopulateProjectPage();
+    void PopulateRenderingPage();
     void OnButtonStart(wxCommandEvent& evt);
     void OnButtonStop(wxCommandEvent& evt);
     void OnButtonPause(wxCommandEvent& evt);
