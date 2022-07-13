@@ -148,7 +148,7 @@ void MainPanel::PopulateProjectPage()
     boxLayout->Add(m_btnConfirmLattice, 0, wxGROW | wxALL, 10);
 
     page->SetSizer(boxLayout);
-    m_notebook->AddPage(page, "Lattice");
+    m_notebook->AddPage(page, "Project");
 }
 
 void MainPanel::PopulateRenderingPage()
