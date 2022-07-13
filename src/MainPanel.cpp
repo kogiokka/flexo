@@ -3,8 +3,6 @@
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/event.h>
-#include <wx/richtext/richtextctrl.h>
-#include <wx/richtext/richtextstyles.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
 #include <wx/statline.h>
