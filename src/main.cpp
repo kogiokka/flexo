@@ -463,13 +463,10 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
         float deltaLong = glm::radians(360.0f) / numSegments;
         float deltaLat = glm::radians(180.0f) / numRings;
 
-        Mesh temp;
-        temp.positions.resize((numRings - 1) * numSegments + 2);
-        temp.normals.resize((numRings - 1) * numSegments + 2);
-        temp.positions.front() = center + radius * glm::vec3(0.0f, cos(0.0f), 0.0f);
-        temp.positions.back() = center + radius * glm::vec3(0.0f, cos(glm::radians(180.0f)), 0.0f);
-        temp.normals.front() = radius * glm::vec3(0.0f, cos(0.0f), 0.0f);
-        temp.normals.back() = radius * glm::vec3(0.0f, cos(glm::radians(180.0f)), 0.0f);
+        std::vector<glm::vec3> temp;
+        temp.resize((numRings - 1) * numSegments + 2);
+        temp.front() = center + radius * glm::vec3(0.0f, cos(0.0f), 0.0f);
+        temp.back() = center + radius * glm::vec3(0.0f, cos(glm::radians(180.0f)), 0.0f);
 
         // Iterate through the rings without the first and the last.
         for (int i = 1; i < numRings; i++) {
@@ -478,18 +475,22 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
                 float const phi = glm::radians(180.0f) - deltaLong * j;
                 glm::vec3 const coord = radius * glm::vec3(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
                 int const idx = (i - 1) * numSegments + j + 1;
-                temp.positions[idx] = center + coord;
-                temp.normals[idx] = coord;
+                temp[idx] = center + coord;
             }
         }
 
         for (int j = 0; j < numSegments; j++) {
-            mesh.positions.push_back(temp.positions[0]);
-            mesh.positions.push_back(temp.positions[(j + 1) % numSegments + 1]);
-            mesh.positions.push_back(temp.positions[j % numSegments + 1]);
-            mesh.normals.push_back(temp.normals[0]);
-            mesh.normals.push_back(temp.normals[(j + 1) % numSegments + 1]);
-            mesh.normals.push_back(temp.normals[j % numSegments + 1]);
+            auto const& p1 = temp[0];
+            auto const& p2 = temp[(j + 1) % numSegments + 1];
+            auto const& p3 = temp[j % numSegments + 1];
+            glm::vec3 const normal = glm::normalize(glm::cross(p2 - p1, p3 - p1));
+
+            mesh.positions.push_back(p1);
+            mesh.positions.push_back(p2);
+            mesh.positions.push_back(p3);
+            mesh.normals.push_back(normal);
+            mesh.normals.push_back(normal);
+            mesh.normals.push_back(normal);
         }
 
         for (int i = 0; i < numRings - 2; i++) {
@@ -504,15 +505,13 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
                 int k3 = ((i + 1) * numSegments + ((j + 1) % numSegments)) + 1;
                 int k4 = ((i + 1) * numSegments + (j % numSegments)) + 1;
                 glm::vec3 p1, p2, p3, p4;
-                glm::vec3 n1, n2, n3, n4;
-                p1 = temp.positions[k1]; // [x, y]
-                p2 = temp.positions[k2]; // [x + 1, y]
-                p3 = temp.positions[k3]; // [x + 1, y + 1]
-                p4 = temp.positions[k4]; // [x, y + 1]
-                n1 = temp.normals[k1];
-                n2 = temp.normals[k2];
-                n3 = temp.normals[k3];
-                n4 = temp.normals[k4];
+                glm::vec3 n1, n2;
+                p1 = temp[k1]; // [x, y]
+                p2 = temp[k2]; // [x + 1, y]
+                p3 = temp[k3]; // [x + 1, y + 1]
+                p4 = temp[k4]; // [x, y + 1]
+                n1= glm::normalize(glm::cross(p2 - p1, p3 - p1));
+                n2= glm::normalize(glm::cross(p3 - p1, p4 - p1));
 
                 mesh.positions.push_back(p1);
                 mesh.positions.push_back(p2);
@@ -521,20 +520,25 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
                 mesh.positions.push_back(p3);
                 mesh.positions.push_back(p4);
                 mesh.normals.push_back(n1);
-                mesh.normals.push_back(n2);
-                mesh.normals.push_back(n3);
                 mesh.normals.push_back(n1);
-                mesh.normals.push_back(n3);
-                mesh.normals.push_back(n4);
+                mesh.normals.push_back(n1);
+                mesh.normals.push_back(n2);
+                mesh.normals.push_back(n2);
+                mesh.normals.push_back(n2);
             }
         }
         for (int j = 0; j < numSegments; j++) {
-            mesh.positions.push_back(temp.positions[((numRings - 2) * numSegments + 1) + (j % numSegments)]);
-            mesh.positions.push_back(temp.positions[((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments)]);
-            mesh.positions.push_back(temp.positions.back());
-            mesh.normals.push_back(temp.normals[((numRings - 2) * numSegments + 1) + (j % numSegments)]);
-            mesh.normals.push_back(temp.normals[((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments)]);
-            mesh.normals.push_back(temp.normals.back());
+            auto const& p1 = temp[((numRings - 2) * numSegments + 1) + (j % numSegments)];
+            auto const& p2 = temp[((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments)];
+            auto const& p3 = temp.back();
+            glm::vec3 const normal = glm::normalize(glm::cross(p2 - p1, p3 - p1));
+
+            mesh.positions.push_back(p1);
+            mesh.positions.push_back(p2);
+            mesh.positions.push_back(p3);
+            mesh.normals.push_back(normal);
+            mesh.normals.push_back(normal);
+            mesh.normals.push_back(normal);
         }
     }
 
