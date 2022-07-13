@@ -28,11 +28,13 @@ wxDEFINE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
 MainPanel::MainPanel(wxWindow* parent)
     : wxPanel(parent, wxID_ANY)
 {
-    auto layout = new wxBoxSizer(wxVERTICAL);
-    layout->Add(CreatePanelStaticBox1(), 0, wxGROW | wxALL, 10);
-    layout->Add(CreatePanelStaticBox2(), 0, wxGROW | wxALL, 10);
-    layout->Add(CreatePanelStaticBox3(), 0, wxGROW | wxALL, 10);
+    m_notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
+    PopulateProcedurePage();
+    PopulateLatticePage();
+    PopulateRenderingPage();
 
+    auto layout = new wxBoxSizer(wxVERTICAL);
+    layout->Add(m_notebook, 1, wxGROW | wxALL, 10);
     SetSizer(layout);
 
     m_updateTimer = new wxTimer(this, TIMER_UI_UPDATE);
@@ -49,52 +51,12 @@ void MainPanel::SetOpenGLCanvas(OpenGLCanvas* canvas)
     m_canvas = canvas;
 }
 
-inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox1()
+void MainPanel::PopulateProcedurePage()
 {
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, this, "Lattice");
+    wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
+
+    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, page, "SOM Control");
     auto const box = boxLayout->GetStaticBox();
-
-    auto dimenLabel = new wxStaticText(box, wxID_ANY, "Dimension: ");
-
-    wxIntegerValidator<int> validDimen;
-    validDimen.SetRange(1, 512);
-
-    m_tcLatticeWidth = new wxTextCtrl(box, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                      wxTE_CENTER, validDimen);
-    m_tcLatticeHeight = new wxTextCtrl(box, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                       wxTE_CENTER, validDimen);
-    *m_tcLatticeWidth << 64;
-    *m_tcLatticeHeight << 64;
-    m_tcLatticeWidth->SendTextUpdatedEvent();
-    m_tcLatticeHeight->SendTextUpdatedEvent();
-
-    auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
-    auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
-    chkBox1->SetValue(false);
-    chkBox2->SetValue(false);
-
-    m_btnConfirmLattice = new wxButton(box, BTN_CONFIRM_LATTICE, "Create Lattice");
-
-    auto row1 = new wxBoxSizer(wxHORIZONTAL);
-    auto row2 = new wxBoxSizer(wxHORIZONTAL);
-    auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
-    row1->Add(dimenLabel, 1, sizerFlag, 5);
-    row1->Add(m_tcLatticeWidth, 1, sizerFlag, 5);
-    row1->Add(m_tcLatticeHeight, 1, sizerFlag, 5);
-    row2->Add(chkBox1, 1, sizerFlag, 5);
-    row2->Add(chkBox2, 1, sizerFlag, 5);
-    boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(m_btnConfirmLattice, 0, wxGROW | wxALL, 10);
-
-    return boxLayout;
-}
-
-inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox2()
-{
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, this, "SOM Control");
-    auto const box = boxLayout->GetStaticBox();
-
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
@@ -155,14 +117,59 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox2()
     boxLayout->Add(row5, 0, wxGROW | wxALL, 10);
     boxLayout->Add(row6, 0, wxGROW | wxALL, 10);
 
-    return boxLayout;
+    page->SetSizer(boxLayout);
+    m_notebook->AddPage(page, "Procedure");
 }
 
-inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox3()
+void MainPanel::PopulateLatticePage()
 {
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, this, "Rendering Options");
-    auto const box = boxLayout->GetStaticBox();
+    wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
 
+    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, page, "Lattice");
+    auto const box = boxLayout->GetStaticBox();
+    auto dimenLabel = new wxStaticText(box, wxID_ANY, "Dimension: ");
+
+    wxIntegerValidator<int> validDimen;
+    validDimen.SetRange(1, 512);
+
+    m_tcLatticeWidth = new wxTextCtrl(box, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                      wxTE_CENTER, validDimen);
+    m_tcLatticeHeight = new wxTextCtrl(box, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                       wxTE_CENTER, validDimen);
+    *m_tcLatticeWidth << 64;
+    *m_tcLatticeHeight << 64;
+    m_tcLatticeWidth->SendTextUpdatedEvent();
+    m_tcLatticeHeight->SendTextUpdatedEvent();
+
+    auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
+    auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
+    chkBox1->SetValue(false);
+    chkBox2->SetValue(false);
+
+    m_btnConfirmLattice = new wxButton(box, BTN_CONFIRM_LATTICE, "Create Lattice");
+
+    auto row1 = new wxBoxSizer(wxHORIZONTAL);
+    auto row2 = new wxBoxSizer(wxHORIZONTAL);
+    auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
+    row1->Add(dimenLabel, 1, sizerFlag, 5);
+    row1->Add(m_tcLatticeWidth, 1, sizerFlag, 5);
+    row1->Add(m_tcLatticeHeight, 1, sizerFlag, 5);
+    row2->Add(chkBox1, 1, sizerFlag, 5);
+    row2->Add(chkBox2, 1, sizerFlag, 5);
+    boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
+    boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
+    boxLayout->Add(m_btnConfirmLattice, 0, wxGROW | wxALL, 10);
+
+    page->SetSizer(boxLayout);
+    m_notebook->AddPage(page, "Lattice");
+}
+
+void MainPanel::PopulateRenderingPage()
+{
+    wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
+
+    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, page, "Rendering Options");
+    auto const box = boxLayout->GetStaticBox();
     auto row1 = new wxBoxSizer(wxVERTICAL);
     auto row2 = new wxBoxSizer(wxVERTICAL);
     auto chkBox1 = new wxCheckBox(box, CB_RENDEROPT_MODEL, "Model");
@@ -196,7 +203,8 @@ inline wxStaticBoxSizer* MainPanel::CreatePanelStaticBox3()
     boxLayout->Add(row1, 0, wxGROW | wxALL, 10);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
 
-    return boxLayout;
+    page->SetSizer(boxLayout);
+    m_notebook->AddPage(page, "Rendering");
 }
 
 void MainPanel::OnButtonWatermark(wxCommandEvent&)
