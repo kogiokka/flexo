@@ -68,8 +68,7 @@ public:
     void SetOpenGLCanvas(OpenGLCanvas* canvas);
 
 private:
-    void PopulateProcedurePage();
-    void PopulateLatticePage();
+    void PopulateProjectPage();
     void PopulateRenderingPage();
     void OnButtonStart(wxCommandEvent& evt);
     void OnButtonStop(wxCommandEvent& evt);

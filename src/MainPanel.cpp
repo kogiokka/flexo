@@ -1,6 +1,8 @@
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/event.h>
+#include <wx/richtext/richtextctrl.h>
+#include <wx/richtext/richtextstyles.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
 #include <wx/statline.h>
@@ -29,8 +31,7 @@ MainPanel::MainPanel(wxWindow* parent)
     : wxPanel(parent, wxID_ANY)
 {
     m_notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
-    PopulateProcedurePage();
-    PopulateLatticePage();
+    PopulateProjectPage();
     PopulateRenderingPage();
 
     auto layout = new wxBoxSizer(wxVERTICAL);
@@ -51,28 +52,26 @@ void MainPanel::SetOpenGLCanvas(OpenGLCanvas* canvas)
     m_canvas = canvas;
 }
 
-void MainPanel::PopulateProcedurePage()
+void MainPanel::PopulateProjectPage()
 {
     wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
 
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, page, "SOM Control");
-    auto const box = boxLayout->GetStaticBox();
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
     auto row4 = new wxBoxSizer(wxHORIZONTAL);
     auto row5 = new wxBoxSizer(wxHORIZONTAL);
     auto row6 = new wxBoxSizer(wxHORIZONTAL);
+    auto row7 = new wxBoxSizer(wxHORIZONTAL);
+    auto row8 = new wxBoxSizer(wxHORIZONTAL);
 
     wxIntegerValidator<int> validIterCap;
     wxFloatingPointValidator<float> validLearnRate(2, nullptr);
     validIterCap.SetMin(0);
     validLearnRate.SetRange(0.0f, 1.0f);
-    auto maxIterLabel = new wxStaticText(box, wxID_ANY, "Max Iterations: ");
-    auto learnRateLabel = new wxStaticText(box, wxID_ANY, "Learning Rate: ");
-    m_tcMaxIterations = new wxTextCtrl(box, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+    m_tcMaxIterations = new wxTextCtrl(page, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                        wxTE_CENTER, validIterCap);
-    m_tcInitialRate = new wxTextCtrl(box, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+    m_tcInitialRate = new wxTextCtrl(page, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                      wxTE_CENTER, validLearnRate);
 
     *m_tcMaxIterations << 50000;
@@ -80,84 +79,72 @@ void MainPanel::PopulateProcedurePage()
     m_tcMaxIterations->SendTextUpdatedEvent();
     m_tcInitialRate->SendTextUpdatedEvent();
 
-    m_btnPlayPause = new wxButton(box, BTN_PLAY_PAUSE, "Continue");
+    m_btnPlayPause = new wxButton(page, BTN_PLAY_PAUSE, "Continue");
     m_btnPlayPause->Disable();
-    m_btnConfirmSOM = new wxButton(box, BTN_CONFIRM_SOM, "Create Procedure");
+    m_btnConfirmSOM = new wxButton(page, BTN_CONFIRM_SOM, "Create Procedure");
 
-    m_btnWatermark = new wxButton(box, BTN_WATERMARK, "Watermark");
+    m_btnWatermark = new wxButton(page, BTN_WATERMARK, "Watermark");
     m_btnWatermark->Disable();
 
-    auto iterLabel = new wxStaticText(box, wxID_ANY, "Iterations: ");
-    m_tcIterations = new wxTextCtrl(box, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+    m_tcIterations = new wxTextCtrl(page, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
     m_tcIterations->SetCanFocus(false);
 
-    m_btnStart = new wxButton(box, BTN_START, "Start");
-    m_btnStop = new wxButton(box, BTN_STOP, "Stop");
+    m_btnStart = new wxButton(page, BTN_START, "Start");
+    m_btnStop = new wxButton(page, BTN_STOP, "Stop");
     m_btnStart->Disable();
     m_btnStop->Disable();
 
-    auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
-    row1->Add(maxIterLabel, 1, sizerFlag, 5);
-    row1->Add(m_tcMaxIterations, 1, sizerFlag, 5);
-    row2->Add(learnRateLabel, 1, sizerFlag, 5);
-    row2->Add(m_tcInitialRate, 1, sizerFlag, 5);
+    row1->Add(new wxStaticText(page, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row1->Add(m_tcMaxIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row2->Add(new wxStaticText(page, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row2->Add(m_tcInitialRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     row3->Add(m_btnConfirmSOM, 1, wxGROW | wxLEFT | wxRIGHT, 5);
-    auto line = new wxStaticLine(box);
-    row4->Add(iterLabel, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row4->Add(new wxStaticText(page, wxID_ANY, "Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     row4->Add(m_tcIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
     row5->Add(m_btnStart, 1, wxGROW | wxLEFT | wxRIGHT, 5);
     row5->Add(m_btnStop, 1, wxGROW | wxLEFT | wxRIGHT, 5);
     row6->Add(m_btnPlayPause, 1, wxGROW | wxLEFT | wxRIGHT, 5);
     row6->Add(m_btnWatermark, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+
+    wxBoxSizer* const boxLayout = new wxBoxSizer(wxVERTICAL);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
     boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(line, 0, wxGROW | wxALL, 10);
+    boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
     boxLayout->Add(row4, 0, wxGROW | wxALL, 10);
     boxLayout->Add(row5, 0, wxGROW | wxALL, 10);
     boxLayout->Add(row6, 0, wxGROW | wxALL, 10);
 
-    page->SetSizer(boxLayout);
-    m_notebook->AddPage(page, "Procedure");
-}
-
-void MainPanel::PopulateLatticePage()
-{
-    wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
-
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, page, "Lattice");
-    auto const box = boxLayout->GetStaticBox();
-    auto dimenLabel = new wxStaticText(box, wxID_ANY, "Dimension: ");
+    // ----
 
     wxIntegerValidator<int> validDimen;
     validDimen.SetRange(1, 512);
 
-    m_tcLatticeWidth = new wxTextCtrl(box, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+    m_tcLatticeWidth = new wxTextCtrl(page, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                       wxTE_CENTER, validDimen);
-    m_tcLatticeHeight = new wxTextCtrl(box, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+    m_tcLatticeHeight = new wxTextCtrl(page, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                        wxTE_CENTER, validDimen);
     *m_tcLatticeWidth << 64;
     *m_tcLatticeHeight << 64;
     m_tcLatticeWidth->SendTextUpdatedEvent();
     m_tcLatticeHeight->SendTextUpdatedEvent();
 
-    auto chkBox1 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
-    auto chkBox2 = new wxCheckBox(box, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
+    auto chkBox1 = new wxCheckBox(page, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
+    auto chkBox2 = new wxCheckBox(page, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
     chkBox1->SetValue(false);
     chkBox2->SetValue(false);
 
-    m_btnConfirmLattice = new wxButton(box, BTN_CONFIRM_LATTICE, "Create Lattice");
+    m_btnConfirmLattice = new wxButton(page, BTN_CONFIRM_LATTICE, "Create Lattice");
 
-    auto row1 = new wxBoxSizer(wxHORIZONTAL);
-    auto row2 = new wxBoxSizer(wxHORIZONTAL);
-    auto sizerFlag = wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT;
-    row1->Add(dimenLabel, 1, sizerFlag, 5);
-    row1->Add(m_tcLatticeWidth, 1, sizerFlag, 5);
-    row1->Add(m_tcLatticeHeight, 1, sizerFlag, 5);
-    row2->Add(chkBox1, 1, sizerFlag, 5);
-    row2->Add(chkBox2, 1, sizerFlag, 5);
-    boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
-    boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
+    row7->Add(new wxStaticText(page, wxID_ANY, "Dimension: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row7->Add(m_tcLatticeWidth, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row7->Add(m_tcLatticeHeight, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row8->Add(chkBox1, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+    row8->Add(chkBox2, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+
+    boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
+    boxLayout->Add(row7, 0, wxGROW | wxALL, 5);
+    boxLayout->Add(row8, 0, wxGROW | wxALL, 5);
     boxLayout->Add(m_btnConfirmLattice, 0, wxGROW | wxALL, 10);
 
     page->SetSizer(boxLayout);
@@ -168,15 +155,13 @@ void MainPanel::PopulateRenderingPage()
 {
     wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
 
-    auto const boxLayout = new wxStaticBoxSizer(wxVERTICAL, page, "Rendering Options");
-    auto const box = boxLayout->GetStaticBox();
     auto row1 = new wxBoxSizer(wxVERTICAL);
     auto row2 = new wxBoxSizer(wxVERTICAL);
-    auto chkBox1 = new wxCheckBox(box, CB_RENDEROPT_MODEL, "Model");
-    auto chkBox2 = new wxCheckBox(box, CB_RENDEROPT_LAT_VERTEX, "Lattice Vertex");
-    auto chkBox3 = new wxCheckBox(box, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
-    auto chkBox4 = new wxCheckBox(box, CB_RENDEROPT_LAT_FACE, "Lattice Face");
-    auto chkBox5 = new wxCheckBox(box, CB_RENDEROPT_LIGHT_SOURCE, "Light Source");
+    auto chkBox1 = new wxCheckBox(page, CB_RENDEROPT_MODEL, "Model");
+    auto chkBox2 = new wxCheckBox(page, CB_RENDEROPT_LAT_VERTEX, "Lattice Vertex");
+    auto chkBox3 = new wxCheckBox(page, CB_RENDEROPT_LAT_EDGE, "Lattice Edge");
+    auto chkBox4 = new wxCheckBox(page, CB_RENDEROPT_LAT_FACE, "Lattice Face");
+    auto chkBox5 = new wxCheckBox(page, CB_RENDEROPT_LIGHT_SOURCE, "Light Source");
     chkBox1->SetValue(true);
     chkBox2->SetValue(true);
     chkBox3->SetValue(true);
@@ -189,9 +174,9 @@ void MainPanel::PopulateRenderingPage()
     OnCheckboxLatticeVertex(event);
     OnCheckboxLatticeEdge(event);
 
-    auto surfAlphaLabel = new wxStaticText(box, wxID_ANY, "Model Transparency (%)");
+    auto surfAlphaLabel = new wxStaticText(page, wxID_ANY, "Model Transparency (%)");
     int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
-    m_slider = new wxSlider(box, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
+    m_slider = new wxSlider(page, SLIDER_TRANSPARENCY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
                             wxSL_HORIZONTAL | wxSL_LABELS | wxSL_INVERSE);
     row1->Add(chkBox1, 0, wxGROW | wxALL, 5);
     row1->Add(chkBox2, 0, wxGROW | wxALL, 5);
@@ -200,10 +185,12 @@ void MainPanel::PopulateRenderingPage()
     row1->Add(chkBox5, 0, wxGROW | wxALL, 5);
     row2->Add(surfAlphaLabel, 0, wxGROW);
     row2->Add(m_slider, 0, wxGROW);
+
+    wxBoxSizer* boxLayout = new wxBoxSizer(wxVERTICAL);
     boxLayout->Add(row1, 0, wxGROW | wxALL, 10);
     boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
-
     page->SetSizer(boxLayout);
+
     m_notebook->AddPage(page, "Rendering");
 }
 
