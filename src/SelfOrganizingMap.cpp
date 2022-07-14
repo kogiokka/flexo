@@ -1,11 +1,12 @@
 #include "SelfOrganizingMap.hpp"
 #include "common/Logger.hpp"
 
-SelfOrganizingMap::SelfOrganizingMap(float initialRate, int maxIterations)
+SelfOrganizingMap::SelfOrganizingMap(float initialRate, int maxIterations, float initialNeighborhood)
     : m_isDone(false)
     , m_isTraining(true)
     , m_maxIterations(maxIterations)
     , m_initialRate(initialRate)
+    , m_initialNeighborhood(initialNeighborhood)
     , m_worker()
     , m_mut()
     , m_cv()
@@ -27,8 +28,6 @@ SelfOrganizingMap::~SelfOrganizingMap()
 
 void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
 {
-    m_initialNeighborhood
-        = sqrt(static_cast<float>(lattice->width * lattice->width + lattice->height * lattice->height)) * 0.5f;
     m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 
     Logger::info("Max iterations: %d, Initial Learning Rate: %f", m_maxIterations, m_initialRate);

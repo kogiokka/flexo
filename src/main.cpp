@@ -1,3 +1,4 @@
+#include <cmath>
 #include <memory>
 
 #include <glm/glm.hpp>
@@ -16,6 +17,7 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_TEXT(TE_LATTICE_HEIGHT, WatermarkingApp::OnSetLatticeHeight)
     EVT_TEXT(TE_MAX_ITERATIONS, WatermarkingApp::OnSetMaxIterations)
     EVT_TEXT(TE_LEARNING_RATE, WatermarkingApp::OnSetLearningRate)
+    EVT_TEXT(TE_NEIGHBORHOOD, WatermarkingApp::OnSetNeighborhood)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_FLAG, WatermarkingApp::OnCmdToggleRenderOption)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
     EVT_COMMAND(wxID_ANY, CMD_START_TRAINING, WatermarkingApp::OnCmdStartTraining)
@@ -55,6 +57,7 @@ std::shared_ptr<SelfOrganizingMap> const& WatermarkingApp::GetSOM() const
 {
     return m_som;
 }
+
 bool WatermarkingApp::OnInit()
 {
     if (!wxApp::OnInit()) {
@@ -66,15 +69,15 @@ bool WatermarkingApp::OnInit()
     world.cube = stlImp.ReadFile("res/models/cube.stl");
 
     MainWindow* window = new MainWindow();
-    MainPanel* panel = new MainPanel(window);
+    m_panel = new MainPanel(window);
 
     wxGLAttributes attrs;
     attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
     auto canvas = new OpenGLCanvas(window, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     canvas->SetFocus();
 
-    panel->SetOpenGLCanvas(canvas);
-    window->SetMainPanel(panel);
+    m_panel->SetOpenGLCanvas(canvas);
+    window->SetMainPanel(m_panel);
     window->SetOpenGLCanvas(canvas);
 
     window->Show();
@@ -367,6 +370,14 @@ void WatermarkingApp::OnSetLearningRate(wxCommandEvent& evt)
     }
 }
 
+void WatermarkingApp::OnSetNeighborhood(wxCommandEvent& evt)
+{
+    double tmp;
+    if (evt.GetString().ToDouble(&tmp)) {
+        m_conf.initialNeighborhood = tmp;
+    }
+}
+
 void WatermarkingApp::OnCmdStartTraining(wxCommandEvent&)
 {
     m_som->Train(m_lattice, m_dataset);
@@ -427,6 +438,13 @@ void WatermarkingApp::OnCmdCreateLattice(wxCommandEvent&)
 {
     m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
     m_lattice->flags = m_conf.flags;
+
+    // TODO: Clean this mess
+    float neighborhood = 0.5f * sqrt(m_conf.width * m_conf.width + m_conf.height * m_conf.height);
+    m_panel->SetInitialNeighborhood(neighborhood);
+    m_conf.initialNeighborhood = neighborhood;
+    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations, m_conf.initialNeighborhood);
+
     BuildLatticeMesh();
 
     m_renderer->LoadLattice(); // Change OpenGL vertex buffer's size
@@ -434,7 +452,7 @@ void WatermarkingApp::OnCmdCreateLattice(wxCommandEvent&)
 
 void WatermarkingApp::OnCmdCreateSOMProcedure(wxCommandEvent&)
 {
-    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations);
+    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations, m_conf.initialNeighborhood);
 }
 
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)

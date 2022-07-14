@@ -19,6 +19,7 @@
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
     TE_LEARNING_RATE,
+    TE_NEIGHBORHOOD,
     TE_LATTICE_WIDTH,
     TE_LATTICE_HEIGHT,
     BTN_PLAY_PAUSE,
@@ -57,6 +58,7 @@ class MainPanel : public wxPanel
     wxTextCtrl* m_tcLatticeHeight;
     wxTextCtrl* m_tcMaxIterations;
     wxTextCtrl* m_tcInitialRate;
+    wxTextCtrl* m_tcInitialNeighborhood;
     wxSlider* m_slider;
     wxTimer* m_updateTimer;
 
@@ -64,6 +66,7 @@ public:
     MainPanel(wxWindow* parent = nullptr);
     ~MainPanel();
     void SetOpenGLCanvas(OpenGLCanvas* canvas);
+    void SetInitialNeighborhood(float radius);
 
 private:
     void PopulateProjectPage();

@@ -28,7 +28,7 @@ class SelfOrganizingMap
     std::condition_variable m_cv;
 
 public:
-    SelfOrganizingMap(float initialRate, int maxIterations);
+    SelfOrganizingMap(float initialRate, int maxIterations, float initialNeighborhood);
     ~SelfOrganizingMap();
     void Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
     void ToggleTraining();

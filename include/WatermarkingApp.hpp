@@ -9,6 +9,7 @@
 
 #include "InputData.hpp"
 #include "Lattice.hpp"
+#include "MainPanel.hpp"
 #include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
 #include "Renderer.hpp"
@@ -19,6 +20,7 @@ struct TrainingConfig {
     int height;
     float initialRate;
     int maxIterations;
+    float initialNeighborhood;
     int flags;
 };
 
@@ -33,6 +35,7 @@ class WatermarkingApp : public wxApp
     std::shared_ptr<Lattice> m_lattice;
     std::shared_ptr<Renderer> m_renderer;
     std::shared_ptr<InputData> m_dataset;
+    MainPanel* m_panel;
     TrainingConfig m_conf;
     BoundingBox m_bbox;
 
@@ -52,6 +55,7 @@ public:
     void OnSetLatticeHeight(wxCommandEvent& evt);
     void OnSetMaxIterations(wxCommandEvent& evt);
     void OnSetLearningRate(wxCommandEvent& evt);
+    void OnSetNeighborhood(wxCommandEvent& evt);
     void OnCmdStartTraining(wxCommandEvent& evt);
     void OnCmdStopTrainining(wxCommandEvent& evt);
     void OnCmdPauseTraining(wxCommandEvent& evt);
