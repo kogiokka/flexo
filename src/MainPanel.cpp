@@ -12,11 +12,9 @@
 #include <wx/valnum.h>
 
 #include "MainPanel.hpp"
+#include "ProjectSettings.hpp"
 #include "Renderer.hpp"
-#include "WatermarkingApp.hpp"
 #include "World.hpp"
-
-wxDECLARE_APP(WatermarkingApp);
 
 wxDEFINE_EVENT(CMD_START_TRAINING, wxCommandEvent);
 wxDEFINE_EVENT(CMD_STOP_TRAINING, wxCommandEvent);
@@ -27,8 +25,9 @@ wxDEFINE_EVENT(CMD_DO_WATERMARK, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
 
-MainPanel::MainPanel(wxWindow* parent)
+MainPanel::MainPanel(wxWindow* parent, WatermarkingProject& project)
     : wxPanel(parent, wxID_ANY)
+    , m_project(project)
 {
     m_notebook = new wxNotebook(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
     PopulateProjectPage();
@@ -45,17 +44,6 @@ MainPanel::MainPanel(wxWindow* parent)
 MainPanel::~MainPanel()
 {
     m_updateTimer->Stop();
-}
-
-void MainPanel::SetOpenGLCanvas(OpenGLCanvas* canvas)
-{
-    m_canvas = canvas;
-}
-
-void MainPanel::SetInitialNeighborhood(float radius)
-{
-    m_tcInitialNeighborhood->Clear();
-    *m_tcInitialNeighborhood << radius;
 }
 
 void MainPanel::PopulateProjectPage()
@@ -80,12 +68,9 @@ void MainPanel::PopulateProjectPage()
     m_tcInitialNeighborhood = new wxTextCtrl(page, TE_NEIGHBORHOOD, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                              wxTE_CENTER, validNeighborhood);
 
-    *m_tcMaxIterations << 50000;
-    *m_tcInitialRate << 0.15f;
-    *m_tcInitialNeighborhood << 0.0f;
-    m_tcMaxIterations->SendTextUpdatedEvent();
-    m_tcInitialRate->SendTextUpdatedEvent();
-    m_tcInitialNeighborhood->SendTextUpdatedEvent();
+    *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
+    *m_tcInitialRate << ProjectSettings::Get(m_project).GetLearningRate();
+    *m_tcInitialNeighborhood << ProjectSettings::Get(m_project).GetNeighborhood();
     m_btnConfirmSOM = new wxButton(page, BTN_CONFIRM_SOM, "Create Procedure");
 
     rows[0]->Add(new wxStaticText(page, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
@@ -104,10 +89,9 @@ void MainPanel::PopulateProjectPage()
                                       wxTE_CENTER, validDimen);
     m_tcLatticeHeight = new wxTextCtrl(page, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                        wxTE_CENTER, validDimen);
-    *m_tcLatticeWidth << 64;
-    *m_tcLatticeHeight << 64;
-    m_tcLatticeWidth->SendTextUpdatedEvent();
-    m_tcLatticeHeight->SendTextUpdatedEvent();
+    *m_tcLatticeWidth << ProjectSettings::Get(m_project).GetLatticeWidth();
+    *m_tcLatticeHeight << ProjectSettings::Get(m_project).GetLatticeHeight();
+
     auto chkBox1 = new wxCheckBox(page, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
     auto chkBox2 = new wxCheckBox(page, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
     chkBox1->SetValue(false);
@@ -229,12 +213,7 @@ void MainPanel::OnButtonConfirmSOM(wxCommandEvent&)
 
 void MainPanel::OnButtonStart(wxCommandEvent&)
 {
-    if (!wxGetApp().GetSOM()) {
-        return;
-    }
-
-    wxCommandEvent event(CMD_START_TRAINING, GetId());
-    ProcessWindowEvent(event);
+    m_project.Train();
 
     m_btnStart->Disable();
     m_btnConfirmLattice->Disable();
@@ -244,8 +223,7 @@ void MainPanel::OnButtonStart(wxCommandEvent&)
 
 void MainPanel::OnButtonStop(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_STOP_TRAINING, GetId());
-    ProcessWindowEvent(event);
+    m_project.Stop();
 
     m_tcIterations->Clear();
     *m_tcIterations << 0;
@@ -325,18 +303,16 @@ void MainPanel::OnSliderTransparency(wxCommandEvent&)
 
 void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
 {
-    if (m_tcIterations == nullptr || wxGetApp().GetSOM() == nullptr) {
+    if (!m_project.IsTraining()) {
         return;
     }
 
-    if (wxGetApp().GetSOM()->IsTraining()) {
-        m_tcIterations->Clear();
-        *m_tcIterations << wxGetApp().GetSOM()->GetIterations();
-        m_tcNeighborhood->Clear();
-        *m_tcNeighborhood << wxGetApp().GetSOM()->GetNeighborhood();
-    }
+    m_tcIterations->Clear();
+    *m_tcIterations << m_project.GetIterations();
+    m_tcNeighborhood->Clear();
+    *m_tcNeighborhood << m_project.GetNeighborhood();
 
-    if (wxGetApp().GetSOM()->IsDone()) {
+    if (m_project.IsDone()) {
         m_btnWatermark->Enable();
     } else {
         m_btnWatermark->Disable();
@@ -357,7 +333,52 @@ void MainPanel::OnUpdateStopButton(wxUpdateUIEvent& evt)
     }
 }
 
+void MainPanel::OnSetLatticeWidth(wxCommandEvent& evt)
+{
+    long tmp;
+    if (evt.GetString().ToLong(&tmp)) {
+        ProjectSettings::Get(m_project).SetLatticeWidth(tmp);
+    }
+}
+
+void MainPanel::OnSetLatticeHeight(wxCommandEvent& evt)
+{
+    long tmp;
+    if (evt.GetString().ToLong(&tmp)) {
+        ProjectSettings::Get(m_project).SetLatticeHeight(tmp);
+    }
+}
+
+void MainPanel::OnSetMaxIterations(wxCommandEvent& evt)
+{
+    long tmp;
+    if (evt.GetString().ToLong(&tmp)) {
+        ProjectSettings::Get(m_project).SetMaxIterations(tmp);
+    }
+}
+
+void MainPanel::OnSetLearningRate(wxCommandEvent& evt)
+{
+    double tmp;
+    if (evt.GetString().ToDouble(&tmp)) {
+        ProjectSettings::Get(m_project).SetLearningRate(tmp);
+    }
+}
+
+void MainPanel::OnSetNeighborhood(wxCommandEvent& evt)
+{
+    double tmp;
+    if (evt.GetString().ToDouble(&tmp)) {
+        ProjectSettings::Get(m_project).SetNeighborhood(tmp);
+    }
+}
+
 wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
+    EVT_TEXT(TE_LATTICE_WIDTH, MainPanel::OnSetLatticeWidth)
+    EVT_TEXT(TE_LATTICE_HEIGHT, MainPanel::OnSetLatticeHeight)
+    EVT_TEXT(TE_MAX_ITERATIONS, MainPanel::OnSetMaxIterations)
+    EVT_TEXT(TE_LEARNING_RATE, MainPanel::OnSetLearningRate)
+    EVT_TEXT(TE_NEIGHBORHOOD, MainPanel::OnSetNeighborhood)
     EVT_BUTTON(BTN_START, MainPanel::OnButtonStart)
     EVT_BUTTON(BTN_STOP, MainPanel::OnButtonStop)
     EVT_BUTTON(BTN_PLAY_PAUSE, MainPanel::OnButtonPause)

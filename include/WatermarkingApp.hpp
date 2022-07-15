@@ -12,17 +12,9 @@
 #include "MainPanel.hpp"
 #include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
+#include "Project.hpp"
 #include "Renderer.hpp"
 #include "SelfOrganizingMap.hpp"
-
-struct TrainingConfig {
-    int width;
-    int height;
-    float initialRate;
-    int maxIterations;
-    float initialNeighborhood;
-    int flags;
-};
 
 class WatermarkingApp : public wxApp
 {
@@ -31,12 +23,11 @@ class WatermarkingApp : public wxApp
         glm::vec3 min;
     };
 
-    std::shared_ptr<SelfOrganizingMap> m_som;
-    std::shared_ptr<Lattice> m_lattice;
+    std::shared_ptr<WatermarkingProject> m_project;
     std::shared_ptr<Renderer> m_renderer;
     std::shared_ptr<InputData> m_dataset;
+
     MainPanel* m_panel;
-    TrainingConfig m_conf;
     BoundingBox m_bbox;
 
 public:
@@ -44,26 +35,18 @@ public:
     virtual bool OnInit() override;
     virtual int OnExit() override;
     virtual void OnUnhandledException() override;
-    std::shared_ptr<SelfOrganizingMap> const& GetSOM() const;
     void BuildLatticeMesh();
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
     void SetCameraView(BoundingBox box);
     BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
-    void OnSetLatticeWidth(wxCommandEvent& evt);
-    void OnSetLatticeHeight(wxCommandEvent& evt);
-    void OnSetMaxIterations(wxCommandEvent& evt);
-    void OnSetLearningRate(wxCommandEvent& evt);
-    void OnSetNeighborhood(wxCommandEvent& evt);
     void OnCmdStartTraining(wxCommandEvent& evt);
     void OnCmdStopTrainining(wxCommandEvent& evt);
     void OnCmdPauseTraining(wxCommandEvent& evt);
     void OnCmdToggleRenderOption(wxCommandEvent& evt);
     void OnCmdToggleLatticeFlag(wxCommandEvent& evt);
     void OnCmdDoWatermark(wxCommandEvent& evt);
-    void OnCmdCreateLattice(wxCommandEvent& evt);
-    void OnCmdCreateSOMProcedure(wxCommandEvent& evt);
     void OnCmdRebuildLatticeMesh(wxCommandEvent& evt);
     void OnMenuGenerateModel(wxCommandEvent& evt);
     void OnMenuImportModel(wxCommandEvent& evt);

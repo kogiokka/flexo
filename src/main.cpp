@@ -13,19 +13,12 @@
 #include "common/Logger.hpp"
 
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
-    EVT_TEXT(TE_LATTICE_WIDTH, WatermarkingApp::OnSetLatticeWidth)
-    EVT_TEXT(TE_LATTICE_HEIGHT, WatermarkingApp::OnSetLatticeHeight)
-    EVT_TEXT(TE_MAX_ITERATIONS, WatermarkingApp::OnSetMaxIterations)
-    EVT_TEXT(TE_LEARNING_RATE, WatermarkingApp::OnSetLearningRate)
-    EVT_TEXT(TE_NEIGHBORHOOD, WatermarkingApp::OnSetNeighborhood)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_FLAG, WatermarkingApp::OnCmdToggleRenderOption)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
     EVT_COMMAND(wxID_ANY, CMD_START_TRAINING, WatermarkingApp::OnCmdStartTraining)
     EVT_COMMAND(wxID_ANY, CMD_STOP_TRAINING, WatermarkingApp::OnCmdStopTrainining)
     EVT_COMMAND(wxID_ANY, CMD_PAUSE_TRAINING, WatermarkingApp::OnCmdPauseTraining)
     EVT_COMMAND(wxID_ANY, CMD_DO_WATERMARK, WatermarkingApp::OnCmdDoWatermark)
-    EVT_COMMAND(wxID_ANY, CMD_CREATE_LATTICE, WatermarkingApp::OnCmdCreateLattice)
-    EVT_COMMAND(wxID_ANY, CMD_CREATE_SOM_PROCEDURE, WatermarkingApp::OnCmdCreateSOMProcedure)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
     EVT_COMMAND(wxID_ANY, CMD_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
     EVT_COMMAND(wxID_ANY, CMD_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
@@ -34,11 +27,8 @@ wxEND_EVENT_TABLE()
 wxIMPLEMENT_APP(WatermarkingApp);
 
 WatermarkingApp::WatermarkingApp()
-    : m_som(nullptr)
-    , m_lattice(nullptr)
-    , m_renderer(nullptr)
+    : m_renderer(nullptr)
     , m_dataset(nullptr)
-    , m_conf {}
     , m_bbox {}
 {
 }
@@ -53,11 +43,6 @@ int WatermarkingApp::OnExit()
     return wxApp::OnExit();
 }
 
-std::shared_ptr<SelfOrganizingMap> const& WatermarkingApp::GetSOM() const
-{
-    return m_som;
-}
-
 bool WatermarkingApp::OnInit()
 {
     if (!wxApp::OnInit()) {
@@ -68,15 +53,15 @@ bool WatermarkingApp::OnInit()
     world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
     world.cube = stlImp.ReadFile("res/models/cube.stl");
 
+    m_project = std::make_shared<WatermarkingProject>();
     MainWindow* window = new MainWindow();
-    m_panel = new MainPanel(window);
+    m_panel = new MainPanel(window, *m_project);
 
     wxGLAttributes attrs;
     attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
     auto canvas = new OpenGLCanvas(window, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     canvas->SetFocus();
 
-    m_panel->SetOpenGLCanvas(canvas);
     window->SetMainPanel(m_panel);
     window->SetOpenGLCanvas(canvas);
 
@@ -92,7 +77,8 @@ bool WatermarkingApp::OnInit()
 
 void WatermarkingApp::BuildLatticeMesh()
 {
-    if (!m_lattice) {
+    // The renderer will be initialized after the project is created.
+    if (!m_renderer) {
         return;
     }
 
@@ -107,8 +93,8 @@ void WatermarkingApp::BuildLatticeMesh()
         positions.emplace_back(n[0], n[1], n[2]);
     }
 
-    int const width = m_lattice->width;
-    int const height = m_lattice->height;
+    int const width = ProjectSettings::Get(*m_project).GetLatticeWidth();
+    int const height = ProjectSettings::Get(*m_project).GetLatticeHeight();;
     float const divisor = 1.1f; // FIXME
 
     for (int y = 0; y < height - 1; ++y) {
@@ -338,46 +324,6 @@ void WatermarkingApp::SetCameraView(BoundingBox box)
     m_renderer->GetCamera().volumeSize = size;
 }
 
-void WatermarkingApp::OnSetLatticeWidth(wxCommandEvent& evt)
-{
-    long tmp;
-    if (evt.GetString().ToLong(&tmp)) {
-        m_conf.width = tmp;
-    }
-}
-
-void WatermarkingApp::OnSetLatticeHeight(wxCommandEvent& evt)
-{
-    long tmp;
-    if (evt.GetString().ToLong(&tmp)) {
-        m_conf.height = tmp;
-    }
-}
-
-void WatermarkingApp::OnSetMaxIterations(wxCommandEvent& evt)
-{
-    long tmp;
-    if (evt.GetString().ToLong(&tmp)) {
-        m_conf.maxIterations = tmp;
-    }
-}
-
-void WatermarkingApp::OnSetLearningRate(wxCommandEvent& evt)
-{
-    double tmp;
-    if (evt.GetString().ToDouble(&tmp)) {
-        m_conf.initialRate = tmp;
-    }
-}
-
-void WatermarkingApp::OnSetNeighborhood(wxCommandEvent& evt)
-{
-    double tmp;
-    if (evt.GetString().ToDouble(&tmp)) {
-        m_conf.initialNeighborhood = tmp;
-    }
-}
-
 void WatermarkingApp::OnCmdStartTraining(wxCommandEvent&)
 {
     m_som->Train(m_lattice, m_dataset);
@@ -448,11 +394,6 @@ void WatermarkingApp::OnCmdCreateLattice(wxCommandEvent&)
     BuildLatticeMesh();
 
     m_renderer->LoadLattice(); // Change OpenGL vertex buffer's size
-}
-
-void WatermarkingApp::OnCmdCreateSOMProcedure(wxCommandEvent&)
-{
-    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations, m_conf.initialNeighborhood);
 }
 
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)

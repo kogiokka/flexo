@@ -3,9 +3,9 @@
 
 #include <memory>
 
-#include <wx/notebook.h>
 #include <wx/button.h>
 #include <wx/event.h>
+#include <wx/notebook.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
@@ -13,8 +13,8 @@
 #include <wx/textctrl.h>
 #include <wx/window.h>
 
-#include "Lattice.hpp"
 #include "OpenGLCanvas.hpp"
+#include "Project.hpp"
 
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
@@ -44,7 +44,7 @@ class MainPanel : public wxPanel
 {
     std::shared_ptr<Lattice> m_lattice;
 
-    OpenGLCanvas* m_canvas;
+    WatermarkingProject& m_project;
     wxNotebook* m_notebook;
     wxButton* m_btnStart;
     wxButton* m_btnStop;
@@ -63,10 +63,8 @@ class MainPanel : public wxPanel
     wxTimer* m_updateTimer;
 
 public:
-    MainPanel(wxWindow* parent = nullptr);
+    MainPanel(wxWindow* parent, WatermarkingProject& project);
     ~MainPanel();
-    void SetOpenGLCanvas(OpenGLCanvas* canvas);
-    void SetInitialNeighborhood(float radius);
 
 private:
     void PopulateProjectPage();
@@ -88,6 +86,11 @@ private:
     void OnTimerUIUpdate(wxTimerEvent& evt);
     void OnUpdateStartButton(wxUpdateUIEvent& evt);
     void OnUpdateStopButton(wxUpdateUIEvent& evt);
+    void OnSetLatticeWidth(wxCommandEvent& evt);
+    void OnSetLatticeHeight(wxCommandEvent& evt);
+    void OnSetMaxIterations(wxCommandEvent& evt);
+    void OnSetLearningRate(wxCommandEvent& evt);
+    void OnSetNeighborhood(wxCommandEvent& evt);
 
     wxDECLARE_EVENT_TABLE();
 };
