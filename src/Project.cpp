@@ -2,27 +2,45 @@
 
 #include "Project.hpp"
 #include "World.hpp"
+#include "common/Logger.hpp"
+
+wxDEFINE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
 
 WatermarkingProject::WatermarkingProject()
     : m_conf(*this)
+    , m_lattice(nullptr)
+    , m_som(nullptr)
+    , m_dataset(nullptr)
 {
+    Bind(EVT_PROJECT_SETTINGS_CHANGED, &WatermarkingProject::OnProjectSettingsChanged, this);
 }
 
-void WatermarkingProject::Train()
+void WatermarkingProject::Create()
 {
+    assert(m_dataset);
+
     int const width = m_conf.GetLatticeWidth();
     int const height = m_conf.GetLatticeHeight();
+
     m_lattice = std::make_shared<Lattice>(width, height);
     m_lattice->flags = m_conf.GetLatticeFlags();
+    BuildLatticeMesh();
 
-    // float neighborhood = 0.5f * sqrt(width * width + height * height);
-    m_som = std::make_shared<SelfOrganizingMap>(m_conf.GetLearningRate(), m_conf.GetMaxIterations(),
-                                                m_conf.GetNeighborhood());
+    m_som = std::make_shared<SelfOrganizingMap>(m_conf.GetLearningRate(), m_conf.GetMaxIterations());
+    m_som->Initialize(m_lattice, m_dataset);
+
+    wxCommandEvent event(EVT_LATTICE_MESH_READY);
+    ProcessEvent(event);
 }
 
 void WatermarkingProject::Stop()
 {
     m_som = nullptr;
+}
+
+bool WatermarkingProject::IsReady() const
+{
+    return (m_som && m_lattice);
 }
 
 bool WatermarkingProject::IsTraining() const
@@ -47,11 +65,16 @@ float WatermarkingProject::GetNeighborhood() const
 
 void WatermarkingProject::ToggleTraining()
 {
+    assert(m_som);
     m_som->ToggleTraining();
 }
 
 void WatermarkingProject::BuildLatticeMesh() const
 {
+    if (!m_lattice) {
+        return;
+    }
+
     Lattice const& lattice = *m_lattice;
     Mesh mesh;
 
@@ -64,9 +87,8 @@ void WatermarkingProject::BuildLatticeMesh() const
         positions.emplace_back(n[0], n[1], n[2]);
     }
 
-    int const width = ProjectSettings::Get(*this).GetLatticeWidth();
-    int const height = ProjectSettings::Get(*this).GetLatticeHeight();
-    ;
+    int const width = m_conf.GetLatticeWidth();
+    int const height = m_conf.GetLatticeHeight();
     float const divisor = 1.1f; // FIXME
 
     for (int y = 0; y < height - 1; ++y) {
@@ -135,4 +157,83 @@ void WatermarkingProject::BuildLatticeMesh() const
 
     // FIXME?
     UpdateLatticeEdges();
+}
+
+void WatermarkingProject::UpdateLatticeEdges() const
+{
+    std::vector<unsigned int> indices;
+
+    int const width = m_conf.GetLatticeWidth();
+    int const height = m_conf.GetLatticeHeight();
+    for (int i = 0; i < height - 1; ++i) {
+        for (int j = 0; j < width - 1; ++j) {
+            indices.push_back(i * width + j);
+            indices.push_back(i * width + j + 1);
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back(i * width + j);
+        }
+    }
+
+    world.latticeEdges = indices;
+}
+
+void WatermarkingProject::SetDataset(std::shared_ptr<InputData> dataset)
+{
+    m_dataset = dataset;
+}
+
+void WatermarkingProject::DoWatermark()
+{
+    assert(world.theModel);
+
+    // Update the texture coordinates of the Volumetric Model.
+    std::vector<glm::vec2> textureCoords;
+    textureCoords.reserve(world.theModel->textureCoords.size());
+
+    for (glm::vec3 const& vp : world.theModel->positions) {
+        glm::vec2 coord = world.latticeMesh.textureCoords.front();
+        float minDist = glm::distance(vp, world.latticeMesh.positions.front());
+        // TODO: Deal with the duplicate calculations
+        for (unsigned int i = 1; i < world.latticeMesh.positions.size(); i++) {
+            auto dist = glm::distance(vp, world.latticeMesh.positions[i]);
+            if (dist < minDist) {
+                minDist = dist;
+                coord = world.latticeMesh.textureCoords[i];
+            }
+        }
+        textureCoords.push_back(coord);
+    }
+    world.theModel->textureCoords = textureCoords;
+    world.isWatermarked = true;
+}
+
+void WatermarkingProject::OnProjectSettingsChanged(wxCommandEvent& evt)
+{
+    // TODO: To guarantee the user instantiated them by creating the project.
+
+    switch (static_cast<ProjectSettings::EventCode>(evt.GetInt())) {
+    case ProjectSettings::EventCode_LatticeDimensionsChanged: {
+        if (!m_lattice || !m_som) {
+            return;
+        }
+        m_lattice = std::make_shared<Lattice>(m_conf.GetLatticeWidth(), m_conf.GetLatticeHeight());
+        m_lattice->flags = m_conf.GetLatticeFlags();
+        m_som->Initialize(m_lattice, m_dataset);
+        BuildLatticeMesh();
+        wxCommandEvent e1(EVT_LATTICE_MESH_READY);
+        ProcessEvent(e1);
+    } break;
+    case ProjectSettings::EventCode_ProcedureChanged:
+        if (!m_som) {
+            return;
+        }
+        m_som->SetMaxIterations(m_conf.GetMaxIterations());
+        m_som->SetLearningRate(m_conf.GetLearningRate());
+        m_som->SetNeighborhood(m_conf.GetNeighborhood());
+        break;
+    }
 }

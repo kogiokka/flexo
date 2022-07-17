@@ -25,7 +25,6 @@ class WatermarkingApp : public wxApp
 
     std::shared_ptr<WatermarkingProject> m_project;
     std::shared_ptr<Renderer> m_renderer;
-    std::shared_ptr<InputData> m_dataset;
 
     MainPanel* m_panel;
     BoundingBox m_bbox;
@@ -35,12 +34,12 @@ public:
     virtual bool OnInit() override;
     virtual int OnExit() override;
     virtual void OnUnhandledException() override;
-    void BuildLatticeMesh();
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
     void SetCameraView(BoundingBox box);
     BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
+    void OnLatticeMeshReady(wxCommandEvent& evt);
     void OnCmdStartTraining(wxCommandEvent& evt);
     void OnCmdStopTrainining(wxCommandEvent& evt);
     void OnCmdPauseTraining(wxCommandEvent& evt);
@@ -52,7 +51,6 @@ public:
     void OnMenuImportModel(wxCommandEvent& evt);
 
 private:
-    void UpdateLatticeEdges();
     wxDECLARE_EVENT_TABLE();
 };
 

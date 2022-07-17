@@ -15,17 +15,16 @@
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_FLAG, WatermarkingApp::OnCmdToggleRenderOption)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
-    EVT_COMMAND(wxID_ANY, CMD_DO_WATERMARK, WatermarkingApp::OnCmdDoWatermark)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
     EVT_COMMAND(wxID_ANY, CMD_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
     EVT_COMMAND(wxID_ANY, CMD_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
+    EVT_COMMAND(wxID_ANY, EVT_LATTICE_MESH_READY, WatermarkingApp::OnLatticeMeshReady)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_APP(WatermarkingApp);
 
 WatermarkingApp::WatermarkingApp()
     : m_renderer(nullptr)
-    , m_dataset(nullptr)
     , m_bbox {}
 {
 }
@@ -72,32 +71,6 @@ bool WatermarkingApp::OnInit()
     return true;
 }
 
-void WatermarkingApp::BuildLatticeMesh()
-{
-}
-
-void WatermarkingApp::UpdateLatticeEdges()
-{
-    std::vector<unsigned int> indices;
-
-    int const width = ProjectSettings::Get(*m_project).GetLatticeWidth();
-    int const height = ProjectSettings::Get(*m_project).GetLatticeHeight();
-    for (int i = 0; i < height - 1; ++i) {
-        for (int j = 0; j < width - 1; ++j) {
-            indices.push_back(i * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back(i * width + j);
-        }
-    }
-
-    world.latticeEdges = indices;
-}
-
 void WatermarkingApp::ImportPolygonalModel(wxString const& path)
 {
     if (path.EndsWith(".obj")) {
@@ -108,7 +81,7 @@ void WatermarkingApp::ImportPolygonalModel(wxString const& path)
         world.theModel = std::make_shared<Mesh>(stlImp.ReadFile(path.ToStdString()));
     }
 
-    m_dataset = std::make_shared<InputData>(world.theModel->positions);
+    m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
     m_renderer->LoadPolygonalModel(*world.theModel);
     m_bbox = CalculateBoundingBox(world.theModel->positions);
     SetCameraView(m_bbox);
@@ -178,7 +151,7 @@ void WatermarkingApp::ImportVolumetricModel(wxString const& path)
     texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
     Logger::info("%lu voxels will be rendered.", pos.size());
 
-    m_dataset = std::make_shared<InputData>(pos);
+    m_project->SetDataset(std::make_shared<InputData>(pos));
     m_renderer->LoadVolumetricModel();
     m_bbox = CalculateBoundingBox(world.theModel->positions);
     SetCameraView(m_bbox);
@@ -222,7 +195,7 @@ void WatermarkingApp::SetCameraView(BoundingBox box)
     Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
 
     m_renderer->GetCamera().UpdateViewCoord();
-    m_renderer->LoadLattice();
+    m_renderer->LoadLattice(); // FIXME Why is this here?
 
     glm::vec3 diff = max - min;
     float size = diff.x;
@@ -233,6 +206,11 @@ void WatermarkingApp::SetCameraView(BoundingBox box)
         size = diff.z;
     }
     m_renderer->GetCamera().volumeSize = size;
+}
+
+void WatermarkingApp::OnLatticeMeshReady(wxCommandEvent&)
+{
+    m_renderer->LoadLattice();
 }
 
 void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
@@ -247,34 +225,13 @@ void WatermarkingApp::OnCmdToggleLatticeFlag(wxCommandEvent& evt)
     ProjectSettings::Get(*m_project).ToggleLatticeFlags(flag);
 }
 
-void WatermarkingApp::OnCmdDoWatermark(wxCommandEvent&)
-{
-    assert(world.theModel);
-
-    // Update the texture coordinates of the Volumetric Model.
-    std::vector<glm::vec2> textureCoords;
-    textureCoords.reserve(world.theModel->textureCoords.size());
-
-    for (glm::vec3 const& vp : world.theModel->positions) {
-        glm::vec2 coord = world.latticeMesh.textureCoords.front();
-        float minDist = glm::distance(vp, world.latticeMesh.positions.front());
-        // TODO: Deal with the duplicate calculations
-        for (unsigned int i = 1; i < world.latticeMesh.positions.size(); i++) {
-            auto dist = glm::distance(vp, world.latticeMesh.positions[i]);
-            if (dist < minDist) {
-                minDist = dist;
-                coord = world.latticeMesh.textureCoords[i];
-            }
-        }
-        textureCoords.push_back(coord);
-    }
-    world.theModel->textureCoords = textureCoords;
-    world.isWatermarked = true;
-}
-
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
 {
-    BuildLatticeMesh();
+    if (!m_project) {
+        return;
+    }
+
+    m_project->BuildLatticeMesh();
 }
 
 void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
@@ -345,8 +302,8 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
                 p2 = temp[k2]; // [x + 1, y]
                 p3 = temp[k3]; // [x + 1, y + 1]
                 p4 = temp[k4]; // [x, y + 1]
-                n1= glm::normalize(glm::cross(p2 - p1, p3 - p1));
-                n2= glm::normalize(glm::cross(p3 - p1, p4 - p1));
+                n1 = glm::normalize(glm::cross(p2 - p1, p3 - p1));
+                n2 = glm::normalize(glm::cross(p3 - p1, p4 - p1));
 
                 mesh.positions.push_back(p1);
                 mesh.positions.push_back(p2);
@@ -378,7 +335,7 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
     }
 
     world.theModel = std::make_shared<Mesh>(mesh);
-    m_dataset = std::make_shared<InputData>(world.theModel->positions);
+    m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
     m_renderer->LoadPolygonalModel(*world.theModel);
     m_bbox = CalculateBoundingBox(world.theModel->positions);
     SetCameraView(m_bbox);

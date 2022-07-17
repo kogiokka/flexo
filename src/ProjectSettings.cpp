@@ -6,7 +6,7 @@ wxDEFINE_EVENT(EVT_PROJECT_SETTINGS_CHANGED, wxCommandEvent);
 
 void Notify(WatermarkingProject& project, ProjectSettings::EventCode code)
 {
-    wxCommandEvent event { EVT_PROJECT_SETTINGS_CHANGED };
+    wxCommandEvent event(EVT_PROJECT_SETTINGS_CHANGED);
     event.SetInt(static_cast<int>(code));
     project.ProcessEvent(event);
 }
@@ -38,7 +38,7 @@ void ProjectSettings::SetMaxIterations(unsigned int iterations)
     }
 
     m_maxIterations = iterations;
-    Notify(m_project, EventCode_MaxIterationChanged);
+    Notify(m_project, EventCode_ProcedureChanged);
 }
 
 float ProjectSettings::GetMaxIterations() const
@@ -48,17 +48,17 @@ float ProjectSettings::GetMaxIterations() const
 
 void ProjectSettings::SetNeighborhood(float radius)
 {
-    if (m_initialNeighborhood == radius) {
+    if (m_neighborhood == radius) {
         return;
     }
 
-    m_initialNeighborhood = radius;
-    Notify(m_project, EventCode_NeighborhoodRadiusChanged);
+    m_neighborhood = radius;
+    Notify(m_project, EventCode_ProcedureChanged);
 }
 
 float ProjectSettings::GetNeighborhood() const
 {
-    return m_initialNeighborhood;
+    return m_neighborhood;
 }
 
 void ProjectSettings::SetLearningRate(float rate)
@@ -68,7 +68,7 @@ void ProjectSettings::SetLearningRate(float rate)
     }
 
     m_learningRate = rate;
-    Notify(m_project, EventCode_LearningRateChanged);
+    Notify(m_project, EventCode_ProcedureChanged);
 }
 
 float ProjectSettings::GetLearningRate() const
@@ -109,7 +109,6 @@ int ProjectSettings::GetLatticeHeight() const
 void ProjectSettings::ToggleLatticeFlags(int flags)
 {
     m_flags ^= flags;
-    Notify(m_project, EventCode_LatticeFlagsChanged);
 }
 
 int ProjectSettings::GetLatticeFlags() const

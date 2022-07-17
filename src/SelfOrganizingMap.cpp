@@ -1,12 +1,11 @@
 #include "SelfOrganizingMap.hpp"
 #include "common/Logger.hpp"
 
-SelfOrganizingMap::SelfOrganizingMap(float initialRate, int maxIterations, float initialNeighborhood)
+SelfOrganizingMap::SelfOrganizingMap(float initialRate, int maxIterations)
     : m_isDone(false)
-    , m_isTraining(true)
+    , m_isTraining(false)
     , m_maxIterations(maxIterations)
     , m_initialRate(initialRate)
-    , m_initialNeighborhood(initialNeighborhood)
     , m_worker()
     , m_mut()
     , m_cv()
@@ -17,30 +16,29 @@ SelfOrganizingMap::SelfOrganizingMap(float initialRate, int maxIterations, float
 
 SelfOrganizingMap::~SelfOrganizingMap()
 {
-    m_isDone = true;
-    m_cv.notify_one();
+    StopWorker();
+}
 
-    if (m_worker.joinable()) {
-        m_worker.join();
-        Logger::info("The worker joined successfully");
-    }
+void SelfOrganizingMap::Initialize(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
+{
+    int const width = lattice->width;
+    int const height = lattice->height;
+    float const radius = 0.5f * sqrt(width * width + height * height);
+    m_initialNeighborhood = radius;
+    m_neighborhood = radius;
+
+    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
+
+    StopWorker();
+    m_isDone = false;
+
+    void (SelfOrganizingMap::*Train)(std::shared_ptr<Lattice>, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
+    m_worker = std::thread(Train, std::ref(*this), lattice, dataset);
+
+    Logger::info("Training worker created");
 }
 
 void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
-{
-    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
-
-    Logger::info("Max iterations: %d, Initial Learning Rate: %f", m_maxIterations, m_initialRate);
-
-    void (SelfOrganizingMap::*TrainInternal)(std::shared_ptr<Lattice>, std::shared_ptr<InputData>)
-        = &SelfOrganizingMap::TrainInternal;
-    m_worker = std::thread(TrainInternal, std::ref(*this), lattice, dataset);
-
-    Logger::info("Training worker created");
-    Logger::info("Training has been paused");
-}
-
-void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
 {
     while (m_iterations < m_maxIterations) {
         std::unique_lock lk(m_mut);
@@ -156,6 +154,24 @@ bool SelfOrganizingMap::IsTraining() const
     return m_isTraining;
 }
 
+void SelfOrganizingMap::SetMaxIterations(int numIterations)
+{
+    m_maxIterations = numIterations;
+    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
+}
+
+void SelfOrganizingMap::SetLearningRate(float rate)
+{
+    m_initialRate = rate;
+}
+
+void SelfOrganizingMap::SetNeighborhood(float radius)
+{
+    m_initialNeighborhood = radius;
+    m_neighborhood = radius;
+    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
+}
+
 int SelfOrganizingMap::GetIterations() const
 {
     return m_iterations;
@@ -164,4 +180,15 @@ int SelfOrganizingMap::GetIterations() const
 float SelfOrganizingMap::GetNeighborhood() const
 {
     return m_neighborhood;
+}
+
+void SelfOrganizingMap::StopWorker()
+{
+    m_isDone = true;
+    m_cv.notify_one();
+
+    if (m_worker.joinable()) {
+        m_worker.join();
+        Logger::info("The worker joined successfully");
+    }
 }

@@ -15,10 +15,7 @@ public:
 
     enum EventCode : int {
         EventCode_LatticeDimensionsChanged,
-        EventCode_LatticeFlagsChanged,
-        EventCode_LearningRateChanged,
-        EventCode_MaxIterationChanged,
-        EventCode_NeighborhoodRadiusChanged,
+        EventCode_ProcedureChanged,
     };
 
     explicit ProjectSettings(WatermarkingProject& project);
@@ -44,7 +41,7 @@ private:
     int m_width;
     int m_height;
     unsigned int m_maxIterations;
-    float m_initialNeighborhood;
+    float m_neighborhood;
     int m_flags;
 };
 

@@ -19,15 +19,14 @@
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
     TE_LEARNING_RATE,
-    TE_NEIGHBORHOOD,
+    TE_INITIAL_NEIGHBORHOOD,
     TE_LATTICE_WIDTH,
     TE_LATTICE_HEIGHT,
     BTN_PLAY_PAUSE,
     BTN_WATERMARK,
-    BTN_CONFIRM_LATTICE,
-    BTN_CONFIRM_SOM,
     BTN_START,
-    BTN_STOP,
+    BTN_CREATE_PROJECT,
+    BTN_STOP_PROJECT,
     SPCTRL_ITERATION_PER_FRAME,
     CB_RENDEROPT_MODEL,
     CB_RENDEROPT_LAT_VERTEX,
@@ -38,26 +37,27 @@ enum {
     CB_LATTICE_FLAGS_CYCLIC_Y,
     SLIDER_TRANSPARENCY,
     TIMER_UI_UPDATE,
+    MAIN_PANEL_NOTEBOOK,
 };
 
 class MainPanel : public wxPanel
 {
     std::shared_ptr<Lattice> m_lattice;
 
+    wxPanel* m_projectConfigPanel;
     WatermarkingProject& m_project;
     wxNotebook* m_notebook;
+    wxButton* m_btnCreateProject;
+    wxButton* m_btnStopProject;
     wxButton* m_btnStart;
-    wxButton* m_btnStop;
-    wxButton* m_btnPlayPause;
+    wxButton* m_btnPause;
     wxButton* m_btnWatermark;
-    wxButton* m_btnConfirmLattice;
-    wxButton* m_btnConfirmSOM;
     wxTextCtrl* m_tcIterations;
     wxTextCtrl* m_tcNeighborhood;
     wxTextCtrl* m_tcLatticeWidth;
     wxTextCtrl* m_tcLatticeHeight;
     wxTextCtrl* m_tcMaxIterations;
-    wxTextCtrl* m_tcInitialRate;
+    wxTextCtrl* m_tcLearningRate;
     wxTextCtrl* m_tcInitialNeighborhood;
     wxSlider* m_slider;
     wxTimer* m_updateTimer;
@@ -69,12 +69,11 @@ public:
 private:
     void PopulateProjectPage();
     void PopulateRenderingPage();
+    void OnButtonCreateProject(wxCommandEvent& evt);
+    void OnButtonStopProject(wxCommandEvent& evt);
     void OnButtonStart(wxCommandEvent& evt);
-    void OnButtonStop(wxCommandEvent& evt);
     void OnButtonPause(wxCommandEvent& evt);
     void OnButtonWatermark(wxCommandEvent& evt);
-    void OnButtonConfirmLattice(wxCommandEvent& evt);
-    void OnButtonConfirmSOM(wxCommandEvent& evt);
     void OnCheckboxModel(wxCommandEvent& evt);
     void OnCheckboxLatticeVertex(wxCommandEvent& evt);
     void OnCheckboxLatticeEdge(wxCommandEvent& evt);
@@ -84,8 +83,7 @@ private:
     void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& evt);
     void OnSliderTransparency(wxCommandEvent& evt);
     void OnTimerUIUpdate(wxTimerEvent& evt);
-    void OnUpdateStartButton(wxUpdateUIEvent& evt);
-    void OnUpdateStopButton(wxUpdateUIEvent& evt);
+    void OnUpdateUI(wxUpdateUIEvent& evt);
     void OnSetLatticeWidth(wxCommandEvent& evt);
     void OnSetLatticeHeight(wxCommandEvent& evt);
     void OnSetMaxIterations(wxCommandEvent& evt);
@@ -97,8 +95,5 @@ private:
 
 wxDECLARE_EVENT(CMD_TOGGLE_RENDER_FLAG, wxCommandEvent);
 wxDECLARE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
-wxDECLARE_EVENT(CMD_DO_WATERMARK, wxCommandEvent);
-wxDECLARE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
-wxDECLARE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
 
 #endif
