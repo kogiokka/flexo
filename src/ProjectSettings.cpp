@@ -11,6 +11,16 @@ void Notify(WatermarkingProject& project, ProjectSettings::EventCode code)
     project.ProcessEvent(event);
 }
 
+ProjectSettings& ProjectSettings::Get(WatermarkingProject& project)
+{
+    return project.m_conf;
+}
+
+ProjectSettings const& ProjectSettings::Get(WatermarkingProject const& project)
+{
+    return project.m_conf;
+}
+
 ProjectSettings::ProjectSettings(WatermarkingProject& project)
     : m_project(project)
 {
@@ -96,13 +106,9 @@ int ProjectSettings::GetLatticeHeight() const
     return m_height;
 }
 
-void ProjectSettings::SetLatticeFlags(int flags)
+void ProjectSettings::ToggleLatticeFlags(int flags)
 {
-    if (m_flags == flags) {
-        return;
-    }
-
-    m_flags = flags;
+    m_flags ^= flags;
     Notify(m_project, EventCode_LatticeFlagsChanged);
 }
 

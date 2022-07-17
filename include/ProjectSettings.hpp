@@ -35,7 +35,7 @@ public:
     int GetLatticeWidth() const;
     void SetLatticeHeight(int height);
     int GetLatticeHeight() const;
-    void SetLatticeFlags(int flags);
+    void ToggleLatticeFlags(int flags);
     int GetLatticeFlags() const;
 
 private:

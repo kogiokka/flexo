@@ -15,9 +15,6 @@
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_FLAG, WatermarkingApp::OnCmdToggleRenderOption)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
-    EVT_COMMAND(wxID_ANY, CMD_START_TRAINING, WatermarkingApp::OnCmdStartTraining)
-    EVT_COMMAND(wxID_ANY, CMD_STOP_TRAINING, WatermarkingApp::OnCmdStopTrainining)
-    EVT_COMMAND(wxID_ANY, CMD_PAUSE_TRAINING, WatermarkingApp::OnCmdPauseTraining)
     EVT_COMMAND(wxID_ANY, CMD_DO_WATERMARK, WatermarkingApp::OnCmdDoWatermark)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
     EVT_COMMAND(wxID_ANY, CMD_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
@@ -77,100 +74,14 @@ bool WatermarkingApp::OnInit()
 
 void WatermarkingApp::BuildLatticeMesh()
 {
-    // The renderer will be initialized after the project is created.
-    if (!m_renderer) {
-        return;
-    }
-
-    Mesh mesh;
-
-    std::vector<glm::vec3> positions;
-
-    // Positions
-    auto const& neurons = m_lattice->neurons;
-    positions.reserve(neurons.size());
-    for (Node const& n : neurons) {
-        positions.emplace_back(n[0], n[1], n[2]);
-    }
-
-    int const width = ProjectSettings::Get(*m_project).GetLatticeWidth();
-    int const height = ProjectSettings::Get(*m_project).GetLatticeHeight();;
-    float const divisor = 1.1f; // FIXME
-
-    for (int y = 0; y < height - 1; ++y) {
-        for (int x = 0; x < width - 1; ++x) {
-
-            unsigned int const idx = y * width + x;
-            glm::vec3 p1, p2, p3, p4;
-            glm::vec3 n1, n2, n3, n4;
-            glm::vec2 t1, t2, t3, t4;
-            Face f1, f2;
-
-            /**
-             *  4-----3
-             *  |     |
-             *  |     |
-             *  1-----2
-             */
-            p1 = positions[idx]; // [x, y]
-            p2 = positions[idx + 1]; // [x + 1, y]
-            p3 = positions[idx + width + 1]; // [x + 1, y + 1]
-            p4 = positions[idx + width]; // [x, y + 1]
-
-            // Normals
-            n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-            n4 = glm::normalize(glm::cross(p3 - p1, p4 - p3));
-
-            if (isnan(n1.x) || isnan(n1.y) || isnan(n1.z)) {
-                n1 = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-            if (isnan(n2.x) || isnan(n2.y) || isnan(n2.z)) {
-                n2 = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-
-            n3 = (n2 + n4) * 0.5f;
-            n1 = (n2 + n4) * 0.5f;
-
-            // TextureCoords
-            t1 = glm::vec2(x / divisor, y / divisor);
-            t2 = glm::vec2((x + 1) / divisor, y / divisor);
-            t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
-            t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-
-            mesh.positions.push_back(p1);
-            mesh.positions.push_back(p2);
-            mesh.positions.push_back(p3);
-            mesh.positions.push_back(p1);
-            mesh.positions.push_back(p3);
-            mesh.positions.push_back(p4);
-            mesh.normals.push_back(n1);
-            mesh.normals.push_back(n2);
-            mesh.normals.push_back(n3);
-            mesh.normals.push_back(n1);
-            mesh.normals.push_back(n3);
-            mesh.normals.push_back(n4);
-            mesh.textureCoords.push_back(t1);
-            mesh.textureCoords.push_back(t2);
-            mesh.textureCoords.push_back(t3);
-            mesh.textureCoords.push_back(t1);
-            mesh.textureCoords.push_back(t3);
-            mesh.textureCoords.push_back(t4);
-        }
-    }
-
-    world.neurons.positions = positions;
-    world.latticeMesh = mesh;
-
-    // FIXME?
-    UpdateLatticeEdges();
 }
 
 void WatermarkingApp::UpdateLatticeEdges()
 {
     std::vector<unsigned int> indices;
 
-    int const width = m_lattice->width;
-    int const height = m_lattice->height;
+    int const width = ProjectSettings::Get(*m_project).GetLatticeWidth();
+    int const height = ProjectSettings::Get(*m_project).GetLatticeHeight();
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);
@@ -324,25 +235,6 @@ void WatermarkingApp::SetCameraView(BoundingBox box)
     m_renderer->GetCamera().volumeSize = size;
 }
 
-void WatermarkingApp::OnCmdStartTraining(wxCommandEvent&)
-{
-    m_som->Train(m_lattice, m_dataset);
-}
-
-void WatermarkingApp::OnCmdStopTrainining(wxCommandEvent&)
-{
-    m_som = nullptr;
-}
-
-void WatermarkingApp::OnCmdPauseTraining(wxCommandEvent&)
-{
-    if (!m_som) {
-        return;
-    }
-
-    m_som->ToggleTraining();
-}
-
 void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
 {
     RenderFlag opt = evt.GetInt();
@@ -352,7 +244,7 @@ void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
 void WatermarkingApp::OnCmdToggleLatticeFlag(wxCommandEvent& evt)
 {
     LatticeFlags flag = evt.GetInt();
-    m_conf.flags ^= flag;
+    ProjectSettings::Get(*m_project).ToggleLatticeFlags(flag);
 }
 
 void WatermarkingApp::OnCmdDoWatermark(wxCommandEvent&)
@@ -378,22 +270,6 @@ void WatermarkingApp::OnCmdDoWatermark(wxCommandEvent&)
     }
     world.theModel->textureCoords = textureCoords;
     world.isWatermarked = true;
-}
-
-void WatermarkingApp::OnCmdCreateLattice(wxCommandEvent&)
-{
-    m_lattice = std::make_shared<Lattice>(m_conf.width, m_conf.height);
-    m_lattice->flags = m_conf.flags;
-
-    // TODO: Clean this mess
-    float neighborhood = 0.5f * sqrt(m_conf.width * m_conf.width + m_conf.height * m_conf.height);
-    m_panel->SetInitialNeighborhood(neighborhood);
-    m_conf.initialNeighborhood = neighborhood;
-    m_som = std::make_shared<SelfOrganizingMap>(m_conf.initialRate, m_conf.maxIterations, m_conf.initialNeighborhood);
-
-    BuildLatticeMesh();
-
-    m_renderer->LoadLattice(); // Change OpenGL vertex buffer's size
 }
 
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)

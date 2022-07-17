@@ -16,9 +16,6 @@
 #include "Renderer.hpp"
 #include "World.hpp"
 
-wxDEFINE_EVENT(CMD_START_TRAINING, wxCommandEvent);
-wxDEFINE_EVENT(CMD_STOP_TRAINING, wxCommandEvent);
-wxDEFINE_EVENT(CMD_PAUSE_TRAINING, wxCommandEvent);
 wxDEFINE_EVENT(CMD_TOGGLE_RENDER_FLAG, wxCommandEvent);
 wxDEFINE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 wxDEFINE_EVENT(CMD_DO_WATERMARK, wxCommandEvent);
@@ -235,8 +232,7 @@ void MainPanel::OnButtonStop(wxCommandEvent&)
 
 void MainPanel::OnButtonPause(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_PAUSE_TRAINING, GetId());
-    ProcessWindowEvent(event);
+    m_project.ToggleTraining();
 
     if (m_btnPlayPause->GetLabel() == "Continue") {
         m_btnPlayPause->SetLabel("Pause");

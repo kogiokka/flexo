@@ -11,6 +11,8 @@
 
 class WatermarkingProject : public wxEvtHandler
 {
+    friend ProjectSettings;
+
 public:
     WatermarkingProject();
     void Train();
@@ -19,6 +21,8 @@ public:
     bool IsDone() const;
     int GetIterations() const;
     float GetNeighborhood() const;
+    void ToggleTraining();
+    void BuildLatticeMesh() const;
 
 private:
     ProjectSettings m_conf;
