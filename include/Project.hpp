@@ -18,8 +18,6 @@ using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase>;
 
 class WatermarkingProject : public wxEvtHandler, public AttachedProjectObjects
 {
-    friend ProjectSettings;
-
 public:
     using AttachedObjects = ::AttachedProjectObjects;
 
