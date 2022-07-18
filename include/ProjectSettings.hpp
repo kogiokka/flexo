@@ -3,11 +3,13 @@
 
 #include <wx/event.h>
 
+#include "Attachable.hpp"
+
 class WatermarkingProject;
 
 wxDECLARE_EVENT(EVT_PROJECT_SETTINGS_CHANGED, wxCommandEvent);
 
-class ProjectSettings
+class ProjectSettings : public AttachableBase
 {
 public:
     static ProjectSettings& Get(WatermarkingProject& project);
@@ -19,6 +21,7 @@ public:
     };
 
     explicit ProjectSettings(WatermarkingProject& project);
+    virtual ~ProjectSettings() {};
     ProjectSettings(const ProjectSettings&) = delete;
     ProjectSettings& operator=(const ProjectSettings&) = delete;
 

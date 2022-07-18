@@ -5,17 +5,22 @@
 
 #include <wx/event.h>
 
+#include "Attachable.hpp"
 #include "InputData.hpp"
 #include "Lattice.hpp"
 #include "ProjectSettings.hpp"
 #include "Renderer.hpp"
 #include "SelfOrganizingMap.hpp"
 
-class WatermarkingProject : public wxEvtHandler
+using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase>;
+
+class WatermarkingProject : public wxEvtHandler, public AttachedProjectObjects
 {
     friend ProjectSettings;
 
 public:
+    using AttachedObjects = ::AttachedProjectObjects;
+
     WatermarkingProject();
     void Create();
     void Stop();
@@ -31,7 +36,6 @@ public:
     void OnProjectSettingsChanged(wxCommandEvent& evt);
 
 private:
-    ProjectSettings m_conf;
     std::shared_ptr<Lattice> m_lattice;
     std::shared_ptr<SelfOrganizingMap> m_som;
     std::shared_ptr<InputData> m_dataset;

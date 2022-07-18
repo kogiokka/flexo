@@ -17,13 +17,14 @@ enum LatticeFlags_ : int {
     LatticeFlags_CyclicY = 1 << 2,
 };
 
-struct Lattice {
+struct Lattice
+{
+    Lattice(int width, int height);
+
     int width;
     int height;
     LatticeFlags flags;
     std::vector<Node> neurons;
-
-    Lattice(int width, int height);
 };
 
 #endif
