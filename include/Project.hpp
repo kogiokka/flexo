@@ -12,6 +12,8 @@
 #include "Renderer.hpp"
 #include "SelfOrganizingMap.hpp"
 
+wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
+
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase>;
 
 class WatermarkingProject : public wxEvtHandler, public AttachedProjectObjects
@@ -33,16 +35,15 @@ public:
     void BuildLatticeMesh() const;
     void DoWatermark();
     void SetDataset(std::shared_ptr<InputData> dataset);
+    void OnLatticeInitialized(wxCommandEvent& evt);
+    void OnLatticeDimensionsChanged(wxCommandEvent& evt);
     void OnProjectSettingsChanged(wxCommandEvent& evt);
 
 private:
-    std::shared_ptr<Lattice> m_lattice;
     std::shared_ptr<SelfOrganizingMap> m_som;
     std::shared_ptr<InputData> m_dataset;
 
     void UpdateLatticeEdges() const;
 };
-
-wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
 
 #endif

@@ -16,7 +16,6 @@ public:
     static ProjectSettings const& Get(WatermarkingProject const& project);
 
     enum EventCode : int {
-        EventCode_LatticeDimensionsChanged,
         EventCode_ProcedureChanged,
     };
 
@@ -31,21 +30,12 @@ public:
     float GetNeighborhood() const;
     void SetLearningRate(float rate);
     float GetLearningRate() const;
-    void SetLatticeWidth(int width);
-    int GetLatticeWidth() const;
-    void SetLatticeHeight(int height);
-    int GetLatticeHeight() const;
-    void ToggleLatticeFlags(int flags);
-    int GetLatticeFlags() const;
 
 private:
     WatermarkingProject& m_project;
     float m_learningRate;
-    int m_width;
-    int m_height;
     unsigned int m_maxIterations;
     float m_neighborhood;
-    int m_flags;
 };
 
 #endif

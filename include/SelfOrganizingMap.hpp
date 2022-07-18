@@ -11,6 +11,8 @@
 #include "InputData.hpp"
 #include "Lattice.hpp"
 
+class WatermarkingProject;
+
 class SelfOrganizingMap
 {
     bool m_isDone;
@@ -28,9 +30,9 @@ class SelfOrganizingMap
     std::condition_variable m_cv;
 
 public:
-    SelfOrganizingMap(float initialRate, int maxIterations);
+    explicit SelfOrganizingMap(WatermarkingProject& project);
     ~SelfOrganizingMap();
-    void Initialize(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
+    void Initialize(std::shared_ptr<InputData> dataset);
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
@@ -42,9 +44,11 @@ public:
 
 private:
     void StopWorker();
-    void Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
+    void Train(Lattice& lattice, std::shared_ptr<InputData> dataset);
     glm::ivec2 FindBMU(Lattice const& lattice, glm::vec3 const& input) const;
     void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius);
+
+    WatermarkingProject& m_project;
 };
 
 #endif

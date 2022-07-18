@@ -7,30 +7,22 @@
 wxDEFINE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
 
 WatermarkingProject::WatermarkingProject()
-    : m_lattice(nullptr)
-    , m_som(nullptr)
+    : m_som(nullptr)
     , m_dataset(nullptr)
 {
     Bind(EVT_PROJECT_SETTINGS_CHANGED, &WatermarkingProject::OnProjectSettingsChanged, this);
+    Bind(EVT_LATTICE_INITIALIZED, &WatermarkingProject::OnLatticeInitialized, this);
+    Bind(EVT_LATTICE_DIMENSIONS_CHANGED, &WatermarkingProject::OnLatticeDimensionsChanged, this);
 }
 
 void WatermarkingProject::Create()
 {
     assert(m_dataset);
 
-    int const width = ProjectSettings::Get(*this).GetLatticeWidth();
-    int const height = ProjectSettings::Get(*this).GetLatticeHeight();
+    m_som = std::make_shared<SelfOrganizingMap>(*this);
 
-    m_lattice = std::make_shared<Lattice>(width, height);
-    m_lattice->flags = ProjectSettings::Get(*this).GetLatticeFlags();
-    BuildLatticeMesh();
-
-    m_som = std::make_shared<SelfOrganizingMap>(ProjectSettings::Get(*this).GetLearningRate(),
-                                                ProjectSettings::Get(*this).GetMaxIterations());
-    m_som->Initialize(m_lattice, m_dataset);
-
-    wxCommandEvent event(EVT_LATTICE_MESH_READY);
-    ProcessEvent(event);
+    Lattice::Get(*this).Initialize();
+    m_som->Initialize(m_dataset);
 }
 
 void WatermarkingProject::Stop()
@@ -40,7 +32,7 @@ void WatermarkingProject::Stop()
 
 bool WatermarkingProject::IsReady() const
 {
-    return (m_som && m_lattice);
+    return (m_som != nullptr);
 }
 
 bool WatermarkingProject::IsTraining() const
@@ -71,24 +63,20 @@ void WatermarkingProject::ToggleTraining()
 
 void WatermarkingProject::BuildLatticeMesh() const
 {
-    if (!m_lattice) {
-        return;
-    }
-
-    Lattice const& lattice = *m_lattice;
+    Lattice const& lattice = Lattice::Get(*this);
     Mesh mesh;
 
     std::vector<glm::vec3> positions;
 
     // Positions
-    auto const& neurons = lattice.neurons;
+    auto const& neurons = lattice.GetNeurons();
     positions.reserve(neurons.size());
     for (Node const& n : neurons) {
         positions.emplace_back(n[0], n[1], n[2]);
     }
 
-    int const width = ProjectSettings::Get(*this).GetLatticeWidth();
-    int const height = ProjectSettings::Get(*this).GetLatticeHeight();
+    int const width = lattice.GetWidth();
+    int const height = lattice.GetHeight();
     float const divisor = 1.1f; // FIXME
 
     for (int y = 0; y < height - 1; ++y) {
@@ -163,8 +151,8 @@ void WatermarkingProject::UpdateLatticeEdges() const
 {
     std::vector<unsigned int> indices;
 
-    int const width = ProjectSettings::Get(*this).GetLatticeWidth();
-    int const height = ProjectSettings::Get(*this).GetLatticeHeight();
+    int const width = Lattice::Get(*this).GetWidth();
+    int const height = Lattice::Get(*this).GetHeight();
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);
@@ -211,29 +199,27 @@ void WatermarkingProject::DoWatermark()
     world.isWatermarked = true;
 }
 
-void WatermarkingProject::OnProjectSettingsChanged(wxCommandEvent& evt)
+void WatermarkingProject::OnLatticeInitialized(wxCommandEvent&)
 {
-    // TODO: To guarantee the user instantiated them by creating the project.
-    switch (static_cast<ProjectSettings::EventCode>(evt.GetInt())) {
-    case ProjectSettings::EventCode_LatticeDimensionsChanged: {
-        if (!m_lattice || !m_som) {
-            return;
-        }
-        m_lattice = std::make_shared<Lattice>(ProjectSettings::Get(*this).GetLatticeWidth(),
-                                              ProjectSettings::Get(*this).GetLatticeHeight());
-        m_lattice->flags = ProjectSettings::Get(*this).GetLatticeFlags();
-        m_som->Initialize(m_lattice, m_dataset);
-        BuildLatticeMesh();
-        wxCommandEvent e1(EVT_LATTICE_MESH_READY);
-        ProcessEvent(e1);
-    } break;
-    case ProjectSettings::EventCode_ProcedureChanged:
-        if (!m_som) {
-            return;
-        }
-        m_som->SetMaxIterations(ProjectSettings::Get(*this).GetMaxIterations());
-        m_som->SetLearningRate(ProjectSettings::Get(*this).GetLearningRate());
-        m_som->SetNeighborhood(ProjectSettings::Get(*this).GetNeighborhood());
-        break;
+    assert(m_som && m_dataset);
+    m_som->Initialize(m_dataset);
+    BuildLatticeMesh();
+
+    wxCommandEvent event(EVT_LATTICE_MESH_READY);
+    ProcessEvent(event);
+}
+
+void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)
+{
+    Lattice::Get(*this).Initialize();
+}
+
+void WatermarkingProject::OnProjectSettingsChanged(wxCommandEvent&)
+{
+    if (!m_som) {
+        return;
     }
+    m_som->SetMaxIterations(ProjectSettings::Get(*this).GetMaxIterations());
+    m_som->SetLearningRate(ProjectSettings::Get(*this).GetLearningRate());
+    m_som->SetNeighborhood(ProjectSettings::Get(*this).GetNeighborhood());
 }

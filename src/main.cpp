@@ -221,13 +221,13 @@ void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
 
 void WatermarkingApp::OnCmdToggleLatticeFlag(wxCommandEvent& evt)
 {
-    LatticeFlags flag = evt.GetInt();
-    ProjectSettings::Get(*m_project).ToggleLatticeFlags(flag);
+    LatticeFlags flags = Lattice::Get(*m_project).GetFlags() ^ evt.GetInt();
+    Lattice::Get(*m_project).SetFlags(flags);
 }
 
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
 {
-    if (!m_project) {
+    if (!m_project->IsReady()) {
         return;
     }
 

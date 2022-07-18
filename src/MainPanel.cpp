@@ -11,6 +11,7 @@
 #include <wx/textctrl.h>
 #include <wx/valnum.h>
 
+#include "Lattice.hpp"
 #include "MainPanel.hpp"
 #include "ProjectSettings.hpp"
 #include "Renderer.hpp"
@@ -70,8 +71,8 @@ void MainPanel::PopulateProjectPage()
                                            wxTE_CENTER, validIterCap);
         m_tcLearningRate = new wxTextCtrl(panel, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                           wxTE_CENTER, validLearnRate);
-        m_tcInitialNeighborhood = new wxTextCtrl(panel, TE_INITIAL_NEIGHBORHOOD, "-", wxDefaultPosition,
-                                                 wxDefaultSize, wxTE_CENTER, validNeighborhood);
+        m_tcInitialNeighborhood = new wxTextCtrl(panel, TE_INITIAL_NEIGHBORHOOD, "-", wxDefaultPosition, wxDefaultSize,
+                                                 wxTE_CENTER, validNeighborhood);
 
         *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
         *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
@@ -93,8 +94,8 @@ void MainPanel::PopulateProjectPage()
                                           wxTE_CENTER, validDimen);
         m_tcLatticeHeight = new wxTextCtrl(panel, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                            wxTE_CENTER, validDimen);
-        *m_tcLatticeWidth << ProjectSettings::Get(m_project).GetLatticeWidth();
-        *m_tcLatticeHeight << ProjectSettings::Get(m_project).GetLatticeHeight();
+        *m_tcLatticeWidth << Lattice::Get(m_project).GetWidth();
+        *m_tcLatticeHeight << Lattice::Get(m_project).GetHeight();
 
         auto chkBox1 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
         auto chkBox2 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
@@ -350,7 +351,7 @@ void MainPanel::OnSetLatticeWidth(wxCommandEvent& evt)
 {
     long tmp;
     if (evt.GetString().ToLong(&tmp)) {
-        ProjectSettings::Get(m_project).SetLatticeWidth(tmp);
+        Lattice::Get(m_project).SetWidth(tmp);
     }
 }
 
@@ -358,7 +359,7 @@ void MainPanel::OnSetLatticeHeight(wxCommandEvent& evt)
 {
     long tmp;
     if (evt.GetString().ToLong(&tmp)) {
-        ProjectSettings::Get(m_project).SetLatticeHeight(tmp);
+        Lattice::Get(m_project).SetHeight(tmp);
     }
 }
 
