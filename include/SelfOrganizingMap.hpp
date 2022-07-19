@@ -7,12 +7,15 @@
 #include <thread>
 
 #include <glm/glm.hpp>
+#include <wx/event.h>
 
 #include "Attachable.hpp"
 #include "InputData.hpp"
 #include "Lattice.hpp"
 
 class WatermarkingProject;
+
+wxDECLARE_EVENT(EVT_SOM_PROCEDURE_INITIALIZED, wxCommandEvent);
 
 class SelfOrganizingMap : public AttachableBase
 {

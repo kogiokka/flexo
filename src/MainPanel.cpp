@@ -13,6 +13,7 @@
 
 #include "Lattice.hpp"
 #include "MainPanel.hpp"
+#include "Project.hpp"
 #include "ProjectSettings.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
@@ -71,8 +72,8 @@ void MainPanel::PopulateProjectPage()
                                            wxTE_CENTER, validIterCap);
         m_tcLearningRate = new wxTextCtrl(panel, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                           wxTE_CENTER, validLearnRate);
-        m_tcInitialNeighborhood = new wxTextCtrl(panel, TE_INITIAL_NEIGHBORHOOD, "-", wxDefaultPosition, wxDefaultSize,
-                                                 wxTE_CENTER, validNeighborhood);
+        m_tcInitialNeighborhood = new wxTextCtrl(panel, TE_INITIAL_NEIGHBORHOOD, wxEmptyString, wxDefaultPosition,
+                                                 wxDefaultSize, wxTE_CENTER, validNeighborhood);
 
         *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
         *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();

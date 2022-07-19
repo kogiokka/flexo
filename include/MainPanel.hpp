@@ -14,7 +14,6 @@
 #include <wx/window.h>
 
 #include "OpenGLCanvas.hpp"
-#include "Project.hpp"
 
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
@@ -40,12 +39,13 @@ enum {
     MAIN_PANEL_NOTEBOOK,
 };
 
+class WatermarkingProject;
+
 class MainPanel : public wxPanel
 {
-    std::shared_ptr<Lattice> m_lattice;
+    friend WatermarkingProject;
 
     wxPanel* m_projectConfigPanel;
-    WatermarkingProject& m_project;
     wxNotebook* m_notebook;
     wxButton* m_btnCreateProject;
     wxButton* m_btnStopProject;
@@ -89,6 +89,8 @@ private:
     void OnSetMaxIterations(wxCommandEvent& evt);
     void OnSetLearningRate(wxCommandEvent& evt);
     void OnSetNeighborhood(wxCommandEvent& evt);
+
+    WatermarkingProject& m_project;
 
     wxDECLARE_EVENT_TABLE();
 };

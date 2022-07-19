@@ -32,6 +32,7 @@ ProjectSettings::ProjectSettings(WatermarkingProject& project)
 {
     m_maxIterations = 50000;
     m_learningRate = 0.15f;
+    m_neighborhood = 0.0f;
 }
 
 void ProjectSettings::SetMaxIterations(unsigned int iterations)

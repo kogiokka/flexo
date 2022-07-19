@@ -58,6 +58,8 @@ bool WatermarkingApp::OnInit()
     auto canvas = new OpenGLCanvas(window, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     canvas->SetFocus();
 
+    // TODO: Better solution to resolve the dependencies
+    m_project->SetMainPanel(m_panel);
     window->SetMainPanel(m_panel);
     window->SetOpenGLCanvas(canvas);
 

@@ -4,6 +4,8 @@
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
 
+wxDEFINE_EVENT(EVT_SOM_PROCEDURE_INITIALIZED, wxCommandEvent);
+
 static const WatermarkingProject::AttachedObjects::RegisteredFactory factoryKey { [](WatermarkingProject& project) {
     return std::make_shared<SelfOrganizingMap>(project);
 } };
@@ -26,6 +28,12 @@ SelfOrganizingMap::SelfOrganizingMap(WatermarkingProject& project)
     , m_cv()
     , m_project(project)
 {
+    auto const& settings = ProjectSettings::Get(m_project);
+
+    m_maxIterations = settings.GetMaxIterations();
+    m_initialRate = settings.GetLearningRate();
+    m_iterations = 0;
+    m_rate = m_initialRate;
 }
 
 SelfOrganizingMap::~SelfOrganizingMap()
@@ -35,28 +43,37 @@ SelfOrganizingMap::~SelfOrganizingMap()
 
 void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
 {
+    {
+        StopWorker();
+        m_isDone = false;
+        m_isTraining = false;
+    }
+
     int const width = Lattice::Get(m_project).GetWidth();
     int const height = Lattice::Get(m_project).GetHeight();
+    auto const& settings = ProjectSettings::Get(m_project);
 
-    m_maxIterations = ProjectSettings::Get(m_project).GetMaxIterations();
+    m_maxIterations = settings.GetMaxIterations();
+    m_initialRate = settings.GetLearningRate();
     m_iterations = 0;
-
-    m_initialRate = ProjectSettings::Get(m_project).GetLearningRate();
     m_rate = m_initialRate;
 
-    float const radius = 0.5f * sqrt(width * width + height * height);
+    float radius = settings.GetNeighborhood();
+    if (radius == 0.0f) {
+        radius = 0.5f * sqrt(width * width + height * height);
+    }
+
     m_initialNeighborhood = radius;
     m_neighborhood = radius;
 
     m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 
-    StopWorker();
-    m_isDone = false;
-    m_isTraining = false;
-
     auto& lattice = Lattice::Get(m_project);
     void (SelfOrganizingMap::*Train)(Lattice&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
     m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
+
+    wxCommandEvent event(EVT_SOM_PROCEDURE_INITIALIZED);
+    m_project.ProcessEvent(event);
 
     Logger::info("Training worker created");
 }

@@ -8,8 +8,8 @@
 #include "Attachable.hpp"
 #include "InputData.hpp"
 #include "Lattice.hpp"
+#include "MainPanel.hpp"
 #include "ProjectSettings.hpp"
-#include "Renderer.hpp"
 #include "SelfOrganizingMap.hpp"
 
 wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
@@ -27,12 +27,15 @@ public:
     void BuildLatticeMesh() const;
     void DoWatermark();
     void SetDataset(std::shared_ptr<InputData> dataset);
+    void SetMainPanel(MainPanel* panel);
     void OnLatticeInitialized(wxCommandEvent& evt);
+    void OnSOMInitialized(wxCommandEvent& evt);
     void OnLatticeDimensionsChanged(wxCommandEvent& evt);
     void OnProjectSettingsChanged(wxCommandEvent& evt);
 
 private:
     bool m_isLatticeReady;
+    MainPanel* m_panel;
     std::shared_ptr<InputData> m_dataset;
 
     void UpdateLatticeEdges() const;
