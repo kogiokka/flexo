@@ -39,6 +39,8 @@ PRIVATE
     "src/MainWindow.cpp"
     "src/MainPanel.cpp"
     "src/OpenGLCanvas.cpp"
+    "src/ProjectSettings.cpp"
+    "src/Project.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"

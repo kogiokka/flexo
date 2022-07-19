@@ -1,47 +1,90 @@
 #include "SelfOrganizingMap.hpp"
+#include "Lattice.hpp"
+#include "Project.hpp"
+#include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
 
-SelfOrganizingMap::SelfOrganizingMap(float initialRate, int maxIterations, float initialNeighborhood)
+wxDEFINE_EVENT(EVT_SOM_PROCEDURE_INITIALIZED, wxCommandEvent);
+
+static const WatermarkingProject::AttachedObjects::RegisteredFactory factoryKey { [](WatermarkingProject& project) {
+    return std::make_shared<SelfOrganizingMap>(project);
+} };
+
+SelfOrganizingMap& SelfOrganizingMap::Get(WatermarkingProject& project)
+{
+    return project.AttachedObjects::Get<SelfOrganizingMap>(factoryKey);
+}
+
+SelfOrganizingMap const& SelfOrganizingMap::Get(WatermarkingProject const& project)
+{
+    return Get(const_cast<WatermarkingProject&>(project));
+}
+
+SelfOrganizingMap::SelfOrganizingMap(WatermarkingProject& project)
     : m_isDone(false)
-    , m_isTraining(true)
-    , m_maxIterations(maxIterations)
-    , m_initialRate(initialRate)
-    , m_initialNeighborhood(initialNeighborhood)
+    , m_isTraining(false)
     , m_worker()
     , m_mut()
     , m_cv()
+    , m_project(project)
 {
+    auto const& settings = ProjectSettings::Get(m_project);
+
+    m_maxIterations = settings.GetMaxIterations();
+    m_initialRate = settings.GetLearningRate();
     m_iterations = 0;
-    m_rate = initialRate;
+    m_neighborhood = 0.0f;
+    m_rate = m_initialRate;
 }
 
 SelfOrganizingMap::~SelfOrganizingMap()
 {
-    m_isDone = true;
-    m_cv.notify_one();
-
-    if (m_worker.joinable()) {
-        m_worker.join();
-        Logger::info("The worker joined successfully");
-    }
+    StopWorker();
 }
 
-void SelfOrganizingMap::Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
+void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
 {
+    {
+        StopWorker();
+        m_isDone = false;
+        m_isTraining = false;
+    }
+
+    int const width = Lattice::Get(m_project).GetWidth();
+    int const height = Lattice::Get(m_project).GetHeight();
+    auto const& settings = ProjectSettings::Get(m_project);
+
+    m_maxIterations = settings.GetMaxIterations();
+    m_initialRate = settings.GetLearningRate();
+    m_iterations = 0;
+    m_rate = m_initialRate;
+
+    float radius = settings.GetNeighborhood();
+    if (radius == 0.0f) {
+        radius = 0.5f * sqrt(width * width + height * height);
+    }
+
+    m_initialNeighborhood = radius;
+    m_neighborhood = radius;
+
     m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 
-    Logger::info("Max iterations: %d, Initial Learning Rate: %f", m_maxIterations, m_initialRate);
+    auto& lattice = Lattice::Get(m_project);
+    void (SelfOrganizingMap::*Train)(Lattice&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
+    m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
 
-    void (SelfOrganizingMap::*TrainInternal)(std::shared_ptr<Lattice>, std::shared_ptr<InputData>)
-        = &SelfOrganizingMap::TrainInternal;
-    m_worker = std::thread(TrainInternal, std::ref(*this), lattice, dataset);
+    wxCommandEvent event(EVT_SOM_PROCEDURE_INITIALIZED);
+    m_project.ProcessEvent(event);
 
     Logger::info("Training worker created");
-    Logger::info("Training has been paused");
 }
 
-void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset)
+void SelfOrganizingMap::Train(Lattice& lattice, std::shared_ptr<InputData> dataset)
 {
+    auto& neurons = lattice.GetNeurons();
+    int const width = lattice.GetWidth();
+    int const height = lattice.GetHeight();
+
     while (m_iterations < m_maxIterations) {
         std::unique_lock lk(m_mut);
         m_cv.wait(lk, [this] { return m_isTraining || m_isDone; });
@@ -55,19 +98,19 @@ void SelfOrganizingMap::TrainInternal(std::shared_ptr<Lattice> lattice, std::sha
         m_neighborhood = m_initialNeighborhood * expf(-progress / m_timeConstant);
         m_rate = m_initialRate * expf(-progress / static_cast<float>(m_maxIterations - m_iterations));
 
-        glm::ivec2 const index = FindBMU(*lattice, input);
-        Node& bmu = lattice->neurons[index.x + index.y * lattice->width];
-        UpdateNeighborhood(*lattice, input, bmu, m_neighborhood);
+        glm::ivec2 const index = FindBMU(lattice, input);
+        Node const& bmu = neurons[index.x + index.y * width];
+        UpdateNeighborhood(lattice, input, bmu, m_neighborhood);
 
-        if (lattice->flags & LatticeFlags_CyclicX) {
-            for (int y = 0; y < lattice->height; y++) {
-                lattice->neurons[y * lattice->width + lattice->width - 1] = lattice->neurons[y * lattice->width + 0];
+        if (lattice.GetFlags() & LatticeFlags_CyclicX) {
+            for (int y = 0; y < height; y++) {
+                neurons[y * width + width - 1] = neurons[y * width + 0];
             }
         }
 
-        if (lattice->flags & LatticeFlags_CyclicY) {
-            for (int x = 0; x < lattice->width; x++) {
-                lattice->neurons[(lattice->height - 1) * lattice->width + x] = lattice->neurons[0 * lattice->width + x];
+        if (lattice.GetFlags() & LatticeFlags_CyclicY) {
+            for (int x = 0; x < width; x++) {
+                neurons[(height - 1) * width + x] = neurons[0 * width + x];
             }
         }
 
@@ -81,11 +124,11 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice const& lattice, glm::vec3 const& i
 {
     glm::ivec2 idx;
     float distMin = std::numeric_limits<float>::max();
-    for (int i = 0; i < lattice.width; i++) {
-        for (int j = 0; j < lattice.height; j++) {
+    for (int i = 0; i < lattice.GetWidth(); i++) {
+        for (int j = 0; j < lattice.GetHeight(); j++) {
             float sum = 0;
-            for (int k = 0; k < lattice.neurons.front().Dimension(); k++) {
-                float const diff = input[k] - lattice.neurons[i + j * lattice.width][k];
+            for (int k = 0; k < lattice.GetNeurons().front().Dimension(); k++) {
+                float const diff = input[k] - lattice.GetNeurons()[i + j * lattice.GetWidth()][k];
                 sum += (diff * diff);
             }
             if (distMin > sum) {
@@ -99,32 +142,37 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice const& lattice, glm::vec3 const& i
 
 void SelfOrganizingMap::UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius)
 {
+    auto& neurons = lattice.GetNeurons();
+    LatticeFlags const flags = lattice.GetFlags();
+    int const width = lattice.GetWidth();
+    int const height = lattice.GetHeight();
+
     int const rad = static_cast<int>(radius);
     int const radSqr = rad * rad;
 
-    int w = lattice.width - 1;
-    int h = lattice.height - 1;
+    int w = width - 1;
+    int h = height - 1;
     for (int x = bmu.X() - rad; x <= bmu.X() + rad; x++) {
         int modX = x;
-        if (lattice.flags & LatticeFlags_CyclicX) {
+        if (flags & LatticeFlags_CyclicX) {
             modX = ((x % w) + w) % w;
         } else {
-            if (x < 0 || x >= lattice.width)
+            if (x < 0 || x >= width)
                 continue;
         }
         for (int y = bmu.Y() - rad; y <= bmu.Y() + rad; y++) {
             int modY = y;
-            if (lattice.flags & LatticeFlags_CyclicY) {
+            if (flags & LatticeFlags_CyclicY) {
                 modY = ((y % h) + h) % h;
             } else {
-                if (y < 0 || y >= lattice.height)
+                if (y < 0 || y >= height)
                     continue;
             }
             float const dx = bmu.X() - x;
             float const dy = bmu.Y() - y;
             float const distToBmuSqr = dx * dx + dy * dy;
             if (distToBmuSqr < radSqr) {
-                Node& node = lattice.neurons[modX + modY * lattice.width];
+                Node& node = neurons[modX + modY * width];
                 float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
                 for (int k = 0; k < node.Dimension(); ++k) {
                     node[k] += m_rate * influence * (input[k] - node[k]);
@@ -156,6 +204,24 @@ bool SelfOrganizingMap::IsTraining() const
     return m_isTraining;
 }
 
+void SelfOrganizingMap::SetMaxIterations(int numIterations)
+{
+    m_maxIterations = numIterations;
+    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
+}
+
+void SelfOrganizingMap::SetLearningRate(float rate)
+{
+    m_initialRate = rate;
+}
+
+void SelfOrganizingMap::SetNeighborhood(float radius)
+{
+    m_initialNeighborhood = radius;
+    m_neighborhood = radius;
+    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
+}
+
 int SelfOrganizingMap::GetIterations() const
 {
     return m_iterations;
@@ -164,4 +230,15 @@ int SelfOrganizingMap::GetIterations() const
 float SelfOrganizingMap::GetNeighborhood() const
 {
     return m_neighborhood;
+}
+
+void SelfOrganizingMap::StopWorker()
+{
+    m_isDone = true;
+    m_cv.notify_one();
+
+    if (m_worker.joinable()) {
+        m_worker.join();
+        Logger::info("The worker joined successfully");
+    }
 }

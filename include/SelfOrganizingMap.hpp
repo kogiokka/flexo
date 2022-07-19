@@ -7,11 +7,17 @@
 #include <thread>
 
 #include <glm/glm.hpp>
+#include <wx/event.h>
 
+#include "Attachable.hpp"
 #include "InputData.hpp"
 #include "Lattice.hpp"
 
-class SelfOrganizingMap
+class WatermarkingProject;
+
+wxDECLARE_EVENT(EVT_SOM_PROCEDURE_INITIALIZED, wxCommandEvent);
+
+class SelfOrganizingMap : public AttachableBase
 {
     bool m_isDone;
     bool m_isTraining;
@@ -28,19 +34,27 @@ class SelfOrganizingMap
     std::condition_variable m_cv;
 
 public:
-    SelfOrganizingMap(float initialRate, int maxIterations, float initialNeighborhood);
+    static SelfOrganizingMap& Get(WatermarkingProject& project);
+    static SelfOrganizingMap const& Get(WatermarkingProject const& project);
+    explicit SelfOrganizingMap(WatermarkingProject& project);
     ~SelfOrganizingMap();
-    void Train(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
+    void Initialize(std::shared_ptr<InputData> dataset);
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
+    void SetMaxIterations(int numIterations);
+    void SetLearningRate(float rate);
+    void SetNeighborhood(float radius);
     int GetIterations() const;
     float GetNeighborhood() const;
 
 private:
-    void TrainInternal(std::shared_ptr<Lattice> lattice, std::shared_ptr<InputData> dataset);
+    void StopWorker();
+    void Train(Lattice& lattice, std::shared_ptr<InputData> dataset);
     glm::ivec2 FindBMU(Lattice const& lattice, glm::vec3 const& input) const;
     void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius);
+
+    WatermarkingProject& m_project;
 };
 
 #endif
