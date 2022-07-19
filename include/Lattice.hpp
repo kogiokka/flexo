@@ -29,6 +29,8 @@ public:
     static Lattice const& Get(WatermarkingProject const& project);
 
     explicit Lattice(WatermarkingProject& project);
+    Lattice(Lattice const&) = delete;
+    Lattice& operator=(Lattice const&) = delete;
     void Initialize();
     void SetWidth(int width);
     void SetHeight(int height);
