@@ -241,18 +241,18 @@ void MainPanel::OnButtonStart(wxCommandEvent&)
     m_btnStart->Disable();
     m_btnPause->Enable();
 
-    m_project.ToggleTraining();
+    SelfOrganizingMap::Get(m_project).ToggleTraining();
 }
 
 void MainPanel::OnButtonPause(wxCommandEvent&)
 {
-    m_project.ToggleTraining();
-
     if (m_btnPause->GetLabel() == "Continue") {
         m_btnPause->SetLabel("Pause");
     } else {
         m_btnPause->SetLabel("Continue");
     }
+
+    SelfOrganizingMap::Get(m_project).ToggleTraining();
 }
 
 void MainPanel::OnButtonWatermark(wxCommandEvent&)
@@ -318,16 +318,14 @@ void MainPanel::OnSliderTransparency(wxCommandEvent&)
 
 void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
 {
-    if (!m_project.IsReady()) {
-        return;
-    }
+    auto& som = SelfOrganizingMap::Get(m_project);
 
     m_tcIterations->Clear();
-    *m_tcIterations << m_project.GetIterations();
+    *m_tcIterations << som.GetIterations();
     m_tcNeighborhood->Clear();
-    *m_tcNeighborhood << m_project.GetNeighborhood();
+    *m_tcNeighborhood << som.GetNeighborhood();
 
-    if (m_project.IsDone()) {
+    if (som.IsDone()) {
         m_btnWatermark->Enable();
     } else {
         m_btnWatermark->Disable();

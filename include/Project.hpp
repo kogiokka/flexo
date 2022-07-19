@@ -24,12 +24,6 @@ public:
     WatermarkingProject();
     void Create();
     void Stop();
-    bool IsReady() const;
-    bool IsTraining() const;
-    bool IsDone() const;
-    int GetIterations() const;
-    float GetNeighborhood() const;
-    void ToggleTraining();
     void BuildLatticeMesh() const;
     void DoWatermark();
     void SetDataset(std::shared_ptr<InputData> dataset);
@@ -38,7 +32,7 @@ public:
     void OnProjectSettingsChanged(wxCommandEvent& evt);
 
 private:
-    std::shared_ptr<SelfOrganizingMap> m_som;
+    bool m_isLatticeReady;
     std::shared_ptr<InputData> m_dataset;
 
     void UpdateLatticeEdges() const;

@@ -7,7 +7,7 @@
 wxDEFINE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
 
 WatermarkingProject::WatermarkingProject()
-    : m_som(nullptr)
+    : m_isLatticeReady(false)
     , m_dataset(nullptr)
 {
     Bind(EVT_PROJECT_SETTINGS_CHANGED, &WatermarkingProject::OnProjectSettingsChanged, this);
@@ -19,50 +19,20 @@ void WatermarkingProject::Create()
 {
     assert(m_dataset);
 
-    m_som = std::make_shared<SelfOrganizingMap>(*this);
-
     Lattice::Get(*this).Initialize();
-    m_som->Initialize(m_dataset);
+    SelfOrganizingMap::Get(*this).Initialize(m_dataset);
 }
 
 void WatermarkingProject::Stop()
 {
-    m_som = nullptr;
-}
-
-bool WatermarkingProject::IsReady() const
-{
-    return (m_som != nullptr);
-}
-
-bool WatermarkingProject::IsTraining() const
-{
-    return (m_som != nullptr) && (m_som->IsTraining());
-}
-
-bool WatermarkingProject::IsDone() const
-{
-    return m_som->IsDone();
-}
-
-int WatermarkingProject::GetIterations() const
-{
-    return m_som->GetIterations();
-}
-
-float WatermarkingProject::GetNeighborhood() const
-{
-    return m_som->GetNeighborhood();
-}
-
-void WatermarkingProject::ToggleTraining()
-{
-    assert(m_som);
-    m_som->ToggleTraining();
+    SelfOrganizingMap::Get(*this).Initialize(m_dataset);
 }
 
 void WatermarkingProject::BuildLatticeMesh() const
 {
+    if (!m_isLatticeReady)
+        return;
+
     Lattice const& lattice = Lattice::Get(*this);
     Mesh mesh;
 
@@ -201,8 +171,11 @@ void WatermarkingProject::DoWatermark()
 
 void WatermarkingProject::OnLatticeInitialized(wxCommandEvent&)
 {
-    assert(m_som && m_dataset);
-    m_som->Initialize(m_dataset);
+    assert(m_dataset);
+    SelfOrganizingMap::Get(*this).Initialize(m_dataset);
+
+    // TODO: Better solution
+    m_isLatticeReady = true;
     BuildLatticeMesh();
 
     wxCommandEvent event(EVT_LATTICE_MESH_READY);
@@ -216,10 +189,8 @@ void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)
 
 void WatermarkingProject::OnProjectSettingsChanged(wxCommandEvent&)
 {
-    if (!m_som) {
-        return;
-    }
-    m_som->SetMaxIterations(ProjectSettings::Get(*this).GetMaxIterations());
-    m_som->SetLearningRate(ProjectSettings::Get(*this).GetLearningRate());
-    m_som->SetNeighborhood(ProjectSettings::Get(*this).GetNeighborhood());
+    auto& som = SelfOrganizingMap::Get(*this);
+    som.SetMaxIterations(ProjectSettings::Get(*this).GetMaxIterations());
+    som.SetLearningRate(ProjectSettings::Get(*this).GetLearningRate());
+    som.SetNeighborhood(ProjectSettings::Get(*this).GetNeighborhood());
 }

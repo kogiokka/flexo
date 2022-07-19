@@ -4,6 +4,20 @@
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
 
+static const WatermarkingProject::AttachedObjects::RegisteredFactory factoryKey { [](WatermarkingProject& project) {
+    return std::make_shared<SelfOrganizingMap>(project);
+} };
+
+SelfOrganizingMap& SelfOrganizingMap::Get(WatermarkingProject& project)
+{
+    return project.AttachedObjects::Get<SelfOrganizingMap>(factoryKey);
+}
+
+SelfOrganizingMap const& SelfOrganizingMap::Get(WatermarkingProject const& project)
+{
+    return Get(const_cast<WatermarkingProject&>(project));
+}
+
 SelfOrganizingMap::SelfOrganizingMap(WatermarkingProject& project)
     : m_isDone(false)
     , m_isTraining(false)
@@ -38,6 +52,7 @@ void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
 
     StopWorker();
     m_isDone = false;
+    m_isTraining = false;
 
     auto& lattice = Lattice::Get(m_project);
     void (SelfOrganizingMap::*Train)(Lattice&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;

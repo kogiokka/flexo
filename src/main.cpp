@@ -227,10 +227,6 @@ void WatermarkingApp::OnCmdToggleLatticeFlag(wxCommandEvent& evt)
 
 void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
 {
-    if (!m_project->IsReady()) {
-        return;
-    }
-
     m_project->BuildLatticeMesh();
 }
 
