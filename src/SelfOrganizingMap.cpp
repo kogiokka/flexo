@@ -33,6 +33,7 @@ SelfOrganizingMap::SelfOrganizingMap(WatermarkingProject& project)
     m_maxIterations = settings.GetMaxIterations();
     m_initialRate = settings.GetLearningRate();
     m_iterations = 0;
+    m_neighborhood = 0.0f;
     m_rate = m_initialRate;
 }
 
