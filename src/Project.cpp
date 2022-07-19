@@ -16,16 +16,9 @@ WatermarkingProject::WatermarkingProject()
     Bind(EVT_LATTICE_DIMENSIONS_CHANGED, &WatermarkingProject::OnLatticeDimensionsChanged, this);
 }
 
-void WatermarkingProject::Create()
+void WatermarkingProject::Initialize()
 {
     assert(m_dataset);
-
-    Lattice::Get(*this).Initialize();
-    SelfOrganizingMap::Get(*this).Initialize(m_dataset);
-}
-
-void WatermarkingProject::Stop()
-{
     SelfOrganizingMap::Get(*this).Initialize(m_dataset);
 }
 

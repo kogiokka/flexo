@@ -22,8 +22,7 @@ public:
     using AttachedObjects = ::AttachedProjectObjects;
 
     WatermarkingProject();
-    void Create();
-    void Stop();
+    void Initialize();
     void BuildLatticeMesh() const;
     void DoWatermark();
     void SetDataset(std::shared_ptr<InputData> dataset);

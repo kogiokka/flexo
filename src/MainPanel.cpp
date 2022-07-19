@@ -50,18 +50,59 @@ void MainPanel::PopulateProjectPage()
     wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
     wxBoxSizer* const boxLayout = new wxBoxSizer(wxVERTICAL);
 
+    // Lattice (Map)
     {
         wxPanel* panel = new wxPanel(page, wxID_ANY);
         wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
-
         auto row1 = new wxBoxSizer(wxHORIZONTAL);
         auto row2 = new wxBoxSizer(wxHORIZONTAL);
         auto row3 = new wxBoxSizer(wxHORIZONTAL);
         auto row4 = new wxBoxSizer(wxHORIZONTAL);
-        auto row5 = new wxBoxSizer(wxHORIZONTAL);
-        auto row6 = new wxBoxSizer(wxHORIZONTAL);
-        auto row7 = new wxBoxSizer(wxHORIZONTAL);
-        auto row8 = new wxBoxSizer(wxHORIZONTAL);
+
+        wxIntegerValidator<int> validDimen;
+        validDimen.SetRange(1, 512);
+
+        m_tcLatticeWidth = new wxTextCtrl(panel, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                          wxTE_CENTER, validDimen);
+        m_tcLatticeHeight = new wxTextCtrl(panel, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                           wxTE_CENTER, validDimen);
+        *m_tcLatticeWidth << Lattice::Get(m_project).GetWidth();
+        *m_tcLatticeHeight << Lattice::Get(m_project).GetHeight();
+
+        auto chkBox1 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
+        auto chkBox2 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
+        chkBox1->SetValue(false);
+        chkBox2->SetValue(false);
+
+        row1->Add(new wxStaticText(panel, wxID_ANY, "Lattice Dimensions: "), 1,
+                  wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row2->Add(m_tcLatticeWidth, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row2->Add(m_tcLatticeHeight, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row3->Add(chkBox1, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row3->Add(chkBox2, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row4->Add(new wxButton(panel, BTN_INITIALIZE_LATTICE, "Intialize"), 1,
+                  wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+
+        layout->Add(row1, 0, wxGROW | wxALL, 5);
+        layout->Add(row2, 0, wxGROW | wxALL, 5);
+        layout->Add(row3, 0, wxGROW | wxALL, 5);
+        layout->Add(row4, 0, wxGROW | wxALL, 5);
+        panel->SetSizer(layout);
+        boxLayout->Add(panel, 0, wxGROW | wxALL, 10);
+        boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
+
+        panel->Enable();
+        m_latticeConfigPanel = panel;
+    }
+
+    // SOM procedure
+    {
+        wxPanel* panel = new wxPanel(page, wxID_ANY);
+        wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
+        auto row1 = new wxBoxSizer(wxHORIZONTAL);
+        auto row2 = new wxBoxSizer(wxHORIZONTAL);
+        auto row3 = new wxBoxSizer(wxHORIZONTAL);
+        auto row4 = new wxBoxSizer(wxHORIZONTAL);
         wxIntegerValidator<int> validIterCap;
         wxFloatingPointValidator<float> validLearnRate(2, nullptr);
         wxFloatingPointValidator<float> validNeighborhood(2, nullptr);
@@ -88,46 +129,23 @@ void MainPanel::PopulateProjectPage()
                   5);
         row3->Add(m_tcInitialNeighborhood, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
 
-        wxIntegerValidator<int> validDimen;
-        validDimen.SetRange(1, 512);
-
-        m_tcLatticeWidth = new wxTextCtrl(panel, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                          wxTE_CENTER, validDimen);
-        m_tcLatticeHeight = new wxTextCtrl(panel, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                           wxTE_CENTER, validDimen);
-        *m_tcLatticeWidth << Lattice::Get(m_project).GetWidth();
-        *m_tcLatticeHeight << Lattice::Get(m_project).GetHeight();
-
-        auto chkBox1 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
-        auto chkBox2 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
-        chkBox1->SetValue(false);
-        chkBox2->SetValue(false);
-
-        row4->Add(new wxStaticText(panel, wxID_ANY, "Lattice Dimensions: "), 1,
-                  wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row5->Add(m_tcLatticeWidth, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row5->Add(m_tcLatticeHeight, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row6->Add(chkBox1, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row6->Add(chkBox2, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-
         layout->Add(row1, 0, wxGROW | wxALL, 5);
         layout->Add(row2, 0, wxGROW | wxALL, 5);
         layout->Add(row3, 0, wxGROW | wxALL, 5);
-        layout->Add(row4, 0, wxGROW | wxALL, 5);
-        layout->Add(row5, 0, wxGROW | wxALL, 5);
-        layout->Add(row6, 0, wxGROW | wxALL, 5);
         panel->SetSizer(layout);
 
-        m_btnCreateProject = new wxButton(page, BTN_CREATE_PROJECT, "Create Project");
-        m_btnStopProject = new wxButton(page, BTN_STOP_PROJECT, "Stop Project");
-        row7->Add(m_btnCreateProject, 1, wxGROW | wxLEFT | wxRIGHT);
-        row8->Add(m_btnStopProject, 1, wxGROW | wxLEFT | wxRIGHT);
+        m_btnCreateProject = new wxButton(page, BTN_CREATE_PROJECT, "Create");
+        m_btnStopProject = new wxButton(page, BTN_STOP_PROJECT, "Stop");
+        m_btnCreateProject->Disable();
+        m_btnStopProject->Disable();
+        row4->Add(m_btnCreateProject, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+        row4->Add(m_btnStopProject, 1, wxGROW | wxLEFT | wxRIGHT, 5);
 
         boxLayout->Add(panel, 0, wxGROW | wxALL, 10);
-        boxLayout->Add(row7, 0, wxGROW | wxALL, 10);
-        boxLayout->Add(row8, 0, wxGROW | wxALL, 10);
+        boxLayout->Add(row4, 0, wxGROW | wxALL, 10);
         boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
 
+        panel->Disable();
         m_projectConfigPanel = panel;
     }
 
@@ -213,16 +231,20 @@ void MainPanel::OnButtonCreateProject(wxCommandEvent&)
 {
     m_btnCreateProject->Disable();
     m_btnStopProject->Enable();
-    m_btnStart->Enable();
 
-    m_project.Create();
+    m_btnStart->Enable();
+    m_btnPause->Enable();
+
+    m_project.Initialize();
 }
 
 void MainPanel::OnButtonStopProject(wxCommandEvent&)
 {
+    m_projectConfigPanel->Enable();
     m_btnCreateProject->Enable();
     m_btnStopProject->Disable();
-    m_projectConfigPanel->Enable();
+
+    m_latticeConfigPanel->Enable();
     m_btnStart->Disable();
     m_btnPause->Disable();
 
@@ -231,13 +253,22 @@ void MainPanel::OnButtonStopProject(wxCommandEvent&)
     m_tcNeighborhood->Clear();
     *m_tcNeighborhood << 0.0f;
 
-    m_project.Stop();
+    m_project.Initialize();
+}
+
+void MainPanel::OnButtonInitializeLattice(wxCommandEvent&)
+{
+    Lattice::Get(m_project).Initialize();
+    m_projectConfigPanel->Enable();
+    m_btnCreateProject->Enable();
+    m_btnStopProject->Disable();
 }
 
 void MainPanel::OnButtonStart(wxCommandEvent&)
 {
     m_btnCreateProject->Disable();
     m_btnStopProject->Enable();
+    m_latticeConfigPanel->Disable();
     m_projectConfigPanel->Disable();
     m_btnStart->Disable();
     m_btnPause->Enable();
@@ -395,6 +426,7 @@ wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
     EVT_BUTTON(BTN_START, MainPanel::OnButtonStart)
     EVT_BUTTON(BTN_PLAY_PAUSE, MainPanel::OnButtonPause)
     EVT_BUTTON(BTN_WATERMARK, MainPanel::OnButtonWatermark)
+    EVT_BUTTON(BTN_INITIALIZE_LATTICE, MainPanel::OnButtonInitializeLattice)
     EVT_BUTTON(BTN_CREATE_PROJECT, MainPanel::OnButtonCreateProject)
     EVT_BUTTON(BTN_STOP_PROJECT, MainPanel::OnButtonStopProject)
     EVT_CHECKBOX(CB_RENDEROPT_MODEL, MainPanel::OnCheckboxModel)

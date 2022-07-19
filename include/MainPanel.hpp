@@ -24,6 +24,7 @@ enum {
     BTN_PLAY_PAUSE,
     BTN_WATERMARK,
     BTN_START,
+    BTN_INITIALIZE_LATTICE,
     BTN_CREATE_PROJECT,
     BTN_STOP_PROJECT,
     SPCTRL_ITERATION_PER_FRAME,
@@ -45,6 +46,7 @@ class MainPanel : public wxPanel
 {
     friend WatermarkingProject;
 
+    wxPanel* m_latticeConfigPanel;
     wxPanel* m_projectConfigPanel;
     wxNotebook* m_notebook;
     wxButton* m_btnCreateProject;
@@ -69,6 +71,7 @@ public:
 private:
     void PopulateProjectPage();
     void PopulateRenderingPage();
+    void OnButtonInitializeLattice(wxCommandEvent& evt);
     void OnButtonCreateProject(wxCommandEvent& evt);
     void OnButtonStopProject(wxCommandEvent& evt);
     void OnButtonStart(wxCommandEvent& evt);
