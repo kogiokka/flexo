@@ -190,7 +190,8 @@ void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)
 void WatermarkingProject::OnProjectSettingsChanged(wxCommandEvent&)
 {
     auto& som = SelfOrganizingMap::Get(*this);
-    som.SetMaxIterations(ProjectSettings::Get(*this).GetMaxIterations());
-    som.SetLearningRate(ProjectSettings::Get(*this).GetLearningRate());
-    som.SetNeighborhood(ProjectSettings::Get(*this).GetNeighborhood());
+    auto const& settings = ProjectSettings::Get(*this);
+    som.SetMaxIterations(settings.GetMaxIterations());
+    som.SetLearningRate(settings.GetLearningRate());
+    som.SetNeighborhood(settings.GetNeighborhood());
 }
