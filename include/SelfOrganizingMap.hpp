@@ -8,12 +8,13 @@
 
 #include <glm/glm.hpp>
 
+#include "Attachable.hpp"
 #include "InputData.hpp"
 #include "Lattice.hpp"
 
 class WatermarkingProject;
 
-class SelfOrganizingMap
+class SelfOrganizingMap : public AttachableBase
 {
     bool m_isDone;
     bool m_isTraining;
@@ -30,6 +31,8 @@ class SelfOrganizingMap
     std::condition_variable m_cv;
 
 public:
+    static SelfOrganizingMap& Get(WatermarkingProject& project);
+    static SelfOrganizingMap const& Get(WatermarkingProject const& project);
     explicit SelfOrganizingMap(WatermarkingProject& project);
     ~SelfOrganizingMap();
     void Initialize(std::shared_ptr<InputData> dataset);
