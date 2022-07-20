@@ -41,6 +41,7 @@ PRIVATE
     "src/OpenGLCanvas.cpp"
     "src/ProjectSettings.cpp"
     "src/Project.cpp"
+    "src/ProjectWindow.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"

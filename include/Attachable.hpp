@@ -5,17 +5,23 @@
 #include <memory>
 #include <vector>
 
+template <typename T>
+using SharedPtr = std::shared_ptr<T>;
+
+template <typename T>
+using BarePtr = T*;
+
 class AttachableBase
 {
 public:
     virtual ~AttachableBase() {};
 };
 
-template <typename Host, typename Attachable>
+template <typename Host, typename Attachable, template <typename> typename Pointer>
 class HostBase
 {
 public:
-    using AttachableFactory = std::function<std::shared_ptr<Attachable>(Host&)>;
+    using AttachableFactory = std::function<Pointer<Attachable>(Host&)>;
 
     class RegisteredFactory
     {

@@ -138,6 +138,11 @@ void WatermarkingProject::SetDataset(std::shared_ptr<InputData> dataset)
     m_dataset = dataset;
 }
 
+void WatermarkingProject::SetFrame(wxFrame* frame)
+{
+    m_frame = frame;
+}
+
 void WatermarkingProject::SetMainPanel(MainPanel* panel)
 {
     m_panel = panel;

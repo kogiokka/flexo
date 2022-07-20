@@ -4,6 +4,8 @@
 #include <memory>
 
 #include <wx/event.h>
+#include <wx/frame.h>
+#include <wx/weakref.h>
 
 #include "Attachable.hpp"
 #include "InputData.hpp"
@@ -14,9 +16,10 @@
 
 wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
 
-using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase>;
+using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
+using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;
 
-class WatermarkingProject : public wxEvtHandler, public AttachedProjectObjects
+class WatermarkingProject : public wxEvtHandler, public AttachedProjectObjects, public AttacheProjectWindows
 {
 public:
     using AttachedObjects = ::AttachedProjectObjects;
@@ -26,6 +29,7 @@ public:
     void BuildLatticeMesh() const;
     void DoWatermark();
     void SetDataset(std::shared_ptr<InputData> dataset);
+    void SetFrame(wxFrame* frame);
     void SetMainPanel(MainPanel* panel);
     void OnLatticeInitialized(wxCommandEvent& evt);
     void OnSOMInitialized(wxCommandEvent& evt);
@@ -35,6 +39,7 @@ public:
 private:
     bool m_isLatticeReady;
     MainPanel* m_panel;
+    wxWeakRef<wxFrame> m_frame;
     std::shared_ptr<InputData> m_dataset;
 
     void UpdateLatticeEdges() const;
