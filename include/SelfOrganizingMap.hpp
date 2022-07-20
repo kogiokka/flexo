@@ -38,6 +38,8 @@ public:
     static SelfOrganizingMap const& Get(WatermarkingProject const& project);
     explicit SelfOrganizingMap(WatermarkingProject& project);
     ~SelfOrganizingMap();
+    SelfOrganizingMap(SelfOrganizingMap const&) = delete;
+    SelfOrganizingMap& operator=(SelfOrganizingMap const&) = delete;
     void Initialize(std::shared_ptr<InputData> dataset);
     void ToggleTraining();
     bool IsDone() const;

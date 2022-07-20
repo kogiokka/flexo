@@ -21,8 +21,8 @@ public:
 
     explicit ProjectSettings(WatermarkingProject& project);
     virtual ~ProjectSettings() {};
-    ProjectSettings(const ProjectSettings&) = delete;
-    ProjectSettings& operator=(const ProjectSettings&) = delete;
+    ProjectSettings(ProjectSettings const&) = delete;
+    ProjectSettings& operator=(ProjectSettings const&) = delete;
 
     void SetMaxIterations(unsigned int iterations);
     float GetMaxIterations() const;
