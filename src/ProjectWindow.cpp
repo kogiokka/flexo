@@ -3,6 +3,7 @@
 #include <wx/filedlg.h>
 #include <wx/menu.h>
 
+#include "OpenGLCanvas.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 
@@ -113,7 +114,7 @@ void ProjectWindow::OnExit(wxCommandEvent&)
 
 void ProjectWindow::OnMenuCameraReset(wxCommandEvent&)
 {
-    m_canvas->ResetCamera();
+    OpenGLCanvas::Get(m_project).ResetCamera();
 }
 
 // FIXME: Why do I need this?

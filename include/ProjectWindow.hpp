@@ -6,7 +6,6 @@
 #include <wx/sizer.h>
 
 #include "ProjectPanel.hpp"
-#include "OpenGLCanvas.hpp"
 
 class WatermarkingProject;
 
@@ -31,7 +30,6 @@ private:
     WatermarkingProject& m_project;
     wxWindow* m_mainPage;
     wxPanel* m_mainPanel;
-    OpenGLCanvas* m_canvas;
 
     void OnOpenFile(wxCommandEvent& evt);
     void OnExit(wxCommandEvent&);

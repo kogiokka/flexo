@@ -55,8 +55,6 @@ bool WatermarkingApp::OnInit()
     auto& panel = ProjectPanel::Get(*m_project);
     auto& canvas = OpenGLCanvas::Get(*m_project);
 
-    canvas.SetFocus();
-
     wxWindow* mainPage = window.GetMainPage();
     wxSizer* bs = mainPage->GetSizer();
     bs->Add(&panel, 1, wxGROW | wxALL, 0);
@@ -65,6 +63,7 @@ bool WatermarkingApp::OnInit()
 
     window.Show();
     canvas.InitGL();
+    canvas.SetFocus();
 
     wxSize const size = canvas.GetClientSize() * canvas.GetContentScaleFactor();
     m_renderer = std::make_shared<Renderer>(size.x, size.y);
