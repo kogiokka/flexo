@@ -1,10 +1,9 @@
 #include "SelfOrganizingMap.hpp"
 #include "Lattice.hpp"
 #include "Project.hpp"
+#include "ProjectPanel.hpp"
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
-
-wxDEFINE_EVENT(EVT_SOM_PROCEDURE_INITIALIZED, wxCommandEvent);
 
 static const WatermarkingProject::AttachedObjects::RegisteredFactory factoryKey { [](WatermarkingProject& project) {
     return std::make_shared<SelfOrganizingMap>(project);
@@ -59,22 +58,24 @@ void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
     m_iterations = 0;
     m_rate = m_initialRate;
 
-    float radius = settings.GetNeighborhood();
-    if (radius == 0.0f) {
-        radius = 0.5f * sqrt(width * width + height * height);
+    { // Default radius
+        float radius = settings.GetNeighborhood();
+        if (radius == 0.0f) {
+            radius = 0.5f * sqrt(width * width + height * height);
+        }
+        m_initialNeighborhood = radius;
+        m_neighborhood = radius;
+        // FIXME Use event.
+        auto* textctrl = ProjectPanel::Get(m_project).GetTextCtrlInitialNeighborhood();
+        textctrl->Clear();
+        *textctrl << radius;
     }
-
-    m_initialNeighborhood = radius;
-    m_neighborhood = radius;
 
     m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 
     auto& lattice = Lattice::Get(m_project);
     void (SelfOrganizingMap::*Train)(Lattice&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
     m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
-
-    wxCommandEvent event(EVT_SOM_PROCEDURE_INITIALIZED);
-    m_project.ProcessEvent(event);
 
     Logger::info("Training worker created");
 }

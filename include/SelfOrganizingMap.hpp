@@ -15,8 +15,6 @@
 
 class WatermarkingProject;
 
-wxDECLARE_EVENT(EVT_SOM_PROCEDURE_INITIALIZED, wxCommandEvent);
-
 class SelfOrganizingMap : public AttachableBase
 {
     bool m_isDone;

@@ -8,11 +8,12 @@ wxDEFINE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
 
 WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)
+    , m_frame {}
+    , m_panel {}
     , m_dataset(nullptr)
 {
     Bind(EVT_PROJECT_SETTINGS_CHANGED, &WatermarkingProject::OnProjectSettingsChanged, this);
     Bind(EVT_LATTICE_INITIALIZED, &WatermarkingProject::OnLatticeInitialized, this);
-    Bind(EVT_SOM_PROCEDURE_INITIALIZED, &WatermarkingProject::OnSOMInitialized, this);
     Bind(EVT_LATTICE_DIMENSIONS_CHANGED, &WatermarkingProject::OnLatticeDimensionsChanged, this);
 }
 
@@ -143,7 +144,7 @@ void WatermarkingProject::SetFrame(wxFrame* frame)
     m_frame = frame;
 }
 
-void WatermarkingProject::SetMainPanel(MainPanel* panel)
+void WatermarkingProject::SetPanel(wxWindow* panel)
 {
     m_panel = panel;
 }
@@ -184,12 +185,6 @@ void WatermarkingProject::OnLatticeInitialized(wxCommandEvent&)
 
     wxCommandEvent event(EVT_LATTICE_MESH_READY);
     ProcessEvent(event);
-}
-
-void WatermarkingProject::OnSOMInitialized(wxCommandEvent&)
-{
-    m_panel->m_tcInitialNeighborhood->Clear();
-    *(m_panel->m_tcInitialNeighborhood) << SelfOrganizingMap::Get(*this).GetNeighborhood();
 }
 
 void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)

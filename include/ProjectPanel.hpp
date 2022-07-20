@@ -42,10 +42,8 @@ enum {
 
 class WatermarkingProject;
 
-class MainPanel : public wxPanel
+class ProjectPanel : public wxPanel
 {
-    friend WatermarkingProject;
-
     wxPanel* m_latticeConfigPanel;
     wxPanel* m_projectConfigPanel;
     wxNotebook* m_notebook;
@@ -65,8 +63,12 @@ class MainPanel : public wxPanel
     wxTimer* m_updateTimer;
 
 public:
-    MainPanel(wxWindow* parent, WatermarkingProject& project);
-    ~MainPanel();
+    static ProjectPanel& Get(WatermarkingProject& project);
+    static ProjectPanel const& Get(WatermarkingProject const& project);
+    ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size, WatermarkingProject& project);
+    ~ProjectPanel();
+
+    wxTextCtrl* GetTextCtrlInitialNeighborhood();
 
 private:
     void PopulateProjectPage();

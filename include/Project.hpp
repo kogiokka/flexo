@@ -10,7 +10,6 @@
 #include "Attachable.hpp"
 #include "InputData.hpp"
 #include "Lattice.hpp"
-#include "MainPanel.hpp"
 #include "ProjectSettings.hpp"
 #include "SelfOrganizingMap.hpp"
 
@@ -31,16 +30,15 @@ public:
     void DoWatermark();
     void SetDataset(std::shared_ptr<InputData> dataset);
     void SetFrame(wxFrame* frame);
-    void SetMainPanel(MainPanel* panel);
+    void SetPanel(wxWindow* panel);
     void OnLatticeInitialized(wxCommandEvent& evt);
-    void OnSOMInitialized(wxCommandEvent& evt);
     void OnLatticeDimensionsChanged(wxCommandEvent& evt);
     void OnProjectSettingsChanged(wxCommandEvent& evt);
 
 private:
     bool m_isLatticeReady;
-    MainPanel* m_panel;
     wxWeakRef<wxFrame> m_frame;
+    wxWeakRef<wxWindow> m_panel;
     std::shared_ptr<InputData> m_dataset;
 
     void UpdateLatticeEdges() const;

@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "MainPanel.hpp"
+#include "ProjectPanel.hpp"
 #include "ProjectWindow.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
@@ -51,17 +51,19 @@ bool WatermarkingApp::OnInit()
 
     m_project = std::make_shared<WatermarkingProject>();
     auto& window = ProjectWindow::Get(*m_project);
-    m_panel = new MainPanel(&window, *m_project);
+    wxWindow* mainPage = window.GetMainPage();
+
+    auto& projectPanel = ProjectPanel::Get(*m_project);
 
     wxGLAttributes attrs;
     attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-    auto canvas = new OpenGLCanvas(&window, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
+    auto canvas = new OpenGLCanvas(mainPage, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     canvas->SetFocus();
 
-    // TODO: Better solution to resolve the dependencies
-    m_project->SetMainPanel(m_panel);
-    window.SetMainPanel(m_panel);
-    window.SetOpenGLCanvas(canvas);
+    wxSizer* bs = mainPage->GetSizer();
+    bs->Add(&projectPanel, 1, wxGROW | wxALL, 0);
+    bs->Add(canvas, 3, wxGROW | wxALL, 0);
+    bs->Layout();
 
     window.Show();
     canvas->InitGL();

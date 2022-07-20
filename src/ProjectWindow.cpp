@@ -53,8 +53,10 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     this->SetMenuBar(menubar);
 
-    m_layout = new wxBoxSizer(wxHORIZONTAL);
-    SetSizer(m_layout);
+    m_mainPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+    m_mainPanel->SetSizer(new wxBoxSizer(wxHORIZONTAL));
+
+    m_mainPage = m_mainPanel;
 
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenFile, this, wxID_OPEN);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
@@ -122,15 +124,7 @@ void ProjectWindow::OnMenuGenerateModelDome(wxCommandEvent&)
     ProcessWindowEvent(event);
 }
 
-void ProjectWindow::SetMainPanel(MainPanel* panel)
+wxWindow* ProjectWindow::GetMainPage()
 {
-    m_layout->Add(panel, 1, wxGROW | wxALL, 0);
-    Layout();
-}
-
-void ProjectWindow::SetOpenGLCanvas(OpenGLCanvas* canvas)
-{
-    m_canvas = canvas;
-    m_layout->Add(canvas, 3, wxGROW | wxALL, 0);
-    Layout();
+    return m_mainPage;
 }
