@@ -15,6 +15,10 @@
 
 #include "Renderer.hpp"
 
+wxDECLARE_EVENT(CMD_REBUILD_LATTICE_MESH, wxCommandEvent);
+
+class WatermarkingProject;
+
 class OpenGLCanvas : public wxGLCanvas
 {
     bool m_isGLLoaded;
@@ -28,6 +32,9 @@ class OpenGLCanvas : public wxGLCanvas
     wxTimer* m_updateTimer;
 
 public:
+    static OpenGLCanvas& Get(WatermarkingProject& project);
+    static OpenGLCanvas const& Get(WatermarkingProject const& project);
+
     OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id = wxID_ANY,
                  wxPoint const& pos = wxDefaultPosition, wxSize const& size = wxDefaultSize, long style = 0,
                  wxString const& name = wxEmptyString);
@@ -49,7 +56,5 @@ private:
 
     wxDECLARE_EVENT_TABLE();
 };
-
-wxDECLARE_EVENT(CMD_REBUILD_LATTICE_MESH, wxCommandEvent);
 
 #endif

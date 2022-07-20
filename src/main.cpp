@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "OpenGLCanvas.hpp"
 #include "ProjectPanel.hpp"
 #include "ProjectWindow.hpp"
 #include "WatermarkingApp.hpp"
@@ -51,26 +52,23 @@ bool WatermarkingApp::OnInit()
 
     m_project = std::make_shared<WatermarkingProject>();
     auto& window = ProjectWindow::Get(*m_project);
+    auto& panel = ProjectPanel::Get(*m_project);
+    auto& canvas = OpenGLCanvas::Get(*m_project);
+
+    canvas.SetFocus();
+
     wxWindow* mainPage = window.GetMainPage();
-
-    auto& projectPanel = ProjectPanel::Get(*m_project);
-
-    wxGLAttributes attrs;
-    attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-    auto canvas = new OpenGLCanvas(mainPage, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
-    canvas->SetFocus();
-
     wxSizer* bs = mainPage->GetSizer();
-    bs->Add(&projectPanel, 1, wxGROW | wxALL, 0);
-    bs->Add(canvas, 3, wxGROW | wxALL, 0);
+    bs->Add(&panel, 1, wxGROW | wxALL, 0);
+    bs->Add(&canvas, 3, wxGROW | wxALL, 0);
     bs->Layout();
 
     window.Show();
-    canvas->InitGL();
+    canvas.InitGL();
 
-    wxSize const size = canvas->GetClientSize() * canvas->GetContentScaleFactor();
+    wxSize const size = canvas.GetClientSize() * canvas.GetContentScaleFactor();
     m_renderer = std::make_shared<Renderer>(size.x, size.y);
-    canvas->SetRenderer(m_renderer);
+    canvas.SetRenderer(m_renderer);
 
     return true;
 }

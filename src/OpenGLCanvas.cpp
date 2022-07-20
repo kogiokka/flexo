@@ -11,6 +11,8 @@
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
+#include "Project.hpp"
+#include "ProjectWindow.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 
@@ -20,9 +22,43 @@ enum {
     TIMER_CANVAS_UPDATE,
 };
 
+wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
+    EVT_PAINT(OpenGLCanvas::OnPaint)
+    EVT_SIZE(OpenGLCanvas::OnSize)
+    EVT_MOTION(OpenGLCanvas::OnMouseMotion)
+    EVT_LEFT_DOWN(OpenGLCanvas::OnMouseLeftDown)
+    EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
+    EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
+    EVT_TIMER(TIMER_CANVAS_UPDATE, OpenGLCanvas::OnUpdateTimer)
+wxEND_EVENT_TABLE()
+
 float static constexpr MATH_PI = 3.14159265f;
-float static constexpr MATH_PI_DIV_4 = MATH_PI * 0.25f;
 float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
+
+static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
+    [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
+        auto& window = ProjectWindow::Get(project);
+        wxWindow* mainPage = window.GetMainPage();
+        wxASSERT(mainPage != nullptr);
+
+        wxGLAttributes attrs;
+        attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
+        auto canvas = new OpenGLCanvas(mainPage, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+        project.SetPanel(canvas);
+
+        return canvas;
+    }
+};
+
+OpenGLCanvas& OpenGLCanvas::Get(WatermarkingProject& project)
+{
+    return project.AttachedWindows::Get<OpenGLCanvas>(factoryKey);
+}
+
+OpenGLCanvas const& OpenGLCanvas::Get(WatermarkingProject const& project)
+{
+    return Get(const_cast<WatermarkingProject&>(project));
+}
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
                            wxSize const& size, long style, wxString const& name)
@@ -206,13 +242,3 @@ float OpenGLCanvas::RoundGuard(float radian)
     else
         return radian;
 }
-
-wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
-    EVT_PAINT(OpenGLCanvas::OnPaint)
-    EVT_SIZE(OpenGLCanvas::OnSize)
-    EVT_MOTION(OpenGLCanvas::OnMouseMotion)
-    EVT_LEFT_DOWN(OpenGLCanvas::OnMouseLeftDown)
-    EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
-    EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
-    EVT_TIMER(TIMER_CANVAS_UPDATE, OpenGLCanvas::OnUpdateTimer)
-wxEND_EVENT_TABLE()

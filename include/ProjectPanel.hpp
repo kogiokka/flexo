@@ -11,9 +11,8 @@
 #include <wx/slider.h>
 #include <wx/spinctrl.h>
 #include <wx/textctrl.h>
+#include <wx/timer.h>
 #include <wx/window.h>
-
-#include "OpenGLCanvas.hpp"
 
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
