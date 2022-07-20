@@ -95,8 +95,6 @@ void ProjectWindow::OnOpenFile(wxCommandEvent&)
         return;
     }
 
-    assert(m_canvas != nullptr);
-
     // Why wxBusyCursor does not work here?
     // wxBusyCursor wait;
     wxString const filepath = dialog.GetPath();

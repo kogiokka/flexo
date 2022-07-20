@@ -4,6 +4,11 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+struct BoundingBox {
+    glm::vec3 max;
+    glm::vec3 min;
+};
+
 struct Face {
     std::vector<unsigned int> indices;
 };

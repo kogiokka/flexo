@@ -3,10 +3,8 @@
 
 #include <memory>
 
-#include <glad/glad.h>
-#include <glm/glm.hpp>
-
 #include "Graphics.hpp"
+#include "Mesh.hpp"
 #include "drawable/Drawable.hpp"
 #include "drawable/LatticeEdge.hpp"
 #include "drawable/LatticeFace.hpp"
@@ -17,6 +15,16 @@
 
 class Renderer
 {
+public:
+    Renderer(int width, int height);
+    void Render();
+    void SetCameraView(BoundingBox const& box);
+    void LoadPolygonalModel(Mesh const& mesh);
+    void LoadLattice();
+    void LoadVolumetricModel();
+    Camera& GetCamera();
+
+private:
     Graphics m_gfx;
 
     std::unique_ptr<PolygonalModel> m_polyModel;
@@ -25,14 +33,6 @@ class Renderer
     std::unique_ptr<LatticeVertex> m_latticeVert;
     std::unique_ptr<LatticeEdge> m_latticeEdge;
     std::unique_ptr<LatticeFace> m_latticeFace;
-
-public:
-    Renderer(int width, int height);
-    void Render();
-    void LoadPolygonalModel(Mesh const& mesh);
-    void LoadLattice();
-    void LoadVolumetricModel();
-    Camera& GetCamera();
 };
 
 #endif

@@ -9,7 +9,6 @@
 
 #include "InputData.hpp"
 #include "Lattice.hpp"
-#include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
 #include "Project.hpp"
 #include "Renderer.hpp"
@@ -17,15 +16,8 @@
 
 class WatermarkingApp : public wxApp
 {
-    struct BoundingBox {
-        glm::vec3 max;
-        glm::vec3 min;
-    };
-
     std::shared_ptr<WatermarkingProject> m_project;
     std::shared_ptr<Renderer> m_renderer;
-
-    BoundingBox m_bbox;
 
 public:
     WatermarkingApp();
@@ -34,7 +26,6 @@ public:
     virtual void OnUnhandledException() override;
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
-    void SetCameraView(BoundingBox box);
     BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
     void OnLatticeMeshReady(wxCommandEvent& evt);

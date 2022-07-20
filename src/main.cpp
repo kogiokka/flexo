@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
 #include "ProjectPanel.hpp"
 #include "ProjectWindow.hpp"
@@ -26,7 +27,6 @@ wxIMPLEMENT_APP(WatermarkingApp);
 
 WatermarkingApp::WatermarkingApp()
     : m_renderer(nullptr)
-    , m_bbox {}
 {
 }
 
@@ -84,8 +84,7 @@ void WatermarkingApp::ImportPolygonalModel(wxString const& path)
 
     m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
     m_renderer->LoadPolygonalModel(*world.theModel);
-    m_bbox = CalculateBoundingBox(world.theModel->positions);
-    SetCameraView(m_bbox);
+    m_renderer->SetCameraView(CalculateBoundingBox(world.theModel->positions));
 }
 
 void WatermarkingApp::ImportVolumetricModel(wxString const& path)
@@ -154,11 +153,10 @@ void WatermarkingApp::ImportVolumetricModel(wxString const& path)
 
     m_project->SetDataset(std::make_shared<InputData>(pos));
     m_renderer->LoadVolumetricModel();
-    m_bbox = CalculateBoundingBox(world.theModel->positions);
-    SetCameraView(m_bbox);
+    m_renderer->SetCameraView(CalculateBoundingBox(world.theModel->positions));
 }
 
-WatermarkingApp::BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positions)
+BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positions)
 {
     const float FLOAT_MAX = std::numeric_limits<float>::max();
     glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
@@ -185,28 +183,6 @@ WatermarkingApp::BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<g
         }
     }
     return { max, min };
-}
-
-// FIXME: Move it to the renderer
-void WatermarkingApp::SetCameraView(BoundingBox box)
-{
-    auto const& [max, min] = box;
-    glm::vec3 center = (max + min) * 0.5f;
-    m_renderer->GetCamera().center = center;
-    Logger::info("Camera looking at: %s", glm::to_string(center).c_str());
-
-    m_renderer->GetCamera().UpdateViewCoord();
-    m_renderer->LoadLattice(); // FIXME Why is this here?
-
-    glm::vec3 diff = max - min;
-    float size = diff.x;
-    if (size < diff.y) {
-        size = diff.y;
-    }
-    if (size < diff.z) {
-        size = diff.z;
-    }
-    m_renderer->GetCamera().volumeSize = size;
 }
 
 void WatermarkingApp::OnLatticeMeshReady(wxCommandEvent&)
@@ -239,11 +215,10 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
     }
 
     Mesh mesh;
-
-    m_bbox = CalculateBoundingBox(world.theModel->positions);
+    BoundingBox bbox = CalculateBoundingBox(world.theModel->positions);
 
     if (evt.GetId() == EVT_GENERATE_MODEL_DOME) {
-        auto const& [max, min] = m_bbox;
+        auto const& [max, min] = bbox;
         float const radius = glm::length((max - min) * 0.5f);
         int const numSegments = 60;
         int const numRings = 60;
@@ -332,10 +307,9 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
     }
 
     world.theModel = std::make_shared<Mesh>(mesh);
-    m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
+    m_project->SetDataset(std::make_shared<InputData>(mesh.positions));
     m_renderer->LoadPolygonalModel(*world.theModel);
-    m_bbox = CalculateBoundingBox(world.theModel->positions);
-    SetCameraView(m_bbox);
+    m_renderer->SetCameraView(CalculateBoundingBox(mesh.positions));
 }
 
 void WatermarkingApp::OnMenuImportModel(wxCommandEvent& evt)
