@@ -24,6 +24,7 @@ wxDEFINE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
 
+// Register factory: ProjectPanel
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
         auto& window = ProjectWindow::Get(project);

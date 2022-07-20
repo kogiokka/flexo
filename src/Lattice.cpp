@@ -7,7 +7,8 @@
 wxDEFINE_EVENT(EVT_LATTICE_INITIALIZED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_LATTICE_DIMENSIONS_CHANGED, wxCommandEvent);
 
-static const WatermarkingProject::AttachedObjects::RegisteredFactory factoryKey { [](WatermarkingProject& project) {
+// Register factory: Lattice
+static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey { [](WatermarkingProject& project) {
     return std::make_shared<Lattice>(project);
 } };
 

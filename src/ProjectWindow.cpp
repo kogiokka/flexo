@@ -10,7 +10,8 @@
 wxDEFINE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
-WatermarkingProject::AttachedWindows::RegisteredFactory factoryKey {
+// Register factory: ProjectWindow
+static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
         auto window = new ProjectWindow(nullptr, wxID_ANY, wxDefaultPosition, wxSize(1200, 800), project);
         window->SetMinSize(wxSize(800, 600));

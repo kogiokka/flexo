@@ -35,6 +35,7 @@ wxEND_EVENT_TABLE()
 float static constexpr MATH_PI = 3.14159265f;
 float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
 
+// Register factory: OpenGLCanvas
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
         auto& window = ProjectWindow::Get(project);

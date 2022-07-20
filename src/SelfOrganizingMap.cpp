@@ -5,7 +5,8 @@
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
 
-static const WatermarkingProject::AttachedObjects::RegisteredFactory factoryKey { [](WatermarkingProject& project) {
+// Register factory: SelfOrganizingMap
+static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey { [](WatermarkingProject& project) {
     return std::make_shared<SelfOrganizingMap>(project);
 } };
 
