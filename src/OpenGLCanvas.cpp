@@ -3,16 +3,11 @@
 #include <cstddef>
 #include <fstream>
 #include <iostream>
-#include <limits>
 
-#include <glm/gtx/string_cast.hpp>
-
-#include "InputData.hpp"
-#include "Lattice.hpp"
-#include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 
@@ -44,10 +39,7 @@ static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey 
 
         wxGLAttributes attrs;
         attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-        auto canvas = new OpenGLCanvas(mainPage, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize);
-        project.SetPanel(canvas);
-
-        return canvas;
+        return new OpenGLCanvas(mainPage, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, project);
     }
 };
 
@@ -62,11 +54,11 @@ OpenGLCanvas const& OpenGLCanvas::Get(WatermarkingProject const& project)
 }
 
 OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
-                           wxSize const& size, long style, wxString const& name)
-    : wxGLCanvas(parent, dispAttrs, id, pos, size, style, name)
-    , m_isGLLoaded(false)
+                           wxSize const& size, WatermarkingProject& project)
+    : wxGLCanvas(parent, dispAttrs, id, pos, size)
+    , m_project(project)
     , m_context(nullptr)
-    , m_renderer(nullptr)
+    , m_isGLLoaded(false)
     , m_rateMove(0.4f)
     , m_rateRotate(0.005f)
     , m_dirHorizontal(1)
@@ -94,7 +86,7 @@ void OpenGLCanvas::OnPaint(wxPaintEvent&)
 
     UpdateScene();
 
-    m_renderer->Render();
+    Renderer::Get(m_project).Render();
 
     SwapBuffers();
 }
@@ -130,24 +122,16 @@ void OpenGLCanvas::InitGL()
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
 }
 
-void OpenGLCanvas::SetRenderer(Renderer* renderer)
-{
-    m_renderer = renderer;
-}
-
 void OpenGLCanvas::OnSize(wxSizeEvent&)
 {
     assert(m_context.get() != nullptr);
 
-    wxSize const size = GetClientSize() * GetContentScaleFactor();
-
-    if (m_renderer) {
-        m_renderer->GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
-    }
-
     // Guard for SetCurrent and calling GL functions
     if (!IsShownOnScreen() || !m_isGLLoaded)
         return;
+
+    wxSize const size = GetClientSize() * GetContentScaleFactor();
+    Renderer::Get(m_project).GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
 
     SetCurrent(*m_context);
     glViewport(0, 0, size.x, size.y);
@@ -156,7 +140,7 @@ void OpenGLCanvas::OnSize(wxSizeEvent&)
 void OpenGLCanvas::OnMouseWheel(wxMouseEvent& event)
 {
     int direction = event.GetWheelRotation() / 120;
-    float& zoom = m_renderer->GetCamera().zoom;
+    float& zoom = Renderer::Get(m_project).GetCamera().zoom;
     float const tmp_zoom = zoom + direction * -0.02f;
     constexpr float min = 0.01f;
     constexpr float max = 10.0f;
@@ -174,14 +158,14 @@ void OpenGLCanvas::OnMouseLeftDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    m_originTranslate = std::make_tuple(x, y, m_renderer->GetCamera().center);
+    m_originTranslate = std::make_tuple(x, y, Renderer::Get(m_project).GetCamera().center);
 }
 
 void OpenGLCanvas::OnMouseRightDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    auto& coord = m_renderer->GetCamera().coord;
+    auto& coord = Renderer::Get(m_project).GetCamera().coord;
     // Change rotating direction if the camera passes through the polars.
     // Theta is guaranteed to be on either [0, pi] or (pi, 2 * pi).
     if (coord.theta > MATH_PI)
@@ -197,7 +181,7 @@ void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
 
-    auto& cam = m_renderer->GetCamera();
+    auto& cam = Renderer::Get(m_project).GetCamera();
 
     if (event.LeftIsDown()) {
         auto const& [oX, oY, oTarget] = m_originTranslate;
@@ -221,7 +205,7 @@ void OpenGLCanvas::OnUpdateTimer(wxTimerEvent&)
 void OpenGLCanvas::ResetCamera()
 {
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    m_renderer->GetCamera() = Camera(size.x, size.y);
+    Renderer::Get(m_project).GetCamera() = Camera(size.x, size.y);
 }
 
 void OpenGLCanvas::UpdateScene()

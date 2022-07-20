@@ -62,10 +62,9 @@ bool WatermarkingApp::OnInit()
 
     window.Show();
     canvas.InitGL();
-    // After OpenGL has been initialized
-    auto& renderer = Renderer::Get(*m_project);
-    canvas.SetRenderer(&renderer); // TODO: Get rid of this
 
+    // After OpenGL has been initialized
+    Renderer::Get(*m_project);
     canvas.SetFocus();
 
     return true;
