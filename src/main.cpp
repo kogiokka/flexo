@@ -5,7 +5,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "MainPanel.hpp"
-#include "MainWindow.hpp"
+#include "ProjectWindow.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
@@ -16,8 +16,8 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_FLAG, WatermarkingApp::OnCmdToggleRenderOption)
     EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
-    EVT_COMMAND(wxID_ANY, CMD_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
-    EVT_COMMAND(wxID_ANY, CMD_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
+    EVT_COMMAND(wxID_ANY, EVT_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
+    EVT_COMMAND(wxID_ANY, EVT_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
     EVT_COMMAND(wxID_ANY, EVT_LATTICE_MESH_READY, WatermarkingApp::OnLatticeMeshReady)
 wxEND_EVENT_TABLE()
 
@@ -50,20 +50,20 @@ bool WatermarkingApp::OnInit()
     world.cube = stlImp.ReadFile("res/models/cube.stl");
 
     m_project = std::make_shared<WatermarkingProject>();
-    MainWindow* window = new MainWindow();
-    m_panel = new MainPanel(window, *m_project);
+    auto& window = ProjectWindow::Get(*m_project);
+    m_panel = new MainPanel(&window, *m_project);
 
     wxGLAttributes attrs;
     attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-    auto canvas = new OpenGLCanvas(window, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
+    auto canvas = new OpenGLCanvas(&window, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxSUNKEN_BORDER);
     canvas->SetFocus();
 
     // TODO: Better solution to resolve the dependencies
     m_project->SetMainPanel(m_panel);
-    window->SetMainPanel(m_panel);
-    window->SetOpenGLCanvas(canvas);
+    window.SetMainPanel(m_panel);
+    window.SetOpenGLCanvas(canvas);
 
-    window->Show();
+    window.Show();
     canvas->InitGL();
 
     wxSize const size = canvas->GetClientSize() * canvas->GetContentScaleFactor();
@@ -243,7 +243,7 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
 
     m_bbox = CalculateBoundingBox(world.theModel->positions);
 
-    if (evt.GetId() == CMD_GENERATE_MODEL_DOME) {
+    if (evt.GetId() == EVT_GENERATE_MODEL_DOME) {
         auto const& [max, min] = m_bbox;
         float const radius = glm::length((max - min) * 0.5f);
         int const numSegments = 60;

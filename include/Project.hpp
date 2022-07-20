@@ -23,6 +23,7 @@ class WatermarkingProject : public wxEvtHandler, public AttachedProjectObjects, 
 {
 public:
     using AttachedObjects = ::AttachedProjectObjects;
+    using AttachedWindows = ::AttacheProjectWindows;
 
     WatermarkingProject();
     void Initialize();

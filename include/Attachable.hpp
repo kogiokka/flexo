@@ -17,7 +17,7 @@ public:
     virtual ~AttachableBase() {};
 };
 
-template <typename Host, typename Attachable, template <typename> typename Pointer>
+template <typename Host, typename Attachable, template <typename> class Pointer>
 class HostBase
 {
 public:
@@ -72,7 +72,7 @@ public:
 
 private:
     using AttachableFactories = std::vector<AttachableFactory>;
-    using AttachableContainer = std::vector<std::shared_ptr<Attachable>>;
+    using AttachableContainer = std::vector<Pointer<Attachable>>;
 
     static AttachableFactories& GetFactories()
     {
