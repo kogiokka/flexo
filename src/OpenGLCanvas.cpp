@@ -130,7 +130,7 @@ void OpenGLCanvas::InitGL()
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
 }
 
-void OpenGLCanvas::SetRenderer(std::shared_ptr<Renderer> renderer)
+void OpenGLCanvas::SetRenderer(Renderer* renderer)
 {
     m_renderer = renderer;
 }

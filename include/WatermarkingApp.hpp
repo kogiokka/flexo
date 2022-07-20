@@ -11,13 +11,11 @@
 #include "Lattice.hpp"
 #include "OpenGLCanvas.hpp"
 #include "Project.hpp"
-#include "Renderer.hpp"
 #include "SelfOrganizingMap.hpp"
 
 class WatermarkingApp : public wxApp
 {
     std::shared_ptr<WatermarkingProject> m_project;
-    std::shared_ptr<Renderer> m_renderer;
 
 public:
     WatermarkingApp();
@@ -28,7 +26,6 @@ public:
     void ImportVolumetricModel(wxString const& path);
     BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
-    void OnLatticeMeshReady(wxCommandEvent& evt);
     void OnCmdStartTraining(wxCommandEvent& evt);
     void OnCmdStopTrainining(wxCommandEvent& evt);
     void OnCmdPauseTraining(wxCommandEvent& evt);
@@ -44,3 +41,4 @@ private:
 };
 
 #endif
+

@@ -8,6 +8,7 @@
 #include "OpenGLCanvas.hpp"
 #include "ProjectPanel.hpp"
 #include "ProjectWindow.hpp"
+#include "Renderer.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
@@ -20,13 +21,11 @@ wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
     EVT_COMMAND(wxID_ANY, EVT_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
     EVT_COMMAND(wxID_ANY, EVT_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
-    EVT_COMMAND(wxID_ANY, EVT_LATTICE_MESH_READY, WatermarkingApp::OnLatticeMeshReady)
 wxEND_EVENT_TABLE()
 
 wxIMPLEMENT_APP(WatermarkingApp);
 
 WatermarkingApp::WatermarkingApp()
-    : m_renderer(nullptr)
 {
 }
 
@@ -63,11 +62,11 @@ bool WatermarkingApp::OnInit()
 
     window.Show();
     canvas.InitGL();
-    canvas.SetFocus();
+    // After OpenGL has been initialized
+    auto& renderer = Renderer::Get(*m_project);
+    canvas.SetRenderer(&renderer); // TODO: Get rid of this
 
-    wxSize const size = canvas.GetClientSize() * canvas.GetContentScaleFactor();
-    m_renderer = std::make_shared<Renderer>(size.x, size.y);
-    canvas.SetRenderer(m_renderer);
+    canvas.SetFocus();
 
     return true;
 }
@@ -83,8 +82,8 @@ void WatermarkingApp::ImportPolygonalModel(wxString const& path)
     }
 
     m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
-    m_renderer->LoadPolygonalModel(*world.theModel);
-    m_renderer->SetCameraView(CalculateBoundingBox(world.theModel->positions));
+    Renderer::Get(*m_project).LoadPolygonalModel(*world.theModel);
+    Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(world.theModel->positions));
 }
 
 void WatermarkingApp::ImportVolumetricModel(wxString const& path)
@@ -152,8 +151,8 @@ void WatermarkingApp::ImportVolumetricModel(wxString const& path)
     Logger::info("%lu voxels will be rendered.", pos.size());
 
     m_project->SetDataset(std::make_shared<InputData>(pos));
-    m_renderer->LoadVolumetricModel();
-    m_renderer->SetCameraView(CalculateBoundingBox(world.theModel->positions));
+    Renderer::Get(*m_project).LoadVolumetricModel();
+    Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(world.theModel->positions));
 }
 
 BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positions)
@@ -183,11 +182,6 @@ BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positio
         }
     }
     return { max, min };
-}
-
-void WatermarkingApp::OnLatticeMeshReady(wxCommandEvent&)
-{
-    m_renderer->LoadLattice();
 }
 
 void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
@@ -308,8 +302,8 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
 
     world.theModel = std::make_shared<Mesh>(mesh);
     m_project->SetDataset(std::make_shared<InputData>(mesh.positions));
-    m_renderer->LoadPolygonalModel(*world.theModel);
-    m_renderer->SetCameraView(CalculateBoundingBox(mesh.positions));
+    Renderer::Get(*m_project).LoadPolygonalModel(*world.theModel);
+    Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(mesh.positions));
 }
 
 void WatermarkingApp::OnMenuImportModel(wxCommandEvent& evt)

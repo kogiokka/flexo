@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include "Attachable.hpp"
 #include "Graphics.hpp"
 #include "Mesh.hpp"
 #include "drawable/Drawable.hpp"
@@ -13,9 +14,14 @@
 #include "drawable/PolygonalModel.hpp"
 #include "drawable/VolumetricModel.hpp"
 
-class Renderer
+class WatermarkingProject;
+
+class Renderer : public AttachableBase
 {
 public:
+    static Renderer& Get(WatermarkingProject& project);
+    static Renderer const& Get(WatermarkingProject const& project);
+
     Renderer(int width, int height);
     void Render();
     void SetCameraView(BoundingBox const& box);

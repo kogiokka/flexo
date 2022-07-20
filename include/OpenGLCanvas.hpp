@@ -1,7 +1,6 @@
 #ifndef OPENGL_CANVAS_H
 #define OPENGL_CANVAS_H
 
-#include <memory>
 #include <tuple>
 
 #include <glad/glad.h> // before <wx/glcanvas.h>
@@ -23,7 +22,7 @@ class OpenGLCanvas : public wxGLCanvas
 {
     bool m_isGLLoaded;
     std::unique_ptr<wxGLContext> m_context;
-    std::shared_ptr<Renderer> m_renderer;
+    Renderer* m_renderer;
     float m_rateMove;
     float m_rateRotate;
     int m_dirHorizontal;
@@ -47,7 +46,7 @@ public:
     void OnMouseRightDown(wxMouseEvent& event);
     void OnUpdateTimer(wxTimerEvent& event);
     void InitGL();
-    void SetRenderer(std::shared_ptr<Renderer> renderer);
+    void SetRenderer(Renderer* renderer);
     void ResetCamera();
 
 private:

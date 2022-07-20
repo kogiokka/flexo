@@ -2,9 +2,29 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "OpenGLCanvas.hpp"
+#include "Project.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
+
+static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
+    [](WatermarkingProject& project) -> SharedPtr<Renderer> {
+        auto const& canvas = OpenGLCanvas::Get(project);
+        wxSize const size = canvas.GetClientSize() * canvas.GetContentScaleFactor();
+        return std::make_shared<Renderer>(size.x, size.y);
+    }
+};
+
+Renderer& Renderer::Get(WatermarkingProject& project)
+{
+    return project.AttachedObjects::Get<Renderer>(factoryKey);
+}
+
+Renderer const& Renderer::Get(WatermarkingProject const& project)
+{
+    return Get(const_cast<WatermarkingProject&>(project));
+}
 
 Renderer::Renderer(int width, int height)
     : m_gfx(width, height)

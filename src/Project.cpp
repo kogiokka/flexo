@@ -1,6 +1,7 @@
 #include <glm/glm.hpp>
 
 #include "Project.hpp"
+#include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 
@@ -183,8 +184,7 @@ void WatermarkingProject::OnLatticeInitialized(wxCommandEvent&)
     m_isLatticeReady = true;
     BuildLatticeMesh();
 
-    wxCommandEvent event(EVT_LATTICE_MESH_READY);
-    ProcessEvent(event);
+    Renderer::Get(*this).LoadLattice();
 }
 
 void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)
