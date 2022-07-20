@@ -1,17 +1,12 @@
 #ifndef WATERMARKING_APP_H
 #define WATERMARKING_APP_H
 
-#include <memory>
 #include <vector>
 
 #include <glm/glm.hpp>
 #include <wx/app.h>
 
-#include "InputData.hpp"
-#include "Lattice.hpp"
-#include "OpenGLCanvas.hpp"
 #include "Project.hpp"
-#include "SelfOrganizingMap.hpp"
 
 class WatermarkingApp : public wxApp
 {
@@ -41,4 +36,3 @@ private:
 };
 
 #endif
-
