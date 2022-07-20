@@ -6,9 +6,11 @@
 #include "common/Logger.hpp"
 
 // Register factory: SelfOrganizingMap
-static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey { [](WatermarkingProject& project) {
-    return std::make_shared<SelfOrganizingMap>(project);
-} };
+static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
+    [](WatermarkingProject& project) -> SharedPtr<SelfOrganizingMap> {
+        return std::make_shared<SelfOrganizingMap>(project);
+    }
+};
 
 SelfOrganizingMap& SelfOrganizingMap::Get(WatermarkingProject& project)
 {

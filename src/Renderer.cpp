@@ -8,6 +8,7 @@
 #include "World.hpp"
 #include "common/Logger.hpp"
 
+// Register factory: Renderer
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> SharedPtr<Renderer> {
         auto const& canvas = OpenGLCanvas::Get(project);

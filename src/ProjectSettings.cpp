@@ -5,10 +5,12 @@
 wxDEFINE_EVENT(EVT_PROJECT_SETTINGS_CHANGED, wxCommandEvent);
 
 // Register factory: ProjectSettings
-static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey { [](WatermarkingProject& project) {
-    auto result = std::make_shared<ProjectSettings>(project);
-    return result;
-} };
+static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
+    [](WatermarkingProject& project) -> SharedPtr<ProjectSettings> {
+        auto result = std::make_shared<ProjectSettings>(project);
+        return result;
+    }
+};
 
 void Notify(WatermarkingProject& project, ProjectSettings::EventCode code)
 {
