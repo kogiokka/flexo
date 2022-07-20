@@ -9,7 +9,6 @@
 
 #include "InputData.hpp"
 #include "Lattice.hpp"
-#include "MainPanel.hpp"
 #include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
 #include "Project.hpp"
@@ -26,7 +25,6 @@ class WatermarkingApp : public wxApp
     std::shared_ptr<WatermarkingProject> m_project;
     std::shared_ptr<Renderer> m_renderer;
 
-    MainPanel* m_panel;
     BoundingBox m_bbox;
 
 public:

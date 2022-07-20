@@ -12,9 +12,10 @@
 #include <wx/valnum.h>
 
 #include "Lattice.hpp"
-#include "MainPanel.hpp"
 #include "Project.hpp"
+#include "ProjectPanel.hpp"
 #include "ProjectSettings.hpp"
+#include "ProjectWindow.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
 
@@ -23,8 +24,31 @@ wxDEFINE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
 wxDEFINE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
 
-MainPanel::MainPanel(wxWindow* parent, WatermarkingProject& project)
-    : wxPanel(parent, wxID_ANY)
+static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
+    [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
+        auto& window = ProjectWindow::Get(project);
+        wxWindow* mainPage = window.GetMainPage();
+        wxASSERT(mainPage != nullptr);
+
+        auto panel = new ProjectPanel(mainPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, project);
+        project.SetPanel(panel);
+        return panel;
+    }
+};
+
+ProjectPanel& ProjectPanel::Get(WatermarkingProject& project)
+{
+    return project.AttachedWindows::Get<ProjectPanel>(factoryKey);
+}
+
+ProjectPanel const& ProjectPanel::Get(WatermarkingProject const& project)
+{
+    return Get(const_cast<WatermarkingProject&>(project));
+}
+
+ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
+                           WatermarkingProject& project)
+    : wxPanel(parent, id, pos, size)
     , m_project(project)
 {
     m_notebook = new wxNotebook(this, MAIN_PANEL_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
@@ -40,12 +64,17 @@ MainPanel::MainPanel(wxWindow* parent, WatermarkingProject& project)
     m_updateTimer->Start(16); // 16 ms (60 fps)
 }
 
-MainPanel::~MainPanel()
+ProjectPanel::~ProjectPanel()
 {
     m_updateTimer->Stop();
 }
 
-void MainPanel::PopulateProjectPage()
+wxTextCtrl* ProjectPanel::GetTextCtrlInitialNeighborhood()
+{
+    return m_tcInitialNeighborhood;
+};
+
+void ProjectPanel::PopulateProjectPage()
 {
     wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
     wxBoxSizer* const boxLayout = new wxBoxSizer(wxVERTICAL);
@@ -184,7 +213,7 @@ void MainPanel::PopulateProjectPage()
     m_notebook->AddPage(page, "Project");
 }
 
-void MainPanel::PopulateRenderingPage()
+void ProjectPanel::PopulateRenderingPage()
 {
     wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
 
@@ -227,7 +256,7 @@ void MainPanel::PopulateRenderingPage()
     m_notebook->AddPage(page, "Rendering");
 }
 
-void MainPanel::OnButtonCreateProject(wxCommandEvent&)
+void ProjectPanel::OnButtonCreateProject(wxCommandEvent&)
 {
     m_btnCreateProject->Disable();
     m_btnStopProject->Enable();
@@ -238,7 +267,7 @@ void MainPanel::OnButtonCreateProject(wxCommandEvent&)
     m_project.Initialize();
 }
 
-void MainPanel::OnButtonStopProject(wxCommandEvent&)
+void ProjectPanel::OnButtonStopProject(wxCommandEvent&)
 {
     m_projectConfigPanel->Enable();
     m_btnCreateProject->Enable();
@@ -256,7 +285,7 @@ void MainPanel::OnButtonStopProject(wxCommandEvent&)
     m_project.Initialize();
 }
 
-void MainPanel::OnButtonInitializeLattice(wxCommandEvent&)
+void ProjectPanel::OnButtonInitializeLattice(wxCommandEvent&)
 {
     Lattice::Get(m_project).Initialize();
     m_projectConfigPanel->Enable();
@@ -264,7 +293,7 @@ void MainPanel::OnButtonInitializeLattice(wxCommandEvent&)
     m_btnStopProject->Disable();
 }
 
-void MainPanel::OnButtonStart(wxCommandEvent&)
+void ProjectPanel::OnButtonStart(wxCommandEvent&)
 {
     m_btnCreateProject->Disable();
     m_btnStopProject->Enable();
@@ -276,7 +305,7 @@ void MainPanel::OnButtonStart(wxCommandEvent&)
     SelfOrganizingMap::Get(m_project).ToggleTraining();
 }
 
-void MainPanel::OnButtonPause(wxCommandEvent&)
+void ProjectPanel::OnButtonPause(wxCommandEvent&)
 {
     if (m_btnPause->GetLabel() == "Continue") {
         m_btnPause->SetLabel("Pause");
@@ -287,68 +316,68 @@ void MainPanel::OnButtonPause(wxCommandEvent&)
     SelfOrganizingMap::Get(m_project).ToggleTraining();
 }
 
-void MainPanel::OnButtonWatermark(wxCommandEvent&)
+void ProjectPanel::OnButtonWatermark(wxCommandEvent&)
 {
     m_project.DoWatermark();
 }
 
-void MainPanel::OnCheckboxModel(wxCommandEvent&)
+void ProjectPanel::OnCheckboxModel(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawModel);
     ProcessWindowEvent(event);
 }
 
-void MainPanel::OnCheckboxLatticeVertex(wxCommandEvent&)
+void ProjectPanel::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeVertex);
     ProcessWindowEvent(event);
 }
 
-void MainPanel::OnCheckboxLatticeEdge(wxCommandEvent&)
+void ProjectPanel::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeEdge);
     ProcessWindowEvent(event);
 }
 
-void MainPanel::OnCheckboxLatticeFace(wxCommandEvent&)
+void ProjectPanel::OnCheckboxLatticeFace(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeFace);
     ProcessWindowEvent(event);
 }
 
-void MainPanel::OnCheckboxLightSource(wxCommandEvent&)
+void ProjectPanel::OnCheckboxLightSource(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLightSource);
     ProcessWindowEvent(event);
 }
 
-void MainPanel::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
+void ProjectPanel::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_TOGGLE_LATTICE_FLAG, GetId());
     event.SetInt(LatticeFlags_CyclicX);
     ProcessWindowEvent(event);
 }
 
-void MainPanel::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
+void ProjectPanel::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
 {
     wxCommandEvent event(CMD_TOGGLE_LATTICE_FLAG, GetId());
     event.SetInt(LatticeFlags_CyclicY);
     ProcessWindowEvent(event);
 }
 
-void MainPanel::OnSliderTransparency(wxCommandEvent&)
+void ProjectPanel::OnSliderTransparency(wxCommandEvent&)
 {
     float const range = static_cast<float>(m_slider->GetMax() - m_slider->GetMin());
     float const value = static_cast<float>(m_slider->GetValue());
     world.modelColorAlpha = (range - value) / range;
 }
 
-void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
+void ProjectPanel::OnTimerUIUpdate(wxTimerEvent&)
 {
     auto& som = SelfOrganizingMap::Get(m_project);
 
@@ -364,7 +393,7 @@ void MainPanel::OnTimerUIUpdate(wxTimerEvent&)
     }
 }
 
-void MainPanel::OnUpdateUI(wxUpdateUIEvent& evt)
+void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& evt)
 {
     switch (evt.GetId()) {
     case MAIN_PANEL_NOTEBOOK:
@@ -377,7 +406,7 @@ void MainPanel::OnUpdateUI(wxUpdateUIEvent& evt)
     }
 }
 
-void MainPanel::OnSetLatticeWidth(wxCommandEvent& evt)
+void ProjectPanel::OnSetLatticeWidth(wxCommandEvent& evt)
 {
     long tmp;
     if (evt.GetString().ToLong(&tmp)) {
@@ -385,7 +414,7 @@ void MainPanel::OnSetLatticeWidth(wxCommandEvent& evt)
     }
 }
 
-void MainPanel::OnSetLatticeHeight(wxCommandEvent& evt)
+void ProjectPanel::OnSetLatticeHeight(wxCommandEvent& evt)
 {
     long tmp;
     if (evt.GetString().ToLong(&tmp)) {
@@ -393,7 +422,7 @@ void MainPanel::OnSetLatticeHeight(wxCommandEvent& evt)
     }
 }
 
-void MainPanel::OnSetMaxIterations(wxCommandEvent& evt)
+void ProjectPanel::OnSetMaxIterations(wxCommandEvent& evt)
 {
     long tmp;
     if (evt.GetString().ToLong(&tmp)) {
@@ -401,7 +430,7 @@ void MainPanel::OnSetMaxIterations(wxCommandEvent& evt)
     }
 }
 
-void MainPanel::OnSetLearningRate(wxCommandEvent& evt)
+void ProjectPanel::OnSetLearningRate(wxCommandEvent& evt)
 {
     double tmp;
     if (evt.GetString().ToDouble(&tmp)) {
@@ -409,7 +438,7 @@ void MainPanel::OnSetLearningRate(wxCommandEvent& evt)
     }
 }
 
-void MainPanel::OnSetNeighborhood(wxCommandEvent& evt)
+void ProjectPanel::OnSetNeighborhood(wxCommandEvent& evt)
 {
     double tmp;
     if (evt.GetString().ToDouble(&tmp)) {
@@ -417,26 +446,26 @@ void MainPanel::OnSetNeighborhood(wxCommandEvent& evt)
     }
 }
 
-wxBEGIN_EVENT_TABLE(MainPanel, wxPanel)
-    EVT_TEXT(TE_LATTICE_WIDTH, MainPanel::OnSetLatticeWidth)
-    EVT_TEXT(TE_LATTICE_HEIGHT, MainPanel::OnSetLatticeHeight)
-    EVT_TEXT(TE_MAX_ITERATIONS, MainPanel::OnSetMaxIterations)
-    EVT_TEXT(TE_LEARNING_RATE, MainPanel::OnSetLearningRate)
-    EVT_TEXT(TE_INITIAL_NEIGHBORHOOD, MainPanel::OnSetNeighborhood)
-    EVT_BUTTON(BTN_START, MainPanel::OnButtonStart)
-    EVT_BUTTON(BTN_PLAY_PAUSE, MainPanel::OnButtonPause)
-    EVT_BUTTON(BTN_WATERMARK, MainPanel::OnButtonWatermark)
-    EVT_BUTTON(BTN_INITIALIZE_LATTICE, MainPanel::OnButtonInitializeLattice)
-    EVT_BUTTON(BTN_CREATE_PROJECT, MainPanel::OnButtonCreateProject)
-    EVT_BUTTON(BTN_STOP_PROJECT, MainPanel::OnButtonStopProject)
-    EVT_CHECKBOX(CB_RENDEROPT_MODEL, MainPanel::OnCheckboxModel)
-    EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, MainPanel::OnCheckboxLatticeVertex)
-    EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, MainPanel::OnCheckboxLatticeEdge)
-    EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, MainPanel::OnCheckboxLatticeFace)
-    EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, MainPanel::OnCheckboxLightSource)
-    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, MainPanel::OnCheckboxLatticeFlagsCyclicX)
-    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, MainPanel::OnCheckboxLatticeFlagsCyclicY)
-    EVT_SLIDER(SLIDER_TRANSPARENCY, MainPanel::OnSliderTransparency)
-    EVT_TIMER(TIMER_UI_UPDATE, MainPanel::OnTimerUIUpdate)
-    EVT_UPDATE_UI(MAIN_PANEL_NOTEBOOK, MainPanel::OnUpdateUI)
+wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
+    EVT_TEXT(TE_LATTICE_WIDTH, ProjectPanel::OnSetLatticeWidth)
+    EVT_TEXT(TE_LATTICE_HEIGHT, ProjectPanel::OnSetLatticeHeight)
+    EVT_TEXT(TE_MAX_ITERATIONS, ProjectPanel::OnSetMaxIterations)
+    EVT_TEXT(TE_LEARNING_RATE, ProjectPanel::OnSetLearningRate)
+    EVT_TEXT(TE_INITIAL_NEIGHBORHOOD, ProjectPanel::OnSetNeighborhood)
+    EVT_BUTTON(BTN_START, ProjectPanel::OnButtonStart)
+    EVT_BUTTON(BTN_PLAY_PAUSE, ProjectPanel::OnButtonPause)
+    EVT_BUTTON(BTN_WATERMARK, ProjectPanel::OnButtonWatermark)
+    EVT_BUTTON(BTN_INITIALIZE_LATTICE, ProjectPanel::OnButtonInitializeLattice)
+    EVT_BUTTON(BTN_CREATE_PROJECT, ProjectPanel::OnButtonCreateProject)
+    EVT_BUTTON(BTN_STOP_PROJECT, ProjectPanel::OnButtonStopProject)
+    EVT_CHECKBOX(CB_RENDEROPT_MODEL, ProjectPanel::OnCheckboxModel)
+    EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, ProjectPanel::OnCheckboxLatticeVertex)
+    EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, ProjectPanel::OnCheckboxLatticeEdge)
+    EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, ProjectPanel::OnCheckboxLatticeFace)
+    EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, ProjectPanel::OnCheckboxLightSource)
+    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, ProjectPanel::OnCheckboxLatticeFlagsCyclicX)
+    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
+    EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
+    EVT_TIMER(TIMER_UI_UPDATE, ProjectPanel::OnTimerUIUpdate)
+    EVT_UPDATE_UI(MAIN_PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()

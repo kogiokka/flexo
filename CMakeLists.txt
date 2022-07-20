@@ -36,11 +36,11 @@ endif()
 target_sources(som-demo
 PRIVATE
     "src/main.cpp"
-    "src/MainWindow.cpp"
-    "src/MainPanel.cpp"
     "src/OpenGLCanvas.cpp"
     "src/ProjectSettings.cpp"
     "src/Project.cpp"
+    "src/ProjectWindow.cpp"
+    "src/ProjectPanel.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"
