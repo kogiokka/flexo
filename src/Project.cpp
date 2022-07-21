@@ -22,6 +22,7 @@ void WatermarkingProject::Initialize()
 {
     assert(m_dataset);
     SelfOrganizingMap::Get(*this).Initialize(m_dataset);
+    world.isWatermarked = false;
 }
 
 void WatermarkingProject::BuildLatticeMesh() const
