@@ -15,6 +15,8 @@
 
 class WatermarkingProject;
 
+wxDECLARE_EVENT(EVT_INITIAL_NEIGHBORHOOD_UPDATE, wxCommandEvent);
+
 class SelfOrganizingMap : public AttachableBase
 {
     bool m_isDone;
@@ -42,11 +44,13 @@ public:
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
+
     void SetMaxIterations(int numIterations);
     void SetLearningRate(float rate);
-    void SetNeighborhood(float radius);
+    void SetInitialNeighborhood(float radius);
     int GetIterations() const;
     float GetNeighborhood() const;
+    float GetInitialNeighborhood() const;
 
 private:
     void StopWorker();

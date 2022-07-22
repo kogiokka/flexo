@@ -1,6 +1,7 @@
 #include <glm/glm.hpp>
 
 #include "Project.hpp"
+#include "ProjectPanel.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
@@ -179,7 +180,18 @@ void WatermarkingProject::DoWatermark()
 void WatermarkingProject::OnLatticeInitialized(wxCommandEvent&)
 {
     assert(m_dataset);
-    SelfOrganizingMap::Get(*this).Initialize(m_dataset);
+    auto& som = SelfOrganizingMap::Get(*this);
+    auto& lattice = Lattice::Get(*this);
+    som.Initialize(m_dataset);
+
+    int const width = lattice.GetWidth();
+    int const height = lattice.GetHeight();
+    float radius = 0.5f * sqrt(width * width + height * height);
+    som.SetInitialNeighborhood(radius);
+
+    // This event is bind to a ProjectPanel function
+    wxCommandEvent event(EVT_INITIAL_NEIGHBORHOOD_UPDATE);
+    ProcessEvent(event);
 
     // TODO: Better solution
     m_isLatticeReady = true;
@@ -199,5 +211,5 @@ void WatermarkingProject::OnProjectSettingsChanged(wxCommandEvent&)
     auto const& settings = ProjectSettings::Get(*this);
     som.SetMaxIterations(settings.GetMaxIterations());
     som.SetLearningRate(settings.GetLearningRate());
-    som.SetNeighborhood(settings.GetNeighborhood());
+    som.SetInitialNeighborhood(settings.GetNeighborhood());
 }

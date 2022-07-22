@@ -63,17 +63,14 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
 
     m_updateTimer = new wxTimer(this, TIMER_UI_UPDATE);
     m_updateTimer->Start(16); // 16 ms (60 fps)
+
+    m_project.Bind(EVT_INITIAL_NEIGHBORHOOD_UPDATE, &ProjectPanel::OnInitialNeighborhoodUpdate, this);
 }
 
 ProjectPanel::~ProjectPanel()
 {
     m_updateTimer->Stop();
 }
-
-wxTextCtrl* ProjectPanel::GetTextCtrlInitialNeighborhood()
-{
-    return m_tcInitialNeighborhood;
-};
 
 void ProjectPanel::PopulateProjectPage()
 {
@@ -445,6 +442,12 @@ void ProjectPanel::OnSetNeighborhood(wxCommandEvent& evt)
     if (evt.GetString().ToDouble(&tmp)) {
         ProjectSettings::Get(m_project).SetNeighborhood(tmp);
     }
+}
+
+void ProjectPanel::OnInitialNeighborhoodUpdate(wxCommandEvent&)
+{
+    m_tcInitialNeighborhood->Clear();
+    *m_tcInitialNeighborhood << SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
 }
 
 wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
