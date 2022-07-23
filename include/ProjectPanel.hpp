@@ -67,8 +67,6 @@ public:
     ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size, WatermarkingProject& project);
     ~ProjectPanel();
 
-    wxTextCtrl* GetTextCtrlInitialNeighborhood();
-
 private:
     void PopulateProjectPage();
     void PopulateRenderingPage();
@@ -93,6 +91,7 @@ private:
     void OnSetMaxIterations(wxCommandEvent& evt);
     void OnSetLearningRate(wxCommandEvent& evt);
     void OnSetNeighborhood(wxCommandEvent& evt);
+    void OnInitialNeighborhoodUpdate(wxCommandEvent& evt);
 
     WatermarkingProject& m_project;
 

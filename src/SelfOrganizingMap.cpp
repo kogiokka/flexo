@@ -1,9 +1,10 @@
 #include "SelfOrganizingMap.hpp"
 #include "Lattice.hpp"
 #include "Project.hpp"
-#include "ProjectPanel.hpp"
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
+
+wxDEFINE_EVENT(EVT_INITIAL_NEIGHBORHOOD_UPDATE, wxCommandEvent);
 
 // Register factory: SelfOrganizingMap
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
@@ -52,27 +53,14 @@ void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
         m_isTraining = false;
     }
 
-    int const width = Lattice::Get(m_project).GetWidth();
-    int const height = Lattice::Get(m_project).GetHeight();
     auto const& settings = ProjectSettings::Get(m_project);
 
     m_maxIterations = settings.GetMaxIterations();
     m_initialRate = settings.GetLearningRate();
+    m_initialNeighborhood = settings.GetNeighborhood();
     m_iterations = 0;
     m_rate = m_initialRate;
-
-    { // Default radius
-        float radius = settings.GetNeighborhood();
-        if (radius == 0.0f) {
-            radius = 0.5f * sqrt(width * width + height * height);
-        }
-        m_initialNeighborhood = radius;
-        m_neighborhood = radius;
-        // FIXME Use event.
-        auto* textctrl = ProjectPanel::Get(m_project).GetTextCtrlInitialNeighborhood();
-        textctrl->Clear();
-        *textctrl << radius;
-    }
+    m_neighborhood = m_initialNeighborhood;
 
     m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 
@@ -219,7 +207,7 @@ void SelfOrganizingMap::SetLearningRate(float rate)
     m_initialRate = rate;
 }
 
-void SelfOrganizingMap::SetNeighborhood(float radius)
+void SelfOrganizingMap::SetInitialNeighborhood(float radius)
 {
     m_initialNeighborhood = radius;
     m_neighborhood = radius;
@@ -234,6 +222,11 @@ int SelfOrganizingMap::GetIterations() const
 float SelfOrganizingMap::GetNeighborhood() const
 {
     return m_neighborhood;
+}
+
+float SelfOrganizingMap::GetInitialNeighborhood() const
+{
+    return m_initialNeighborhood;
 }
 
 void SelfOrganizingMap::StopWorker()
