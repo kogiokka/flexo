@@ -50,7 +50,7 @@ void WatermarkingProject::BuildLatticeMesh() const
 
             unsigned int const idx = y * width + x;
             glm::vec3 p1, p2, p3, p4;
-            glm::vec3 n1, n2, n3, n4;
+            glm::vec3 n1, n2;
             glm::vec2 t1, t2, t3, t4;
             Face f1, f2;
 
@@ -66,18 +66,8 @@ void WatermarkingProject::BuildLatticeMesh() const
             p4 = positions[idx + width]; // [x, y + 1]
 
             // Normals
-            n2 = glm::normalize(glm::cross(p2 - p1, p3 - p2));
-            n4 = glm::normalize(glm::cross(p3 - p1, p4 - p3));
-
-            if (isnan(n1.x) || isnan(n1.y) || isnan(n1.z)) {
-                n1 = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-            if (isnan(n2.x) || isnan(n2.y) || isnan(n2.z)) {
-                n2 = glm::vec3(0.0f, 0.0f, 0.0f);
-            }
-
-            n3 = (n2 + n4) * 0.5f;
-            n1 = (n2 + n4) * 0.5f;
+            n1 = glm::normalize(glm::cross(p2 - p1, p3 - p1));
+            n2 = glm::normalize(glm::cross(p3 - p1, p4 - p1));
 
             // TextureCoords
             t1 = glm::vec2(x / divisor, y / divisor);
@@ -92,11 +82,11 @@ void WatermarkingProject::BuildLatticeMesh() const
             mesh.positions.push_back(p3);
             mesh.positions.push_back(p4);
             mesh.normals.push_back(n1);
-            mesh.normals.push_back(n2);
-            mesh.normals.push_back(n3);
             mesh.normals.push_back(n1);
-            mesh.normals.push_back(n3);
-            mesh.normals.push_back(n4);
+            mesh.normals.push_back(n1);
+            mesh.normals.push_back(n2);
+            mesh.normals.push_back(n2);
+            mesh.normals.push_back(n2);
             mesh.textureCoords.push_back(t1);
             mesh.textureCoords.push_back(t2);
             mesh.textureCoords.push_back(t3);
