@@ -62,8 +62,6 @@ void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
     m_rate = m_initialRate;
     m_neighborhood = m_initialNeighborhood;
 
-    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
-
     auto& lattice = Lattice::Get(m_project);
     void (SelfOrganizingMap::*Train)(Lattice&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
     m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
@@ -87,8 +85,12 @@ void SelfOrganizingMap::Train(Lattice& lattice, std::shared_ptr<InputData> datas
         glm::vec3 const input = dataset->GetInput();
         float const progress = static_cast<float>(m_iterations);
 
-        m_neighborhood = m_initialNeighborhood * expf(-progress / m_timeConstant);
-        m_rate = m_initialRate * expf(-progress / static_cast<float>(m_maxIterations - m_iterations));
+        float const remains = static_cast<float>(m_maxIterations - m_iterations);
+        float const learningRateDecayCoef = 1.0f / remains;
+        float const neighborhoodDecayCoef = logf(m_initialNeighborhood) / remains;
+
+        m_neighborhood = m_initialNeighborhood * expf(-progress * neighborhoodDecayCoef);
+        m_rate = m_initialRate * expf(-progress * learningRateDecayCoef);
 
         glm::ivec2 const index = FindBMU(lattice, input);
         Node const& bmu = neurons[index.x + index.y * width];
@@ -199,7 +201,6 @@ bool SelfOrganizingMap::IsTraining() const
 void SelfOrganizingMap::SetMaxIterations(int numIterations)
 {
     m_maxIterations = numIterations;
-    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 }
 
 void SelfOrganizingMap::SetLearningRate(float rate)
@@ -211,7 +212,6 @@ void SelfOrganizingMap::SetInitialNeighborhood(float radius)
 {
     m_initialNeighborhood = radius;
     m_neighborhood = radius;
-    m_timeConstant = m_maxIterations / logf(m_initialNeighborhood);
 }
 
 int SelfOrganizingMap::GetIterations() const

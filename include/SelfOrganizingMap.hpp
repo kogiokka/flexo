@@ -27,7 +27,6 @@ class SelfOrganizingMap : public AttachableBase
     float m_rate;
     float m_initialNeighborhood;
     float m_neighborhood;
-    float m_timeConstant;
 
     std::thread m_worker;
     std::mutex m_mut;
