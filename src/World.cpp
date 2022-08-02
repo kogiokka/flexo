@@ -6,7 +6,8 @@ World world;
 World::World()
 {
     theModel = nullptr;
-    const char* imgFile = "res/images/checkerboard_64x64.png";
+    // const char* imgFile = "res/images/checkerboard_64x64.png";
+    const char* imgFile = "res/images/mandala.png";
     pattern = Image(imgFile, 0, STBI_rgb_alpha);
     Logger::info("Hello from World");
 

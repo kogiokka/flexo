@@ -45,8 +45,10 @@ void WatermarkingProject::BuildLatticeMesh() const
 
     int const width = lattice.GetWidth();
     int const height = lattice.GetHeight();
-    float const divisor = 1.1f; // FIXME
+    // float const divisor = 1.1f; // FIXME
 
+    float const w = static_cast<float>(width - 1);
+    float const h = static_cast<float>(height - 1);
     for (int y = 0; y < height - 1; ++y) {
         for (int x = 0; x < width - 1; ++x) {
 
@@ -72,10 +74,14 @@ void WatermarkingProject::BuildLatticeMesh() const
             n2 = glm::normalize(glm::cross(p3 - p1, p4 - p1));
 
             // TextureCoords
-            t1 = glm::vec2(x / divisor, y / divisor);
-            t2 = glm::vec2((x + 1) / divisor, y / divisor);
-            t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
-            t4 = glm::vec2(x / divisor, (y + 1) / divisor);
+            // t1 = glm::vec2(x / divisor, y / divisor);
+            // t2 = glm::vec2((x + 1) / divisor, y / divisor);
+            // t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
+            // t4 = glm::vec2(x / divisor, (y + 1) / divisor);
+            t1 = glm::vec2(x / w, y / h);
+            t2 = glm::vec2((x + 1) / w, y / h);
+            t3 = glm::vec2((x + 1) / w, (y + 1) / h);
+            t4 = glm::vec2(x / w, (y + 1) / h);
 
             mesh.positions.push_back(p1);
             mesh.positions.push_back(p2);
