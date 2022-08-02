@@ -36,6 +36,7 @@ void WatermarkingApp::OnUnhandledException()
 
 int WatermarkingApp::OnExit()
 {
+    SelfOrganizingMap::Get(*m_project).StopWorker();
     return wxApp::OnExit();
 }
 

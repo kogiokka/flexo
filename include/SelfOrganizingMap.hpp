@@ -43,6 +43,7 @@ public:
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
+    void StopWorker();
 
     void SetMaxIterations(int numIterations);
     void SetLearningRate(float rate);
@@ -52,7 +53,6 @@ public:
     float GetInitialNeighborhood() const;
 
 private:
-    void StopWorker();
     void Train(Lattice& lattice, std::shared_ptr<InputData> dataset);
     glm::ivec2 FindBMU(Lattice const& lattice, glm::vec3 const& input) const;
     void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius);
