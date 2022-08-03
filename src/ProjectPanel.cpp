@@ -52,7 +52,7 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     : wxPanel(parent, id, pos, size)
     , m_project(project)
 {
-    m_notebook = new wxNotebook(this, MAIN_PANEL_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
+    m_notebook = new wxNotebook(this, PANEL_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
     m_notebook->Disable();
     PopulateProjectPage();
     PopulateRenderingPage();
@@ -79,7 +79,7 @@ void ProjectPanel::PopulateProjectPage()
 
     // Lattice (Map)
     {
-        wxPanel* panel = new wxPanel(page, wxID_ANY);
+        wxPanel* panel = new wxPanel(page, PANEL_LATTICE);
         wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
         auto row1 = new wxBoxSizer(wxHORIZONTAL);
         auto row2 = new wxBoxSizer(wxHORIZONTAL);
@@ -117,14 +117,11 @@ void ProjectPanel::PopulateProjectPage()
         panel->SetSizer(layout);
         boxLayout->Add(panel, 0, wxGROW | wxALL, 10);
         boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
-
-        panel->Enable();
-        m_latticeConfigPanel = panel;
     }
 
-    // SOM procedure
+    // SOM hyperparameters
     {
-        wxPanel* panel = new wxPanel(page, wxID_ANY);
+        wxPanel* panel = new wxPanel(page, PANEL_HYPERPARAMS);
         wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
         auto row1 = new wxBoxSizer(wxHORIZONTAL);
         auto row2 = new wxBoxSizer(wxHORIZONTAL);
@@ -171,9 +168,6 @@ void ProjectPanel::PopulateProjectPage()
         boxLayout->Add(panel, 0, wxGROW | wxALL, 10);
         boxLayout->Add(row4, 0, wxGROW | wxALL, 10);
         boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
-
-        panel->Disable();
-        m_projectConfigPanel = panel;
     }
 
     {
@@ -267,11 +261,9 @@ void ProjectPanel::OnButtonCreateProject(wxCommandEvent&)
 
 void ProjectPanel::OnButtonStopProject(wxCommandEvent&)
 {
-    m_projectConfigPanel->Enable();
     m_btnCreateProject->Enable();
     m_btnStopProject->Disable();
 
-    m_latticeConfigPanel->Enable();
     m_btnStart->Disable();
     m_btnPause->Disable();
 
@@ -286,7 +278,6 @@ void ProjectPanel::OnButtonStopProject(wxCommandEvent&)
 void ProjectPanel::OnButtonInitializeLattice(wxCommandEvent&)
 {
     Lattice::Get(m_project).Initialize();
-    m_projectConfigPanel->Enable();
     m_btnCreateProject->Enable();
     m_btnStopProject->Disable();
 }
@@ -295,8 +286,6 @@ void ProjectPanel::OnButtonStart(wxCommandEvent&)
 {
     m_btnCreateProject->Disable();
     m_btnStopProject->Enable();
-    m_latticeConfigPanel->Disable();
-    m_projectConfigPanel->Disable();
     m_btnStart->Disable();
     m_btnPause->Enable();
 
@@ -394,8 +383,16 @@ void ProjectPanel::OnTimerUIUpdate(wxTimerEvent&)
 void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& evt)
 {
     switch (evt.GetId()) {
-    case MAIN_PANEL_NOTEBOOK:
+    case PANEL_NOTEBOOK:
         if (world.theModel) {
+            evt.Enable(true);
+        }
+        break;
+    case PANEL_LATTICE:
+    case PANEL_HYPERPARAMS:
+        if (SelfOrganizingMap::Get(m_project).IsTraining()) {
+            evt.Enable(false);
+        } else {
             evt.Enable(true);
         }
         break;
@@ -471,5 +468,7 @@ wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
     EVT_TIMER(TIMER_UI_UPDATE, ProjectPanel::OnTimerUIUpdate)
-    EVT_UPDATE_UI(MAIN_PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(PANEL_LATTICE, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(PANEL_HYPERPARAMS, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()

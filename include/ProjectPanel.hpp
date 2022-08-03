@@ -36,15 +36,15 @@ enum {
     CB_LATTICE_FLAGS_CYCLIC_Y,
     SLIDER_TRANSPARENCY,
     TIMER_UI_UPDATE,
-    MAIN_PANEL_NOTEBOOK,
+    PANEL_NOTEBOOK,
+    PANEL_HYPERPARAMS,
+    PANEL_LATTICE,
 };
 
 class WatermarkingProject;
 
 class ProjectPanel : public wxPanel
 {
-    wxPanel* m_latticeConfigPanel;
-    wxPanel* m_projectConfigPanel;
     wxNotebook* m_notebook;
     wxButton* m_btnCreateProject;
     wxButton* m_btnStopProject;
