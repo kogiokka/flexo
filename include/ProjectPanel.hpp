@@ -10,6 +10,7 @@
 #include <wx/sizer.h>
 #include <wx/slider.h>
 #include <wx/spinctrl.h>
+#include <wx/aui/framemanager.h>
 #include <wx/textctrl.h>
 #include <wx/timer.h>
 #include <wx/window.h>
@@ -46,6 +47,7 @@ class WatermarkingProject;
 class ProjectPanel : public wxPanel
 {
     wxNotebook* m_notebook;
+    wxAuiManager m_auiManager;
     wxButton* m_btnCreateProject;
     wxButton* m_btnStopProject;
     wxButton* m_btnStart;
@@ -92,6 +94,7 @@ private:
     void OnSetLearningRate(wxCommandEvent& evt);
     void OnSetNeighborhood(wxCommandEvent& evt);
     void OnInitialNeighborhoodUpdate(wxCommandEvent& evt);
+    void OnTogglePane(wxCommandEvent& event);
 
     WatermarkingProject& m_project;
 

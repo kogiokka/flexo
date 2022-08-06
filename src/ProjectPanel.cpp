@@ -54,6 +54,7 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
 {
     m_notebook = new wxNotebook(this, PANEL_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
     m_notebook->Disable();
+
     PopulateProjectPage();
     PopulateRenderingPage();
 
@@ -65,6 +66,9 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     m_updateTimer->Start(16); // 16 ms (60 fps)
 
     m_project.Bind(EVT_INITIAL_NEIGHBORHOOD_UPDATE, &ProjectPanel::OnInitialNeighborhoodUpdate, this);
+    m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
+    m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_HYPERPARAMS);
+    m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_CONTROL);
 }
 
 ProjectPanel::~ProjectPanel()
@@ -74,12 +78,15 @@ ProjectPanel::~ProjectPanel()
 
 void ProjectPanel::PopulateProjectPage()
 {
-    wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
-    wxBoxSizer* const boxLayout = new wxBoxSizer(wxVERTICAL);
+    wxPanel* sidePane = new wxPanel(m_notebook, wxID_ANY);
+    wxPanel* panel1 = new wxPanel(sidePane, PANEL_LATTICE);
+    wxPanel* panel2 = new wxPanel(sidePane, PANEL_LATTICE);
+    wxPanel* panel3 = new wxPanel(sidePane, wxID_ANY);
+
+    m_auiManager.SetManagedWindow(sidePane);
 
     // Lattice (Map)
     {
-        wxPanel* panel = new wxPanel(page, PANEL_LATTICE);
         wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
         auto row1 = new wxBoxSizer(wxHORIZONTAL);
         auto row2 = new wxBoxSizer(wxHORIZONTAL);
@@ -89,95 +96,82 @@ void ProjectPanel::PopulateProjectPage()
         wxIntegerValidator<int> validDimen;
         validDimen.SetRange(1, 512);
 
-        m_tcLatticeWidth = new wxTextCtrl(panel, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        m_tcLatticeWidth = new wxTextCtrl(panel1, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                           wxTE_CENTER, validDimen);
-        m_tcLatticeHeight = new wxTextCtrl(panel, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        m_tcLatticeHeight = new wxTextCtrl(panel1, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                            wxTE_CENTER, validDimen);
         *m_tcLatticeWidth << Lattice::Get(m_project).GetWidth();
         *m_tcLatticeHeight << Lattice::Get(m_project).GetHeight();
 
-        auto chkBox1 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
-        auto chkBox2 = new wxCheckBox(panel, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
+        auto chkBox1 = new wxCheckBox(panel1, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
+        auto chkBox2 = new wxCheckBox(panel1, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
         chkBox1->SetValue(false);
         chkBox2->SetValue(false);
 
-        row1->Add(new wxStaticText(panel, wxID_ANY, "Lattice Dimensions: "), 1,
+        row1->Add(new wxStaticText(panel1, wxID_ANY, "Lattice Dimensions: "), 1,
                   wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row2->Add(m_tcLatticeWidth, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row2->Add(m_tcLatticeHeight, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row3->Add(chkBox1, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row3->Add(chkBox2, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row4->Add(new wxButton(panel, BTN_INITIALIZE_LATTICE, "Intialize"), 1,
+        row4->Add(new wxButton(panel1, BTN_INITIALIZE_LATTICE, "Intialize"), 1,
                   wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
 
         layout->Add(row1, 0, wxGROW | wxALL, 5);
         layout->Add(row2, 0, wxGROW | wxALL, 5);
         layout->Add(row3, 0, wxGROW | wxALL, 5);
         layout->Add(row4, 0, wxGROW | wxALL, 5);
-        panel->SetSizer(layout);
-        boxLayout->Add(panel, 0, wxGROW | wxALL, 10);
-        boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
+        panel1->SetSizer(layout);
     }
 
     // SOM hyperparameters
     {
-        wxPanel* panel = new wxPanel(page, PANEL_HYPERPARAMS);
         wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
         auto row1 = new wxBoxSizer(wxHORIZONTAL);
         auto row2 = new wxBoxSizer(wxHORIZONTAL);
         auto row3 = new wxBoxSizer(wxHORIZONTAL);
-        auto row4 = new wxBoxSizer(wxHORIZONTAL);
         wxIntegerValidator<int> validIterCap;
         wxFloatingPointValidator<float> validLearnRate(2, nullptr);
         wxFloatingPointValidator<float> validNeighborhood(2, nullptr);
         validIterCap.SetMin(0);
         validLearnRate.SetRange(0.0f, 1.0f);
         validNeighborhood.SetRange(0.0f, 10000.0f); // TODO: Adjust the range according to the lattice's dimensions
-        m_tcMaxIterations = new wxTextCtrl(panel, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        m_tcMaxIterations = new wxTextCtrl(panel2, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                            wxTE_CENTER, validIterCap);
-        m_tcLearningRate = new wxTextCtrl(panel, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+        m_tcLearningRate = new wxTextCtrl(panel2, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                           wxTE_CENTER, validLearnRate);
-        m_tcInitialNeighborhood = new wxTextCtrl(panel, TE_INITIAL_NEIGHBORHOOD, wxEmptyString, wxDefaultPosition,
+        m_tcInitialNeighborhood = new wxTextCtrl(panel2, TE_INITIAL_NEIGHBORHOOD, wxEmptyString, wxDefaultPosition,
                                                  wxDefaultSize, wxTE_CENTER, validNeighborhood);
 
         *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
         *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
 
-        row1->Add(new wxStaticText(panel, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
+        row1->Add(new wxStaticText(panel2, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
                   5);
         row1->Add(m_tcMaxIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row2->Add(new wxStaticText(panel, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
+        row2->Add(new wxStaticText(panel2, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
                   5);
         row2->Add(m_tcLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row3->Add(new wxStaticText(panel, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
+        row3->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
                   5);
         row3->Add(m_tcInitialNeighborhood, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
 
         layout->Add(row1, 0, wxGROW | wxALL, 5);
         layout->Add(row2, 0, wxGROW | wxALL, 5);
         layout->Add(row3, 0, wxGROW | wxALL, 5);
-        panel->SetSizer(layout);
-
-        m_btnCreateProject = new wxButton(page, BTN_CREATE_PROJECT, "Create");
-        m_btnStopProject = new wxButton(page, BTN_STOP_PROJECT, "Stop");
-        m_btnCreateProject->Disable();
-        m_btnStopProject->Disable();
-        row4->Add(m_btnCreateProject, 1, wxGROW | wxLEFT | wxRIGHT, 5);
-        row4->Add(m_btnStopProject, 1, wxGROW | wxLEFT | wxRIGHT, 5);
-
-        boxLayout->Add(panel, 0, wxGROW | wxALL, 10);
-        boxLayout->Add(row4, 0, wxGROW | wxALL, 10);
-        boxLayout->Add(new wxStaticLine(page), 0, wxGROW | wxALL, 10);
+        panel2->SetSizer(layout);
     }
 
     {
+        wxBoxSizer* const layout = new wxBoxSizer(wxVERTICAL);
         auto row1 = new wxBoxSizer(wxHORIZONTAL);
         auto row2 = new wxBoxSizer(wxHORIZONTAL);
         auto row3 = new wxBoxSizer(wxHORIZONTAL);
         auto row4 = new wxBoxSizer(wxHORIZONTAL);
-        m_btnPause = new wxButton(page, BTN_PLAY_PAUSE, "Pause");
-        m_btnWatermark = new wxButton(page, BTN_WATERMARK, "Watermark");
-        m_btnStart = new wxButton(page, BTN_START, "Start");
+        auto row5 = new wxBoxSizer(wxHORIZONTAL);
+        m_btnPause = new wxButton(panel3, BTN_PLAY_PAUSE, "Pause");
+        m_btnWatermark = new wxButton(panel3, BTN_WATERMARK, "Watermark");
+        m_btnStart = new wxButton(panel3, BTN_START, "Start");
         m_btnPause->Disable();
         m_btnWatermark->Disable();
         m_btnStart->Disable();
@@ -186,23 +180,39 @@ void ProjectPanel::PopulateProjectPage()
         row2->Add(m_btnWatermark, 1, wxGROW | wxLEFT | wxRIGHT, 5);
 
         m_tcIterations
-            = new wxTextCtrl(page, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+            = new wxTextCtrl(panel3, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
         m_tcIterations->SetCanFocus(false);
         m_tcNeighborhood
-            = new wxTextCtrl(page, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+            = new wxTextCtrl(panel3, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
         m_tcNeighborhood->SetCanFocus(false);
-        row3->Add(new wxStaticText(page, wxID_ANY, "Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row3->Add(new wxStaticText(panel3, wxID_ANY, "Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row3->Add(m_tcIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row4->Add(new wxStaticText(page, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row4->Add(new wxStaticText(panel3, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
+                  5);
         row4->Add(m_tcNeighborhood, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        boxLayout->Add(row3, 0, wxGROW | wxALL, 5);
-        boxLayout->Add(row4, 0, wxGROW | wxALL, 5);
-        boxLayout->Add(row1, 0, wxGROW | wxALL, 5);
-        boxLayout->Add(row2, 0, wxGROW | wxALL, 5);
+
+        m_btnCreateProject = new wxButton(panel3, BTN_CREATE_PROJECT, "Create");
+        m_btnStopProject = new wxButton(panel3, BTN_STOP_PROJECT, "Stop");
+        m_btnCreateProject->Disable();
+        m_btnStopProject->Disable();
+        row5->Add(m_btnCreateProject, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+        row5->Add(m_btnStopProject, 1, wxGROW | wxLEFT | wxRIGHT, 5);
+
+        layout->Add(row5, 0, wxGROW | wxALL, 10);
+        layout->Add(row3, 0, wxGROW | wxALL, 5);
+        layout->Add(row4, 0, wxGROW | wxALL, 5);
+        layout->Add(row1, 0, wxGROW | wxALL, 5);
+        layout->Add(row2, 0, wxGROW | wxALL, 5);
+        panel3->SetSizer(layout);
     }
 
-    page->SetSizer(boxLayout);
-    m_notebook->AddPage(page, "Project");
+    wxAuiPaneInfo info = wxAuiPaneInfo().Center().CloseButton(false);
+    m_auiManager.AddPane(panel1, info.Name("lattice").Caption("Lattice"));
+    m_auiManager.AddPane(panel2, info.Name("hyperparams").Caption("Hyperparameters"));
+    m_auiManager.AddPane(panel3, info.Name("control").Caption("Control"));
+    m_auiManager.Update();
+
+    m_notebook->AddPage(sidePane, "Project");
 }
 
 void ProjectPanel::PopulateRenderingPage()
@@ -445,6 +455,29 @@ void ProjectPanel::OnInitialNeighborhoodUpdate(wxCommandEvent&)
 {
     m_tcInitialNeighborhood->Clear();
     *m_tcInitialNeighborhood << SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
+}
+
+void ProjectPanel::OnTogglePane(wxCommandEvent& event)
+{
+    wxString name;
+    int const id = event.GetId();
+
+    if (id == EVT_VIEW_MENU_LATTICE) {
+        name = "lattice";
+    } else if (id == EVT_VIEW_MENU_HYPERPARAMS) {
+        name = "hyperparams";
+    } else if (id == EVT_VIEW_MENU_CONTROL) {
+        name = "control";
+    }
+
+    wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(name);
+    if (paneInfo.IsShown()) {
+        paneInfo.Hide();
+    } else {
+        paneInfo.Show();
+    }
+
+    m_auiManager.Update();
 }
 
 wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)

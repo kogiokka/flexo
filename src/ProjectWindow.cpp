@@ -8,6 +8,9 @@
 #include "ProjectWindow.hpp"
 
 wxDEFINE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_HYPERPARAMS, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_CONTROL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
 // Register factory: ProjectWindow
@@ -42,6 +45,11 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     fileMenu->Append(wxID_OPEN, "Import model");
     fileMenu->Append(wxID_EXIT, "Exit");
 
+    auto viewMenu = new wxMenu();
+    viewMenu->Append(EVT_VIEW_MENU_LATTICE, "Toggle Lattice Panel");
+    viewMenu->Append(EVT_VIEW_MENU_HYPERPARAMS, "Toggle Hyperparameters Panel");
+    viewMenu->Append(EVT_VIEW_MENU_CONTROL, "Toggle Control Panel");
+
     auto cameraMenu = new wxMenu;
     cameraMenu->Append(wxID_REFRESH, "Reset");
 
@@ -50,6 +58,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     auto menubar = new wxMenuBar;
     menubar->Append(fileMenu, "&File");
+    menubar->Append(viewMenu, "&View");
     menubar->Append(cameraMenu, "&Camera");
     menubar->Append(modelsMenu, "&Models");
 
@@ -64,6 +73,9 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_GENERATE_MODEL_DOME);
+    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_LATTICE);
+    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_HYPERPARAMS);
+    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_CONTROL);
 }
 
 ProjectWindow::~ProjectWindow()
@@ -122,6 +134,11 @@ void ProjectWindow::OnMenuGenerateModelDome(wxCommandEvent&)
     wxCommandEvent event(EVT_GENERATE_MODEL_DOME);
     event.SetId(EVT_GENERATE_MODEL_DOME);
     ProcessWindowEvent(event);
+}
+
+void ProjectWindow::OnViewMenu(wxCommandEvent& event)
+{
+    m_project.ProcessEvent(event);
 }
 
 wxWindow* ProjectWindow::GetMainPage()

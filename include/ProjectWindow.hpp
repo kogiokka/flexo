@@ -11,6 +11,9 @@ class WatermarkingProject;
 
 wxDECLARE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
 wxDECLARE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
+wxDECLARE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
+wxDECLARE_EVENT(EVT_VIEW_MENU_HYPERPARAMS, wxCommandEvent);
+wxDECLARE_EVENT(EVT_VIEW_MENU_CONTROL, wxCommandEvent);
 
 class ProjectWindow final : public wxFrame
 {
@@ -34,6 +37,7 @@ private:
     void OnOpenFile(wxCommandEvent& evt);
     void OnExit(wxCommandEvent&);
     void OnMenuCameraReset(wxCommandEvent& evt);
+    void OnViewMenu(wxCommandEvent& event);
     void OnMenuGenerateModelDome(wxCommandEvent& evt);
 };
 
