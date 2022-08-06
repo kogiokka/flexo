@@ -44,9 +44,8 @@ enum {
 
 class WatermarkingProject;
 
-class ProjectPanel : public wxPanel
+class ProjectPanel : public wxNotebook
 {
-    wxNotebook* m_notebook;
     wxAuiManager m_auiManager;
     wxButton* m_btnCreateProject;
     wxButton* m_btnStopProject;

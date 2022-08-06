@@ -31,7 +31,7 @@ static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey 
         wxWindow* mainPage = window.GetMainPage();
         wxASSERT(mainPage != nullptr);
 
-        auto panel = new ProjectPanel(mainPage, wxID_ANY, wxDefaultPosition, wxDefaultSize, project);
+        auto panel = new ProjectPanel(mainPage, PANEL_NOTEBOOK, wxDefaultPosition, wxDefaultSize, project);
         project.SetPanel(panel);
         return panel;
     }
@@ -49,18 +49,11 @@ ProjectPanel const& ProjectPanel::Get(WatermarkingProject const& project)
 
 ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
                            WatermarkingProject& project)
-    : wxPanel(parent, id, pos, size)
+    : wxNotebook(parent, id, pos, size)
     , m_project(project)
 {
-    m_notebook = new wxNotebook(this, PANEL_NOTEBOOK, wxDefaultPosition, wxDefaultSize, wxNB_BOTTOM);
-    m_notebook->Disable();
-
     PopulateProjectPage();
     PopulateRenderingPage();
-
-    auto layout = new wxBoxSizer(wxVERTICAL);
-    layout->Add(m_notebook, 1, wxGROW | wxALL, 10);
-    SetSizer(layout);
 
     m_updateTimer = new wxTimer(this, TIMER_UI_UPDATE);
     m_updateTimer->Start(16); // 16 ms (60 fps)
@@ -69,6 +62,8 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_HYPERPARAMS);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_CONTROL);
+
+    Disable();
 }
 
 ProjectPanel::~ProjectPanel()
@@ -78,7 +73,7 @@ ProjectPanel::~ProjectPanel()
 
 void ProjectPanel::PopulateProjectPage()
 {
-    wxPanel* sidePane = new wxPanel(m_notebook, wxID_ANY);
+    wxPanel* sidePane = new wxPanel(this, wxID_ANY);
     wxPanel* panel1 = new wxPanel(sidePane, PANEL_LATTICE);
     wxPanel* panel2 = new wxPanel(sidePane, PANEL_LATTICE);
     wxPanel* panel3 = new wxPanel(sidePane, wxID_ANY);
@@ -212,12 +207,12 @@ void ProjectPanel::PopulateProjectPage()
     m_auiManager.AddPane(panel3, info.Name("control").Caption("Control"));
     m_auiManager.Update();
 
-    m_notebook->AddPage(sidePane, "Project");
+    AddPage(sidePane, "Project");
 }
 
 void ProjectPanel::PopulateRenderingPage()
 {
-    wxPanel* page = new wxPanel(m_notebook, wxID_ANY);
+    wxPanel* page = new wxPanel(this, wxID_ANY);
 
     auto row1 = new wxBoxSizer(wxVERTICAL);
     auto row2 = new wxBoxSizer(wxVERTICAL);
@@ -255,7 +250,7 @@ void ProjectPanel::PopulateRenderingPage()
     boxLayout->Add(row2, 0, wxGROW | wxALL, 10);
     page->SetSizer(boxLayout);
 
-    m_notebook->AddPage(page, "Rendering");
+    AddPage(page, "Rendering");
 }
 
 void ProjectPanel::OnButtonCreateProject(wxCommandEvent&)
