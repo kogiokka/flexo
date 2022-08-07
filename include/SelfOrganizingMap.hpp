@@ -15,8 +15,6 @@
 
 class WatermarkingProject;
 
-wxDECLARE_EVENT(EVT_INITIAL_NEIGHBORHOOD_UPDATE, wxCommandEvent);
-
 class SelfOrganizingMap : public AttachableBase
 {
     bool m_isDone;
@@ -39,11 +37,12 @@ public:
     ~SelfOrganizingMap();
     SelfOrganizingMap(SelfOrganizingMap const&) = delete;
     SelfOrganizingMap& operator=(SelfOrganizingMap const&) = delete;
-    void Initialize(std::shared_ptr<InputData> dataset);
+    void CreateProcedure(Lattice& lattice, std::shared_ptr<InputData> dataset);
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
     void StopWorker();
+    void OnProjectSettingsChanged(wxCommandEvent& event);
 
     void SetMaxIterations(int numIterations);
     void SetLearningRate(float rate);

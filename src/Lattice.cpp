@@ -4,7 +4,6 @@
 #include "Project.hpp"
 #include "RandomRealNumber.hpp"
 
-wxDEFINE_EVENT(EVT_LATTICE_INITIALIZED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_LATTICE_DIMENSIONS_CHANGED, wxCommandEvent);
 
 // Register factory: Lattice
@@ -46,9 +45,6 @@ void Lattice::Initialize()
             m_neurons.emplace_back(i, j, rng.vector(3));
         }
     }
-
-    wxCommandEvent event(EVT_LATTICE_INITIALIZED);
-    m_project.ProcessEvent(event);
 }
 
 void Lattice::SetWidth(int width)

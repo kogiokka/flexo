@@ -19,7 +19,6 @@ enum LatticeFlags_ : int {
 
 class WatermarkingProject;
 
-wxDECLARE_EVENT(EVT_LATTICE_INITIALIZED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_LATTICE_DIMENSIONS_CHANGED, wxCommandEvent);
 
 class Lattice : public AttachableBase

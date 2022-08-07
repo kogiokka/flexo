@@ -8,10 +8,10 @@
 #include "ProjectWindow.hpp"
 
 wxDEFINE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_HYPERPARAMS, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_CONTROL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_SOM, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_WATERMARKING, wxCommandEvent);
 
 // Register factory: ProjectWindow
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
@@ -47,8 +47,8 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     auto viewMenu = new wxMenu();
     viewMenu->Append(EVT_VIEW_MENU_LATTICE, "Toggle Lattice Panel");
-    viewMenu->Append(EVT_VIEW_MENU_HYPERPARAMS, "Toggle Hyperparameters Panel");
-    viewMenu->Append(EVT_VIEW_MENU_CONTROL, "Toggle Control Panel");
+    viewMenu->Append(EVT_VIEW_MENU_SOM, "Toggle SOM Panel");
+    viewMenu->Append(EVT_VIEW_MENU_WATERMARKING, "Toggle Watermarking Panel");
 
     auto cameraMenu = new wxMenu;
     cameraMenu->Append(wxID_REFRESH, "Reset");
@@ -74,8 +74,8 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_GENERATE_MODEL_DOME);
     Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_LATTICE);
-    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_HYPERPARAMS);
-    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_CONTROL);
+    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_SOM);
+    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_WATERMARKING);
 }
 
 ProjectWindow::~ProjectWindow()

@@ -12,8 +12,8 @@ class WatermarkingProject;
 wxDECLARE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
 wxDECLARE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 wxDECLARE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
-wxDECLARE_EVENT(EVT_VIEW_MENU_HYPERPARAMS, wxCommandEvent);
-wxDECLARE_EVENT(EVT_VIEW_MENU_CONTROL, wxCommandEvent);
+wxDECLARE_EVENT(EVT_VIEW_MENU_SOM, wxCommandEvent);
+wxDECLARE_EVENT(EVT_VIEW_MENU_WATERMARKING, wxCommandEvent);
 
 class ProjectWindow final : public wxFrame
 {

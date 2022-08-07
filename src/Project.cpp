@@ -7,6 +7,7 @@
 #include "common/Logger.hpp"
 
 wxDEFINE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
+wxDEFINE_EVENT(EVT_LATTICE_INITIALIZED, wxCommandEvent);
 
 WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)
@@ -14,16 +15,25 @@ WatermarkingProject::WatermarkingProject()
     , m_panel {}
     , m_dataset(nullptr)
 {
-    Bind(EVT_PROJECT_SETTINGS_CHANGED, &WatermarkingProject::OnProjectSettingsChanged, this);
-    Bind(EVT_LATTICE_INITIALIZED, &WatermarkingProject::OnLatticeInitialized, this);
     Bind(EVT_LATTICE_DIMENSIONS_CHANGED, &WatermarkingProject::OnLatticeDimensionsChanged, this);
 }
 
-void WatermarkingProject::Initialize()
+void WatermarkingProject::CreateProject()
 {
     assert(m_dataset);
-    SelfOrganizingMap::Get(*this).Initialize(m_dataset);
+
+    SelfOrganizingMap::Get(*this).CreateProcedure(Lattice::Get(*this), m_dataset);
+
     world.isWatermarked = false;
+}
+
+void WatermarkingProject::StopProject()
+{
+    auto& som = SelfOrganizingMap::Get(*this);
+    if (som.IsTraining()) {
+        som.ToggleTraining();
+    }
+    som.StopWorker();
 }
 
 void WatermarkingProject::BuildLatticeMesh() const
@@ -173,39 +183,32 @@ void WatermarkingProject::DoWatermark()
     world.isWatermarked = true;
 }
 
-void WatermarkingProject::OnLatticeInitialized(wxCommandEvent&)
+void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)
 {
-    assert(m_dataset);
-    auto& som = SelfOrganizingMap::Get(*this);
-    auto& lattice = Lattice::Get(*this);
-    som.Initialize(m_dataset);
+    InitializeLattice();
+    UpdateLatticeGraphics();
+}
 
+// Init the lattice and calculate the initial neighborhood radius
+void WatermarkingProject::InitializeLattice()
+{
+    auto& lattice = Lattice::Get(*this);
     int const width = lattice.GetWidth();
     int const height = lattice.GetHeight();
     float radius = 0.5f * sqrt(width * width + height * height);
-    som.SetInitialNeighborhood(radius);
 
-    // This event is bind to a ProjectPanel function
-    wxCommandEvent event(EVT_INITIAL_NEIGHBORHOOD_UPDATE);
+    lattice.Initialize();
+    ProjectSettings::Get(*this).SetNeighborhood(radius);
+
+    wxCommandEvent event(EVT_LATTICE_INITIALIZED);
     ProcessEvent(event);
+}
 
+void WatermarkingProject::UpdateLatticeGraphics()
+{
     // TODO: Better solution
     m_isLatticeReady = true;
     BuildLatticeMesh();
 
     Renderer::Get(*this).LoadLattice();
-}
-
-void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)
-{
-    Lattice::Get(*this).Initialize();
-}
-
-void WatermarkingProject::OnProjectSettingsChanged(wxCommandEvent&)
-{
-    auto& som = SelfOrganizingMap::Get(*this);
-    auto const& settings = ProjectSettings::Get(*this);
-    som.SetMaxIterations(settings.GetMaxIterations());
-    som.SetLearningRate(settings.GetLearningRate());
-    som.SetInitialNeighborhood(settings.GetNeighborhood());
 }

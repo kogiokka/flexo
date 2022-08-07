@@ -4,8 +4,6 @@
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
 
-wxDEFINE_EVENT(EVT_INITIAL_NEIGHBORHOOD_UPDATE, wxCommandEvent);
-
 // Register factory: SelfOrganizingMap
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> SharedPtr<SelfOrganizingMap> {
@@ -38,6 +36,8 @@ SelfOrganizingMap::SelfOrganizingMap(WatermarkingProject& project)
     m_iterations = 0;
     m_neighborhood = 0.0f;
     m_rate = m_initialRate;
+
+    m_project.Bind(EVT_PROJECT_SETTINGS_CHANGED, &SelfOrganizingMap::OnProjectSettingsChanged, this);
 }
 
 SelfOrganizingMap::~SelfOrganizingMap()
@@ -45,7 +45,7 @@ SelfOrganizingMap::~SelfOrganizingMap()
     StopWorker();
 }
 
-void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
+void SelfOrganizingMap::CreateProcedure(Lattice& lattice, std::shared_ptr<InputData> dataset)
 {
     {
         StopWorker();
@@ -62,7 +62,6 @@ void SelfOrganizingMap::Initialize(std::shared_ptr<InputData> dataset)
     m_rate = m_initialRate;
     m_neighborhood = m_initialNeighborhood;
 
-    auto& lattice = Lattice::Get(m_project);
     void (SelfOrganizingMap::*Train)(Lattice&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
     m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
 
@@ -196,6 +195,14 @@ bool SelfOrganizingMap::IsDone() const
 bool SelfOrganizingMap::IsTraining() const
 {
     return m_isTraining;
+}
+
+void SelfOrganizingMap::OnProjectSettingsChanged(wxCommandEvent&)
+{
+    auto const& settings = ProjectSettings::Get(m_project);
+    SetMaxIterations(settings.GetMaxIterations());
+    SetLearningRate(settings.GetLearningRate());
+    SetInitialNeighborhood(settings.GetNeighborhood());
 }
 
 void SelfOrganizingMap::SetMaxIterations(int numIterations)

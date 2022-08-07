@@ -21,12 +21,11 @@ enum {
     TE_INITIAL_NEIGHBORHOOD,
     TE_LATTICE_WIDTH,
     TE_LATTICE_HEIGHT,
-    BTN_PLAY_PAUSE,
-    BTN_WATERMARK,
-    BTN_START,
     BTN_INITIALIZE_LATTICE,
     BTN_CREATE_PROJECT,
     BTN_STOP_PROJECT,
+    BTN_RUN,
+    BTN_WATERMARK,
     SPCTRL_ITERATION_PER_FRAME,
     CB_RENDEROPT_MODEL,
     CB_RENDEROPT_LAT_VERTEX,
@@ -38,8 +37,9 @@ enum {
     SLIDER_TRANSPARENCY,
     TIMER_UI_UPDATE,
     PANEL_NOTEBOOK,
-    PANEL_HYPERPARAMS,
     PANEL_LATTICE,
+    PANEL_SOM,
+    PANEL_WATERMARKING
 };
 
 class WatermarkingProject;
@@ -49,9 +49,7 @@ class ProjectPanel : public wxNotebook
     wxAuiManager m_auiManager;
     wxButton* m_btnCreateProject;
     wxButton* m_btnStopProject;
-    wxButton* m_btnStart;
-    wxButton* m_btnPause;
-    wxButton* m_btnWatermark;
+    wxButton* m_btnRun;
     wxTextCtrl* m_tcIterations;
     wxTextCtrl* m_tcNeighborhood;
     wxTextCtrl* m_tcLatticeWidth;
@@ -61,6 +59,8 @@ class ProjectPanel : public wxNotebook
     wxTextCtrl* m_tcInitialNeighborhood;
     wxSlider* m_slider;
     wxTimer* m_updateTimer;
+    bool isLatticeInitialized;
+    bool isProjectStopped;
 
 public:
     static ProjectPanel& Get(WatermarkingProject& project);
@@ -71,11 +71,11 @@ public:
 private:
     void PopulateProjectPage();
     void PopulateRenderingPage();
-    void OnButtonInitializeLattice(wxCommandEvent& evt);
+    void OnLatticeInitialized(wxCommandEvent& evt);
+    void OnButtonInitializeLattice(wxCommandEvent& event);
     void OnButtonCreateProject(wxCommandEvent& evt);
     void OnButtonStopProject(wxCommandEvent& evt);
-    void OnButtonStart(wxCommandEvent& evt);
-    void OnButtonPause(wxCommandEvent& evt);
+    void OnButtonRun(wxCommandEvent& evt);
     void OnButtonWatermark(wxCommandEvent& evt);
     void OnCheckboxModel(wxCommandEvent& evt);
     void OnCheckboxLatticeVertex(wxCommandEvent& evt);
@@ -92,7 +92,6 @@ private:
     void OnSetMaxIterations(wxCommandEvent& evt);
     void OnSetLearningRate(wxCommandEvent& evt);
     void OnSetNeighborhood(wxCommandEvent& evt);
-    void OnInitialNeighborhoodUpdate(wxCommandEvent& evt);
     void OnTogglePane(wxCommandEvent& event);
 
     WatermarkingProject& m_project;

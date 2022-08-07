@@ -14,6 +14,7 @@
 #include "SelfOrganizingMap.hpp"
 
 wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
+wxDECLARE_EVENT(EVT_LATTICE_INITIALIZED, wxCommandEvent);
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;
@@ -25,15 +26,16 @@ public:
     using AttachedWindows = ::AttacheProjectWindows;
 
     WatermarkingProject();
-    void Initialize();
+    void CreateProject();
+    void StopProject();
     void BuildLatticeMesh() const;
     void DoWatermark();
     void SetDataset(std::shared_ptr<InputData> dataset);
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
-    void OnLatticeInitialized(wxCommandEvent& evt);
     void OnLatticeDimensionsChanged(wxCommandEvent& evt);
-    void OnProjectSettingsChanged(wxCommandEvent& evt);
+    void InitializeLattice();
+    void UpdateLatticeGraphics();
 
 private:
     bool m_isLatticeReady;
