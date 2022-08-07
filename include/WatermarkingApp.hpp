@@ -21,15 +21,11 @@ public:
     void ImportVolumetricModel(wxString const& path);
     BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
-    void OnCmdStartTraining(wxCommandEvent& evt);
-    void OnCmdStopTrainining(wxCommandEvent& evt);
-    void OnCmdPauseTraining(wxCommandEvent& evt);
-    void OnCmdToggleRenderOption(wxCommandEvent& evt);
-    void OnCmdToggleLatticeFlag(wxCommandEvent& evt);
-    void OnCmdDoWatermark(wxCommandEvent& evt);
-    void OnCmdRebuildLatticeMesh(wxCommandEvent& evt);
-    void OnMenuGenerateModel(wxCommandEvent& evt);
-    void OnMenuImportModel(wxCommandEvent& evt);
+    void OnToggleRenderOption(wxCommandEvent& event);
+    void OnToggleLatticeFlag(wxCommandEvent& event);
+    void OnRebuildLatticeMesh(wxCommandEvent& event);
+    void OnMenuGenerateModel(wxCommandEvent& event);
+    void OnMenuImportModel(wxCommandEvent& event);
 
 private:
     wxDECLARE_EVENT_TABLE();

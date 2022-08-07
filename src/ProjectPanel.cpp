@@ -19,10 +19,35 @@
 #include "Renderer.hpp"
 #include "World.hpp"
 
-wxDEFINE_EVENT(CMD_TOGGLE_RENDER_FLAG, wxCommandEvent);
-wxDEFINE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
-wxDEFINE_EVENT(CMD_CREATE_LATTICE, wxCommandEvent);
-wxDEFINE_EVENT(CMD_CREATE_SOM_PROCEDURE, wxCommandEvent);
+wxDEFINE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
+wxDEFINE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
+
+wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
+    EVT_TEXT(TE_LATTICE_WIDTH, ProjectPanel::OnSetLatticeWidth)
+    EVT_TEXT(TE_LATTICE_HEIGHT, ProjectPanel::OnSetLatticeHeight)
+    EVT_TEXT(TE_MAX_ITERATIONS, ProjectPanel::OnSetMaxIterations)
+    EVT_TEXT(TE_LEARNING_RATE, ProjectPanel::OnSetLearningRate)
+    EVT_TEXT(TE_INITIAL_NEIGHBORHOOD, ProjectPanel::OnSetNeighborhood)
+    EVT_BUTTON(BTN_INITIALIZE_LATTICE, ProjectPanel::OnButtonInitializeLattice)
+    EVT_BUTTON(BTN_RUN, ProjectPanel::OnButtonRun)
+    EVT_BUTTON(BTN_WATERMARK, ProjectPanel::OnButtonWatermark)
+    EVT_BUTTON(BTN_CREATE_PROJECT, ProjectPanel::OnButtonCreateProject)
+    EVT_BUTTON(BTN_STOP_PROJECT, ProjectPanel::OnButtonStopProject)
+    EVT_CHECKBOX(CB_RENDEROPT_MODEL, ProjectPanel::OnCheckboxModel)
+    EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, ProjectPanel::OnCheckboxLatticeVertex)
+    EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, ProjectPanel::OnCheckboxLatticeEdge)
+    EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, ProjectPanel::OnCheckboxLatticeFace)
+    EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, ProjectPanel::OnCheckboxLightSource)
+    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, ProjectPanel::OnCheckboxLatticeFlagsCyclicX)
+    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
+    EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
+    EVT_TIMER(TIMER_UI_UPDATE, ProjectPanel::OnTimerUIUpdate)
+    EVT_UPDATE_UI(BTN_RUN, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(PANEL_LATTICE, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(PANEL_SOM, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
+wxEND_EVENT_TABLE()
 
 // Register factory: ProjectPanel
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
@@ -313,49 +338,49 @@ void ProjectPanel::OnButtonWatermark(wxCommandEvent&)
 
 void ProjectPanel::OnCheckboxModel(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawModel);
     ProcessWindowEvent(event);
 }
 
 void ProjectPanel::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeVertex);
     ProcessWindowEvent(event);
 }
 
 void ProjectPanel::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeEdge);
     ProcessWindowEvent(event);
 }
 
 void ProjectPanel::OnCheckboxLatticeFace(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeFace);
     ProcessWindowEvent(event);
 }
 
 void ProjectPanel::OnCheckboxLightSource(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_RENDER_FLAG, GetId());
+    wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLightSource);
     ProcessWindowEvent(event);
 }
 
 void ProjectPanel::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_LATTICE_FLAG, GetId());
+    wxCommandEvent event(EVT_TOGGLE_LATTICE_FLAG, GetId());
     event.SetInt(LatticeFlags_CyclicX);
     ProcessWindowEvent(event);
 }
 
 void ProjectPanel::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
 {
-    wxCommandEvent event(CMD_TOGGLE_LATTICE_FLAG, GetId());
+    wxCommandEvent event(EVT_TOGGLE_LATTICE_FLAG, GetId());
     event.SetInt(LatticeFlags_CyclicY);
     ProcessWindowEvent(event);
 }
@@ -419,42 +444,42 @@ void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
     }
 }
 
-void ProjectPanel::OnSetLatticeWidth(wxCommandEvent& evt)
+void ProjectPanel::OnSetLatticeWidth(wxCommandEvent& event)
 {
     long tmp;
-    if (evt.GetString().ToLong(&tmp)) {
+    if (event.GetString().ToLong(&tmp)) {
         Lattice::Get(m_project).SetWidth(tmp);
     }
 }
 
-void ProjectPanel::OnSetLatticeHeight(wxCommandEvent& evt)
+void ProjectPanel::OnSetLatticeHeight(wxCommandEvent& event)
 {
     long tmp;
-    if (evt.GetString().ToLong(&tmp)) {
+    if (event.GetString().ToLong(&tmp)) {
         Lattice::Get(m_project).SetHeight(tmp);
     }
 }
 
-void ProjectPanel::OnSetMaxIterations(wxCommandEvent& evt)
+void ProjectPanel::OnSetMaxIterations(wxCommandEvent& event)
 {
     long tmp;
-    if (evt.GetString().ToLong(&tmp)) {
+    if (event.GetString().ToLong(&tmp)) {
         ProjectSettings::Get(m_project).SetMaxIterations(tmp);
     }
 }
 
-void ProjectPanel::OnSetLearningRate(wxCommandEvent& evt)
+void ProjectPanel::OnSetLearningRate(wxCommandEvent& event)
 {
     double tmp;
-    if (evt.GetString().ToDouble(&tmp)) {
+    if (event.GetString().ToDouble(&tmp)) {
         ProjectSettings::Get(m_project).SetLearningRate(tmp);
     }
 }
 
-void ProjectPanel::OnSetNeighborhood(wxCommandEvent& evt)
+void ProjectPanel::OnSetNeighborhood(wxCommandEvent& event)
 {
     double tmp;
-    if (evt.GetString().ToDouble(&tmp)) {
+    if (event.GetString().ToDouble(&tmp)) {
         ProjectSettings::Get(m_project).SetNeighborhood(tmp);
     }
 }
@@ -481,30 +506,3 @@ void ProjectPanel::OnTogglePane(wxCommandEvent& event)
 
     m_auiManager.Update();
 }
-
-wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
-    EVT_TEXT(TE_LATTICE_WIDTH, ProjectPanel::OnSetLatticeWidth)
-    EVT_TEXT(TE_LATTICE_HEIGHT, ProjectPanel::OnSetLatticeHeight)
-    EVT_TEXT(TE_MAX_ITERATIONS, ProjectPanel::OnSetMaxIterations)
-    EVT_TEXT(TE_LEARNING_RATE, ProjectPanel::OnSetLearningRate)
-    EVT_TEXT(TE_INITIAL_NEIGHBORHOOD, ProjectPanel::OnSetNeighborhood)
-    EVT_BUTTON(BTN_INITIALIZE_LATTICE, ProjectPanel::OnButtonInitializeLattice)
-    EVT_BUTTON(BTN_RUN, ProjectPanel::OnButtonRun)
-    EVT_BUTTON(BTN_WATERMARK, ProjectPanel::OnButtonWatermark)
-    EVT_BUTTON(BTN_CREATE_PROJECT, ProjectPanel::OnButtonCreateProject)
-    EVT_BUTTON(BTN_STOP_PROJECT, ProjectPanel::OnButtonStopProject)
-    EVT_CHECKBOX(CB_RENDEROPT_MODEL, ProjectPanel::OnCheckboxModel)
-    EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, ProjectPanel::OnCheckboxLatticeVertex)
-    EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, ProjectPanel::OnCheckboxLatticeEdge)
-    EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, ProjectPanel::OnCheckboxLatticeFace)
-    EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, ProjectPanel::OnCheckboxLightSource)
-    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, ProjectPanel::OnCheckboxLatticeFlagsCyclicX)
-    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
-    EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
-    EVT_TIMER(TIMER_UI_UPDATE, ProjectPanel::OnTimerUIUpdate)
-    EVT_UPDATE_UI(BTN_RUN, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(PANEL_LATTICE, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(PANEL_SOM, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
-wxEND_EVENT_TABLE()

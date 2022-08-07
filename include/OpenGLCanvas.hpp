@@ -14,7 +14,7 @@
 #include <wx/string.h>
 #include <wx/timer.h>
 
-wxDECLARE_EVENT(CMD_REBUILD_LATTICE_MESH, wxCommandEvent);
+wxDECLARE_EVENT(EVT_REBUILD_LATTICE_MESH, wxCommandEvent);
 
 class WatermarkingProject;
 

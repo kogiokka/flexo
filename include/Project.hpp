@@ -33,7 +33,7 @@ public:
     void SetDataset(std::shared_ptr<InputData> dataset);
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
-    void OnLatticeDimensionsChanged(wxCommandEvent& evt);
+    void OnLatticeDimensionsChanged(wxCommandEvent& event);
     void InitializeLattice();
     void UpdateLatticeGraphics();
 

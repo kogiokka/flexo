@@ -34,11 +34,11 @@ private:
     wxWindow* m_mainPage;
     wxPanel* m_mainPanel;
 
-    void OnOpenFile(wxCommandEvent& evt);
+    void OnOpenFile(wxCommandEvent& event);
     void OnExit(wxCommandEvent&);
-    void OnMenuCameraReset(wxCommandEvent& evt);
+    void OnMenuCameraReset(wxCommandEvent& event);
     void OnViewMenu(wxCommandEvent& event);
-    void OnMenuGenerateModelDome(wxCommandEvent& evt);
+    void OnMenuGenerateModelDome(wxCommandEvent& event);
 };
 
 #endif

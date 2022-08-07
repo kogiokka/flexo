@@ -16,9 +16,9 @@
 #include "common/Logger.hpp"
 
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
-    EVT_COMMAND(wxID_ANY, CMD_TOGGLE_RENDER_FLAG, WatermarkingApp::OnCmdToggleRenderOption)
-    EVT_COMMAND(wxID_ANY, CMD_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnCmdToggleLatticeFlag)
-    EVT_COMMAND(wxID_ANY, CMD_REBUILD_LATTICE_MESH, WatermarkingApp::OnCmdRebuildLatticeMesh)
+    EVT_COMMAND(wxID_ANY, EVT_TOGGLE_RENDER_FLAG, WatermarkingApp::OnToggleRenderOption)
+    EVT_COMMAND(wxID_ANY, EVT_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnToggleLatticeFlag)
+    EVT_COMMAND(wxID_ANY, EVT_REBUILD_LATTICE_MESH, WatermarkingApp::OnRebuildLatticeMesh)
     EVT_COMMAND(wxID_ANY, EVT_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
     EVT_COMMAND(wxID_ANY, EVT_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
 wxEND_EVENT_TABLE()
@@ -184,24 +184,24 @@ BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positio
     return { max, min };
 }
 
-void WatermarkingApp::OnCmdToggleRenderOption(wxCommandEvent& evt)
+void WatermarkingApp::OnToggleRenderOption(wxCommandEvent& event)
 {
-    RenderFlag opt = evt.GetInt();
+    RenderFlag opt = event.GetInt();
     world.renderFlags ^= opt;
 }
 
-void WatermarkingApp::OnCmdToggleLatticeFlag(wxCommandEvent& evt)
+void WatermarkingApp::OnToggleLatticeFlag(wxCommandEvent& event)
 {
-    LatticeFlags flags = Lattice::Get(*m_project).GetFlags() ^ evt.GetInt();
+    LatticeFlags flags = Lattice::Get(*m_project).GetFlags() ^ event.GetInt();
     Lattice::Get(*m_project).SetFlags(flags);
 }
 
-void WatermarkingApp::OnCmdRebuildLatticeMesh(wxCommandEvent&)
+void WatermarkingApp::OnRebuildLatticeMesh(wxCommandEvent&)
 {
     m_project->BuildLatticeMesh();
 }
 
-void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
+void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& event)
 {
     if (world.theModel == nullptr) {
         Logger::info("You have to load a model into the scene first!");
@@ -211,7 +211,7 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
     Mesh mesh;
     BoundingBox bbox = CalculateBoundingBox(world.theModel->positions);
 
-    if (evt.GetId() == EVT_GENERATE_MODEL_DOME) {
+    if (event.GetId() == EVT_GENERATE_MODEL_DOME) {
         auto const& [max, min] = bbox;
         float const radius = glm::length((max - min) * 0.5f);
         int const numSegments = 60;
@@ -306,13 +306,12 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& evt)
     Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(mesh.positions));
 }
 
-void WatermarkingApp::OnMenuImportModel(wxCommandEvent& evt)
+void WatermarkingApp::OnMenuImportModel(wxCommandEvent& event)
 {
-    wxString const filepath = evt.GetString();
+    wxString const filepath = event.GetString();
     if (filepath.EndsWith(".toml")) {
         ImportVolumetricModel(filepath);
     } else {
         ImportPolygonalModel(filepath);
     }
 }
-

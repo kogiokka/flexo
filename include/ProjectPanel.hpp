@@ -42,6 +42,9 @@ enum {
     PANEL_WATERMARKING
 };
 
+wxDECLARE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
+wxDECLARE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
+
 class WatermarkingProject;
 
 class ProjectPanel : public wxNotebook
@@ -71,35 +74,32 @@ public:
 private:
     void PopulateProjectPage();
     void PopulateRenderingPage();
-    void OnLatticeInitialized(wxCommandEvent& evt);
+    void OnLatticeInitialized(wxCommandEvent& event);
     void OnButtonInitializeLattice(wxCommandEvent& event);
-    void OnButtonCreateProject(wxCommandEvent& evt);
-    void OnButtonStopProject(wxCommandEvent& evt);
-    void OnButtonRun(wxCommandEvent& evt);
-    void OnButtonWatermark(wxCommandEvent& evt);
-    void OnCheckboxModel(wxCommandEvent& evt);
-    void OnCheckboxLatticeVertex(wxCommandEvent& evt);
-    void OnCheckboxLatticeEdge(wxCommandEvent& evt);
-    void OnCheckboxLatticeFace(wxCommandEvent& evt);
-    void OnCheckboxLightSource(wxCommandEvent& evt);
-    void OnCheckboxLatticeFlagsCyclicX(wxCommandEvent& evt);
-    void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& evt);
-    void OnSliderTransparency(wxCommandEvent& evt);
-    void OnTimerUIUpdate(wxTimerEvent& evt);
-    void OnUpdateUI(wxUpdateUIEvent& evt);
-    void OnSetLatticeWidth(wxCommandEvent& evt);
-    void OnSetLatticeHeight(wxCommandEvent& evt);
-    void OnSetMaxIterations(wxCommandEvent& evt);
-    void OnSetLearningRate(wxCommandEvent& evt);
-    void OnSetNeighborhood(wxCommandEvent& evt);
+    void OnButtonCreateProject(wxCommandEvent& event);
+    void OnButtonStopProject(wxCommandEvent& event);
+    void OnButtonRun(wxCommandEvent& event);
+    void OnButtonWatermark(wxCommandEvent& event);
+    void OnCheckboxModel(wxCommandEvent& event);
+    void OnCheckboxLatticeVertex(wxCommandEvent& event);
+    void OnCheckboxLatticeEdge(wxCommandEvent& event);
+    void OnCheckboxLatticeFace(wxCommandEvent& event);
+    void OnCheckboxLightSource(wxCommandEvent& event);
+    void OnCheckboxLatticeFlagsCyclicX(wxCommandEvent& event);
+    void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& event);
+    void OnSliderTransparency(wxCommandEvent& event);
+    void OnTimerUIUpdate(wxTimerEvent& event);
+    void OnUpdateUI(wxUpdateUIEvent& event);
+    void OnSetLatticeWidth(wxCommandEvent& event);
+    void OnSetLatticeHeight(wxCommandEvent& event);
+    void OnSetMaxIterations(wxCommandEvent& event);
+    void OnSetLearningRate(wxCommandEvent& event);
+    void OnSetNeighborhood(wxCommandEvent& event);
     void OnTogglePane(wxCommandEvent& event);
 
     WatermarkingProject& m_project;
 
     wxDECLARE_EVENT_TABLE();
 };
-
-wxDECLARE_EVENT(CMD_TOGGLE_RENDER_FLAG, wxCommandEvent);
-wxDECLARE_EVENT(CMD_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
 #endif
