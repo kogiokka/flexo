@@ -23,7 +23,6 @@ public:
 
     void OnToggleRenderOption(wxCommandEvent& event);
     void OnToggleLatticeFlag(wxCommandEvent& event);
-    void OnRebuildLatticeMesh(wxCommandEvent& event);
     void OnMenuGenerateModel(wxCommandEvent& event);
     void OnMenuImportModel(wxCommandEvent& event);
 

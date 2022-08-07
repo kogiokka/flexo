@@ -14,8 +14,6 @@
 #include <wx/string.h>
 #include <wx/timer.h>
 
-wxDECLARE_EVENT(EVT_REBUILD_LATTICE_MESH, wxCommandEvent);
-
 class WatermarkingProject;
 
 class OpenGLCanvas : public wxGLCanvas

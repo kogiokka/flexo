@@ -11,8 +11,6 @@
 #include "World.hpp"
 #include "common/Logger.hpp"
 
-wxDEFINE_EVENT(EVT_REBUILD_LATTICE_MESH, wxCommandEvent);
-
 enum {
     TIMER_CANVAS_UPDATE,
 };
@@ -212,8 +210,7 @@ void OpenGLCanvas::UpdateScene()
 {
     if (world.renderFlags & RenderFlag_DrawLatticeVertex || world.renderFlags & RenderFlag_DrawLatticeEdge
         || world.renderFlags & RenderFlag_DrawLatticeFace) {
-        wxCommandEvent event(EVT_REBUILD_LATTICE_MESH, GetId());
-        ProcessWindowEvent(event);
+        m_project.BuildLatticeMesh();
     }
 }
 

@@ -18,7 +18,6 @@
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, EVT_TOGGLE_RENDER_FLAG, WatermarkingApp::OnToggleRenderOption)
     EVT_COMMAND(wxID_ANY, EVT_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnToggleLatticeFlag)
-    EVT_COMMAND(wxID_ANY, EVT_REBUILD_LATTICE_MESH, WatermarkingApp::OnRebuildLatticeMesh)
     EVT_COMMAND(wxID_ANY, EVT_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
     EVT_COMMAND(wxID_ANY, EVT_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
 wxEND_EVENT_TABLE()
@@ -194,11 +193,6 @@ void WatermarkingApp::OnToggleLatticeFlag(wxCommandEvent& event)
 {
     LatticeFlags flags = Lattice::Get(*m_project).GetFlags() ^ event.GetInt();
     Lattice::Get(*m_project).SetFlags(flags);
-}
-
-void WatermarkingApp::OnRebuildLatticeMesh(wxCommandEvent&)
-{
-    m_project->BuildLatticeMesh();
 }
 
 void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& event)
