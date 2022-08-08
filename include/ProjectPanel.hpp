@@ -12,7 +12,6 @@
 #include <wx/spinctrl.h>
 #include <wx/aui/framemanager.h>
 #include <wx/textctrl.h>
-#include <wx/timer.h>
 #include <wx/window.h>
 
 enum {
@@ -21,6 +20,8 @@ enum {
     TE_INITIAL_NEIGHBORHOOD,
     TE_LATTICE_WIDTH,
     TE_LATTICE_HEIGHT,
+    TE_ITERATIONS,
+    TE_NEIGHBORHOOD,
     BTN_INITIALIZE_LATTICE,
     BTN_CREATE_PROJECT,
     BTN_STOP_PROJECT,
@@ -35,7 +36,6 @@ enum {
     CB_LATTICE_FLAGS_CYCLIC_X,
     CB_LATTICE_FLAGS_CYCLIC_Y,
     SLIDER_TRANSPARENCY,
-    TIMER_UI_UPDATE,
     PANEL_NOTEBOOK,
     PANEL_LATTICE,
     PANEL_SOM,
@@ -61,7 +61,6 @@ class ProjectPanel : public wxNotebook
     wxTextCtrl* m_tcLearningRate;
     wxTextCtrl* m_tcInitialNeighborhood;
     wxSlider* m_slider;
-    wxTimer* m_updateTimer;
     bool isLatticeInitialized;
     bool isProjectStopped;
 

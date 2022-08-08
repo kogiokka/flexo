@@ -67,6 +67,8 @@ bool WatermarkingApp::OnInit()
     Renderer::Get(*m_project);
     canvas.SetFocus();
 
+    wxUpdateUIEvent::SetUpdateInterval(16);
+
     return true;
 }
 

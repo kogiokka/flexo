@@ -41,12 +41,13 @@ wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, ProjectPanel::OnCheckboxLatticeFlagsCyclicX)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
-    EVT_TIMER(TIMER_UI_UPDATE, ProjectPanel::OnTimerUIUpdate)
     EVT_UPDATE_UI(BTN_RUN, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_LATTICE, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_SOM, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(TE_ITERATIONS, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(TE_NEIGHBORHOOD, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 // Register factory: ProjectPanel
@@ -80,9 +81,6 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     PopulateProjectPage();
     PopulateRenderingPage();
 
-    m_updateTimer = new wxTimer(this, TIMER_UI_UPDATE);
-    m_updateTimer->Start(16); // 16 ms (60 fps)
-
     m_project.Bind(EVT_UI_UPDATE_INITIAL_NEIGHBORHOOD_RADIUS, &ProjectPanel::OnUpdateInitialNeighborhoodRadius, this);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_SOM);
@@ -96,7 +94,6 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
 
 ProjectPanel::~ProjectPanel()
 {
-    m_updateTimer->Stop();
 }
 
 void ProjectPanel::PopulateProjectPage()
@@ -178,10 +175,10 @@ void ProjectPanel::PopulateProjectPage()
         m_btnRun->Disable();
 
         m_tcIterations
-            = new wxTextCtrl(panel2, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+            = new wxTextCtrl(panel2, TE_ITERATIONS, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
         m_tcIterations->SetCanFocus(false);
-        m_tcNeighborhood
-            = new wxTextCtrl(panel2, wxID_ANY, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+        m_tcNeighborhood = new wxTextCtrl(panel2, TE_NEIGHBORHOOD, "0", wxDefaultPosition, wxDefaultSize,
+                                          wxTE_READONLY | wxTE_CENTER);
         m_tcNeighborhood->SetCanFocus(false);
 
         m_btnCreateProject = new wxButton(panel2, BTN_CREATE_PROJECT, "Create");
@@ -398,16 +395,6 @@ void ProjectPanel::OnSliderTransparency(wxCommandEvent&)
     world.modelColorAlpha = (range - value) / range;
 }
 
-void ProjectPanel::OnTimerUIUpdate(wxTimerEvent&)
-{
-    auto& som = SelfOrganizingMap::Get(m_project);
-
-    m_tcIterations->Clear();
-    *m_tcIterations << som.GetIterations();
-    m_tcNeighborhood->Clear();
-    *m_tcNeighborhood << som.GetNeighborhood();
-}
-
 void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
 {
     switch (event.GetId()) {
@@ -429,6 +416,14 @@ void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
         break;
     case PANEL_WATERMARKING:
         event.Enable(SelfOrganizingMap::Get(m_project).IsDone());
+        break;
+    case TE_ITERATIONS:
+        m_tcIterations->Clear();
+        *m_tcIterations << SelfOrganizingMap::Get(m_project).GetIterations();
+        break;
+    case TE_NEIGHBORHOOD:
+        m_tcNeighborhood->Clear();
+        *m_tcNeighborhood << SelfOrganizingMap::Get(m_project).GetNeighborhood();
         break;
     default:
         break;
