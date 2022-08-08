@@ -25,7 +25,7 @@ public:
     ProjectSettings& operator=(ProjectSettings const&) = delete;
 
     void SetMaxIterations(unsigned int iterations);
-    float GetMaxIterations() const;
+    long int GetMaxIterations() const;
     void SetNeighborhood(float rate);
     float GetNeighborhood() const;
     void SetLearningRate(float rate);
@@ -34,7 +34,7 @@ public:
 private:
     WatermarkingProject& m_project;
     float m_learningRate;
-    unsigned int m_maxIterations;
+    long int m_maxIterations;
     float m_neighborhood;
 };
 

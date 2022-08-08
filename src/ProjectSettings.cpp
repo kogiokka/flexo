@@ -47,7 +47,7 @@ void ProjectSettings::SetMaxIterations(unsigned int iterations)
     Notify(m_project, EventCode_ProcedureChanged);
 }
 
-float ProjectSettings::GetMaxIterations() const
+long int ProjectSettings::GetMaxIterations() const
 {
     return m_maxIterations;
 }
