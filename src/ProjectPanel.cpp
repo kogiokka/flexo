@@ -408,7 +408,6 @@ void ProjectPanel::OnTimerUIUpdate(wxTimerEvent&)
     *m_tcNeighborhood << som.GetNeighborhood();
 }
 
-#include "common/Logger.hpp"
 void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
 {
     switch (event.GetId()) {
@@ -420,30 +419,16 @@ void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
         }
         break;
     case PANEL_NOTEBOOK:
-        if (world.theModel) {
-            event.Enable(true);
-        }
+        event.Enable(world.theModel != nullptr);
         break;
     case PANEL_LATTICE:
-        if (isProjectStopped && !SelfOrganizingMap::Get(m_project).IsTraining()) {
-            event.Enable(true);
-        } else {
-            event.Enable(false);
-        }
+        event.Enable(isProjectStopped && !SelfOrganizingMap::Get(m_project).IsTraining());
         break;
     case PANEL_SOM:
-        if (isLatticeInitialized) {
-            event.Enable(true);
-        } else {
-            event.Enable(false);
-        }
+        event.Enable(isLatticeInitialized);
         break;
     case PANEL_WATERMARKING:
-        if (SelfOrganizingMap::Get(m_project).IsDone()) {
-            event.Enable(true);
-        } else {
-            event.Enable(false);
-        }
+        event.Enable(SelfOrganizingMap::Get(m_project).IsDone());
         break;
     default:
         break;
