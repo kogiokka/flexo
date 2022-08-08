@@ -12,7 +12,7 @@
 #include "common/Logger.hpp"
 
 enum {
-    TIMER_CANVAS_UPDATE,
+    OPENGL_CANVAS = wxID_HIGHEST + 1,
 };
 
 wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
@@ -22,7 +22,7 @@ wxBEGIN_EVENT_TABLE(OpenGLCanvas, wxGLCanvas)
     EVT_LEFT_DOWN(OpenGLCanvas::OnMouseLeftDown)
     EVT_RIGHT_DOWN(OpenGLCanvas::OnMouseRightDown)
     EVT_MOUSEWHEEL(OpenGLCanvas::OnMouseWheel)
-    EVT_TIMER(TIMER_CANVAS_UPDATE, OpenGLCanvas::OnUpdateTimer)
+    EVT_UPDATE_UI(OPENGL_CANVAS, OpenGLCanvas::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 float static constexpr MATH_PI = 3.14159265f;
@@ -37,7 +37,7 @@ static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey 
 
         wxGLAttributes attrs;
         attrs.PlatformDefaults().MinRGBA(8, 8, 8, 8).DoubleBuffer().Depth(24).EndList();
-        return new OpenGLCanvas(mainPage, attrs, wxID_ANY, wxDefaultPosition, wxDefaultSize, project);
+        return new OpenGLCanvas(mainPage, attrs, OPENGL_CANVAS, wxDefaultPosition, wxDefaultSize, project);
     }
 };
 
@@ -64,14 +64,10 @@ OpenGLCanvas::OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wx
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
     m_context = std::make_unique<wxGLContext>(this, nullptr, &attrs);
-
-    m_updateTimer = new wxTimer(this, TIMER_CANVAS_UPDATE);
-    m_updateTimer->Start(16); // 16 ms (60 fps)
 }
 
 OpenGLCanvas::~OpenGLCanvas()
 {
-    m_updateTimer->Stop();
 }
 
 void OpenGLCanvas::OnPaint(wxPaintEvent&)
@@ -195,7 +191,7 @@ void OpenGLCanvas::OnMouseMotion(wxMouseEvent& event)
     }
 }
 
-void OpenGLCanvas::OnUpdateTimer(wxTimerEvent&)
+void OpenGLCanvas::OnUpdateUI(wxUpdateUIEvent&)
 {
     Refresh();
 }

@@ -13,6 +13,10 @@ wxDEFINE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_SOM, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_WATERMARKING, wxCommandEvent);
 
+enum {
+    TIMER_UPDATE_UI = wxID_HIGHEST + 1,
+};
+
 // Register factory: ProjectWindow
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
@@ -76,10 +80,15 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_LATTICE);
     Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_SOM);
     Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_WATERMARKING);
+
+    m_updateUITimer = new wxTimer(this, TIMER_UPDATE_UI);
+    m_updateUITimer->Start(16);
+    Bind(wxEVT_TIMER, &ProjectWindow::OnTimerUpdateUI, this);
 }
 
 ProjectWindow::~ProjectWindow()
 {
+    m_updateUITimer->Stop();
 }
 
 WatermarkingProject& ProjectWindow::GetProject()
@@ -144,4 +153,9 @@ void ProjectWindow::OnViewMenu(wxCommandEvent& event)
 wxWindow* ProjectWindow::GetMainPage()
 {
     return m_mainPage;
+}
+
+void ProjectWindow::OnTimerUpdateUI(wxTimerEvent&)
+{
+    UpdateWindowUI();
 }

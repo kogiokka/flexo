@@ -12,7 +12,6 @@
 #include <wx/gdicmn.h>
 #include <wx/glcanvas.h>
 #include <wx/string.h>
-#include <wx/timer.h>
 
 class WatermarkingProject;
 
@@ -31,7 +30,7 @@ public:
     void OnMouseWheel(wxMouseEvent& event);
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseRightDown(wxMouseEvent& event);
-    void OnUpdateTimer(wxTimerEvent& event);
+    void OnUpdateUI(wxUpdateUIEvent& event);
     void InitGL();
     void ResetCamera();
 
@@ -44,7 +43,6 @@ private:
     int m_dirHorizontal;
     std::tuple<int, int, float, float> m_originRotate;
     std::tuple<float, float, glm::vec3> m_originTranslate;
-    wxTimer* m_updateTimer;
 
     void UpdateScene();
     inline float RoundGuard(float radian);

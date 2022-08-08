@@ -4,6 +4,7 @@
 #include <wx/frame.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
+#include <wx/timer.h>
 
 #include "ProjectPanel.hpp"
 
@@ -33,12 +34,14 @@ private:
     WatermarkingProject& m_project;
     wxWindow* m_mainPage;
     wxPanel* m_mainPanel;
+    wxTimer* m_updateUITimer;
 
     void OnOpenFile(wxCommandEvent& event);
     void OnExit(wxCommandEvent&);
     void OnMenuCameraReset(wxCommandEvent& event);
     void OnViewMenu(wxCommandEvent& event);
     void OnMenuGenerateModelDome(wxCommandEvent& event);
+    void OnTimerUpdateUI(wxTimerEvent& event);
 };
 
 #endif
