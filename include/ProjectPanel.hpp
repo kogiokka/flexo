@@ -74,7 +74,7 @@ public:
 private:
     void PopulateProjectPage();
     void PopulateRenderingPage();
-    void OnLatticeInitialized(wxCommandEvent& event);
+    void OnUpdateInitialNeighborhoodRadius(wxCommandEvent& event);
     void OnButtonInitializeLattice(wxCommandEvent& event);
     void OnButtonCreateProject(wxCommandEvent& event);
     void OnButtonStopProject(wxCommandEvent& event);

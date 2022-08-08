@@ -14,7 +14,7 @@
 #include "SelfOrganizingMap.hpp"
 
 wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
-wxDECLARE_EVENT(EVT_LATTICE_INITIALIZED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_UI_UPDATE_INITIAL_NEIGHBORHOOD_RADIUS, wxCommandEvent);
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;

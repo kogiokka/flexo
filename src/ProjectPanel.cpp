@@ -83,7 +83,7 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     m_updateTimer = new wxTimer(this, TIMER_UI_UPDATE);
     m_updateTimer->Start(16); // 16 ms (60 fps)
 
-    m_project.Bind(EVT_LATTICE_INITIALIZED, &ProjectPanel::OnLatticeInitialized, this);
+    m_project.Bind(EVT_UI_UPDATE_INITIAL_NEIGHBORHOOD_RADIUS, &ProjectPanel::OnUpdateInitialNeighborhoodRadius, this);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_SOM);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
@@ -160,18 +160,16 @@ void ProjectPanel::PopulateProjectPage()
         auto row6 = new wxBoxSizer(wxHORIZONTAL);
         auto row7 = new wxBoxSizer(wxHORIZONTAL);
 
-        wxIntegerValidator<int> validIterCap;
+        wxIntegerValidator<int> validMaxIter;
         wxFloatingPointValidator<float> validLearnRate(2, nullptr);
-        wxFloatingPointValidator<float> validNeighborhood(2, nullptr);
-        validIterCap.SetMin(0);
+        validMaxIter.SetMin(0);
         validLearnRate.SetRange(0.0f, 1.0f);
-        validNeighborhood.SetRange(0.0f, 10000.0f); // TODO: Adjust the range according to the lattice's dimensions
         m_tcMaxIterations = new wxTextCtrl(panel2, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                           wxTE_CENTER, validIterCap);
+                                           wxTE_CENTER, validMaxIter);
         m_tcLearningRate = new wxTextCtrl(panel2, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                           wxTE_CENTER, validLearnRate);
         m_tcInitialNeighborhood = new wxTextCtrl(panel2, TE_INITIAL_NEIGHBORHOOD, wxEmptyString, wxDefaultPosition,
-                                                 wxDefaultSize, wxTE_CENTER, validNeighborhood);
+                                                 wxDefaultSize, wxTE_CENTER);
 
         *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
         *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
@@ -317,10 +315,18 @@ void ProjectPanel::OnButtonStopProject(wxCommandEvent&)
     isProjectStopped = true;
 }
 
-void ProjectPanel::OnLatticeInitialized(wxCommandEvent&)
+void ProjectPanel::OnUpdateInitialNeighborhoodRadius(wxCommandEvent& event)
 {
     m_tcInitialNeighborhood->Clear();
     *m_tcInitialNeighborhood << SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
+
+    // TODO: Get rid of the string indirection
+    double max;
+    if (event.GetString().ToDouble(&max)) {
+        wxFloatingPointValidator<float> valid(2, nullptr);
+        valid.SetRange(0.0f, max);
+        m_tcInitialNeighborhood->SetValidator(valid);
+    }
 }
 
 void ProjectPanel::OnButtonRun(wxCommandEvent&)
