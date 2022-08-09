@@ -50,6 +50,7 @@ public:
     int GetIterations() const;
     float GetNeighborhood() const;
     float GetInitialNeighborhood() const;
+    float GetLearningRate() const;
 
 private:
     void Train(Lattice& lattice, std::shared_ptr<InputData> dataset);

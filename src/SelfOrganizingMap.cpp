@@ -213,6 +213,7 @@ void SelfOrganizingMap::SetMaxIterations(int numIterations)
 void SelfOrganizingMap::SetLearningRate(float rate)
 {
     m_initialRate = rate;
+    m_rate = rate;
 }
 
 void SelfOrganizingMap::SetInitialNeighborhood(float radius)
@@ -234,6 +235,11 @@ float SelfOrganizingMap::GetNeighborhood() const
 float SelfOrganizingMap::GetInitialNeighborhood() const
 {
     return m_initialNeighborhood;
+}
+
+float SelfOrganizingMap::GetLearningRate() const
+{
+    return m_rate;
 }
 
 void SelfOrganizingMap::StopWorker()

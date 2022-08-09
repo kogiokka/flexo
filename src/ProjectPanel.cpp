@@ -27,7 +27,7 @@ wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_TEXT(TE_LATTICE_WIDTH, ProjectPanel::OnSetLatticeWidth)
     EVT_TEXT(TE_LATTICE_HEIGHT, ProjectPanel::OnSetLatticeHeight)
     EVT_TEXT(TE_MAX_ITERATIONS, ProjectPanel::OnSetMaxIterations)
-    EVT_TEXT(TE_LEARNING_RATE, ProjectPanel::OnSetLearningRate)
+    EVT_TEXT(TE_INITIAL_LEARNING_RATE, ProjectPanel::OnSetLearningRate)
     EVT_SLIDER(SLIDER_NEIGHBORHOOD_RADIUS, ProjectPanel::OnSliderNeighborhoodRadius)
     EVT_BUTTON(BTN_INITIALIZE_LATTICE, ProjectPanel::OnButtonInitializeLattice)
     EVT_BUTTON(BTN_RUN, ProjectPanel::OnButtonRun)
@@ -49,6 +49,7 @@ wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(TE_ITERATIONS, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(TE_NEIGHBORHOOD, ProjectPanel::OnUpdateUI)
+    EVT_UPDATE_UI(TE_LEARNING_RATE, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 // Register factory: ProjectPanel
@@ -166,6 +167,7 @@ void ProjectPanel::PopulateProjectPage()
         auto row6 = new wxBoxSizer(wxHORIZONTAL);
         auto row7 = new wxBoxSizer(wxHORIZONTAL);
         auto row8 = new wxBoxSizer(wxHORIZONTAL);
+        auto row9 = new wxBoxSizer(wxHORIZONTAL);
 
         wxIntegerValidator<int> validMaxIter;
         wxFloatingPointValidator<float> validLearnRate(2, nullptr);
@@ -173,10 +175,12 @@ void ProjectPanel::PopulateProjectPage()
         validLearnRate.SetRange(0.0f, 1.0f);
         m_tcMaxIterations = new wxTextCtrl(panel2, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                            wxTE_CENTER, validMaxIter);
-        m_tcLearningRate = new wxTextCtrl(panel2, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                          wxTE_CENTER, validLearnRate);
-
+        m_tcInitialLearningRate = new wxTextCtrl(panel2, TE_INITIAL_LEARNING_RATE, wxEmptyString, wxDefaultPosition,
+                                                 wxDefaultSize, wxTE_CENTER, validLearnRate);
+        m_tcLearningRate
+            = new wxTextCtrl(panel2, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER);
         *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
+        *m_tcInitialLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
         *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
 
         m_btnRun = new wxButton(panel2, BTN_RUN, "Pause");
@@ -201,7 +205,7 @@ void ProjectPanel::PopulateProjectPage()
         row1->Add(m_tcMaxIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row2->Add(new wxStaticText(panel2, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
                   5);
-        row2->Add(m_tcLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row2->Add(m_tcInitialLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row3->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood Radius: "), 1,
                   wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row8->Add(m_sliderRadius, 5, wxALIGN_CENTER | wxLEFT | wxRIGHT, 5);
@@ -213,9 +217,14 @@ void ProjectPanel::PopulateProjectPage()
 
         row6->Add(new wxStaticText(panel2, wxID_ANY, "Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row6->Add(m_tcIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+
         row7->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
                   5);
         row7->Add(m_tcNeighborhood, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+
+        row9->Add(new wxStaticText(panel2, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
+                  5);
+        row9->Add(m_tcLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
 
         layout->Add(row1, 0, wxGROW | wxALL, 5);
         layout->Add(row2, 0, wxGROW | wxALL, 5);
@@ -226,6 +235,7 @@ void ProjectPanel::PopulateProjectPage()
         layout->Add(new wxStaticLine(panel2), 0, wxGROW | wxALL, 5);
         layout->Add(row6, 0, wxGROW | wxALL, 5);
         layout->Add(row7, 0, wxGROW | wxALL, 5);
+        layout->Add(row9, 0, wxGROW | wxALL, 5);
         panel2->SetSizer(layout);
     }
 
@@ -433,6 +443,10 @@ void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
     case TE_NEIGHBORHOOD:
         m_tcNeighborhood->Clear();
         *m_tcNeighborhood << SelfOrganizingMap::Get(m_project).GetNeighborhood();
+        break;
+    case TE_LEARNING_RATE:
+        m_tcLearningRate->Clear();
+        *m_tcLearningRate << wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate());
         break;
     default:
         break;

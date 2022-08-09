@@ -17,11 +17,12 @@
 
 enum {
     TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
-    TE_LEARNING_RATE,
+    TE_INITIAL_LEARNING_RATE,
     TE_INITIAL_NEIGHBORHOOD,
     TE_LATTICE_WIDTH,
     TE_LATTICE_HEIGHT,
     TE_ITERATIONS,
+    TE_LEARNING_RATE,
     TE_NEIGHBORHOOD,
     BTN_INITIALIZE_LATTICE,
     BTN_CREATE_PROJECT,
@@ -60,6 +61,7 @@ class ProjectPanel : public wxNotebook
     wxTextCtrl* m_tcLatticeWidth;
     wxTextCtrl* m_tcLatticeHeight;
     wxTextCtrl* m_tcMaxIterations;
+    wxTextCtrl* m_tcInitialLearningRate;
     wxTextCtrl* m_tcLearningRate;
     wxSlider* m_slider;
     wxSlider* m_sliderRadius;
