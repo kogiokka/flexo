@@ -27,7 +27,7 @@ wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_TEXT(TE_LATTICE_HEIGHT, ProjectPanel::OnSetLatticeHeight)
     EVT_TEXT(TE_MAX_ITERATIONS, ProjectPanel::OnSetMaxIterations)
     EVT_TEXT(TE_LEARNING_RATE, ProjectPanel::OnSetLearningRate)
-    EVT_TEXT(TE_INITIAL_NEIGHBORHOOD, ProjectPanel::OnSetNeighborhood)
+    EVT_SLIDER(SLIDER_NEIGHBORHOOD_RADIUS, ProjectPanel::OnSliderNeighborhoodRadius)
     EVT_BUTTON(BTN_INITIALIZE_LATTICE, ProjectPanel::OnButtonInitializeLattice)
     EVT_BUTTON(BTN_RUN, ProjectPanel::OnButtonRun)
     EVT_BUTTON(BTN_WATERMARK, ProjectPanel::OnButtonWatermark)
@@ -156,6 +156,7 @@ void ProjectPanel::PopulateProjectPage()
         auto row5 = new wxBoxSizer(wxHORIZONTAL);
         auto row6 = new wxBoxSizer(wxHORIZONTAL);
         auto row7 = new wxBoxSizer(wxHORIZONTAL);
+        auto row8 = new wxBoxSizer(wxHORIZONTAL);
 
         wxIntegerValidator<int> validMaxIter;
         wxFloatingPointValidator<float> validLearnRate(2, nullptr);
@@ -165,8 +166,6 @@ void ProjectPanel::PopulateProjectPage()
                                            wxTE_CENTER, validMaxIter);
         m_tcLearningRate = new wxTextCtrl(panel2, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                           wxTE_CENTER, validLearnRate);
-        m_tcInitialNeighborhood = new wxTextCtrl(panel2, TE_INITIAL_NEIGHBORHOOD, wxEmptyString, wxDefaultPosition,
-                                                 wxDefaultSize, wxTE_CENTER);
 
         *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
         *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
@@ -185,15 +184,19 @@ void ProjectPanel::PopulateProjectPage()
         m_btnStopProject = new wxButton(panel2, BTN_STOP_PROJECT, "Stop");
         m_btnStopProject->Disable();
 
+        m_sliderRadius = new wxSlider(panel2, SLIDER_NEIGHBORHOOD_RADIUS, 0, 0, 0, wxDefaultPosition, wxDefaultSize);
+        m_neighborhoodRadiusText = new wxStaticText(panel2, wxID_ANY, "0.0");
+
         row1->Add(new wxStaticText(panel2, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
                   5);
         row1->Add(m_tcMaxIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row2->Add(new wxStaticText(panel2, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
                   5);
         row2->Add(m_tcLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row3->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
-                  5);
-        row3->Add(m_tcInitialNeighborhood, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row3->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood Radius: "), 1,
+                  wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row3->Add(m_neighborhoodRadiusText, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row8->Add(m_sliderRadius, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
 
         row4->Add(m_btnCreateProject, 1, wxGROW | wxALL, 3);
         row4->Add(m_btnStopProject, 1, wxGROW | wxALL, 3);
@@ -208,6 +211,7 @@ void ProjectPanel::PopulateProjectPage()
         layout->Add(row1, 0, wxGROW | wxALL, 5);
         layout->Add(row2, 0, wxGROW | wxALL, 5);
         layout->Add(row3, 0, wxGROW | wxALL, 5);
+        layout->Add(row8, 0, wxGROW | wxALL, 5);
         layout->Add(row4, 0, wxGROW | wxALL, 5);
         layout->Add(row5, 0, wxGROW | wxALL, 5);
         layout->Add(new wxStaticLine(panel2), 0, wxGROW | wxALL, 5);
@@ -314,15 +318,14 @@ void ProjectPanel::OnButtonStopProject(wxCommandEvent&)
 
 void ProjectPanel::OnUpdateInitialNeighborhoodRadius(wxCommandEvent& event)
 {
-    m_tcInitialNeighborhood->Clear();
-    *m_tcInitialNeighborhood << SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
+    float const radius = SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
+    m_sliderRadius->SetValue(static_cast<int>(radius * 100.0f));
+    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.3f", radius));
 
     // TODO: Get rid of the string indirection
-    double max;
-    if (event.GetString().ToDouble(&max)) {
-        wxFloatingPointValidator<float> valid(2, nullptr);
-        valid.SetRange(0.0f, max);
-        m_tcInitialNeighborhood->SetValidator(valid);
+    double maxRadius;
+    if (event.GetString().ToDouble(&maxRadius)) {
+        m_sliderRadius->SetMax(static_cast<int>(maxRadius * 100.0f));
     }
 }
 
@@ -462,12 +465,11 @@ void ProjectPanel::OnSetLearningRate(wxCommandEvent& event)
     }
 }
 
-void ProjectPanel::OnSetNeighborhood(wxCommandEvent& event)
+void ProjectPanel::OnSliderNeighborhoodRadius(wxCommandEvent& event)
 {
-    double tmp;
-    if (event.GetString().ToDouble(&tmp)) {
-        ProjectSettings::Get(m_project).SetNeighborhood(tmp);
-    }
+    float radius = static_cast<float>(event.GetInt()) / 100.0f;
+    ProjectSettings::Get(m_project).SetNeighborhood(radius);
+    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.3f", radius));
 }
 
 void ProjectPanel::OnTogglePane(wxCommandEvent& event)

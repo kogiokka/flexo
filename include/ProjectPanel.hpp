@@ -3,6 +3,7 @@
 
 #include <memory>
 
+#include <wx/aui/framemanager.h>
 #include <wx/button.h>
 #include <wx/event.h>
 #include <wx/notebook.h>
@@ -10,7 +11,7 @@
 #include <wx/sizer.h>
 #include <wx/slider.h>
 #include <wx/spinctrl.h>
-#include <wx/aui/framemanager.h>
+#include <wx/stattext.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
 
@@ -36,6 +37,7 @@ enum {
     CB_LATTICE_FLAGS_CYCLIC_X,
     CB_LATTICE_FLAGS_CYCLIC_Y,
     SLIDER_TRANSPARENCY,
+    SLIDER_NEIGHBORHOOD_RADIUS,
     PANEL_NOTEBOOK,
     PANEL_LATTICE,
     PANEL_SOM,
@@ -59,8 +61,9 @@ class ProjectPanel : public wxNotebook
     wxTextCtrl* m_tcLatticeHeight;
     wxTextCtrl* m_tcMaxIterations;
     wxTextCtrl* m_tcLearningRate;
-    wxTextCtrl* m_tcInitialNeighborhood;
     wxSlider* m_slider;
+    wxSlider* m_sliderRadius;
+    wxStaticText* m_neighborhoodRadiusText;
     bool isLatticeInitialized;
     bool isProjectStopped;
 
@@ -87,13 +90,13 @@ private:
     void OnCheckboxLatticeFlagsCyclicX(wxCommandEvent& event);
     void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& event);
     void OnSliderTransparency(wxCommandEvent& event);
+    void OnSliderNeighborhoodRadius(wxCommandEvent& event);
     void OnTimerUIUpdate(wxTimerEvent& event);
     void OnUpdateUI(wxUpdateUIEvent& event);
     void OnSetLatticeWidth(wxCommandEvent& event);
     void OnSetLatticeHeight(wxCommandEvent& event);
     void OnSetMaxIterations(wxCommandEvent& event);
     void OnSetLearningRate(wxCommandEvent& event);
-    void OnSetNeighborhood(wxCommandEvent& event);
     void OnTogglePane(wxCommandEvent& event);
 
     WatermarkingProject& m_project;
