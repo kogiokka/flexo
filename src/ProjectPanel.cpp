@@ -170,7 +170,7 @@ void ProjectPanel::PopulateProjectPage()
         auto row9 = new wxBoxSizer(wxHORIZONTAL);
 
         wxIntegerValidator<int> validMaxIter;
-        wxFloatingPointValidator<float> validLearnRate(2, nullptr);
+        wxFloatingPointValidator<float> validLearnRate(6, nullptr);
         validMaxIter.SetMin(0);
         validLearnRate.SetRange(0.0f, 1.0f);
         m_tcMaxIterations = new wxTextCtrl(panel2, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
