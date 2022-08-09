@@ -179,6 +179,8 @@ void ProjectPanel::PopulateProjectPage()
                                                  wxDefaultSize, wxTE_CENTER, validLearnRate);
         m_tcLearningRate = new wxTextCtrl(panel2, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                           wxTE_READONLY | wxTE_CENTER);
+        m_tcLearningRate->SetCanFocus(false);
+
         *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
         *m_tcInitialLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
         *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
