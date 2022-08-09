@@ -74,6 +74,7 @@ public:
     ~ProjectPanel();
 
 private:
+    wxWindow* CreateScrolledPanel(wxWindow* parent, wxWindowID winid);
     void PopulateProjectPage();
     void PopulateRenderingPage();
     void OnUpdateInitialNeighborhoodRadius(wxCommandEvent& event);

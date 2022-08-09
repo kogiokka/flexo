@@ -3,6 +3,7 @@
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/event.h>
+#include <wx/scrolwin.h>
 #include <wx/sizer.h>
 #include <wx/statbox.h>
 #include <wx/statline.h>
@@ -96,16 +97,24 @@ ProjectPanel::~ProjectPanel()
 {
 }
 
+wxWindow* ProjectPanel::CreateScrolledPanel(wxWindow* parent, wxWindowID winid)
+{
+    auto panel = new wxScrolledWindow(parent, winid, wxDefaultPosition, wxDefaultSize);
+    panel->SetScrollRate(10, 10);
+    return panel;
+}
+
 void ProjectPanel::PopulateProjectPage()
 {
-    wxPanel* sidePane = new wxPanel(this, wxID_ANY);
-    wxPanel* panel1 = new wxPanel(sidePane, PANEL_LATTICE);
-    wxPanel* panel2 = new wxPanel(sidePane, PANEL_SOM);
-    wxPanel* panel3 = new wxPanel(sidePane, PANEL_WATERMARKING);
+    auto page = CreateScrolledPanel(this, wxID_ANY);
+    auto panel1 = CreateScrolledPanel(page, PANEL_LATTICE);
+    auto panel2 = CreateScrolledPanel(page, PANEL_SOM);
+    auto panel3 = CreateScrolledPanel(page, PANEL_WATERMARKING);
+
     panel2->Disable();
     panel3->Disable();
 
-    m_auiManager.SetManagedWindow(sidePane);
+    m_auiManager.SetManagedWindow(page);
 
     // Lattice (Map)
     {
@@ -230,15 +239,12 @@ void ProjectPanel::PopulateProjectPage()
     }
 
     wxAuiPaneInfo info = wxAuiPaneInfo().Center().CloseButton(false);
-    info.dock_proportion = 2;
     m_auiManager.AddPane(panel1, info.Name("lattice").Caption("Lattice"));
-    info.dock_proportion = 3;
     m_auiManager.AddPane(panel2, info.Name("som").Caption("SOM"));
-    info.dock_proportion = 1;
     m_auiManager.AddPane(panel3, info.Name("watermark").Caption("Watermarking"));
     m_auiManager.Update();
 
-    AddPage(sidePane, "Project");
+    AddPage(page, "Project");
 }
 
 void ProjectPanel::PopulateRenderingPage()
