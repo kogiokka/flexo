@@ -195,8 +195,8 @@ void ProjectPanel::PopulateProjectPage()
         row2->Add(m_tcLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
         row3->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood Radius: "), 1,
                   wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row3->Add(m_neighborhoodRadiusText, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row8->Add(m_sliderRadius, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
+        row8->Add(m_sliderRadius, 5, wxALIGN_CENTER | wxLEFT | wxRIGHT, 5);
+        row8->Add(m_neighborhoodRadiusText, 1, wxALIGN_CENTER | wxLEFT | wxRIGHT, 5);
 
         row4->Add(m_btnCreateProject, 1, wxGROW | wxALL, 3);
         row4->Add(m_btnStopProject, 1, wxGROW | wxALL, 3);
@@ -318,15 +318,15 @@ void ProjectPanel::OnButtonStopProject(wxCommandEvent&)
 
 void ProjectPanel::OnUpdateInitialNeighborhoodRadius(wxCommandEvent& event)
 {
-    float const radius = SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
-    m_sliderRadius->SetValue(static_cast<int>(radius * 100.0f));
-    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.3f", radius));
-
     // TODO: Get rid of the string indirection
     double maxRadius;
     if (event.GetString().ToDouble(&maxRadius)) {
         m_sliderRadius->SetMax(static_cast<int>(maxRadius * 100.0f));
     }
+
+    float const radius = SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
+    m_sliderRadius->SetValue(static_cast<int>(radius * 100.0f));
+    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.2f", radius));
 }
 
 void ProjectPanel::OnButtonRun(wxCommandEvent&)
@@ -469,7 +469,7 @@ void ProjectPanel::OnSliderNeighborhoodRadius(wxCommandEvent& event)
 {
     float radius = static_cast<float>(event.GetInt()) / 100.0f;
     ProjectSettings::Get(m_project).SetNeighborhood(radius);
-    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.3f", radius));
+    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.2f", radius));
 }
 
 void ProjectPanel::OnTogglePane(wxCommandEvent& event)
