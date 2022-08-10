@@ -26,14 +26,8 @@ wxDEFINE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_TEXT(TE_LATTICE_WIDTH, ProjectPanel::OnSetLatticeWidth)
     EVT_TEXT(TE_LATTICE_HEIGHT, ProjectPanel::OnSetLatticeHeight)
-    EVT_TEXT(TE_MAX_ITERATIONS, ProjectPanel::OnSetMaxIterations)
-    EVT_TEXT(TE_INITIAL_LEARNING_RATE, ProjectPanel::OnSetLearningRate)
-    EVT_SLIDER(SLIDER_NEIGHBORHOOD_RADIUS, ProjectPanel::OnSliderNeighborhoodRadius)
     EVT_BUTTON(BTN_INITIALIZE_LATTICE, ProjectPanel::OnButtonInitializeLattice)
-    EVT_BUTTON(BTN_RUN, ProjectPanel::OnButtonRun)
     EVT_BUTTON(BTN_WATERMARK, ProjectPanel::OnButtonWatermark)
-    EVT_BUTTON(BTN_CREATE_PROJECT, ProjectPanel::OnButtonCreateProject)
-    EVT_BUTTON(BTN_STOP_PROJECT, ProjectPanel::OnButtonStopProject)
     EVT_CHECKBOX(CB_RENDEROPT_MODEL, ProjectPanel::OnCheckboxModel)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, ProjectPanel::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, ProjectPanel::OnCheckboxLatticeEdge)
@@ -42,14 +36,9 @@ wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, ProjectPanel::OnCheckboxLatticeFlagsCyclicX)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
-    EVT_UPDATE_UI(BTN_RUN, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_LATTICE, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(PANEL_SOM, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(TE_ITERATIONS, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(TE_NEIGHBORHOOD, ProjectPanel::OnUpdateUI)
-    EVT_UPDATE_UI(TE_LEARNING_RATE, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 // Register factory: ProjectPanel
@@ -83,13 +72,11 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     PopulateProjectPage();
     PopulateRenderingPage();
 
-    m_project.Bind(EVT_UI_UPDATE_INITIAL_NEIGHBORHOOD_RADIUS, &ProjectPanel::OnUpdateInitialNeighborhoodRadius, this);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_SOM);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
 
     isLatticeInitialized = false;
-    isProjectStopped = true;
 
     Disable();
 }
@@ -109,10 +96,8 @@ void ProjectPanel::PopulateProjectPage()
 {
     auto page = CreateScrolledPanel(this, wxID_ANY);
     auto panel1 = CreateScrolledPanel(page, PANEL_LATTICE);
-    auto panel2 = CreateScrolledPanel(page, PANEL_SOM);
     auto panel3 = CreateScrolledPanel(page, PANEL_WATERMARKING);
 
-    panel2->Disable();
     panel3->Disable();
 
     m_auiManager.SetManagedWindow(page);
@@ -156,91 +141,6 @@ void ProjectPanel::PopulateProjectPage()
         panel1->SetSizer(layout);
     }
 
-    // SOM
-    {
-        wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
-        auto row1 = new wxBoxSizer(wxHORIZONTAL);
-        auto row2 = new wxBoxSizer(wxHORIZONTAL);
-        auto row3 = new wxBoxSizer(wxHORIZONTAL);
-        auto row4 = new wxBoxSizer(wxHORIZONTAL);
-        auto row5 = new wxBoxSizer(wxHORIZONTAL);
-        auto row6 = new wxBoxSizer(wxHORIZONTAL);
-        auto row7 = new wxBoxSizer(wxHORIZONTAL);
-        auto row8 = new wxBoxSizer(wxHORIZONTAL);
-        auto row9 = new wxBoxSizer(wxHORIZONTAL);
-
-        wxIntegerValidator<int> validMaxIter;
-        wxFloatingPointValidator<float> validLearnRate(6, nullptr);
-        validMaxIter.SetMin(0);
-        validLearnRate.SetRange(0.0f, 1.0f);
-        m_tcMaxIterations = new wxTextCtrl(panel2, TE_MAX_ITERATIONS, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                           wxTE_CENTER, validMaxIter);
-        m_tcInitialLearningRate = new wxTextCtrl(panel2, TE_INITIAL_LEARNING_RATE, wxEmptyString, wxDefaultPosition,
-                                                 wxDefaultSize, wxTE_CENTER, validLearnRate);
-        m_tcLearningRate = new wxTextCtrl(panel2, TE_LEARNING_RATE, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                          wxTE_READONLY | wxTE_CENTER);
-        m_tcLearningRate->SetCanFocus(false);
-
-        *m_tcMaxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
-        *m_tcInitialLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
-        *m_tcLearningRate << ProjectSettings::Get(m_project).GetLearningRate();
-
-        m_btnRun = new wxButton(panel2, BTN_RUN, "Pause");
-        m_btnRun->Disable();
-
-        m_tcIterations
-            = new wxTextCtrl(panel2, TE_ITERATIONS, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
-        m_tcIterations->SetCanFocus(false);
-        m_tcNeighborhood = new wxTextCtrl(panel2, TE_NEIGHBORHOOD, "0", wxDefaultPosition, wxDefaultSize,
-                                          wxTE_READONLY | wxTE_CENTER);
-        m_tcNeighborhood->SetCanFocus(false);
-
-        m_btnCreateProject = new wxButton(panel2, BTN_CREATE_PROJECT, "Create");
-        m_btnStopProject = new wxButton(panel2, BTN_STOP_PROJECT, "Stop");
-        m_btnStopProject->Disable();
-
-        m_sliderRadius = new wxSlider(panel2, SLIDER_NEIGHBORHOOD_RADIUS, 0, 0, 0, wxDefaultPosition, wxDefaultSize);
-        m_neighborhoodRadiusText = new wxStaticText(panel2, wxID_ANY, "0.0");
-
-        row1->Add(new wxStaticText(panel2, wxID_ANY, "Max Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
-                  5);
-        row1->Add(m_tcMaxIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row2->Add(new wxStaticText(panel2, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
-                  5);
-        row2->Add(m_tcInitialLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row3->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood Radius: "), 1,
-                  wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row8->Add(m_sliderRadius, 5, wxALIGN_CENTER | wxLEFT | wxRIGHT, 5);
-        row8->Add(m_neighborhoodRadiusText, 1, wxALIGN_CENTER | wxLEFT | wxRIGHT, 5);
-
-        row4->Add(m_btnCreateProject, 1, wxGROW | wxALL, 3);
-        row4->Add(m_btnStopProject, 1, wxGROW | wxALL, 3);
-        row4->Add(m_btnRun, 1, wxGROW | wxALL, 3);
-
-        row6->Add(new wxStaticText(panel2, wxID_ANY, "Iterations: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row6->Add(m_tcIterations, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-
-        row7->Add(new wxStaticText(panel2, wxID_ANY, "Neighborhood: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
-                  5);
-        row7->Add(m_tcNeighborhood, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-
-        row9->Add(new wxStaticText(panel2, wxID_ANY, "Learning Rate: "), 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT,
-                  5);
-        row9->Add(m_tcLearningRate, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-
-        layout->Add(row1, 0, wxGROW | wxALL, 5);
-        layout->Add(row2, 0, wxGROW | wxALL, 5);
-        layout->Add(row3, 0, wxGROW | wxALL, 5);
-        layout->Add(row8, 0, wxGROW | wxALL, 5);
-        layout->Add(row4, 0, wxGROW | wxALL, 5);
-        layout->Add(row5, 0, wxGROW | wxALL, 5);
-        layout->Add(new wxStaticLine(panel2), 0, wxGROW | wxALL, 5);
-        layout->Add(row6, 0, wxGROW | wxALL, 5);
-        layout->Add(row7, 0, wxGROW | wxALL, 5);
-        layout->Add(row9, 0, wxGROW | wxALL, 5);
-        panel2->SetSizer(layout);
-    }
-
     // Watermarking
     {
         wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
@@ -250,9 +150,11 @@ void ProjectPanel::PopulateProjectPage()
         panel3->SetSizer(layout);
     }
 
+    m_somPanel = new SelfOrganizingMapPanel(page, PANEL_SOM, wxDefaultPosition, wxDefaultSize, m_project);
+
     wxAuiPaneInfo info = wxAuiPaneInfo().Center().CloseButton(false);
     m_auiManager.AddPane(panel1, info.Name("lattice").Caption("Lattice"));
-    m_auiManager.AddPane(panel2, info.Name("som").Caption("SOM"));
+    m_auiManager.AddPane(m_somPanel, info.Name("som").Caption("SOM"));
     m_auiManager.AddPane(panel3, info.Name("watermark").Caption("Watermarking"));
     m_auiManager.Update();
 
@@ -308,53 +210,6 @@ void ProjectPanel::OnButtonInitializeLattice(wxCommandEvent&)
     m_project.UpdateLatticeGraphics();
     isLatticeInitialized = true;
 }
-
-void ProjectPanel::OnButtonCreateProject(wxCommandEvent&)
-{
-    m_btnCreateProject->Disable();
-    m_btnStopProject->Enable();
-    m_btnRun->Enable();
-
-    m_project.CreateProject();
-    isProjectStopped = false;
-}
-
-void ProjectPanel::OnButtonStopProject(wxCommandEvent&)
-{
-    m_btnCreateProject->Enable();
-    m_btnStopProject->Disable();
-    m_btnRun->Disable();
-
-    m_tcIterations->Clear();
-    *m_tcIterations << 0;
-    m_tcNeighborhood->Clear();
-    *m_tcNeighborhood << 0.0f;
-
-    m_project.StopProject();
-    isProjectStopped = true;
-}
-
-void ProjectPanel::OnUpdateInitialNeighborhoodRadius(wxCommandEvent& event)
-{
-    // TODO: Get rid of the string indirection
-    double maxRadius;
-    if (event.GetString().ToDouble(&maxRadius)) {
-        m_sliderRadius->SetMax(static_cast<int>(maxRadius * 100.0f));
-    }
-
-    float const radius = SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
-    m_sliderRadius->SetValue(static_cast<int>(radius * 100.0f));
-    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.2f", radius));
-}
-
-void ProjectPanel::OnButtonRun(wxCommandEvent&)
-{
-    m_btnCreateProject->Disable();
-    m_btnStopProject->Enable();
-
-    SelfOrganizingMap::Get(m_project).ToggleTraining();
-}
-
 void ProjectPanel::OnButtonWatermark(wxCommandEvent&)
 {
     m_project.DoWatermark();
@@ -419,36 +274,14 @@ void ProjectPanel::OnSliderTransparency(wxCommandEvent&)
 void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
 {
     switch (event.GetId()) {
-    case BTN_RUN:
-        if (SelfOrganizingMap::Get(m_project).IsTraining()) {
-            event.SetText("Pause");
-        } else {
-            event.SetText("Run");
-        }
-        break;
     case PANEL_NOTEBOOK:
         event.Enable(world.theModel != nullptr);
         break;
     case PANEL_LATTICE:
-        event.Enable(isProjectStopped && !SelfOrganizingMap::Get(m_project).IsTraining());
-        break;
-    case PANEL_SOM:
-        event.Enable(isLatticeInitialized);
+        event.Enable(m_somPanel->IsProjectStopped() && !SelfOrganizingMap::Get(m_project).IsTraining());
         break;
     case PANEL_WATERMARKING:
         event.Enable(SelfOrganizingMap::Get(m_project).IsDone());
-        break;
-    case TE_ITERATIONS:
-        m_tcIterations->Clear();
-        *m_tcIterations << SelfOrganizingMap::Get(m_project).GetIterations();
-        break;
-    case TE_NEIGHBORHOOD:
-        m_tcNeighborhood->Clear();
-        *m_tcNeighborhood << SelfOrganizingMap::Get(m_project).GetNeighborhood();
-        break;
-    case TE_LEARNING_RATE:
-        m_tcLearningRate->Clear();
-        *m_tcLearningRate << wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate());
         break;
     default:
         break;
@@ -469,29 +302,6 @@ void ProjectPanel::OnSetLatticeHeight(wxCommandEvent& event)
     if (event.GetString().ToLong(&tmp)) {
         Lattice::Get(m_project).SetHeight(tmp);
     }
-}
-
-void ProjectPanel::OnSetMaxIterations(wxCommandEvent& event)
-{
-    long tmp;
-    if (event.GetString().ToLong(&tmp)) {
-        ProjectSettings::Get(m_project).SetMaxIterations(tmp);
-    }
-}
-
-void ProjectPanel::OnSetLearningRate(wxCommandEvent& event)
-{
-    double tmp;
-    if (event.GetString().ToDouble(&tmp)) {
-        ProjectSettings::Get(m_project).SetLearningRate(tmp);
-    }
-}
-
-void ProjectPanel::OnSliderNeighborhoodRadius(wxCommandEvent& event)
-{
-    float radius = static_cast<float>(event.GetInt()) / 100.0f;
-    ProjectSettings::Get(m_project).SetNeighborhood(radius);
-    m_neighborhoodRadiusText->SetLabelText(wxString::Format("%.2f", radius));
 }
 
 void ProjectPanel::OnTogglePane(wxCommandEvent& event)

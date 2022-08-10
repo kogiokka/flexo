@@ -41,6 +41,7 @@ PRIVATE
     "src/Project.cpp"
     "src/ProjectWindow.cpp"
     "src/ProjectPanel.cpp"
+    "src/SelfOrganizingMapPanel.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"

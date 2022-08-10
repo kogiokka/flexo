@@ -311,3 +311,4 @@ void WatermarkingApp::OnMenuImportModel(wxCommandEvent& event)
         ImportPolygonalModel(filepath);
     }
 }
+

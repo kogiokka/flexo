@@ -7,7 +7,7 @@
 #include "common/Logger.hpp"
 
 wxDEFINE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
-wxDEFINE_EVENT(EVT_UI_UPDATE_INITIAL_NEIGHBORHOOD_RADIUS, wxCommandEvent);
+wxDEFINE_EVENT(EVT_NEIGHBORHOOD_RADIUS_PRESET, wxCommandEvent);
 
 WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)
@@ -158,6 +158,11 @@ void WatermarkingProject::SetPanel(wxWindow* panel)
     m_panel = panel;
 }
 
+wxWindow* WatermarkingProject::GetPanel()
+{
+    return m_panel;
+}
+
 void WatermarkingProject::DoWatermark()
 {
     assert(world.theModel);
@@ -200,7 +205,7 @@ void WatermarkingProject::InitializeLattice()
     lattice.Initialize();
     ProjectSettings::Get(*this).SetNeighborhood(0.5f * diagLen);
 
-    wxCommandEvent event(EVT_UI_UPDATE_INITIAL_NEIGHBORHOOD_RADIUS);
+    wxCommandEvent event(EVT_NEIGHBORHOOD_RADIUS_PRESET);
     event.SetString(wxString() << diagLen);
     ProcessEvent(event);
 }

@@ -15,21 +15,13 @@
 #include <wx/textctrl.h>
 #include <wx/window.h>
 
+#include "SelfOrganizingMapPanel.hpp"
+
 enum {
-    TE_MAX_ITERATIONS = wxID_HIGHEST + 1,
-    TE_INITIAL_LEARNING_RATE,
-    TE_INITIAL_NEIGHBORHOOD,
-    TE_LATTICE_WIDTH,
+    TE_LATTICE_WIDTH = wxID_HIGHEST + 1,
     TE_LATTICE_HEIGHT,
-    TE_ITERATIONS,
-    TE_LEARNING_RATE,
-    TE_NEIGHBORHOOD,
     BTN_INITIALIZE_LATTICE,
-    BTN_CREATE_PROJECT,
-    BTN_STOP_PROJECT,
-    BTN_RUN,
     BTN_WATERMARK,
-    SPCTRL_ITERATION_PER_FRAME,
     CB_RENDEROPT_MODEL,
     CB_RENDEROPT_LAT_VERTEX,
     CB_RENDEROPT_LAT_EDGE,
@@ -38,10 +30,8 @@ enum {
     CB_LATTICE_FLAGS_CYCLIC_X,
     CB_LATTICE_FLAGS_CYCLIC_Y,
     SLIDER_TRANSPARENCY,
-    SLIDER_NEIGHBORHOOD_RADIUS,
     PANEL_NOTEBOOK,
     PANEL_LATTICE,
-    PANEL_SOM,
     PANEL_WATERMARKING
 };
 
@@ -53,21 +43,11 @@ class WatermarkingProject;
 class ProjectPanel : public wxNotebook
 {
     wxAuiManager m_auiManager;
-    wxButton* m_btnCreateProject;
-    wxButton* m_btnStopProject;
-    wxButton* m_btnRun;
-    wxTextCtrl* m_tcIterations;
-    wxTextCtrl* m_tcNeighborhood;
     wxTextCtrl* m_tcLatticeWidth;
     wxTextCtrl* m_tcLatticeHeight;
-    wxTextCtrl* m_tcMaxIterations;
-    wxTextCtrl* m_tcInitialLearningRate;
-    wxTextCtrl* m_tcLearningRate;
     wxSlider* m_slider;
-    wxSlider* m_sliderRadius;
-    wxStaticText* m_neighborhoodRadiusText;
+    SelfOrganizingMapPanel* m_somPanel;
     bool isLatticeInitialized;
-    bool isProjectStopped;
 
 public:
     static ProjectPanel& Get(WatermarkingProject& project);
@@ -79,11 +59,7 @@ private:
     wxWindow* CreateScrolledPanel(wxWindow* parent, wxWindowID winid);
     void PopulateProjectPage();
     void PopulateRenderingPage();
-    void OnUpdateInitialNeighborhoodRadius(wxCommandEvent& event);
     void OnButtonInitializeLattice(wxCommandEvent& event);
-    void OnButtonCreateProject(wxCommandEvent& event);
-    void OnButtonStopProject(wxCommandEvent& event);
-    void OnButtonRun(wxCommandEvent& event);
     void OnButtonWatermark(wxCommandEvent& event);
     void OnCheckboxModel(wxCommandEvent& event);
     void OnCheckboxLatticeVertex(wxCommandEvent& event);
@@ -93,13 +69,10 @@ private:
     void OnCheckboxLatticeFlagsCyclicX(wxCommandEvent& event);
     void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& event);
     void OnSliderTransparency(wxCommandEvent& event);
-    void OnSliderNeighborhoodRadius(wxCommandEvent& event);
     void OnTimerUIUpdate(wxTimerEvent& event);
     void OnUpdateUI(wxUpdateUIEvent& event);
     void OnSetLatticeWidth(wxCommandEvent& event);
     void OnSetLatticeHeight(wxCommandEvent& event);
-    void OnSetMaxIterations(wxCommandEvent& event);
-    void OnSetLearningRate(wxCommandEvent& event);
     void OnTogglePane(wxCommandEvent& event);
 
     WatermarkingProject& m_project;
