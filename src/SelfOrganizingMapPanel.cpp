@@ -41,10 +41,11 @@ SelfOrganizingMapPanel::SelfOrganizingMapPanel(wxWindow* parent, wxWindowID id, 
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
 
-    wxSizerFlags flags = wxSizerFlags().Border().Expand().Center();
-    layout->Add(PopulateParametersPanel(), flags);
-    layout->Add(PopulateDisplayPanel(), flags);
-    layout->Add(PopulateControlPanel(), flags);
+    wxSizerFlags flags = wxSizerFlags().Expand();
+    layout->Add(PopulateParametersPanel(), flags.Border(wxTOP | wxLEFT | wxRIGHT, 10));
+    layout->Add(new wxStaticLine(this), flags.Border(wxTOP | wxBOTTOM, 10));
+    layout->Add(PopulateDisplayPanel(), flags.Border(wxLEFT | wxRIGHT, 10));
+    layout->Add(PopulateControlPanel(), flags.Border(wxLEFT | wxRIGHT | wxBOTTOM, 10));
 
     SetScrollRate(10, 10);
     SetSizer(layout);
@@ -65,7 +66,10 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
-    auto row4 = new wxBoxSizer(wxHORIZONTAL);
+
+    wxSizerFlags labelFlags = wxSizerFlags().Expand().Center().Proportion(4).Border(wxRIGHT, 10);
+    wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Center().Proportion(5);
+    wxSizerFlags rowFlags = wxSizerFlags().Expand().Proportion(1);
 
     wxIntegerValidator<int> validMaxIter;
     wxFloatingPointValidator<float> validLearnRate(6, nullptr);
@@ -76,27 +80,25 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     auto initLearnRate = new wxTextCtrl(this, TextCtrl_InitialLearningRate, wxEmptyString, wxDefaultPosition,
                                         wxDefaultSize, wxTE_CENTER, validLearnRate);
     m_sldrNbhdRadius = new wxSlider(this, Slider_InitialNeighborhoodRadius, 0, 0, 0, wxDefaultPosition, wxDefaultSize);
-    m_nbhdRadiusText = new wxStaticText(this, wxID_ANY, "0.0");
+    m_nbhdRadiusText = new wxStaticText(this, wxID_ANY, "0.0", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
 
     *maxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
     *initLearnRate << ProjectSettings::Get(m_project).GetLearningRate();
 
-    wxSizerFlags flags;
+    row1->Add(new wxStaticText(this, wxID_ANY, "Max Iterations", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+              labelFlags);
+    row1->Add(maxIterations, textCtrlflags);
+    row2->Add(new wxStaticText(this, wxID_ANY, "Learning Rate", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+              labelFlags);
+    row2->Add(initLearnRate, textCtrlflags);
+    row3->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+              labelFlags);
+    row3->Add(m_sldrNbhdRadius, wxSizerFlags().Expand().Center().Proportion(4));
+    row3->Add(m_nbhdRadiusText, wxSizerFlags().Expand().Center().Proportion(1));
 
-    flags = wxSizerFlags().Border(wxLEFT | wxRIGHT, 5).Expand().Proportion(1);
-    row1->Add(new wxStaticText(this, wxID_ANY, "Max Iterations: "), flags.CenterVertical());
-    row1->Add(maxIterations, flags.Center());
-    row2->Add(new wxStaticText(this, wxID_ANY, "Learning Rate: "), flags.CenterVertical());
-    row2->Add(initLearnRate, flags.Center());
-    row3->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius: "), flags.CenterVertical());
-    row4->Add(m_sldrNbhdRadius, wxSizerFlags().Expand().Center().Proportion(5));
-    row4->Add(m_nbhdRadiusText, wxSizerFlags().Expand().Center().Proportion(1));
-
-    flags = wxSizerFlags().Border(wxALL, 5).Expand().Proportion(1);
-    layout->Add(row1, flags);
-    layout->Add(row2, flags);
-    layout->Add(row3, flags);
-    layout->Add(row4, flags);
+    layout->Add(row1, rowFlags);
+    layout->Add(row2, rowFlags);
+    layout->Add(row3, rowFlags);
 
     return layout;
 }
@@ -107,6 +109,10 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
     auto row1 = new wxBoxSizer(wxHORIZONTAL);
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
+
+    wxSizerFlags labelFlags = wxSizerFlags().Expand().Center().Proportion(4).Border(wxRIGHT, 10);
+    wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Center().Proportion(5);
+    wxSizerFlags rowFlags = wxSizerFlags().Expand().Proportion(1);
 
     m_tcIterations
         = new wxTextCtrl(this, TextCtrl_Iterations, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
@@ -121,20 +127,16 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
 
     *m_tcLearnRate << ProjectSettings::Get(m_project).GetLearningRate();
 
-    wxSizerFlags flags;
+    row1->Add(new wxStaticText(this, wxID_ANY, "Iterations", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), labelFlags);
+    row1->Add(m_tcIterations, textCtrlflags);
+    row2->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), labelFlags);
+    row2->Add(m_tcNbhdRadius, textCtrlflags);
+    row3->Add(new wxStaticText(this, wxID_ANY, "Learning Rate", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), labelFlags);
+    row3->Add(m_tcLearnRate, textCtrlflags);
 
-    flags = wxSizerFlags().Border(wxLEFT | wxRIGHT, 5).Expand().Proportion(1);
-    row1->Add(new wxStaticText(this, wxID_ANY, "Iterations: "), flags.CenterVertical());
-    row1->Add(m_tcIterations, flags.Center());
-    row2->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius: "), flags.CenterVertical());
-    row2->Add(m_tcNbhdRadius, flags.Center());
-    row3->Add(new wxStaticText(this, wxID_ANY, "Learning Rate: "), flags.CenterVertical());
-    row3->Add(m_tcLearnRate, flags.Center());
-
-    flags = wxSizerFlags().Border(wxALL, 5).Expand().Proportion(1);
-    layout->Add(row1, flags.Border().Expand());
-    layout->Add(row2, flags.Border().Expand());
-    layout->Add(row3, flags.Border().Expand());
+    layout->Add(row1, rowFlags);
+    layout->Add(row2, rowFlags);
+    layout->Add(row3, rowFlags);
 
     return layout;
 }
@@ -252,3 +254,4 @@ void SelfOrganizingMapPanel::OnUpdateUI(wxUpdateUIEvent& event)
         break;
     }
 }
+
