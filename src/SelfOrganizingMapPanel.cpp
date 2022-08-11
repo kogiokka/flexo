@@ -36,7 +36,7 @@ wxEND_EVENT_TABLE()
 
 SelfOrganizingMapPanel::SelfOrganizingMapPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
                                                WatermarkingProject& project)
-    : wxScrolledWindow(parent, id, pos, size)
+    : wxScrolledWindow(parent, id, pos, size, wxVSCROLL)
     , m_project(project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
