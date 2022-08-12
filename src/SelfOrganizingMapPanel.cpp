@@ -1,3 +1,4 @@
+#include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>
 #include <wx/stattext.h>
@@ -8,6 +9,7 @@
 #include "ProjectPanel.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "SelfOrganizingMapPanel.hpp"
+#include "World.hpp"
 
 enum {
     TextCtrl_MaxIterations = wxID_HIGHEST + 1,
@@ -166,6 +168,13 @@ wxSizer* SelfOrganizingMapPanel::PopulateControlPanel()
 
 void SelfOrganizingMapPanel::OnCreate(wxCommandEvent&)
 {
+    if (!world.theModel) {
+        wxMessageDialog dialog(this, "Please import a model from the File menu first.", "Error",
+                               wxCENTER | wxICON_ERROR);
+        dialog.ShowModal();
+        return;
+    }
+
     m_btnCreate->Disable();
     m_btnStop->Enable();
     m_btnRun->Enable();

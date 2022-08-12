@@ -41,18 +41,17 @@ Renderer::Renderer(int width, int height)
 
 void Renderer::Render()
 {
-    if (!world.theModel) {
-        return;
-    }
-    if (world.theModel->HasNormals()) { // FIXME Is this reliable?
-        m_polyModel->Update(m_gfx);
-        m_polyModel->Draw(m_gfx);
-    } else {
-        glEnable(GL_CULL_FACE); // FIXME: VertexArrray bindable?
-        glCullFace(GL_BACK);
-        m_volModel->Update(m_gfx);
-        m_volModel->Draw(m_gfx);
-        glDisable(GL_CULL_FACE);
+    if (world.theModel) {
+        if (world.theModel->HasNormals()) { // FIXME Is this reliable?
+            m_polyModel->Update(m_gfx);
+            m_polyModel->Draw(m_gfx);
+        } else {
+            glEnable(GL_CULL_FACE); // FIXME: VertexArrray bindable?
+            glCullFace(GL_BACK);
+            m_volModel->Update(m_gfx);
+            m_volModel->Draw(m_gfx);
+            glDisable(GL_CULL_FACE);
+        }
     }
 
     if (m_latticeVert) {

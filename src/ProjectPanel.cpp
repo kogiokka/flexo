@@ -36,7 +36,6 @@ wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, ProjectPanel::OnCheckboxLatticeFlagsCyclicX)
     EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
-    EVT_UPDATE_UI(PANEL_NOTEBOOK, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_LATTICE, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
@@ -77,8 +76,6 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
 
     isLatticeInitialized = false;
-
-    Disable();
 }
 
 ProjectPanel::~ProjectPanel()
@@ -274,9 +271,6 @@ void ProjectPanel::OnSliderTransparency(wxCommandEvent&)
 void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
 {
     switch (event.GetId()) {
-    case PANEL_NOTEBOOK:
-        event.Enable(world.theModel != nullptr);
-        break;
     case PANEL_LATTICE:
         event.Enable(m_somPanel->IsProjectStopped() && !SelfOrganizingMap::Get(m_project).IsTraining());
         break;
