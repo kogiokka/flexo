@@ -41,6 +41,7 @@ PRIVATE
     "src/Project.cpp"
     "src/ProjectWindow.cpp"
     "src/ProjectPanel.cpp"
+    "src/LatticePanel.cpp"
     "src/SelfOrganizingMapPanel.cpp"
 
     "src/Camera.cpp"

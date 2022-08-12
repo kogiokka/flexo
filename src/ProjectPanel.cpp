@@ -13,6 +13,7 @@
 #include <wx/valnum.h>
 
 #include "Lattice.hpp"
+#include "LatticePanel.hpp"
 #include "Project.hpp"
 #include "ProjectPanel.hpp"
 #include "ProjectSettings.hpp"
@@ -21,22 +22,15 @@
 #include "World.hpp"
 
 wxDEFINE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
-wxDEFINE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
-    EVT_TEXT(TE_LATTICE_WIDTH, ProjectPanel::OnSetLatticeWidth)
-    EVT_TEXT(TE_LATTICE_HEIGHT, ProjectPanel::OnSetLatticeHeight)
-    EVT_BUTTON(BTN_INITIALIZE_LATTICE, ProjectPanel::OnButtonInitializeLattice)
     EVT_BUTTON(BTN_WATERMARK, ProjectPanel::OnButtonWatermark)
     EVT_CHECKBOX(CB_RENDEROPT_MODEL, ProjectPanel::OnCheckboxModel)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, ProjectPanel::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, ProjectPanel::OnCheckboxLatticeEdge)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, ProjectPanel::OnCheckboxLatticeFace)
     EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, ProjectPanel::OnCheckboxLightSource)
-    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_X, ProjectPanel::OnCheckboxLatticeFlagsCyclicX)
-    EVT_CHECKBOX(CB_LATTICE_FLAGS_CYCLIC_Y, ProjectPanel::OnCheckboxLatticeFlagsCyclicY)
     EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
-    EVT_UPDATE_UI(PANEL_LATTICE, ProjectPanel::OnUpdateUI)
     EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
@@ -74,8 +68,6 @@ ProjectPanel::ProjectPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_SOM);
     m_project.Bind(wxEVT_MENU, &ProjectPanel::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
-
-    isLatticeInitialized = false;
 }
 
 ProjectPanel::~ProjectPanel()
@@ -92,51 +84,11 @@ wxWindow* ProjectPanel::CreateScrolledPanel(wxWindow* parent, wxWindowID winid)
 void ProjectPanel::PopulateProjectPage()
 {
     auto page = CreateScrolledPanel(this, wxID_ANY);
-    auto panel1 = CreateScrolledPanel(page, PANEL_LATTICE);
     auto panel3 = CreateScrolledPanel(page, PANEL_WATERMARKING);
 
     panel3->Disable();
 
     m_auiManager.SetManagedWindow(page);
-
-    // Lattice (Map)
-    {
-        wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
-        auto row1 = new wxBoxSizer(wxHORIZONTAL);
-        auto row2 = new wxBoxSizer(wxHORIZONTAL);
-        auto row3 = new wxBoxSizer(wxHORIZONTAL);
-        auto row4 = new wxBoxSizer(wxHORIZONTAL);
-
-        wxIntegerValidator<int> validDimen;
-        validDimen.SetRange(1, 512);
-
-        m_tcLatticeWidth = new wxTextCtrl(panel1, TE_LATTICE_WIDTH, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                          wxTE_CENTER, validDimen);
-        m_tcLatticeHeight = new wxTextCtrl(panel1, TE_LATTICE_HEIGHT, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                           wxTE_CENTER, validDimen);
-        *m_tcLatticeWidth << Lattice::Get(m_project).GetWidth();
-        *m_tcLatticeHeight << Lattice::Get(m_project).GetHeight();
-
-        auto chkBox1 = new wxCheckBox(panel1, CB_LATTICE_FLAGS_CYCLIC_X, "Cyclic on X");
-        auto chkBox2 = new wxCheckBox(panel1, CB_LATTICE_FLAGS_CYCLIC_Y, "Cyclic on Y");
-        chkBox1->SetValue(false);
-        chkBox2->SetValue(false);
-
-        row1->Add(new wxStaticText(panel1, wxID_ANY, "Lattice Dimensions: "), 1,
-                  wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row2->Add(m_tcLatticeWidth, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row2->Add(m_tcLatticeHeight, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row3->Add(chkBox1, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row3->Add(chkBox2, 1, wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-        row4->Add(new wxButton(panel1, BTN_INITIALIZE_LATTICE, "Initialize"),
-                  wxALIGN_CENTER_VERTICAL | wxLEFT | wxRIGHT, 5);
-
-        layout->Add(row1, 0, wxGROW | wxALL, 5);
-        layout->Add(row2, 0, wxGROW | wxALL, 5);
-        layout->Add(row3, 0, wxGROW | wxALL, 5);
-        layout->Add(row4, 0, wxGROW | wxALL, 5);
-        panel1->SetSizer(layout);
-    }
 
     // Watermarking
     {
@@ -148,9 +100,10 @@ void ProjectPanel::PopulateProjectPage()
     }
 
     m_somPanel = new SelfOrganizingMapPanel(page, PANEL_SOM, wxDefaultPosition, wxDefaultSize, m_project);
+    auto latticePanel = new LatticePanel(page, PANEL_LATTICE, wxDefaultPosition, wxDefaultSize, m_project);
 
     wxAuiPaneInfo info = wxAuiPaneInfo().Center().CloseButton(false);
-    m_auiManager.AddPane(panel1, info.Name("lattice").Caption("Lattice"));
+    m_auiManager.AddPane(latticePanel, info.Name("lattice").Caption("Lattice"));
     m_auiManager.AddPane(m_somPanel, info.Name("som").Caption("SOM"));
     m_auiManager.AddPane(panel3, info.Name("watermark").Caption("Watermarking"));
     m_auiManager.Update();
@@ -201,12 +154,6 @@ void ProjectPanel::PopulateRenderingPage()
     AddPage(page, "Rendering");
 }
 
-void ProjectPanel::OnButtonInitializeLattice(wxCommandEvent&)
-{
-    m_project.InitializeLattice();
-    m_project.UpdateLatticeGraphics();
-    isLatticeInitialized = true;
-}
 void ProjectPanel::OnButtonWatermark(wxCommandEvent&)
 {
     m_project.DoWatermark();
@@ -247,20 +194,6 @@ void ProjectPanel::OnCheckboxLightSource(wxCommandEvent&)
     ProcessWindowEvent(event);
 }
 
-void ProjectPanel::OnCheckboxLatticeFlagsCyclicX(wxCommandEvent&)
-{
-    wxCommandEvent event(EVT_TOGGLE_LATTICE_FLAG, GetId());
-    event.SetInt(LatticeFlags_CyclicX);
-    ProcessWindowEvent(event);
-}
-
-void ProjectPanel::OnCheckboxLatticeFlagsCyclicY(wxCommandEvent&)
-{
-    wxCommandEvent event(EVT_TOGGLE_LATTICE_FLAG, GetId());
-    event.SetInt(LatticeFlags_CyclicY);
-    ProcessWindowEvent(event);
-}
-
 void ProjectPanel::OnSliderTransparency(wxCommandEvent&)
 {
     float const range = static_cast<float>(m_slider->GetMax() - m_slider->GetMin());
@@ -271,30 +204,11 @@ void ProjectPanel::OnSliderTransparency(wxCommandEvent&)
 void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
 {
     switch (event.GetId()) {
-    case PANEL_LATTICE:
-        event.Enable(m_somPanel->IsProjectStopped() && !SelfOrganizingMap::Get(m_project).IsTraining());
-        break;
     case PANEL_WATERMARKING:
         event.Enable(SelfOrganizingMap::Get(m_project).IsDone());
         break;
     default:
         break;
-    }
-}
-
-void ProjectPanel::OnSetLatticeWidth(wxCommandEvent& event)
-{
-    long tmp;
-    if (event.GetString().ToLong(&tmp)) {
-        Lattice::Get(m_project).SetWidth(tmp);
-    }
-}
-
-void ProjectPanel::OnSetLatticeHeight(wxCommandEvent& event)
-{
-    long tmp;
-    if (event.GetString().ToLong(&tmp)) {
-        Lattice::Get(m_project).SetHeight(tmp);
     }
 }
 

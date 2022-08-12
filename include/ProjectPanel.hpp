@@ -18,36 +18,26 @@
 #include "SelfOrganizingMapPanel.hpp"
 
 enum {
-    TE_LATTICE_WIDTH = wxID_HIGHEST + 1,
-    TE_LATTICE_HEIGHT,
-    BTN_INITIALIZE_LATTICE,
-    BTN_WATERMARK,
+    BTN_WATERMARK = wxID_HIGHEST + 1,
     CB_RENDEROPT_MODEL,
     CB_RENDEROPT_LAT_VERTEX,
     CB_RENDEROPT_LAT_EDGE,
     CB_RENDEROPT_LAT_FACE,
     CB_RENDEROPT_LIGHT_SOURCE,
-    CB_LATTICE_FLAGS_CYCLIC_X,
-    CB_LATTICE_FLAGS_CYCLIC_Y,
     SLIDER_TRANSPARENCY,
     PANEL_NOTEBOOK,
-    PANEL_LATTICE,
     PANEL_WATERMARKING
 };
 
 wxDECLARE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
-wxDECLARE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
 class WatermarkingProject;
 
 class ProjectPanel : public wxNotebook
 {
     wxAuiManager m_auiManager;
-    wxTextCtrl* m_tcLatticeWidth;
-    wxTextCtrl* m_tcLatticeHeight;
     wxSlider* m_slider;
     SelfOrganizingMapPanel* m_somPanel;
-    bool isLatticeInitialized;
 
 public:
     static ProjectPanel& Get(WatermarkingProject& project);
@@ -59,20 +49,14 @@ private:
     wxWindow* CreateScrolledPanel(wxWindow* parent, wxWindowID winid);
     void PopulateProjectPage();
     void PopulateRenderingPage();
-    void OnButtonInitializeLattice(wxCommandEvent& event);
     void OnButtonWatermark(wxCommandEvent& event);
     void OnCheckboxModel(wxCommandEvent& event);
     void OnCheckboxLatticeVertex(wxCommandEvent& event);
     void OnCheckboxLatticeEdge(wxCommandEvent& event);
     void OnCheckboxLatticeFace(wxCommandEvent& event);
     void OnCheckboxLightSource(wxCommandEvent& event);
-    void OnCheckboxLatticeFlagsCyclicX(wxCommandEvent& event);
-    void OnCheckboxLatticeFlagsCyclicY(wxCommandEvent& event);
     void OnSliderTransparency(wxCommandEvent& event);
-    void OnTimerUIUpdate(wxTimerEvent& event);
     void OnUpdateUI(wxUpdateUIEvent& event);
-    void OnSetLatticeWidth(wxCommandEvent& event);
-    void OnSetLatticeHeight(wxCommandEvent& event);
     void OnTogglePane(wxCommandEvent& event);
 
     WatermarkingProject& m_project;

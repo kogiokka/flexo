@@ -4,6 +4,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "LatticePanel.hpp"
 #include "Mesh.hpp"
 #include "OpenGLCanvas.hpp"
 #include "ProjectPanel.hpp"
@@ -68,6 +69,9 @@ bool WatermarkingApp::OnInit()
     canvas.SetFocus();
 
     wxUpdateUIEvent::SetUpdateInterval(16);
+
+    m_project->InitializeLattice();
+    m_project->UpdateLatticeGraphics();
 
     return true;
 }
@@ -311,4 +315,3 @@ void WatermarkingApp::OnMenuImportModel(wxCommandEvent& event)
         ImportPolygonalModel(filepath);
     }
 }
-
