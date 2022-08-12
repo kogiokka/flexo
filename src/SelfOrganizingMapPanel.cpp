@@ -69,8 +69,8 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
 
-    wxSizerFlags labelFlags = wxSizerFlags().Expand().Center().Proportion(4).Border(wxRIGHT, 10);
-    wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Center().Proportion(5);
+    wxSizerFlags labelFlags = wxSizerFlags().Expand().Proportion(4).Border(wxRIGHT, 10);
+    wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Proportion(5);
     wxSizerFlags rowFlags = wxSizerFlags().Expand().Proportion(1);
 
     wxIntegerValidator<int> validMaxIter;
@@ -96,8 +96,8 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     row2->Add(initLearnRate, textCtrlflags);
     row3->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
               labelFlags);
-    row3->Add(m_sldrNbhdRadius, wxSizerFlags().Expand().Center().Proportion(4));
-    row3->Add(m_nbhdRadiusText, wxSizerFlags().Expand().Center().Proportion(1));
+    row3->Add(m_sldrNbhdRadius, wxSizerFlags().Expand().Proportion(4));
+    row3->Add(m_nbhdRadiusText, wxSizerFlags().Expand().Proportion(1));
 
     layout->Add(row1, rowFlags);
     layout->Add(row2, rowFlags);
@@ -113,8 +113,8 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
 
-    wxSizerFlags labelFlags = wxSizerFlags().Expand().Center().Proportion(4).Border(wxRIGHT, 10);
-    wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Center().Proportion(5);
+    wxSizerFlags labelFlags = wxSizerFlags().Expand().Proportion(4).Border(wxRIGHT, 10);
+    wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Proportion(5);
     wxSizerFlags rowFlags = wxSizerFlags().Expand().Proportion(1);
 
     m_tcIterations = new wxTextCtrl(this, TextCtrl_Iterations, wxEmptyString, wxDefaultPosition, wxDefaultSize,
@@ -253,7 +253,7 @@ void SelfOrganizingMapPanel::OnUpdateUI(wxUpdateUIEvent& event)
         break;
     case TextCtrl_Iterations:
         if (!m_isStopped) {
-            event.SetText(wxString::Format("%lu", SelfOrganizingMap::Get(m_project).GetIterations()));
+            event.SetText(wxString::Format("%d", SelfOrganizingMap::Get(m_project).GetIterations()));
         }
         break;
     case TextCtrl_NeighborhoodRadius:
