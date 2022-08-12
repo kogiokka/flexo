@@ -80,7 +80,8 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     auto initLearnRate = new wxTextCtrl(this, TextCtrl_InitialLearningRate, wxEmptyString, wxDefaultPosition,
                                         wxDefaultSize, wxTE_CENTER, validLearnRate);
     m_sldrNbhdRadius = new wxSlider(this, Slider_InitialNeighborhoodRadius, 0, 0, 0, wxDefaultPosition, wxDefaultSize);
-    m_nbhdRadiusText = new wxStaticText(this, wxID_ANY, "0.0", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    m_nbhdRadiusText
+        = new wxStaticText(this, wxID_ANY, "0.0", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
 
     *maxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
     *initLearnRate << ProjectSettings::Get(m_project).GetLearningRate();
@@ -114,9 +115,9 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
     wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Center().Proportion(5);
     wxSizerFlags rowFlags = wxSizerFlags().Expand().Proportion(1);
 
-    m_tcIterations
-        = new wxTextCtrl(this, TextCtrl_Iterations, "0", wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
-    m_tcNbhdRadius = new wxTextCtrl(this, TextCtrl_NeighborhoodRadius, "0", wxDefaultPosition, wxDefaultSize,
+    m_tcIterations = new wxTextCtrl(this, TextCtrl_Iterations, wxEmptyString, wxDefaultPosition, wxDefaultSize,
+                                    wxTE_READONLY | wxTE_CENTER);
+    m_tcNbhdRadius = new wxTextCtrl(this, TextCtrl_NeighborhoodRadius, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                     wxTE_READONLY | wxTE_CENTER);
     m_tcLearnRate = new wxTextCtrl(this, TextCtrl_LearningRate, wxEmptyString, wxDefaultPosition, wxDefaultSize,
                                    wxTE_READONLY | wxTE_CENTER);
@@ -125,13 +126,14 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
     m_tcNbhdRadius->SetCanFocus(false);
     m_tcLearnRate->SetCanFocus(false);
 
-    *m_tcLearnRate << ProjectSettings::Get(m_project).GetLearningRate();
-
-    row1->Add(new wxStaticText(this, wxID_ANY, "Iterations", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), labelFlags);
+    row1->Add(new wxStaticText(this, wxID_ANY, "Iterations", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+              labelFlags);
     row1->Add(m_tcIterations, textCtrlflags);
-    row2->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), labelFlags);
+    row2->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+              labelFlags);
     row2->Add(m_tcNbhdRadius, textCtrlflags);
-    row3->Add(new wxStaticText(this, wxID_ANY, "Learning Rate", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT), labelFlags);
+    row3->Add(new wxStaticText(this, wxID_ANY, "Learning Rate", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+              labelFlags);
     row3->Add(m_tcLearnRate, textCtrlflags);
 
     layout->Add(row1, rowFlags);
@@ -179,9 +181,8 @@ void SelfOrganizingMapPanel::OnStop(wxCommandEvent&)
     m_btnRun->Disable();
 
     m_tcIterations->Clear();
-    *m_tcIterations << 0;
     m_tcNbhdRadius->Clear();
-    *m_tcNbhdRadius << 0.0f;
+    m_tcLearnRate->Clear();
 
     m_project.StopProject();
     m_isStopped = true;
@@ -242,16 +243,21 @@ void SelfOrganizingMapPanel::OnUpdateUI(wxUpdateUIEvent& event)
         }
         break;
     case TextCtrl_Iterations:
-        event.SetText(wxString::Format("%lu", SelfOrganizingMap::Get(m_project).GetIterations()));
+        if (!m_isStopped) {
+            event.SetText(wxString::Format("%lu", SelfOrganizingMap::Get(m_project).GetIterations()));
+        }
         break;
     case TextCtrl_NeighborhoodRadius:
-        event.SetText(wxString::Format("%.2f", SelfOrganizingMap::Get(m_project).GetNeighborhood()));
+        if (!m_isStopped) {
+            event.SetText(wxString::Format("%.2f", SelfOrganizingMap::Get(m_project).GetNeighborhood()));
+        }
         break;
     case TextCtrl_LearningRate:
-        event.SetText(wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate()));
+        if (!m_isStopped) {
+            event.SetText(wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate()));
+        }
         break;
     default:
         break;
     }
 }
-
