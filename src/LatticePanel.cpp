@@ -39,7 +39,7 @@ LatticePanel::LatticePanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     auto row4 = new wxBoxSizer(wxHORIZONTAL);
     auto row5 = new wxBoxSizer(wxVERTICAL);
 
-    wxSizerFlags labelFlags = wxSizerFlags().Expand().Proportion(4).Border(wxRIGHT, 10);
+    wxSizerFlags labelFlags = wxSizerFlags().Center().Proportion(4).Border(wxRIGHT, 10);
     wxSizerFlags textCtrlFlags = wxSizerFlags().Expand().Proportion(5);
     wxSizerFlags rowFlags = wxSizerFlags().Expand();
 

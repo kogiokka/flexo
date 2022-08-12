@@ -69,7 +69,7 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
 
-    wxSizerFlags labelFlags = wxSizerFlags().Expand().Proportion(4).Border(wxRIGHT, 10);
+    wxSizerFlags labelFlags = wxSizerFlags().Center().Proportion(4).Border(wxRIGHT, 10);
     wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Proportion(5);
     wxSizerFlags rowFlags = wxSizerFlags().Expand().Proportion(1);
 
@@ -97,7 +97,7 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     row3->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
               labelFlags);
     row3->Add(m_sldrNbhdRadius, wxSizerFlags().Expand().Proportion(4));
-    row3->Add(m_nbhdRadiusText, wxSizerFlags().Expand().Proportion(1));
+    row3->Add(m_nbhdRadiusText, wxSizerFlags().Center().Proportion(1));
 
     layout->Add(row1, rowFlags);
     layout->Add(row2, rowFlags);
@@ -113,7 +113,7 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
     auto row2 = new wxBoxSizer(wxHORIZONTAL);
     auto row3 = new wxBoxSizer(wxHORIZONTAL);
 
-    wxSizerFlags labelFlags = wxSizerFlags().Expand().Proportion(4).Border(wxRIGHT, 10);
+    wxSizerFlags labelFlags = wxSizerFlags().Center().Proportion(4).Border(wxRIGHT, 10);
     wxSizerFlags textCtrlflags = wxSizerFlags().Expand().Proportion(5);
     wxSizerFlags rowFlags = wxSizerFlags().Expand().Proportion(1);
 
