@@ -9,7 +9,7 @@
 #include "Project.hpp"
 
 enum {
-    TextCtrl_LatticeWidth = wxID_HIGHEST + 1,
+    TextCtrl_LatticeWidth = wxID_HIGHEST + 200,
     TextCtrl_LatticeHeight,
     CheckBox_CyclicX,
     CheckBox_CyclicY,

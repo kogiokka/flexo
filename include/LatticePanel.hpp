@@ -5,7 +5,7 @@
 #include <wx/textctrl.h>
 
 enum {
-    PANEL_LATTICE = wxID_HIGHEST + 10, // FIXME
+    PANEL_LATTICE = wxID_HIGHEST + 40, // FIXME
 };
 
 wxDECLARE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);

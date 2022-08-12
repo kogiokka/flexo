@@ -12,7 +12,7 @@
 #include "World.hpp"
 
 enum {
-    TextCtrl_MaxIterations = wxID_HIGHEST + 1,
+    TextCtrl_MaxIterations = wxID_HIGHEST + 100, // FIXME
     TextCtrl_InitialLearningRate,
     TextCtrl_Iterations,
     TextCtrl_LearningRate,
