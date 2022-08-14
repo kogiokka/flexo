@@ -38,7 +38,7 @@ LatticePanel::LatticePanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     layout->Add(paneSizer, wxSizerFlags().Expand().Border(wxALL, 10));
 
     wxSizerFlags labelFlags = wxSizerFlags().Right().CenterVertical();
-    wxSizerFlags cellFlags = wxSizerFlags().Expand();
+    wxSizerFlags ctrlFlags = wxSizerFlags().Expand();
 
     wxIntegerValidator<int> validDimen;
     validDimen.SetRange(1, 512);
@@ -57,19 +57,19 @@ LatticePanel::LatticePanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, "Lattice Width", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
                    labelFlags);
-    paneSizer->Add(m_tcLatticeWidth, cellFlags);
+    paneSizer->Add(m_tcLatticeWidth, ctrlFlags);
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, "Lattice Height", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
                    labelFlags);
-    paneSizer->Add(m_tcLatticeHeight, cellFlags);
+    paneSizer->Add(m_tcLatticeHeight, ctrlFlags);
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                    labelFlags);
-    paneSizer->Add(chkBox1, cellFlags);
+    paneSizer->Add(chkBox1, ctrlFlags);
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                    labelFlags);
-    paneSizer->Add(chkBox2, cellFlags);
+    paneSizer->Add(chkBox2, ctrlFlags);
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
                    labelFlags);

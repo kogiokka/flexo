@@ -19,19 +19,18 @@
 #include "ProjectSettings.hpp"
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
+#include "WatermarkingPanel.hpp"
 #include "World.hpp"
 
 wxDEFINE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
 wxBEGIN_EVENT_TABLE(ProjectPanel, wxPanel)
-    EVT_BUTTON(BTN_WATERMARK, ProjectPanel::OnButtonWatermark)
     EVT_CHECKBOX(CB_RENDEROPT_MODEL, ProjectPanel::OnCheckboxModel)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_VERTEX, ProjectPanel::OnCheckboxLatticeVertex)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_EDGE, ProjectPanel::OnCheckboxLatticeEdge)
     EVT_CHECKBOX(CB_RENDEROPT_LAT_FACE, ProjectPanel::OnCheckboxLatticeFace)
     EVT_CHECKBOX(CB_RENDEROPT_LIGHT_SOURCE, ProjectPanel::OnCheckboxLightSource)
     EVT_SLIDER(SLIDER_TRANSPARENCY, ProjectPanel::OnSliderTransparency)
-    EVT_UPDATE_UI(PANEL_WATERMARKING, ProjectPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 // Register factory: ProjectPanel
@@ -84,28 +83,17 @@ wxWindow* ProjectPanel::CreateScrolledPanel(wxWindow* parent, wxWindowID winid)
 void ProjectPanel::PopulateProjectPage()
 {
     auto page = CreateScrolledPanel(this, wxID_ANY);
-    auto panel3 = CreateScrolledPanel(page, PANEL_WATERMARKING);
-
-    panel3->Disable();
-
     m_auiManager.SetManagedWindow(page);
-
-    // Watermarking
-    {
-        wxBoxSizer* layout = new wxBoxSizer(wxVERTICAL);
-        auto row1 = new wxBoxSizer(wxHORIZONTAL);
-        row1->Add(new wxButton(panel3, BTN_WATERMARK, "Watermark"), 1, wxGROW | wxLEFT | wxRIGHT, 5);
-        layout->Add(row1, 0, wxGROW | wxALL, 5);
-        panel3->SetSizer(layout);
-    }
 
     m_somPanel = new SelfOrganizingMapPanel(page, PANEL_SOM, wxDefaultPosition, wxDefaultSize, m_project);
     auto latticePanel = new LatticePanel(page, PANEL_LATTICE, wxDefaultPosition, wxDefaultSize, m_project);
+    auto watermarking = new WatermarkingPanel(page, PANEL_WATERMARKING, wxDefaultPosition, wxDefaultSize, m_project);
+    watermarking->Disable();
 
     wxAuiPaneInfo info = wxAuiPaneInfo().Center().CloseButton(false);
     m_auiManager.AddPane(latticePanel, info.Name("lattice").Caption("Lattice"));
     m_auiManager.AddPane(m_somPanel, info.Name("som").Caption("SOM"));
-    m_auiManager.AddPane(panel3, info.Name("watermark").Caption("Watermarking"));
+    m_auiManager.AddPane(watermarking, info.Name("watermark").Caption("Watermarking"));
     m_auiManager.Update();
 
     AddPage(page, "Project");
@@ -154,11 +142,6 @@ void ProjectPanel::PopulateRenderingPage()
     AddPage(page, "Rendering");
 }
 
-void ProjectPanel::OnButtonWatermark(wxCommandEvent&)
-{
-    m_project.DoWatermark();
-}
-
 void ProjectPanel::OnCheckboxModel(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
@@ -199,17 +182,6 @@ void ProjectPanel::OnSliderTransparency(wxCommandEvent&)
     float const range = static_cast<float>(m_slider->GetMax() - m_slider->GetMin());
     float const value = static_cast<float>(m_slider->GetValue());
     world.modelColorAlpha = (range - value) / range;
-}
-
-void ProjectPanel::OnUpdateUI(wxUpdateUIEvent& event)
-{
-    switch (event.GetId()) {
-    case PANEL_WATERMARKING:
-        event.Enable(SelfOrganizingMap::Get(m_project).IsDone());
-        break;
-    default:
-        break;
-    }
 }
 
 void ProjectPanel::OnTogglePane(wxCommandEvent& event)
