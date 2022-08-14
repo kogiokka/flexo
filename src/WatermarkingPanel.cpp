@@ -12,7 +12,7 @@ enum {
 
 wxBEGIN_EVENT_TABLE(WatermarkingPanel, wxScrolledWindow)
     EVT_BUTTON(Button_Watermark, WatermarkingPanel::OnWatermark)
-    EVT_UPDATE_UI(PANEL_WATERMARKING, WatermarkingPanel::OnUpdateUI)
+    EVT_UPDATE_UI(Panel_Watermarking, WatermarkingPanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 WatermarkingPanel::WatermarkingPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
@@ -42,7 +42,7 @@ void WatermarkingPanel::OnWatermark(wxCommandEvent&)
 void WatermarkingPanel::OnUpdateUI(wxUpdateUIEvent& event)
 {
     switch (event.GetId()) {
-    case PANEL_WATERMARKING:
+    case Panel_Watermarking:
         event.Enable(SelfOrganizingMap::Get(m_project).IsDone());
         break;
     default:

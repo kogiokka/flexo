@@ -15,16 +15,8 @@
 #include <wx/textctrl.h>
 #include <wx/window.h>
 
-#include "SelfOrganizingMapPanel.hpp"
-
 enum {
-    CB_RENDEROPT_MODEL = wxID_HIGHEST + 1,
-    CB_RENDEROPT_LAT_VERTEX,
-    CB_RENDEROPT_LAT_EDGE,
-    CB_RENDEROPT_LAT_FACE,
-    CB_RENDEROPT_LIGHT_SOURCE,
-    SLIDER_TRANSPARENCY,
-    PANEL_NOTEBOOK,
+    Panel_Notebook = wxID_HIGHEST + 40,
 };
 
 wxDECLARE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
@@ -35,7 +27,6 @@ class ProjectPanel : public wxNotebook
 {
     wxAuiManager m_auiManager;
     wxSlider* m_slider;
-    SelfOrganizingMapPanel* m_somPanel;
 
 public:
     static ProjectPanel& Get(WatermarkingProject& project);

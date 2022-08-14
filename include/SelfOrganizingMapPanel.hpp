@@ -10,7 +10,7 @@
 #include <wx/textctrl.h>
 
 enum {
-    PANEL_SOM = wxID_HIGHEST + 20,
+    Panel_SOM = wxID_HIGHEST + 20,
 };
 
 class WatermarkingProject;

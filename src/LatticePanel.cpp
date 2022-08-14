@@ -24,7 +24,7 @@ wxBEGIN_EVENT_TABLE(LatticePanel, wxScrolledWindow)
     EVT_CHECKBOX(CheckBox_CyclicX, LatticePanel::OnFlagCyclicX)
     EVT_CHECKBOX(CheckBox_CyclicY, LatticePanel::OnFlagCyclicY)
     EVT_BUTTON(Button_Initialize, LatticePanel::OnInitialize)
-    EVT_UPDATE_UI(PANEL_LATTICE, LatticePanel::OnUpdateUI)
+    EVT_UPDATE_UI(Panel_Lattice, LatticePanel::OnUpdateUI)
 wxEND_EVENT_TABLE()
 
 LatticePanel::LatticePanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,

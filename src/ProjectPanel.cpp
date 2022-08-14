@@ -19,8 +19,18 @@
 #include "ProjectSettings.hpp"
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
+#include "SelfOrganizingMapPanel.hpp"
 #include "WatermarkingPanel.hpp"
 #include "World.hpp"
+
+enum {
+    CB_RENDEROPT_MODEL = wxID_HIGHEST + 1,
+    CB_RENDEROPT_LAT_VERTEX,
+    CB_RENDEROPT_LAT_EDGE,
+    CB_RENDEROPT_LAT_FACE,
+    CB_RENDEROPT_LIGHT_SOURCE,
+    SLIDER_TRANSPARENCY,
+};
 
 wxDEFINE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
@@ -40,7 +50,7 @@ static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey 
         wxWindow* mainPage = window.GetMainPage();
         wxASSERT(mainPage != nullptr);
 
-        auto panel = new ProjectPanel(mainPage, PANEL_NOTEBOOK, wxDefaultPosition, wxDefaultSize, project);
+        auto panel = new ProjectPanel(mainPage, Panel_Notebook, wxDefaultPosition, wxDefaultSize, project);
         project.SetPanel(panel);
         return panel;
     }
@@ -85,15 +95,15 @@ void ProjectPanel::PopulateProjectPage()
     auto page = CreateScrolledPanel(this, wxID_ANY);
     m_auiManager.SetManagedWindow(page);
 
-    m_somPanel = new SelfOrganizingMapPanel(page, PANEL_SOM, wxDefaultPosition, wxDefaultSize, m_project);
-    auto latticePanel = new LatticePanel(page, PANEL_LATTICE, wxDefaultPosition, wxDefaultSize, m_project);
-    auto watermarking = new WatermarkingPanel(page, PANEL_WATERMARKING, wxDefaultPosition, wxDefaultSize, m_project);
+    auto lattice = new LatticePanel(page, Panel_Lattice, wxDefaultPosition, wxDefaultSize, m_project);
+    auto som = new SelfOrganizingMapPanel(page, Panel_SOM, wxDefaultPosition, wxDefaultSize, m_project);
+    auto watermarking = new WatermarkingPanel(page, Panel_Watermarking, wxDefaultPosition, wxDefaultSize, m_project);
     watermarking->Disable();
 
     wxAuiPaneInfo info = wxAuiPaneInfo().Center().CloseButton(false);
-    m_auiManager.AddPane(latticePanel, info.Name("lattice").Caption("Lattice"));
-    m_auiManager.AddPane(m_somPanel, info.Name("som").Caption("SOM"));
-    m_auiManager.AddPane(watermarking, info.Name("watermark").Caption("Watermarking"));
+    m_auiManager.AddPane(lattice, info.Name("lattice").Caption("Lattice"));
+    m_auiManager.AddPane(som, info.Name("som").Caption("SOM"));
+    m_auiManager.AddPane(watermarking, info.Name("watermarking").Caption("Watermarking"));
     m_auiManager.Update();
 
     AddPage(page, "Project");
@@ -194,7 +204,7 @@ void ProjectPanel::OnTogglePane(wxCommandEvent& event)
     } else if (id == EVT_VIEW_MENU_SOM) {
         name = "som";
     } else if (id == EVT_VIEW_MENU_WATERMARKING) {
-        name = "watermark";
+        name = "watermarking";
     }
 
     wxAuiPaneInfo& paneInfo = m_auiManager.GetPane(name);

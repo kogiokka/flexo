@@ -5,7 +5,7 @@
 #include <wx/scrolwin.h>
 
 enum {
-    PANEL_WATERMARKING = wxID_HIGHEST + 30,
+    Panel_Watermarking = wxID_HIGHEST + 30,
 };
 
 class WatermarkingProject;
