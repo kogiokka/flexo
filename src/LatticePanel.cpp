@@ -33,15 +33,12 @@ LatticePanel::LatticePanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     , m_project(project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
-    auto row1 = new wxBoxSizer(wxHORIZONTAL);
-    auto row2 = new wxBoxSizer(wxHORIZONTAL);
-    auto row3 = new wxBoxSizer(wxHORIZONTAL);
-    auto row4 = new wxBoxSizer(wxHORIZONTAL);
-    auto row5 = new wxBoxSizer(wxVERTICAL);
+    auto paneSizer = new wxFlexGridSizer(5, 2, 5, 16);
 
-    wxSizerFlags labelFlags = wxSizerFlags().Center().Proportion(4).Border(wxRIGHT, 10);
-    wxSizerFlags textCtrlFlags = wxSizerFlags().Expand().Proportion(5);
-    wxSizerFlags rowFlags = wxSizerFlags().Expand();
+    layout->Add(paneSizer, wxSizerFlags().Expand().Border(wxALL, 10));
+
+    wxSizerFlags labelFlags = wxSizerFlags().Right().CenterVertical();
+    wxSizerFlags cellFlags = wxSizerFlags().Expand();
 
     wxIntegerValidator<int> validDimen;
     validDimen.SetRange(1, 512);
@@ -58,24 +55,28 @@ LatticePanel::LatticePanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, 
     chkBox1->SetValue(false);
     chkBox2->SetValue(false);
 
-    row1->Add(new wxStaticText(this, wxID_ANY, "Lattice Width", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-              labelFlags);
-    row1->Add(m_tcLatticeWidth, textCtrlFlags);
-    row2->Add(new wxStaticText(this, wxID_ANY, "Lattice Height", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-              labelFlags);
-    row2->Add(m_tcLatticeHeight, textCtrlFlags);
-    row3->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    row3->Add(chkBox1, textCtrlFlags);
-    row4->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    row4->Add(chkBox2, textCtrlFlags);
-    auto btn = new wxButton(this, Button_Initialize, "Initialize");
-    row5->Add(btn, wxSizerFlags().Expand());
+    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Lattice Width", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
+                   labelFlags);
+    paneSizer->Add(m_tcLatticeWidth, cellFlags);
 
-    layout->Add(row1, rowFlags.Border(wxTOP | wxLEFT | wxRIGHT, 10));
-    layout->Add(row2, rowFlags.Border(wxLEFT | wxRIGHT, 10));
-    layout->Add(row3, rowFlags.Border(wxLEFT | wxRIGHT, 10));
-    layout->Add(row4, rowFlags.Border(wxLEFT | wxRIGHT, 10));
-    layout->Add(row5, rowFlags.Border(wxBOTTOM | wxLEFT | wxRIGHT, 10));
+    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Lattice Height", wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
+                   labelFlags);
+    paneSizer->Add(m_tcLatticeHeight, cellFlags);
+
+    paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                   labelFlags);
+    paneSizer->Add(chkBox1, cellFlags);
+
+    paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                   labelFlags);
+    paneSizer->Add(chkBox2, cellFlags);
+
+    paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
+                   labelFlags);
+    paneSizer->Add(new wxButton(this, Button_Initialize, "Initialize"), wxSizerFlags().Expand());
+
+    paneSizer->AddGrowableCol(0, 4);
+    paneSizer->AddGrowableCol(1, 5);
 
     SetScrollRate(10, 10);
     SetSizer(layout);
@@ -121,3 +122,4 @@ void LatticePanel::OnUpdateUI(wxUpdateUIEvent& event)
 {
     event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining());
 }
+
