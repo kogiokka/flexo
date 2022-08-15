@@ -44,6 +44,7 @@ PRIVATE
     "src/LatticePanel.cpp"
     "src/SelfOrganizingMapPanel.cpp"
     "src/WatermarkingPanel.cpp"
+    "src/SceneOutlinerPanel.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"
