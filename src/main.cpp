@@ -1,6 +1,8 @@
 #include <cmath>
 #include <memory>
 
+#include <wx/msgdlg.h>
+
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
@@ -204,7 +206,9 @@ void WatermarkingApp::OnToggleLatticeFlag(wxCommandEvent& event)
 void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& event)
 {
     if (world.theModel == nullptr) {
-        Logger::info("You have to load a model into the scene first!");
+        wxMessageDialog dialog(&ProjectWindow::Get(*m_project), "Please import a model from the File menu first.",
+                               "Error", wxCENTER | wxICON_ERROR);
+        dialog.ShowModal();
         return;
     }
 
