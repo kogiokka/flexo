@@ -8,7 +8,7 @@
 #include <wx/stattext.h>
 
 #include "pane/PaneBase.hpp"
-class SelfOrganizingMapPanel : public PaneBase
+class SelfOrganizingMapPane : public PaneBase
 {
     wxButton* m_btnCreate;
     wxButton* m_btnStop;
@@ -18,7 +18,7 @@ class SelfOrganizingMapPanel : public PaneBase
     bool m_isStopped;
 
 public:
-    SelfOrganizingMapPanel(wxWindow* parent, WatermarkingProject& project);
+    SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project);
     bool IsProjectStopped() const;
 
 private:

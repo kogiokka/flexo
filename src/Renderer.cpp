@@ -2,17 +2,17 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "OpenGLCanvas.hpp"
 #include "Project.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
+#include "pane/SceneViewportPane.hpp"
 
 // Register factory: Renderer
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> SharedPtr<Renderer> {
-        auto const& canvas = OpenGLCanvas::Get(project);
-        wxSize const size = canvas.GetClientSize() * canvas.GetContentScaleFactor();
+        auto const& viewport = SceneViewportPane::Get(project);
+        wxSize const size = viewport.GetClientSize() * viewport.GetContentScaleFactor();
         return std::make_shared<Renderer>(size.x, size.y);
     }
 };

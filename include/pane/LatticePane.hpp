@@ -5,10 +5,10 @@
 
 wxDECLARE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
-class LatticePanel : public PaneBase
+class LatticePane : public PaneBase
 {
 public:
-    LatticePanel(wxWindow* parent, WatermarkingProject& project);
+    LatticePane(wxWindow* parent, WatermarkingProject& project);
 
 private:
     void OnLatticeWidth(wxCommandEvent& event);

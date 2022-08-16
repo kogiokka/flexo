@@ -6,12 +6,12 @@
 #include <wx/valnum.h>
 
 #include "Lattice.hpp"
-#include "LatticePanel.hpp"
 #include "Project.hpp"
+#include "pane/LatticePane.hpp"
 
 wxDEFINE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
-LatticePanel::LatticePanel(wxWindow* parent, WatermarkingProject& project)
+LatticePane::LatticePane(wxWindow* parent, WatermarkingProject& project)
     : PaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
@@ -67,14 +67,14 @@ LatticePanel::LatticePanel(wxWindow* parent, WatermarkingProject& project)
 
     Bind(wxEVT_UPDATE_UI,
          [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
-    width->Bind(wxEVT_TEXT, &LatticePanel::OnLatticeWidth, this);
-    height->Bind(wxEVT_TEXT, &LatticePanel::OnLatticeHeight, this);
-    cyclicX->Bind(wxEVT_CHECKBOX, &LatticePanel::OnFlagCyclicX, this);
-    cyclicY->Bind(wxEVT_CHECKBOX, &LatticePanel::OnFlagCyclicY, this);
-    initButton->Bind(wxEVT_BUTTON, &LatticePanel::OnInitialize, this);
+    width->Bind(wxEVT_TEXT, &LatticePane::OnLatticeWidth, this);
+    height->Bind(wxEVT_TEXT, &LatticePane::OnLatticeHeight, this);
+    cyclicX->Bind(wxEVT_CHECKBOX, &LatticePane::OnFlagCyclicX, this);
+    cyclicY->Bind(wxEVT_CHECKBOX, &LatticePane::OnFlagCyclicY, this);
+    initButton->Bind(wxEVT_BUTTON, &LatticePane::OnInitialize, this);
 }
 
-void LatticePanel::OnLatticeWidth(wxCommandEvent& event)
+void LatticePane::OnLatticeWidth(wxCommandEvent& event)
 {
     long tmp;
     if (event.GetString().ToLong(&tmp)) {
@@ -82,7 +82,7 @@ void LatticePanel::OnLatticeWidth(wxCommandEvent& event)
     }
 }
 
-void LatticePanel::OnLatticeHeight(wxCommandEvent& event)
+void LatticePane::OnLatticeHeight(wxCommandEvent& event)
 {
     long tmp;
     if (event.GetString().ToLong(&tmp)) {
@@ -90,21 +90,21 @@ void LatticePanel::OnLatticeHeight(wxCommandEvent& event)
     }
 }
 
-void LatticePanel::OnFlagCyclicX(wxCommandEvent&)
+void LatticePane::OnFlagCyclicX(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_LATTICE_FLAG, GetId());
     event.SetInt(LatticeFlags_CyclicX);
     ProcessWindowEvent(event);
 }
 
-void LatticePanel::OnFlagCyclicY(wxCommandEvent&)
+void LatticePane::OnFlagCyclicY(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_LATTICE_FLAG, GetId());
     event.SetInt(LatticeFlags_CyclicY);
     ProcessWindowEvent(event);
 }
 
-void LatticePanel::OnInitialize(wxCommandEvent&)
+void LatticePane::OnInitialize(wxCommandEvent&)
 {
     m_project.InitializeLattice();
     m_project.UpdateLatticeGraphics();

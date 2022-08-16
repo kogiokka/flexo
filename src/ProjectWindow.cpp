@@ -1,17 +1,19 @@
 #include <filesystem>
 
+#include <wx/aui/framemanager.h>
 #include <wx/filedlg.h>
 #include <wx/menu.h>
 
-#include "OpenGLCanvas.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "pane/SceneViewportPane.hpp"
 
 wxDEFINE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_SOM, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_WATERMARKING, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_SCENE_OUTLINER, wxCommandEvent);
 
 enum {
     TIMER_UPDATE_UI = wxID_HIGHEST + 1,
@@ -53,6 +55,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     viewMenu->Append(EVT_VIEW_MENU_LATTICE, "Toggle Lattice Panel");
     viewMenu->Append(EVT_VIEW_MENU_SOM, "Toggle SOM Panel");
     viewMenu->Append(EVT_VIEW_MENU_WATERMARKING, "Toggle Watermarking Panel");
+    viewMenu->Append(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner Panel");
 
     auto cameraMenu = new wxMenu;
     cameraMenu->Append(wxID_REFRESH, "Reset");
@@ -77,9 +80,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_GENERATE_MODEL_DOME);
-    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_LATTICE);
-    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_SOM);
-    Bind(wxEVT_MENU, &ProjectWindow::OnViewMenu, this, EVT_VIEW_MENU_WATERMARKING);
 
     m_updateUITimer = new wxTimer(this, TIMER_UPDATE_UI);
     m_updateUITimer->Start(16);
@@ -134,7 +134,7 @@ void ProjectWindow::OnExit(wxCommandEvent&)
 
 void ProjectWindow::OnMenuCameraReset(wxCommandEvent&)
 {
-    OpenGLCanvas::Get(m_project).ResetCamera();
+    SceneViewportPane::Get(m_project).ResetCamera();
 }
 
 // FIXME: Why do I need this?
@@ -143,11 +143,6 @@ void ProjectWindow::OnMenuGenerateModelDome(wxCommandEvent&)
     wxCommandEvent event(EVT_GENERATE_MODEL_DOME);
     event.SetId(EVT_GENERATE_MODEL_DOME);
     ProcessWindowEvent(event);
-}
-
-void ProjectWindow::OnViewMenu(wxCommandEvent& event)
-{
-    m_project.ProcessEvent(event);
 }
 
 wxWindow* ProjectWindow::GetMainPage()

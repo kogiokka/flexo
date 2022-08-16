@@ -3,14 +3,12 @@
 #include <wx/stattext.h>
 #include <wx/treectrl.h>
 
-#include "SceneOutlinerPanel.hpp"
 #include "World.hpp"
-
-#include "common/Logger.hpp"
+#include "pane/SceneOutlinerPane.hpp"
 
 wxDEFINE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
-SceneOutlinerPanel::SceneOutlinerPanel(wxWindow* parent, WatermarkingProject& project)
+SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project)
     : PaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
@@ -62,50 +60,50 @@ SceneOutlinerPanel::SceneOutlinerPanel(wxWindow* parent, WatermarkingProject& pr
 
     SetSizer(layout);
 
-    chkBox1->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxModel, this);
-    chkBox2->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLatticeVertex, this);
-    chkBox3->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLatticeEdge, this);
-    chkBox4->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLatticeFace, this);
-    chkBox5->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLightSource, this);
-    m_slider->Bind(wxEVT_SLIDER, &SceneOutlinerPanel::OnSliderTransparency, this);
+    chkBox1->Bind(wxEVT_CHECKBOX, &SceneOutlinerPane::OnCheckboxModel, this);
+    chkBox2->Bind(wxEVT_CHECKBOX, &SceneOutlinerPane::OnCheckboxLatticeVertex, this);
+    chkBox3->Bind(wxEVT_CHECKBOX, &SceneOutlinerPane::OnCheckboxLatticeEdge, this);
+    chkBox4->Bind(wxEVT_CHECKBOX, &SceneOutlinerPane::OnCheckboxLatticeFace, this);
+    chkBox5->Bind(wxEVT_CHECKBOX, &SceneOutlinerPane::OnCheckboxLightSource, this);
+    m_slider->Bind(wxEVT_SLIDER, &SceneOutlinerPane::OnSliderTransparency, this);
 }
 
-void SceneOutlinerPanel::OnCheckboxModel(wxCommandEvent&)
+void SceneOutlinerPane::OnCheckboxModel(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawModel);
     ProcessWindowEvent(event);
 }
 
-void SceneOutlinerPanel::OnCheckboxLatticeVertex(wxCommandEvent&)
+void SceneOutlinerPane::OnCheckboxLatticeVertex(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeVertex);
     ProcessWindowEvent(event);
 }
 
-void SceneOutlinerPanel::OnCheckboxLatticeEdge(wxCommandEvent&)
+void SceneOutlinerPane::OnCheckboxLatticeEdge(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeEdge);
     ProcessWindowEvent(event);
 }
 
-void SceneOutlinerPanel::OnCheckboxLatticeFace(wxCommandEvent&)
+void SceneOutlinerPane::OnCheckboxLatticeFace(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLatticeFace);
     ProcessWindowEvent(event);
 }
 
-void SceneOutlinerPanel::OnCheckboxLightSource(wxCommandEvent&)
+void SceneOutlinerPane::OnCheckboxLightSource(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_TOGGLE_RENDER_FLAG, GetId());
     event.SetInt(RenderFlag_DrawLightSource);
     ProcessWindowEvent(event);
 }
 
-void SceneOutlinerPanel::OnSliderTransparency(wxCommandEvent&)
+void SceneOutlinerPane::OnSliderTransparency(wxCommandEvent&)
 {
     float const range = static_cast<float>(m_slider->GetMax() - m_slider->GetMin());
     float const value = static_cast<float>(m_slider->GetValue());

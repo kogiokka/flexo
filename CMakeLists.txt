@@ -36,16 +36,16 @@ endif()
 target_sources(som-demo
 PRIVATE
     "src/main.cpp"
-    "src/OpenGLCanvas.cpp"
     "src/ProjectSettings.cpp"
     "src/Project.cpp"
     "src/ProjectWindow.cpp"
-    "src/ProjectPanel.cpp"
-    "src/LatticePanel.cpp"
-    "src/SelfOrganizingMapPanel.cpp"
-    "src/WatermarkingPanel.cpp"
-    "src/SceneOutlinerPanel.cpp"
+
     "src/pane/PaneBase.cpp"
+    "src/pane/SceneViewportPane.cpp"
+    "src/pane/SceneOutlinerPane.cpp"
+    "src/pane/SelfOrganizingMapPane.cpp"
+    "src/pane/LatticePane.cpp"
+    "src/pane/WatermarkingPane.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"

@@ -1,7 +1,6 @@
 #include <glm/glm.hpp>
 
 #include "Project.hpp"
-#include "ProjectPanel.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"

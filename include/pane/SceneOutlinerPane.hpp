@@ -10,12 +10,12 @@
 
 wxDECLARE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
-class SceneOutlinerPanel : public PaneBase
+class SceneOutlinerPane : public PaneBase
 {
     wxSlider* m_slider;
 
 public:
-    SceneOutlinerPanel(wxWindow* parent, WatermarkingProject& project);
+    SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project);
 
 private:
     void OnCheckboxModel(wxCommandEvent& event);

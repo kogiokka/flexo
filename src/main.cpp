@@ -2,21 +2,24 @@
 #include <memory>
 
 #include <wx/msgdlg.h>
+#include <wx/textctrl.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "LatticePanel.hpp"
 #include "Mesh.hpp"
-#include "OpenGLCanvas.hpp"
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
-#include "SceneOutlinerPanel.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
+#include "pane/LatticePane.hpp"
+#include "pane/SceneOutlinerPane.hpp"
+#include "pane/SceneViewportPane.hpp"
+#include "pane/SelfOrganizingMapPane.hpp"
+#include "pane/WatermarkingPane.hpp"
 
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
     EVT_COMMAND(wxID_ANY, EVT_TOGGLE_RENDER_FLAG, WatermarkingApp::OnToggleRenderOption)
@@ -39,6 +42,7 @@ void WatermarkingApp::OnUnhandledException()
 int WatermarkingApp::OnExit()
 {
     SelfOrganizingMap::Get(*m_project).StopWorker();
+    delete m_mgr;
     return wxApp::OnExit();
 }
 
@@ -54,26 +58,73 @@ bool WatermarkingApp::OnInit()
 
     m_project = std::make_shared<WatermarkingProject>();
     auto& window = ProjectWindow::Get(*m_project);
-    auto& panel = ProjectPanel::Get(*m_project);
-    auto& canvas = OpenGLCanvas::Get(*m_project);
+    auto page = window.GetMainPage();
 
-    wxWindow* mainPage = window.GetMainPage();
-    wxSizer* bs = mainPage->GetSizer();
-    bs->Add(&panel, 1, wxGROW | wxALL, 0);
-    bs->Add(&canvas, 3, wxGROW | wxALL, 0);
-    bs->Layout();
+    m_mgr = new wxAuiManager(page);
+
+    auto& viewport = SceneViewportPane::Get(*m_project);
+    auto outliner = new SceneOutlinerPane(page, *m_project);
+    auto lattice = new LatticePane(page, *m_project);
+    auto som = new SelfOrganizingMapPane(page, *m_project);
+    auto watermarking = new WatermarkingPane(page, *m_project);
+    watermarking->Disable();
+
+    wxSize const minSize = page->FromDIP(wxSize(300, 30));
+
+    m_mgr->AddPane(
+        &viewport,
+        wxAuiPaneInfo().Name("viewport").Caption("3D Viewport").Center().CloseButton(true).MaximizeButton(true).MinSize(
+            minSize));
+    m_mgr->AddPane(outliner,
+                   wxAuiPaneInfo()
+                       .Name("outliner")
+                       .Caption("Scene Outliner")
+                       .Right()
+                       .Layer(1)
+                       .CloseButton(true)
+                       .MaximizeButton(true)
+                       .MinSize(minSize));
+    m_mgr->AddPane(lattice,
+                   wxAuiPaneInfo()
+                       .Name("lattice")
+                       .Caption("Lattice")
+                       .Right()
+                       .Layer(1)
+                       .CloseButton(true)
+                       .MaximizeButton(true)
+                       .MinSize(minSize));
+    m_mgr->AddPane(
+        som,
+        wxAuiPaneInfo().Name("som").Caption("SOM").Right().Layer(1).CloseButton(true).MaximizeButton(true).MinSize(
+            minSize));
+    m_mgr->AddPane(watermarking,
+                   wxAuiPaneInfo()
+                       .Name("watermarking")
+                       .Caption("Watermarking")
+                       .Right()
+                       .Layer(1)
+                       .CloseButton(true)
+                       .MaximizeButton(true)
+                       .MinSize(minSize)
+                       .Hide());
+    m_mgr->Update();
 
     window.Show();
-    canvas.InitGL();
+    viewport.InitGL();
 
     // After OpenGL has been initialized
     Renderer::Get(*m_project);
-    canvas.SetFocus();
+    viewport.SetFocus();
 
     wxUpdateUIEvent::SetUpdateInterval(16);
 
     m_project->InitializeLattice();
     m_project->UpdateLatticeGraphics();
+
+    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
+    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_SOM);
+    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
+    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
 
     return true;
 }
@@ -318,4 +369,29 @@ void WatermarkingApp::OnMenuImportModel(wxCommandEvent& event)
     } else {
         ImportPolygonalModel(filepath);
     }
+}
+
+void WatermarkingApp::OnTogglePane(wxCommandEvent& event)
+{
+    wxString name;
+    int const id = event.GetId();
+
+    if (id == EVT_VIEW_MENU_LATTICE) {
+        name = "lattice";
+    } else if (id == EVT_VIEW_MENU_SOM) {
+        name = "som";
+    } else if (id == EVT_VIEW_MENU_WATERMARKING) {
+        name = "watermarking";
+    } else if (id == EVT_VIEW_MENU_SCENE_OUTLINER) {
+        name = "outliner";
+    }
+
+    wxAuiPaneInfo& paneInfo = m_mgr->GetPane(name);
+    if (paneInfo.IsShown()) {
+        paneInfo.Hide();
+    } else {
+        paneInfo.Show();
+    }
+
+    m_mgr->Update();
 }

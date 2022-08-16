@@ -15,15 +15,15 @@
 
 class WatermarkingProject;
 
-class OpenGLCanvas : public wxGLCanvas
+class SceneViewportPane : public wxGLCanvas
 {
 public:
-    static OpenGLCanvas& Get(WatermarkingProject& project);
-    static OpenGLCanvas const& Get(WatermarkingProject const& project);
+    static SceneViewportPane& Get(WatermarkingProject& project);
+    static SceneViewportPane const& Get(WatermarkingProject const& project);
 
-    OpenGLCanvas(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
-                 wxSize const& size, WatermarkingProject& project);
-    ~OpenGLCanvas();
+    SceneViewportPane(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
+                      wxSize const& size, WatermarkingProject& project);
+    ~SceneViewportPane();
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnMouseMotion(wxMouseEvent& event);

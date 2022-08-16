@@ -4,9 +4,9 @@
 
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "WatermarkingPanel.hpp"
+#include "pane/WatermarkingPane.hpp"
 
-WatermarkingPanel::WatermarkingPanel(wxWindow* parent, WatermarkingProject& project)
+WatermarkingPane::WatermarkingPane(wxWindow* parent, WatermarkingProject& project)
     : PaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
@@ -27,7 +27,7 @@ WatermarkingPanel::WatermarkingPanel(wxWindow* parent, WatermarkingProject& proj
                        [this](wxUpdateUIEvent& event) { event.Enable(SelfOrganizingMap::Get(m_project).IsDone()); });
 }
 
-void WatermarkingPanel::OnWatermark(wxCommandEvent&)
+void WatermarkingPane::OnWatermark(wxCommandEvent&)
 {
     m_project.DoWatermark();
 }

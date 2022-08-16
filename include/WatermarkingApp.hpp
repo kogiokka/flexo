@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 #include <wx/app.h>
+#include <wx/aui/framemanager.h>
 
 #include "Project.hpp"
 
@@ -25,8 +26,10 @@ public:
     void OnToggleLatticeFlag(wxCommandEvent& event);
     void OnMenuGenerateModel(wxCommandEvent& event);
     void OnMenuImportModel(wxCommandEvent& event);
+    void OnTogglePane(wxCommandEvent& event);
 
 private:
+    wxAuiManager* m_mgr;
     wxDECLARE_EVENT_TABLE();
 };
 

@@ -5,10 +5,10 @@
 
 #include "pane/PaneBase.hpp"
 
-class WatermarkingPanel : public PaneBase
+class WatermarkingPane : public PaneBase
 {
 public:
-    WatermarkingPanel(wxWindow* parent, WatermarkingProject& project);
+    WatermarkingPane(wxWindow* parent, WatermarkingProject& project);
 
 private:
     void OnWatermark(wxCommandEvent& event);

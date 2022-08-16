@@ -6,8 +6,6 @@
 #include <wx/sizer.h>
 #include <wx/timer.h>
 
-#include "ProjectPanel.hpp"
-
 class WatermarkingProject;
 
 wxDECLARE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
@@ -15,6 +13,7 @@ wxDECLARE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 wxDECLARE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
 wxDECLARE_EVENT(EVT_VIEW_MENU_SOM, wxCommandEvent);
 wxDECLARE_EVENT(EVT_VIEW_MENU_WATERMARKING, wxCommandEvent);
+wxDECLARE_EVENT(EVT_VIEW_MENU_SCENE_OUTLINER, wxCommandEvent);
 
 class ProjectWindow final : public wxFrame
 {
@@ -39,7 +38,6 @@ private:
     void OnOpenFile(wxCommandEvent& event);
     void OnExit(wxCommandEvent&);
     void OnMenuCameraReset(wxCommandEvent& event);
-    void OnViewMenu(wxCommandEvent& event);
     void OnMenuGenerateModelDome(wxCommandEvent& event);
     void OnTimerUpdateUI(wxTimerEvent& event);
 };

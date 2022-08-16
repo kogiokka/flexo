@@ -8,10 +8,10 @@
 
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "SelfOrganizingMapPanel.hpp"
 #include "World.hpp"
+#include "pane/SelfOrganizingMapPane.hpp"
 
-SelfOrganizingMapPanel::SelfOrganizingMapPanel(wxWindow* parent, WatermarkingProject& project)
+SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
     : PaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
@@ -26,15 +26,15 @@ SelfOrganizingMapPanel::SelfOrganizingMapPanel(wxWindow* parent, WatermarkingPro
 
     m_isStopped = true;
 
-    m_project.Bind(EVT_NEIGHBORHOOD_RADIUS_PRESET, &SelfOrganizingMapPanel::OnNeighborhoodRadiusPreset, this);
+    m_project.Bind(EVT_NEIGHBORHOOD_RADIUS_PRESET, &SelfOrganizingMapPane::OnNeighborhoodRadiusPreset, this);
 }
 
-bool SelfOrganizingMapPanel::IsProjectStopped() const
+bool SelfOrganizingMapPane::IsProjectStopped() const
 {
     return m_isStopped;
 }
 
-wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
+wxSizer* SelfOrganizingMapPane::PopulateParametersPanel()
 {
     auto paneSizer = new wxFlexGridSizer(3, 2, 5, 16);
     auto labelFlags = wxSizerFlags().Right().CenterVertical();
@@ -76,14 +76,14 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     row->Add(m_nbhdRadiusText, wxSizerFlags().Center().Proportion(1));
     paneSizer->Add(row, ctrlFlags);
 
-    maxIterations->Bind(wxEVT_TEXT, &SelfOrganizingMapPanel::OnMaxIterations, this);
-    initLearnRate->Bind(wxEVT_TEXT, &SelfOrganizingMapPanel::OnInitialLearningRate, this);
-    m_sldrNbhdRadius->Bind(wxEVT_SLIDER, &SelfOrganizingMapPanel::OnInitialNeighborhoodRadius, this);
+    maxIterations->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnMaxIterations, this);
+    initLearnRate->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnInitialLearningRate, this);
+    m_sldrNbhdRadius->Bind(wxEVT_SLIDER, &SelfOrganizingMapPane::OnInitialNeighborhoodRadius, this);
 
     return paneSizer;
 }
 
-wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
+wxSizer* SelfOrganizingMapPane::PopulateDisplayPanel()
 {
     auto paneSizer = new wxFlexGridSizer(3, 2, 5, 16);
     auto labelFlags = wxSizerFlags().Right().CenterVertical();
@@ -142,7 +142,7 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
     return paneSizer;
 }
 
-wxSizer* SelfOrganizingMapPanel::PopulateControlPanel()
+wxSizer* SelfOrganizingMapPane::PopulateControlPanel()
 {
     auto paneSizer = new wxFlexGridSizer(3, 2, 5, 16);
     auto labelFlags = wxSizerFlags().Right().CenterVertical();
@@ -166,9 +166,9 @@ wxSizer* SelfOrganizingMapPanel::PopulateControlPanel()
         }
     });
 
-    m_btnCreate->Bind(wxEVT_BUTTON, &SelfOrganizingMapPanel::OnCreate, this);
-    m_btnStop->Bind(wxEVT_BUTTON, &SelfOrganizingMapPanel::OnStop, this);
-    m_btnRun->Bind(wxEVT_BUTTON, &SelfOrganizingMapPanel::OnRun, this);
+    m_btnCreate->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnCreate, this);
+    m_btnStop->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnStop, this);
+    m_btnRun->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnRun, this);
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
     paneSizer->Add(m_btnCreate, ctrlFlags);
@@ -181,7 +181,7 @@ wxSizer* SelfOrganizingMapPanel::PopulateControlPanel()
 }
 
 #include "common/Logger.hpp"
-void SelfOrganizingMapPanel::OnCreate(wxCommandEvent&)
+void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
 {
     if (!world.theModel) {
         wxMessageDialog dialog(this, "Please import a model from the File menu first.", "Error",
@@ -198,7 +198,7 @@ void SelfOrganizingMapPanel::OnCreate(wxCommandEvent&)
     m_isStopped = false;
 }
 
-void SelfOrganizingMapPanel::OnStop(wxCommandEvent&)
+void SelfOrganizingMapPane::OnStop(wxCommandEvent&)
 {
     m_btnCreate->Enable();
     m_btnStop->Disable();
@@ -208,7 +208,7 @@ void SelfOrganizingMapPanel::OnStop(wxCommandEvent&)
     m_isStopped = true;
 }
 
-void SelfOrganizingMapPanel::OnRun(wxCommandEvent&)
+void SelfOrganizingMapPane::OnRun(wxCommandEvent&)
 {
     m_btnCreate->Disable();
     m_btnStop->Enable();
@@ -216,7 +216,7 @@ void SelfOrganizingMapPanel::OnRun(wxCommandEvent&)
     SelfOrganizingMap::Get(m_project).ToggleTraining();
 }
 
-void SelfOrganizingMapPanel::OnMaxIterations(wxCommandEvent& event)
+void SelfOrganizingMapPane::OnMaxIterations(wxCommandEvent& event)
 {
     long tmp;
     if (event.GetString().ToLong(&tmp)) {
@@ -224,7 +224,7 @@ void SelfOrganizingMapPanel::OnMaxIterations(wxCommandEvent& event)
     }
 }
 
-void SelfOrganizingMapPanel::OnInitialLearningRate(wxCommandEvent& event)
+void SelfOrganizingMapPane::OnInitialLearningRate(wxCommandEvent& event)
 {
     double tmp;
     if (event.GetString().ToDouble(&tmp)) {
@@ -232,14 +232,14 @@ void SelfOrganizingMapPanel::OnInitialLearningRate(wxCommandEvent& event)
     }
 }
 
-void SelfOrganizingMapPanel::OnInitialNeighborhoodRadius(wxCommandEvent& event)
+void SelfOrganizingMapPane::OnInitialNeighborhoodRadius(wxCommandEvent& event)
 {
     float radius = static_cast<float>(event.GetInt()) / 100.0f;
     ProjectSettings::Get(m_project).SetNeighborhood(radius);
     m_nbhdRadiusText->SetLabelText(wxString::Format("%.2f", radius));
 }
 
-void SelfOrganizingMapPanel::OnNeighborhoodRadiusPreset(wxCommandEvent& event)
+void SelfOrganizingMapPane::OnNeighborhoodRadiusPreset(wxCommandEvent& event)
 {
     // TODO: Get rid of the string indirection
     double maxRadius;
