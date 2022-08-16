@@ -50,6 +50,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     auto transparencyLabel = new wxTextCtrl(this, wxID_ANY, "Model Transparency (%)", wxDefaultPosition, wxDefaultSize,
                                             wxBORDER_NONE | wxTE_READONLY | wxTE_MULTILINE | wxTE_CHARWRAP);
     transparencyLabel->SetCanFocus(false);
+    transparencyLabel->SetBackgroundColour(GetBackgroundColour());
 
     int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
     m_slider = new wxSlider(this, wxID_ANY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
