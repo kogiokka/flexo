@@ -4,22 +4,18 @@
 #include <wx/event.h>
 #include <wx/scrolwin.h>
 #include <wx/slider.h>
+#include <wx/window.h>
 
-enum {
-    Panel_SceneOutliner = wxID_HIGHEST + 50,
-};
+#include "pane/PaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
-class WatermarkingProject;
-
-class SceneOutlinerPanel : public wxScrolledWindow
+class SceneOutlinerPanel : public PaneBase
 {
     wxSlider* m_slider;
 
 public:
-    SceneOutlinerPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
-                       WatermarkingProject& project);
+    SceneOutlinerPanel(wxWindow* parent, WatermarkingProject& project);
 
 private:
     void OnCheckboxModel(wxCommandEvent& event);
@@ -28,9 +24,6 @@ private:
     void OnCheckboxLatticeFace(wxCommandEvent& event);
     void OnCheckboxLightSource(wxCommandEvent& event);
     void OnSliderTransparency(wxCommandEvent& event);
-
-    WatermarkingProject& m_project;
-    wxDECLARE_EVENT_TABLE();
 };
 
 #endif

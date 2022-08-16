@@ -4,10 +4,9 @@
 #include <wx/aui/framemanager.h>
 #include <wx/event.h>
 #include <wx/notebook.h>
+#include <wx/window.h>
 
-enum {
-    Panel_Notebook = wxID_HIGHEST + 40,
-};
+wxWindowIDRef const Panel_Notebook = wxWindow::NewControlId();
 
 class WatermarkingProject;
 

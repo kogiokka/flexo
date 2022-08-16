@@ -6,30 +6,12 @@
 #include "SceneOutlinerPanel.hpp"
 #include "World.hpp"
 
-enum {
-    CheckBox_RenderOpt_Model = wxID_HIGHEST + 400,
-    CheckBox_RenderOpt_LatticeVertex,
-    CheckBox_RenderOpt_LatticeEdge,
-    CheckBox_RenderOpt_LatticeFace,
-    CheckBox_RenderOpt_LightSource,
-    Slider_ModelTransparency,
-};
+#include "common/Logger.hpp"
 
 wxDEFINE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
-wxBEGIN_EVENT_TABLE(SceneOutlinerPanel, wxPanel)
-    EVT_CHECKBOX(CheckBox_RenderOpt_Model, SceneOutlinerPanel::OnCheckboxModel)
-    EVT_CHECKBOX(CheckBox_RenderOpt_LatticeVertex, SceneOutlinerPanel::OnCheckboxLatticeVertex)
-    EVT_CHECKBOX(CheckBox_RenderOpt_LatticeEdge, SceneOutlinerPanel::OnCheckboxLatticeEdge)
-    EVT_CHECKBOX(CheckBox_RenderOpt_LatticeFace, SceneOutlinerPanel::OnCheckboxLatticeFace)
-    EVT_CHECKBOX(CheckBox_RenderOpt_LightSource, SceneOutlinerPanel::OnCheckboxLightSource)
-    EVT_SLIDER(Slider_ModelTransparency, SceneOutlinerPanel::OnSliderTransparency)
-wxEND_EVENT_TABLE()
-
-SceneOutlinerPanel::SceneOutlinerPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
-                                       WatermarkingProject& project)
-    : wxScrolledWindow(parent, id, pos, size, wxVSCROLL)
-    , m_project(project)
+SceneOutlinerPanel::SceneOutlinerPanel(wxWindow* parent, WatermarkingProject& project)
+    : PaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
     auto paneSizer = new wxFlexGridSizer(6, 2, 5, 16);
@@ -39,11 +21,11 @@ SceneOutlinerPanel::SceneOutlinerPanel(wxWindow* parent, wxWindowID id, wxPoint 
     paneSizer->AddGrowableCol(0, 4);
     paneSizer->AddGrowableCol(1, 5);
 
-    auto chkBox1 = new wxCheckBox(this, CheckBox_RenderOpt_Model, "Model");
-    auto chkBox2 = new wxCheckBox(this, CheckBox_RenderOpt_LatticeVertex, "Lattice Vertex");
-    auto chkBox3 = new wxCheckBox(this, CheckBox_RenderOpt_LatticeEdge, "Lattice Edge");
-    auto chkBox4 = new wxCheckBox(this, CheckBox_RenderOpt_LatticeFace, "Lattice Face");
-    auto chkBox5 = new wxCheckBox(this, CheckBox_RenderOpt_LightSource, "Light Source");
+    auto chkBox1 = new wxCheckBox(this, wxID_ANY, "Model");
+    auto chkBox2 = new wxCheckBox(this, wxID_ANY, "Lattice Vertex");
+    auto chkBox3 = new wxCheckBox(this, wxID_ANY, "Lattice Edge");
+    auto chkBox4 = new wxCheckBox(this, wxID_ANY, "Lattice Face");
+    auto chkBox5 = new wxCheckBox(this, wxID_ANY, "Light Source");
     chkBox1->SetValue(true);
     chkBox2->SetValue(true);
     chkBox3->SetValue(true);
@@ -72,14 +54,20 @@ SceneOutlinerPanel::SceneOutlinerPanel(wxWindow* parent, wxWindowID id, wxPoint 
     transparencyLabel->SetCanFocus(false);
 
     int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
-    m_slider = new wxSlider(this, Slider_ModelTransparency, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
+    m_slider = new wxSlider(this, wxID_ANY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
                             wxSL_HORIZONTAL | wxSL_LABELS);
     paneSizer->Add(transparencyLabel, labelFlags);
     paneSizer->Add(m_slider, ctrlFlags);
     layout->Add(paneSizer, wxSizerFlags().Expand().Border(wxALL, 10));
 
-    SetScrollRate(10, 10);
     SetSizer(layout);
+
+    chkBox1->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxModel, this);
+    chkBox2->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLatticeVertex, this);
+    chkBox3->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLatticeEdge, this);
+    chkBox4->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLatticeFace, this);
+    chkBox5->Bind(wxEVT_CHECKBOX, &SceneOutlinerPanel::OnCheckboxLightSource, this);
+    m_slider->Bind(wxEVT_SLIDER, &SceneOutlinerPanel::OnSliderTransparency, this);
 }
 
 void SceneOutlinerPanel::OnCheckboxModel(wxCommandEvent&)

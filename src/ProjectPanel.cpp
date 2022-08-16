@@ -9,6 +9,7 @@
 #include "SceneOutlinerPanel.hpp"
 #include "SelfOrganizingMapPanel.hpp"
 #include "WatermarkingPanel.hpp"
+#include "common/Logger.hpp"
 
 // Register factory: ProjectPanel
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
@@ -62,9 +63,9 @@ void ProjectPanel::PopulateProjectPage()
     auto page = CreateScrolledPanel(this, wxID_ANY);
     m_auiManager.SetManagedWindow(page);
 
-    auto lattice = new LatticePanel(page, Panel_Lattice, wxDefaultPosition, wxDefaultSize, m_project);
-    auto som = new SelfOrganizingMapPanel(page, Panel_SOM, wxDefaultPosition, wxDefaultSize, m_project);
-    auto watermarking = new WatermarkingPanel(page, Panel_Watermarking, wxDefaultPosition, wxDefaultSize, m_project);
+    auto lattice = new LatticePanel(page, m_project);
+    auto som = new SelfOrganizingMapPanel(page, m_project);
+    auto watermarking = new WatermarkingPanel(page, m_project);
     watermarking->Disable();
 
     wxAuiPaneInfo info = wxAuiPaneInfo().Center().CloseButton(false);
@@ -80,7 +81,7 @@ void ProjectPanel::PopulateRenderingPage()
 {
     auto page = CreateScrolledPanel(this, wxID_ANY);
     auto layout = new wxBoxSizer(wxVERTICAL);
-    auto sceneOutliner = new SceneOutlinerPanel(page, Panel_SceneOutliner, wxDefaultPosition, wxDefaultSize, m_project);
+    auto sceneOutliner = new SceneOutlinerPanel(page, m_project);
     layout->Add(sceneOutliner, wxSizerFlags().Expand().Proportion(1));
     page->SetSizer(layout);
 

@@ -3,33 +3,22 @@
 
 #include <wx/button.h>
 #include <wx/panel.h>
-#include <wx/scrolwin.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
 #include <wx/stattext.h>
-#include <wx/textctrl.h>
 
-enum {
-    Panel_SOM = wxID_HIGHEST + 20,
-};
-
-class WatermarkingProject;
-
-class SelfOrganizingMapPanel : public wxScrolledWindow
+#include "pane/PaneBase.hpp"
+class SelfOrganizingMapPanel : public PaneBase
 {
     wxButton* m_btnCreate;
     wxButton* m_btnStop;
     wxButton* m_btnRun;
-    wxTextCtrl* m_tcIterations;
-    wxTextCtrl* m_tcNbhdRadius;
-    wxTextCtrl* m_tcLearnRate;
     wxSlider* m_sldrNbhdRadius;
     wxStaticText* m_nbhdRadiusText;
     bool m_isStopped;
 
 public:
-    SelfOrganizingMapPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
-                           WatermarkingProject& project);
+    SelfOrganizingMapPanel(wxWindow* parent, WatermarkingProject& project);
     bool IsProjectStopped() const;
 
 private:
@@ -43,13 +32,6 @@ private:
     void OnInitialLearningRate(wxCommandEvent& event);
     void OnInitialNeighborhoodRadius(wxCommandEvent& event);
     void OnNeighborhoodRadiusPreset(wxCommandEvent& event);
-    void OnUpdateUI(wxUpdateUIEvent& event);
-
-    WatermarkingProject& m_project;
-
-    wxDECLARE_EVENT_TABLE();
 };
 
 #endif
-
-

@@ -1,24 +1,14 @@
 #ifndef LATTICE_PANEL_H
 #define LATTICE_PANEL_H
 
-#include <wx/scrolwin.h>
-#include <wx/textctrl.h>
-
-enum {
-    Panel_Lattice = wxID_HIGHEST + 40, // FIXME
-};
+#include "pane/PaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
-class WatermarkingProject;
-
-class LatticePanel : public wxScrolledWindow
+class LatticePanel : public PaneBase
 {
-    wxTextCtrl* m_tcLatticeWidth;
-    wxTextCtrl* m_tcLatticeHeight;
-
 public:
-    LatticePanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size, WatermarkingProject& project);
+    LatticePanel(wxWindow* parent, WatermarkingProject& project);
 
 private:
     void OnLatticeWidth(wxCommandEvent& event);
@@ -26,11 +16,7 @@ private:
     void OnFlagCyclicX(wxCommandEvent& event);
     void OnFlagCyclicY(wxCommandEvent& event);
     void OnInitialize(wxCommandEvent& event);
-    void OnUpdateUI(wxUpdateUIEvent& event);
-
-    WatermarkingProject& m_project;
-
-    wxDECLARE_EVENT_TABLE();
 };
 
 #endif
+

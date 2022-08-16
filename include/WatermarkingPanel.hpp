@@ -2,27 +2,16 @@
 #define WATERMARK_PANEL
 
 #include <wx/event.h>
-#include <wx/scrolwin.h>
 
-enum {
-    Panel_Watermarking = wxID_HIGHEST + 30,
-};
+#include "pane/PaneBase.hpp"
 
-class WatermarkingProject;
-
-class WatermarkingPanel : public wxScrolledWindow
+class WatermarkingPanel : public PaneBase
 {
 public:
-    WatermarkingPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
-                   WatermarkingProject& project);
+    WatermarkingPanel(wxWindow* parent, WatermarkingProject& project);
 
 private:
     void OnWatermark(wxCommandEvent& event);
-    void OnUpdateUI(wxUpdateUIEvent& event);
-
-    WatermarkingProject& m_project;
-
-    wxDECLARE_EVENT_TABLE();
 };
 
 #endif

@@ -45,6 +45,7 @@ PRIVATE
     "src/SelfOrganizingMapPanel.cpp"
     "src/WatermarkingPanel.cpp"
     "src/SceneOutlinerPanel.cpp"
+    "src/pane/PaneBase.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"

@@ -3,43 +3,16 @@
 #include <wx/statline.h>
 #include <wx/stattext.h>
 #include <wx/string.h>
+#include <wx/textctrl.h>
 #include <wx/valnum.h>
 
 #include "Project.hpp"
-#include "ProjectPanel.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "SelfOrganizingMapPanel.hpp"
 #include "World.hpp"
 
-enum {
-    TextCtrl_MaxIterations = wxID_HIGHEST + 100, // FIXME
-    TextCtrl_InitialLearningRate,
-    TextCtrl_Iterations,
-    TextCtrl_LearningRate,
-    TextCtrl_NeighborhoodRadius,
-    Button_Create,
-    Button_Stop,
-    Button_Run,
-    Slider_InitialNeighborhoodRadius,
-};
-
-wxBEGIN_EVENT_TABLE(SelfOrganizingMapPanel, wxScrolledWindow)
-    EVT_TEXT(TextCtrl_MaxIterations, SelfOrganizingMapPanel::OnMaxIterations)
-    EVT_TEXT(TextCtrl_InitialLearningRate, SelfOrganizingMapPanel::OnInitialLearningRate)
-    EVT_SLIDER(Slider_InitialNeighborhoodRadius, SelfOrganizingMapPanel::OnInitialNeighborhoodRadius)
-    EVT_BUTTON(Button_Run, SelfOrganizingMapPanel::OnRun)
-    EVT_BUTTON(Button_Create, SelfOrganizingMapPanel::OnCreate)
-    EVT_BUTTON(Button_Stop, SelfOrganizingMapPanel::OnStop)
-    EVT_UPDATE_UI(Button_Run, SelfOrganizingMapPanel::OnUpdateUI)
-    EVT_UPDATE_UI(TextCtrl_Iterations, SelfOrganizingMapPanel::OnUpdateUI)
-    EVT_UPDATE_UI(TextCtrl_NeighborhoodRadius, SelfOrganizingMapPanel::OnUpdateUI)
-    EVT_UPDATE_UI(TextCtrl_LearningRate, SelfOrganizingMapPanel::OnUpdateUI)
-wxEND_EVENT_TABLE()
-
-SelfOrganizingMapPanel::SelfOrganizingMapPanel(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
-                                               WatermarkingProject& project)
-    : wxScrolledWindow(parent, id, pos, size, wxVSCROLL)
-    , m_project(project)
+SelfOrganizingMapPanel::SelfOrganizingMapPanel(wxWindow* parent, WatermarkingProject& project)
+    : PaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
 
@@ -49,7 +22,6 @@ SelfOrganizingMapPanel::SelfOrganizingMapPanel(wxWindow* parent, wxWindowID id, 
     layout->Add(PopulateDisplayPanel(), flags.Border(wxLEFT | wxRIGHT, 10));
     layout->Add(PopulateControlPanel(), flags.Border(wxALL, 10));
 
-    SetScrollRate(10, 10);
     SetSizer(layout);
 
     m_isStopped = true;
@@ -75,11 +47,11 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     wxFloatingPointValidator<float> validLearnRate(6, nullptr);
     validMaxIter.SetMin(0);
     validLearnRate.SetRange(0.0f, 1.0f);
-    auto maxIterations = new wxTextCtrl(this, TextCtrl_MaxIterations, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                        wxTE_CENTER, validMaxIter);
-    auto initLearnRate = new wxTextCtrl(this, TextCtrl_InitialLearningRate, wxEmptyString, wxDefaultPosition,
-                                        wxDefaultSize, wxTE_CENTER, validLearnRate);
-    m_sldrNbhdRadius = new wxSlider(this, Slider_InitialNeighborhoodRadius, 0, 0, 0, wxDefaultPosition, wxDefaultSize);
+    auto maxIterations
+        = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validMaxIter);
+    auto initLearnRate
+        = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validLearnRate);
+    m_sldrNbhdRadius = new wxSlider(this, wxID_ANY, 0, 0, 0, wxDefaultPosition, wxDefaultSize);
     m_nbhdRadiusText
         = new wxStaticText(this, wxID_ANY, "0.0", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
 
@@ -104,6 +76,10 @@ wxSizer* SelfOrganizingMapPanel::PopulateParametersPanel()
     row->Add(m_nbhdRadiusText, wxSizerFlags().Center().Proportion(1));
     paneSizer->Add(row, ctrlFlags);
 
+    maxIterations->Bind(wxEVT_TEXT, &SelfOrganizingMapPanel::OnMaxIterations, this);
+    initLearnRate->Bind(wxEVT_TEXT, &SelfOrganizingMapPanel::OnInitialLearningRate, this);
+    m_sldrNbhdRadius->Bind(wxEVT_SLIDER, &SelfOrganizingMapPanel::OnInitialNeighborhoodRadius, this);
+
     return paneSizer;
 }
 
@@ -116,31 +92,52 @@ wxSizer* SelfOrganizingMapPanel::PopulateDisplayPanel()
     paneSizer->AddGrowableCol(0, 4);
     paneSizer->AddGrowableCol(1, 5);
 
-    m_tcIterations = new wxTextCtrl(this, TextCtrl_Iterations, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                    wxTE_READONLY | wxTE_CENTER);
-    m_tcNbhdRadius = new wxTextCtrl(this, TextCtrl_NeighborhoodRadius, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                    wxTE_READONLY | wxTE_CENTER);
-    m_tcLearnRate = new wxTextCtrl(this, TextCtrl_LearningRate, wxEmptyString, wxDefaultPosition, wxDefaultSize,
-                                   wxTE_READONLY | wxTE_CENTER);
-
-    m_tcIterations->SetCanFocus(false);
-    m_tcNbhdRadius->SetCanFocus(false);
-    m_tcLearnRate->SetCanFocus(false);
+    auto currIterations
+        = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+    auto currNbhdRadius
+        = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+    auto currLearnRate
+        = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
+    currIterations->SetCanFocus(false);
+    currNbhdRadius->SetCanFocus(false);
+    currLearnRate->SetCanFocus(false);
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, "Iterations", wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
                    labelFlags);
-    paneSizer->Add(m_tcIterations, ctrlFlags);
-
+    paneSizer->Add(currIterations, ctrlFlags);
     paneSizer->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
                    labelFlags);
-    paneSizer->Add(m_tcNbhdRadius, ctrlFlags);
-
+    paneSizer->Add(currNbhdRadius, ctrlFlags);
     paneSizer->Add(new wxStaticText(this, wxID_ANY, "Learning Rate", wxDefaultPosition, wxDefaultSize,
                                     wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
                    labelFlags);
-    paneSizer->Add(m_tcLearnRate, ctrlFlags);
+    paneSizer->Add(currLearnRate, ctrlFlags);
+
+    currIterations->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+        if (m_isStopped) {
+            event.SetText("");
+        } else {
+            event.SetText(wxString::Format("%d", SelfOrganizingMap::Get(m_project).GetIterations()));
+        }
+    });
+
+    currNbhdRadius->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+        if (m_isStopped) {
+            event.SetText("");
+        } else {
+            event.SetText(wxString::Format("%.2f", SelfOrganizingMap::Get(m_project).GetNeighborhood()));
+        }
+    });
+
+    currLearnRate->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+        if (m_isStopped) {
+            event.SetText("");
+        } else {
+            event.SetText(wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate()));
+        }
+    });
 
     return paneSizer;
 }
@@ -154,12 +151,24 @@ wxSizer* SelfOrganizingMapPanel::PopulateControlPanel()
     paneSizer->AddGrowableCol(0, 4);
     paneSizer->AddGrowableCol(1, 5);
 
-    m_btnCreate = new wxButton(this, Button_Create, "Create");
-    m_btnStop = new wxButton(this, Button_Stop, "Stop");
-    m_btnRun = new wxButton(this, Button_Run, "Pause");
+    m_btnCreate = new wxButton(this, wxID_ANY, "Create");
+    m_btnStop = new wxButton(this, wxID_ANY, "Stop");
+    m_btnRun = new wxButton(this, wxID_ANY, "Pause");
 
     m_btnStop->Disable();
     m_btnRun->Disable();
+
+    m_btnRun->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+        if (SelfOrganizingMap::Get(m_project).IsTraining()) {
+            event.SetText("Pause");
+        } else {
+            event.SetText("Run");
+        }
+    });
+
+    m_btnCreate->Bind(wxEVT_BUTTON, &SelfOrganizingMapPanel::OnCreate, this);
+    m_btnStop->Bind(wxEVT_BUTTON, &SelfOrganizingMapPanel::OnStop, this);
+    m_btnRun->Bind(wxEVT_BUTTON, &SelfOrganizingMapPanel::OnRun, this);
 
     paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
     paneSizer->Add(m_btnCreate, ctrlFlags);
@@ -171,6 +180,7 @@ wxSizer* SelfOrganizingMapPanel::PopulateControlPanel()
     return paneSizer;
 }
 
+#include "common/Logger.hpp"
 void SelfOrganizingMapPanel::OnCreate(wxCommandEvent&)
 {
     if (!world.theModel) {
@@ -193,10 +203,6 @@ void SelfOrganizingMapPanel::OnStop(wxCommandEvent&)
     m_btnCreate->Enable();
     m_btnStop->Disable();
     m_btnRun->Disable();
-
-    m_tcIterations->Clear();
-    m_tcNbhdRadius->Clear();
-    m_tcLearnRate->Clear();
 
     m_project.StopProject();
     m_isStopped = true;
@@ -244,34 +250,4 @@ void SelfOrganizingMapPanel::OnNeighborhoodRadiusPreset(wxCommandEvent& event)
     float const radius = SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
     m_sldrNbhdRadius->SetValue(static_cast<int>(radius * 100.0f));
     m_nbhdRadiusText->SetLabelText(wxString::Format("%.2f", radius));
-}
-
-void SelfOrganizingMapPanel::OnUpdateUI(wxUpdateUIEvent& event)
-{
-    switch (event.GetId()) {
-    case Button_Run:
-        if (SelfOrganizingMap::Get(m_project).IsTraining()) {
-            event.SetText("Pause");
-        } else {
-            event.SetText("Run");
-        }
-        break;
-    case TextCtrl_Iterations:
-        if (!m_isStopped) {
-            event.SetText(wxString::Format("%d", SelfOrganizingMap::Get(m_project).GetIterations()));
-        }
-        break;
-    case TextCtrl_NeighborhoodRadius:
-        if (!m_isStopped) {
-            event.SetText(wxString::Format("%.2f", SelfOrganizingMap::Get(m_project).GetNeighborhood()));
-        }
-        break;
-    case TextCtrl_LearningRate:
-        if (!m_isStopped) {
-            event.SetText(wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate()));
-        }
-        break;
-    default:
-        break;
-    }
 }
