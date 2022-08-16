@@ -71,10 +71,14 @@ bool WatermarkingApp::OnInit()
 
     wxSize const minSize = page->FromDIP(wxSize(300, 30));
 
-    m_mgr->AddPane(
-        &viewport,
-        wxAuiPaneInfo().Name("viewport").Caption("3D Viewport").Center().CloseButton(true).MaximizeButton(true).MinSize(
-            minSize));
+    m_mgr->AddPane(&viewport,
+                   wxAuiPaneInfo()
+                       .Name("viewport")
+                       .Caption("3D Viewport")
+                       .Center()
+                       .CloseButton(true)
+                       .MaximizeButton(true)
+                       .MinSize(minSize));
     m_mgr->AddPane(outliner,
                    wxAuiPaneInfo()
                        .Name("outliner")
@@ -121,6 +125,7 @@ bool WatermarkingApp::OnInit()
     m_project->InitializeLattice();
     m_project->UpdateLatticeGraphics();
 
+    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
     window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
     window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_SOM);
     window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
@@ -384,6 +389,8 @@ void WatermarkingApp::OnTogglePane(wxCommandEvent& event)
         name = "watermarking";
     } else if (id == EVT_VIEW_MENU_SCENE_OUTLINER) {
         name = "outliner";
+    } else if (id == EVT_VIEW_MENU_SCENE_VIEWPORT) {
+        name = "viewport";
     }
 
     wxAuiPaneInfo& paneInfo = m_mgr->GetPane(name);

@@ -10,6 +10,7 @@
 
 wxDEFINE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
+wxDEFINE_EVENT(EVT_VIEW_MENU_SCENE_VIEWPORT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_SOM, wxCommandEvent);
 wxDEFINE_EVENT(EVT_VIEW_MENU_WATERMARKING, wxCommandEvent);
@@ -52,6 +53,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     fileMenu->Append(wxID_EXIT, "Exit");
 
     auto viewMenu = new wxMenu();
+    viewMenu->Append(EVT_VIEW_MENU_SCENE_VIEWPORT, "Toggle 3D Viewport");
     viewMenu->Append(EVT_VIEW_MENU_LATTICE, "Toggle Lattice Panel");
     viewMenu->Append(EVT_VIEW_MENU_SOM, "Toggle SOM Panel");
     viewMenu->Append(EVT_VIEW_MENU_WATERMARKING, "Toggle Watermarking Panel");
