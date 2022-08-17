@@ -8,8 +8,6 @@
 
 #include "pane/ControlsPaneBase.hpp"
 
-wxDECLARE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
-
 class SceneOutlinerPane : public ControlsPaneBase
 {
     wxSlider* m_slider;
@@ -18,11 +16,6 @@ public:
     SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project);
 
 private:
-    void OnCheckboxModel(wxCommandEvent& event);
-    void OnCheckboxLatticeVertex(wxCommandEvent& event);
-    void OnCheckboxLatticeEdge(wxCommandEvent& event);
-    void OnCheckboxLatticeFace(wxCommandEvent& event);
-    void OnCheckboxLightSource(wxCommandEvent& event);
     void OnSliderTransparency(wxCommandEvent& event);
 };
 

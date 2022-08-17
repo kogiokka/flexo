@@ -21,7 +21,6 @@ public:
     void ImportVolumetricModel(wxString const& path);
     BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
-    void OnToggleRenderOption(wxCommandEvent& event);
     void OnToggleLatticeFlag(wxCommandEvent& event);
     void OnMenuGenerateModel(wxCommandEvent& event);
     void OnMenuImportModel(wxCommandEvent& event);

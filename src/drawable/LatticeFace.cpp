@@ -61,7 +61,7 @@ LatticeFace::~LatticeFace()
 
 void LatticeFace::Update(Graphics& gfx)
 {
-    m_isVisible = world.renderFlags & RenderFlag_DrawLatticeFace;
+    m_isVisible = world.renderFlags & (RenderFlag_DrawLatticeFace | RenderFlag_DrawLattice);
 
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;

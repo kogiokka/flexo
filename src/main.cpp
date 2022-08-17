@@ -22,7 +22,6 @@
 #include "pane/WatermarkingPane.hpp"
 
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
-    EVT_COMMAND(wxID_ANY, EVT_TOGGLE_RENDER_FLAG, WatermarkingApp::OnToggleRenderOption)
     EVT_COMMAND(wxID_ANY, EVT_TOGGLE_LATTICE_FLAG, WatermarkingApp::OnToggleLatticeFlag)
     EVT_COMMAND(wxID_ANY, EVT_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
     EVT_COMMAND(wxID_ANY, EVT_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
@@ -239,12 +238,6 @@ BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positio
         }
     }
     return { max, min };
-}
-
-void WatermarkingApp::OnToggleRenderOption(wxCommandEvent& event)
-{
-    RenderFlag opt = event.GetInt();
-    world.renderFlags ^= opt;
 }
 
 void WatermarkingApp::OnToggleLatticeFlag(wxCommandEvent& event)

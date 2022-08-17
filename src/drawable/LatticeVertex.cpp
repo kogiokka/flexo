@@ -62,7 +62,7 @@ LatticeVertex::~LatticeVertex()
 
 void LatticeVertex::Update(Graphics& gfx)
 {
-    m_isVisible = world.renderFlags & RenderFlag_DrawLatticeVertex;
+    m_isVisible = world.renderFlags & (RenderFlag_DrawLatticeVertex | RenderFlag_DrawLattice);
 
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();

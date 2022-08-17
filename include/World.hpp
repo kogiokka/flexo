@@ -19,6 +19,7 @@ enum RenderFlag_ : int {
     RenderFlag_DrawLatticeEdge = 1 << 2,
     RenderFlag_DrawLatticeFace = 1 << 3,
     RenderFlag_DrawLightSource = 1 << 4,
+    RenderFlag_DrawLattice = 1 << 5,
 };
 
 struct World {
