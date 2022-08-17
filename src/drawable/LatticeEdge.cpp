@@ -45,7 +45,7 @@ LatticeEdge::~LatticeEdge() {};
 
 void LatticeEdge::Update(Graphics&)
 {
-    m_isVisible = world.renderFlags & (RenderFlag_DrawLatticeEdge | RenderFlag_DrawLattice);
+    m_isVisible = (world.renderFlags & RenderFlag_DrawLattice) && (world.renderFlags & RenderFlag_DrawLatticeEdge);
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         {

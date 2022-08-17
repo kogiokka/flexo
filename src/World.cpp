@@ -18,7 +18,7 @@ World::World()
 
     lightPos = glm::vec3(0.0f, 5.0f, 0.0f);
     isWatermarked = false;
-    renderFlags = 0;
+    renderFlags = RenderFlag_DrawLattice | RenderFlag_DrawLatticeVertex | RenderFlag_DrawLatticeEdge | RenderFlag_DrawModel;
 }
 
 World::~World()
