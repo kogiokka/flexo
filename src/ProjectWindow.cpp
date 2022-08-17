@@ -6,18 +6,19 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "common/Logger.hpp"
 #include "pane/SceneViewportPane.hpp"
 
 wxDEFINE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_SCENE_VIEWPORT, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_LATTICE, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_SOM, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_WATERMARKING, wxCommandEvent);
-wxDEFINE_EVENT(EVT_VIEW_MENU_SCENE_OUTLINER, wxCommandEvent);
 
 enum {
     TIMER_UPDATE_UI = wxID_HIGHEST + 1,
+    EVT_VIEW_MENU_SCENE_VIEWPORT,
+    EVT_VIEW_MENU_LATTICE,
+    EVT_VIEW_MENU_SOM,
+    EVT_VIEW_MENU_WATERMARKING,
+    EVT_VIEW_MENU_SCENE_OUTLINER,
 };
 
 // Register factory: ProjectWindow
@@ -48,16 +49,22 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 {
     m_project.SetFrame(this);
 
+    m_mainPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
+    m_mainPanel->SetSizer(new wxBoxSizer(wxHORIZONTAL));
+
+    m_mainPage = m_mainPanel;
+    m_mgr.SetManagedWindow(m_mainPage);
+
     auto fileMenu = new wxMenu;
     fileMenu->Append(wxID_OPEN, "Import model");
     fileMenu->Append(wxID_EXIT, "Exit");
 
-    auto viewMenu = new wxMenu();
-    viewMenu->Append(EVT_VIEW_MENU_SCENE_VIEWPORT, "Toggle 3D Viewport");
-    viewMenu->Append(EVT_VIEW_MENU_LATTICE, "Toggle Lattice Panel");
-    viewMenu->Append(EVT_VIEW_MENU_SOM, "Toggle SOM Panel");
-    viewMenu->Append(EVT_VIEW_MENU_WATERMARKING, "Toggle Watermarking Panel");
-    viewMenu->Append(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner Panel");
+    m_viewMenu = new wxMenu();
+    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_VIEWPORT, "Toggle 3D Viewport");
+    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner");
+    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_LATTICE, "Toggle Lattice Pane");
+    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SOM, "Toggle SOM Pane");
+    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_WATERMARKING, "Toggle Watermarking Pane");
 
     auto cameraMenu = new wxMenu;
     cameraMenu->Append(wxID_REFRESH, "Reset");
@@ -67,21 +74,22 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     auto menubar = new wxMenuBar;
     menubar->Append(fileMenu, "&File");
-    menubar->Append(viewMenu, "&View");
+    menubar->Append(m_viewMenu, "&View");
     menubar->Append(cameraMenu, "&Camera");
     menubar->Append(modelsMenu, "&Models");
 
     this->SetMenuBar(menubar);
 
-    m_mainPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
-    m_mainPanel->SetSizer(new wxBoxSizer(wxHORIZONTAL));
-
-    m_mainPage = m_mainPanel;
-
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenFile, this, wxID_OPEN);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_GENERATE_MODEL_DOME);
+
+    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
+    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
+    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SOM);
+    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
+    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
 
     m_updateUITimer = new wxTimer(this, TIMER_UPDATE_UI);
     m_updateUITimer->Start(16);
@@ -91,6 +99,11 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 ProjectWindow::~ProjectWindow()
 {
     m_updateUITimer->Stop();
+}
+
+wxAuiManager& ProjectWindow::GetPaneManager()
+{
+    return m_mgr;
 }
 
 WatermarkingProject& ProjectWindow::GetProject()
@@ -154,5 +167,38 @@ wxWindow* ProjectWindow::GetMainPage()
 
 void ProjectWindow::OnTimerUpdateUI(wxTimerEvent&)
 {
+    m_viewMenu->Check(EVT_VIEW_MENU_SCENE_VIEWPORT, m_mgr.GetPane("viewport").IsShown());
+    m_viewMenu->Check(EVT_VIEW_MENU_SCENE_OUTLINER, m_mgr.GetPane("outliner").IsShown());
+    m_viewMenu->Check(EVT_VIEW_MENU_LATTICE, m_mgr.GetPane("lattice").IsShown());
+    m_viewMenu->Check(EVT_VIEW_MENU_SOM, m_mgr.GetPane("som").IsShown());
+    m_viewMenu->Check(EVT_VIEW_MENU_WATERMARKING, m_mgr.GetPane("watermarking").IsShown());
+
     UpdateWindowUI();
+}
+
+void ProjectWindow::OnTogglePane(wxCommandEvent& event)
+{
+    wxString name;
+    int const id = event.GetId();
+
+    if (id == EVT_VIEW_MENU_LATTICE) {
+        name = "lattice";
+    } else if (id == EVT_VIEW_MENU_SOM) {
+        name = "som";
+    } else if (id == EVT_VIEW_MENU_WATERMARKING) {
+        name = "watermarking";
+    } else if (id == EVT_VIEW_MENU_SCENE_OUTLINER) {
+        name = "outliner";
+    } else if (id == EVT_VIEW_MENU_SCENE_VIEWPORT) {
+        name = "viewport";
+    }
+
+    wxAuiPaneInfo& paneInfo = m_mgr.GetPane(name);
+    if (paneInfo.IsShown()) {
+        paneInfo.Hide();
+    } else {
+        paneInfo.Show();
+    }
+
+    m_mgr.Update();
 }

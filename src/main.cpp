@@ -42,7 +42,6 @@ void WatermarkingApp::OnUnhandledException()
 int WatermarkingApp::OnExit()
 {
     SelfOrganizingMap::Get(*m_project).StopWorker();
-    delete m_mgr;
     return wxApp::OnExit();
 }
 
@@ -57,61 +56,62 @@ bool WatermarkingApp::OnInit()
     world.cube = stlImp.ReadFile("res/models/cube.stl");
 
     m_project = std::make_shared<WatermarkingProject>();
-    auto& window = ProjectWindow::Get(*m_project);
+
+    auto& project = *m_project;
+    auto& window = ProjectWindow::Get(project);
+    auto& viewport = SceneViewportPane::Get(project);
+
+    auto& mgr = window.GetPaneManager();
     auto page = window.GetMainPage();
 
-    m_mgr = new wxAuiManager(page);
-
-    auto& viewport = SceneViewportPane::Get(*m_project);
-    auto outliner = new SceneOutlinerPane(page, *m_project);
-    auto lattice = new LatticePane(page, *m_project);
-    auto som = new SelfOrganizingMapPane(page, *m_project);
-    auto watermarking = new WatermarkingPane(page, *m_project);
+    auto* outliner = new SceneOutlinerPane(page, project);
+    auto* lattice = new LatticePane(page, project);
+    auto* som = new SelfOrganizingMapPane(page, project);
+    auto* watermarking = new WatermarkingPane(page, project);
     watermarking->Disable();
 
     wxSize const minSize = page->FromDIP(wxSize(300, 30));
-
-    m_mgr->AddPane(&viewport,
-                   wxAuiPaneInfo()
-                       .Name("viewport")
-                       .Caption("3D Viewport")
-                       .Center()
-                       .CloseButton(true)
-                       .MaximizeButton(true)
-                       .MinSize(minSize));
-    m_mgr->AddPane(outliner,
-                   wxAuiPaneInfo()
-                       .Name("outliner")
-                       .Caption("Scene Outliner")
-                       .Right()
-                       .Layer(1)
-                       .CloseButton(true)
-                       .MaximizeButton(true)
-                       .MinSize(minSize));
-    m_mgr->AddPane(lattice,
-                   wxAuiPaneInfo()
-                       .Name("lattice")
-                       .Caption("Lattice")
-                       .Right()
-                       .Layer(1)
-                       .CloseButton(true)
-                       .MaximizeButton(true)
-                       .MinSize(minSize));
-    m_mgr->AddPane(
+    mgr.AddPane(&viewport,
+                wxAuiPaneInfo()
+                    .Name("viewport")
+                    .Caption("3D Viewport")
+                    .Center()
+                    .CloseButton(true)
+                    .MaximizeButton(true)
+                    .MinSize(minSize));
+    mgr.AddPane(outliner,
+                wxAuiPaneInfo()
+                    .Name("outliner")
+                    .Caption("Scene Outliner")
+                    .Right()
+                    .Layer(1)
+                    .CloseButton(true)
+                    .MaximizeButton(true)
+                    .MinSize(minSize));
+    mgr.AddPane(lattice,
+                wxAuiPaneInfo()
+                    .Name("lattice")
+                    .Caption("Lattice")
+                    .Right()
+                    .Layer(1)
+                    .CloseButton(true)
+                    .MaximizeButton(true)
+                    .MinSize(minSize));
+    mgr.AddPane(
         som,
         wxAuiPaneInfo().Name("som").Caption("SOM").Right().Layer(1).CloseButton(true).MaximizeButton(true).MinSize(
             minSize));
-    m_mgr->AddPane(watermarking,
-                   wxAuiPaneInfo()
-                       .Name("watermarking")
-                       .Caption("Watermarking")
-                       .Right()
-                       .Layer(1)
-                       .CloseButton(true)
-                       .MaximizeButton(true)
-                       .MinSize(minSize)
-                       .Hide());
-    m_mgr->Update();
+    mgr.AddPane(watermarking,
+                wxAuiPaneInfo()
+                    .Name("watermarking")
+                    .Caption("Watermarking")
+                    .Right()
+                    .Layer(1)
+                    .CloseButton(true)
+                    .MaximizeButton(true)
+                    .MinSize(minSize)
+                    .Hide());
+    mgr.Update();
 
     window.Show();
     viewport.InitGL();
@@ -124,12 +124,6 @@ bool WatermarkingApp::OnInit()
 
     m_project->InitializeLattice();
     m_project->UpdateLatticeGraphics();
-
-    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
-    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
-    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_SOM);
-    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
-    window.Bind(wxEVT_MENU, &WatermarkingApp::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
 
     return true;
 }
@@ -374,31 +368,4 @@ void WatermarkingApp::OnMenuImportModel(wxCommandEvent& event)
     } else {
         ImportPolygonalModel(filepath);
     }
-}
-
-void WatermarkingApp::OnTogglePane(wxCommandEvent& event)
-{
-    wxString name;
-    int const id = event.GetId();
-
-    if (id == EVT_VIEW_MENU_LATTICE) {
-        name = "lattice";
-    } else if (id == EVT_VIEW_MENU_SOM) {
-        name = "som";
-    } else if (id == EVT_VIEW_MENU_WATERMARKING) {
-        name = "watermarking";
-    } else if (id == EVT_VIEW_MENU_SCENE_OUTLINER) {
-        name = "outliner";
-    } else if (id == EVT_VIEW_MENU_SCENE_VIEWPORT) {
-        name = "viewport";
-    }
-
-    wxAuiPaneInfo& paneInfo = m_mgr->GetPane(name);
-    if (paneInfo.IsShown()) {
-        paneInfo.Hide();
-    } else {
-        paneInfo.Show();
-    }
-
-    m_mgr->Update();
 }
