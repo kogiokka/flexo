@@ -12,7 +12,7 @@
 #include "pane/SelfOrganizingMapPane.hpp"
 
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
-    : PaneBase(parent, project)
+    : ControlsPaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
 
@@ -36,12 +36,7 @@ bool SelfOrganizingMapPane::IsProjectStopped() const
 
 wxSizer* SelfOrganizingMapPane::PopulateParametersPanel()
 {
-    auto paneSizer = new wxFlexGridSizer(3, 2, 5, 16);
-    auto labelFlags = wxSizerFlags().Right().CenterVertical();
-    auto ctrlFlags = wxSizerFlags().Expand();
-
-    paneSizer->AddGrowableCol(0, 4);
-    paneSizer->AddGrowableCol(1, 5);
+    auto* group = CreateGroup(3);
 
     wxIntegerValidator<int> validMaxIter;
     wxFloatingPointValidator<float> validLearnRate(6, nullptr);
@@ -51,46 +46,31 @@ wxSizer* SelfOrganizingMapPane::PopulateParametersPanel()
         = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validMaxIter);
     auto initLearnRate
         = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validLearnRate);
+
     m_sldrNbhdRadius = new wxSlider(this, wxID_ANY, 0, 0, 0, wxDefaultPosition, wxDefaultSize);
     m_nbhdRadiusText
         = new wxStaticText(this, wxID_ANY, "0.0", wxDefaultPosition, wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    auto row = new wxBoxSizer(wxHORIZONTAL);
+    row->Add(m_sldrNbhdRadius, wxSizerFlags().Expand().Proportion(4));
+    row->Add(m_nbhdRadiusText, wxSizerFlags().Center().Proportion(1));
 
     *maxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
     *initLearnRate << ProjectSettings::Get(m_project).GetLearningRate();
 
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Max Iterations", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    paneSizer->Add(maxIterations, ctrlFlags);
-
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Learning Rate", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    paneSizer->Add(initLearnRate, ctrlFlags);
-
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    auto row = new wxBoxSizer(wxHORIZONTAL);
-    row->Add(m_sldrNbhdRadius, wxSizerFlags().Expand().Proportion(4));
-    row->Add(m_nbhdRadiusText, wxSizerFlags().Center().Proportion(1));
-    paneSizer->Add(row, ctrlFlags);
+    AppendControl(group, "Max Iterations", maxIterations);
+    AppendControl(group, "Leanring Rate", initLearnRate);
+    AppendSizer(group, "Neighborhood Radius", row);
 
     maxIterations->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnMaxIterations, this);
     initLearnRate->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnInitialLearningRate, this);
     m_sldrNbhdRadius->Bind(wxEVT_SLIDER, &SelfOrganizingMapPane::OnInitialNeighborhoodRadius, this);
 
-    return paneSizer;
+    return group;
 }
 
 wxSizer* SelfOrganizingMapPane::PopulateDisplayPanel()
 {
-    auto paneSizer = new wxFlexGridSizer(3, 2, 5, 16);
-    auto labelFlags = wxSizerFlags().Right().CenterVertical();
-    auto ctrlFlags = wxSizerFlags().Expand();
-
-    paneSizer->AddGrowableCol(0, 4);
-    paneSizer->AddGrowableCol(1, 5);
+    auto* group = CreateGroup(3);
 
     auto currIterations
         = new wxTextCtrl(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_READONLY | wxTE_CENTER);
@@ -102,18 +82,9 @@ wxSizer* SelfOrganizingMapPane::PopulateDisplayPanel()
     currNbhdRadius->SetCanFocus(false);
     currLearnRate->SetCanFocus(false);
 
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Iterations", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    paneSizer->Add(currIterations, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Neighborhood Radius", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    paneSizer->Add(currNbhdRadius, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Learning Rate", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    paneSizer->Add(currLearnRate, ctrlFlags);
+    AppendControl(group, "Iterations", currIterations);
+    AppendControl(group, "Neighborhood Radius", currNbhdRadius);
+    AppendControl(group, "Leanring Rate", currLearnRate);
 
     currIterations->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
         if (m_isStopped) {
@@ -139,17 +110,12 @@ wxSizer* SelfOrganizingMapPane::PopulateDisplayPanel()
         }
     });
 
-    return paneSizer;
+    return group;
 }
 
 wxSizer* SelfOrganizingMapPane::PopulateControlPanel()
 {
-    auto paneSizer = new wxFlexGridSizer(3, 2, 5, 16);
-    auto labelFlags = wxSizerFlags().Right().CenterVertical();
-    auto ctrlFlags = wxSizerFlags().Expand();
-
-    paneSizer->AddGrowableCol(0, 4);
-    paneSizer->AddGrowableCol(1, 5);
+    auto* group = CreateGroup(3);
 
     m_btnCreate = new wxButton(this, wxID_ANY, "Create");
     m_btnStop = new wxButton(this, wxID_ANY, "Stop");
@@ -170,14 +136,12 @@ wxSizer* SelfOrganizingMapPane::PopulateControlPanel()
     m_btnStop->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnStop, this);
     m_btnRun->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnRun, this);
 
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(m_btnCreate, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(m_btnStop, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(m_btnRun, ctrlFlags);
 
-    return paneSizer;
+    AppendControl(group, "", m_btnCreate);
+    AppendControl(group, "", m_btnStop);
+    AppendControl(group, "", m_btnRun);
+
+    return group;
 }
 
 #include "common/Logger.hpp"

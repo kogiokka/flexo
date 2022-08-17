@@ -12,15 +12,10 @@
 wxDEFINE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
 LatticePane::LatticePane(wxWindow* parent, WatermarkingProject& project)
-    : PaneBase(parent, project)
+    : ControlsPaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
-    auto paneSizer = new wxFlexGridSizer(5, 2, 5, 16);
-
-    layout->Add(paneSizer, wxSizerFlags().Expand().Border(wxALL, 10));
-
-    wxSizerFlags labelFlags = wxSizerFlags().Right().CenterVertical();
-    wxSizerFlags ctrlFlags = wxSizerFlags().Expand();
+    auto* group = CreateGroup(5);
 
     wxIntegerValidator<int> validDimen;
     validDimen.SetRange(1, 512);
@@ -38,40 +33,23 @@ LatticePane::LatticePane(wxWindow* parent, WatermarkingProject& project)
     cyclicX->SetValue(false);
     cyclicY->SetValue(false);
 
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Lattice Width", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    paneSizer->Add(width, ctrlFlags);
+    AppendControl(group, "Lattice Width", width);
+    AppendControl(group, "Lattice Height", height);
+    AppendControl(group, "", cyclicX);
+    AppendControl(group, "", cyclicY);
+    AppendControl(group, "", initButton);
 
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, "Lattice Height", wxDefaultPosition, wxDefaultSize,
-                                    wxALIGN_RIGHT | wxST_ELLIPSIZE_END),
-                   labelFlags);
-    paneSizer->Add(height, ctrlFlags);
-
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                   labelFlags);
-    paneSizer->Add(cyclicX, ctrlFlags);
-
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                   labelFlags);
-    paneSizer->Add(cyclicY, ctrlFlags);
-
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxALIGN_RIGHT),
-                   labelFlags);
-    paneSizer->Add(initButton, wxSizerFlags().Expand());
-
-    paneSizer->AddGrowableCol(0, 4);
-    paneSizer->AddGrowableCol(1, 5);
-
+    layout->Add(group, wxSizerFlags().Expand().Border(wxALL, 10));
     SetSizer(layout);
 
-    Bind(wxEVT_UPDATE_UI,
-         [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
     width->Bind(wxEVT_TEXT, &LatticePane::OnLatticeWidth, this);
     height->Bind(wxEVT_TEXT, &LatticePane::OnLatticeHeight, this);
     cyclicX->Bind(wxEVT_CHECKBOX, &LatticePane::OnFlagCyclicX, this);
     cyclicY->Bind(wxEVT_CHECKBOX, &LatticePane::OnFlagCyclicY, this);
     initButton->Bind(wxEVT_BUTTON, &LatticePane::OnInitialize, this);
+
+    Bind(wxEVT_UPDATE_UI,
+         [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
 }
 
 void LatticePane::OnLatticeWidth(wxCommandEvent& event)

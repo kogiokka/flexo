@@ -1,11 +1,11 @@
 #ifndef LATTICE_PANEL_H
 #define LATTICE_PANEL_H
 
-#include "pane/PaneBase.hpp"
+#include "pane/ControlsPaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
-class LatticePane : public PaneBase
+class LatticePane : public ControlsPaneBase
 {
 public:
     LatticePane(wxWindow* parent, WatermarkingProject& project);

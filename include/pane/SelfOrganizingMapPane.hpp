@@ -7,8 +7,9 @@
 #include <wx/slider.h>
 #include <wx/stattext.h>
 
-#include "pane/PaneBase.hpp"
-class SelfOrganizingMapPane : public PaneBase
+#include "pane/ControlsPaneBase.hpp"
+
+class SelfOrganizingMapPane : public ControlsPaneBase
 {
     wxButton* m_btnCreate;
     wxButton* m_btnStop;

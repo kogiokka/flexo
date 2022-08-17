@@ -6,11 +6,11 @@
 #include <wx/slider.h>
 #include <wx/window.h>
 
-#include "pane/PaneBase.hpp"
+#include "pane/ControlsPaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
-class SceneOutlinerPane : public PaneBase
+class SceneOutlinerPane : public ControlsPaneBase
 {
     wxSlider* m_slider;
 

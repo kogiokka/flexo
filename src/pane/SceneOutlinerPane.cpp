@@ -9,15 +9,10 @@
 wxDEFINE_EVENT(EVT_TOGGLE_RENDER_FLAG, wxCommandEvent);
 
 SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project)
-    : PaneBase(parent, project)
+    : ControlsPaneBase(parent, project)
 {
     auto layout = new wxBoxSizer(wxVERTICAL);
-    auto paneSizer = new wxFlexGridSizer(6, 2, 5, 16);
-    auto labelFlags = wxSizerFlags().Expand();
-    auto ctrlFlags = wxSizerFlags().Expand();
-
-    paneSizer->AddGrowableCol(0, 4);
-    paneSizer->AddGrowableCol(1, 5);
+    auto* group = CreateGroup(6);
 
     auto chkBox1 = new wxCheckBox(this, wxID_ANY, "Model");
     auto chkBox2 = new wxCheckBox(this, wxID_ANY, "Lattice Vertex");
@@ -36,29 +31,18 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     OnCheckboxLatticeVertex(event);
     OnCheckboxLatticeEdge(event);
 
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(chkBox1, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(chkBox2, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(chkBox3, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(chkBox4, ctrlFlags);
-    paneSizer->Add(new wxStaticText(this, wxID_ANY, ""), labelFlags);
-    paneSizer->Add(chkBox5, ctrlFlags);
-
-    auto transparencyLabel = new wxTextCtrl(this, wxID_ANY, "Model Transparency (%)", wxDefaultPosition, wxDefaultSize,
-                                            wxBORDER_NONE | wxTE_READONLY | wxTE_MULTILINE | wxTE_CHARWRAP);
-    transparencyLabel->SetCanFocus(false);
-    transparencyLabel->SetBackgroundColour(GetBackgroundColour());
-
     int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
     m_slider = new wxSlider(this, wxID_ANY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
                             wxSL_HORIZONTAL | wxSL_LABELS);
-    paneSizer->Add(transparencyLabel, labelFlags);
-    paneSizer->Add(m_slider, ctrlFlags);
-    layout->Add(paneSizer, wxSizerFlags().Expand().Border(wxALL, 10));
 
+    AppendControl(group, "", chkBox1);
+    AppendControl(group, "", chkBox2);
+    AppendControl(group, "", chkBox3);
+    AppendControl(group, "", chkBox4);
+    AppendControl(group, "", chkBox5);
+    AppendControl(group, "Model Transparency (%)", m_slider);
+
+    layout->Add(group, wxSizerFlags().Expand().Border(wxALL, 10));
     SetSizer(layout);
 
     chkBox1->Bind(wxEVT_CHECKBOX, &SceneOutlinerPane::OnCheckboxModel, this);

@@ -40,12 +40,12 @@ PRIVATE
     "src/Project.cpp"
     "src/ProjectWindow.cpp"
 
-    "src/pane/PaneBase.cpp"
-    "src/pane/SceneViewportPane.cpp"
+    "src/pane/ControlsPaneBase.cpp"
     "src/pane/SceneOutlinerPane.cpp"
     "src/pane/SelfOrganizingMapPane.cpp"
     "src/pane/LatticePane.cpp"
     "src/pane/WatermarkingPane.cpp"
+    "src/pane/SceneViewportPane.cpp"
 
     "src/Camera.cpp"
     "src/Renderer.cpp"

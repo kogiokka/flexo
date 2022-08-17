@@ -3,9 +3,9 @@
 
 #include <wx/event.h>
 
-#include "pane/PaneBase.hpp"
+#include "pane/ControlsPaneBase.hpp"
 
-class WatermarkingPane : public PaneBase
+class WatermarkingPane : public ControlsPaneBase
 {
 public:
     WatermarkingPane(wxWindow* parent, WatermarkingProject& project);
