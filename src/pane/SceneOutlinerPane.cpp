@@ -1,6 +1,7 @@
 #include <wx/checkbox.h>
 #include <wx/clntdata.h>
 #include <wx/sizer.h>
+#include <wx/slider.h>
 #include <wx/stattext.h>
 #include <wx/treelist.h>
 
@@ -56,7 +57,8 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
             : wxCHK_UNCHECKED);
 
     auto* group = new ControlsGroup(this, "Properties", 1);
-    m_slider = group->AddSliderFloat("Model Transparency (%)", (100.0f - world.modelColorAlpha * 100.0f), 0.0f, 100.0f);
+    auto* slider
+        = group->AddSliderFloat("Model Transparency (%)", (100.0f - world.modelColorAlpha * 100.0f), 0.0f, 100.0f);
 
     GetSizer()->Add(sceneTree, wxSizerFlags(5).Expand());
     GetSizer()->Add(group, wxSizerFlags().Expand());
@@ -67,7 +69,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         world.renderFlags ^= opt;
     });
 
-    group->Bind(EVT_SLIDER_FLOAT, [](SliderFloatEvent& event) {
+    slider->Bind(EVT_SLIDER_FLOAT, [](SliderFloatEvent& event) {
         float const value = event.GetValue();
         world.modelColorAlpha = (100.0f - value) / 100.0f;
     });

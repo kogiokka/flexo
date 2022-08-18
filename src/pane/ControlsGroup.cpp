@@ -63,11 +63,11 @@ wxSlider* ControlsGroup::AddSliderFloat(wxString const& label, float value, floa
     wxStaticText* text = new wxStaticText(pane, wxID_ANY, wxString::Format("%.2f", value), wxDefaultPosition,
                                           wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
 
-    slider->Bind(wxEVT_SLIDER, [this, text](wxCommandEvent& event) {
+    slider->Bind(wxEVT_SLIDER, [this, text, slider](wxCommandEvent& event) {
         float const value = event.GetInt() * 0.01f;
         text->SetLabelText(wxString::Format("%.2f", value));
         SliderFloatEvent floatEvent(EVT_SLIDER_FLOAT, this->GetId(), value);
-        this->ProcessWindowEvent(floatEvent);
+        slider->ProcessWindowEvent(floatEvent);
     });
 
     wxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);

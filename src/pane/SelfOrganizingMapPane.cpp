@@ -51,8 +51,9 @@ void SelfOrganizingMapPane::PopulateParametersPanel()
     maxIterations->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnMaxIterations, this);
     initLearnRate->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnInitialLearningRate, this);
 
-    group->Bind(EVT_SLIDER_FLOAT,
-                [this](SliderFloatEvent& event) { ProjectSettings::Get(m_project).SetNeighborhood(event.GetValue()); });
+    m_sldrNbhdRadius->Bind(EVT_SLIDER_FLOAT, [this](SliderFloatEvent& event) {
+        ProjectSettings::Get(m_project).SetNeighborhood(event.GetValue());
+    });
 
     GetSizer()->Add(group, wxSizerFlags().Expand());
 }
