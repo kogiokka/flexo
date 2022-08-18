@@ -69,7 +69,7 @@ bool WatermarkingApp::OnInit()
     auto* watermarking = new WatermarkingPane(page, project);
     watermarking->Disable();
 
-    wxSize const minSize = page->FromDIP(wxSize(300, 30));
+    wxSize const minSize = page->FromDIP(wxSize(450, 20));
     mgr.AddPane(&viewport,
                 wxAuiPaneInfo()
                     .Name("viewport")
@@ -113,6 +113,7 @@ bool WatermarkingApp::OnInit()
     mgr.Update();
 
     window.Show();
+    window.Maximize();
     viewport.InitGL();
 
     // After OpenGL has been initialized

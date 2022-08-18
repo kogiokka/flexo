@@ -1,3 +1,5 @@
+#include <wx/collpane.h>
+
 #include "pane/ControlsPaneBase.hpp"
 #include "Project.hpp"
 
@@ -9,34 +11,48 @@ ControlsPaneBase::ControlsPaneBase(wxWindow* parent, WatermarkingProject& projec
     m_ctrlFlags = wxSizerFlags().Expand();
 
     SetScrollRate(10, 10);
+
+    SetSizer(new wxBoxSizer(wxVERTICAL));
 }
 
-wxFlexGridSizer* ControlsPaneBase::CreateGroup(int rows)
+wxWindow* ControlsPaneBase::CreateControlGroup(wxString const& title, int rows)
 {
-    wxFlexGridSizer* sizer = new wxFlexGridSizer(rows, 2, 5, 16);
+    wxCollapsiblePane* collpane
+        = new wxCollapsiblePane(this, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxCP_NO_TLW_RESIZE);
+    wxFlexGridSizer* sizer = new wxFlexGridSizer(rows, 2, 3, 10);
+
     sizer->AddGrowableCol(0, 4);
     sizer->AddGrowableCol(1, 5);
 
-    return sizer;
+    collpane->GetPane()->SetSizer(sizer);
+    collpane->Bind(wxEVT_COLLAPSIBLEPANE_CHANGED, [this](wxCollapsiblePaneEvent&) { this->Layout(); });
+
+    GetSizer()->Add(collpane, wxSizerFlags().Expand().Border(wxALL, 10));
+
+    collpane->Expand();
+
+    return collpane->GetPane();
 }
 
-wxTextCtrl* ControlsPaneBase::CreateLabel(wxString const& text)
+void ControlsPaneBase::AppendControl(wxWindow* parent, wxString const& labelText, wxControl* control)
 {
-    wxTextCtrl* label = new wxTextCtrl(this, wxID_ANY, text, wxDefaultPosition, wxDefaultSize,
+    wxSizer* paneSizer = parent->GetSizer();
+    paneSizer->Add(CreateLabel(parent, labelText), m_labelFlags);
+    paneSizer->Add(control, m_ctrlFlags);
+}
+
+void ControlsPaneBase::AppendSizer(wxWindow* parent, wxString const& labelText, wxSizer* sizer)
+{
+    wxSizer* paneSizer = parent->GetSizer();
+    paneSizer->Add(CreateLabel(parent, labelText), m_labelFlags);
+    paneSizer->Add(sizer, m_ctrlFlags);
+}
+
+wxTextCtrl* ControlsPaneBase::CreateLabel(wxWindow* parent, wxString const& text)
+{
+    wxTextCtrl* label = new wxTextCtrl(parent, wxID_ANY, text, wxDefaultPosition, wxDefaultSize,
                                        wxBORDER_NONE | wxTE_RIGHT | wxTE_READONLY);
-    label->SetBackgroundColour(GetBackgroundColour());
+    label->SetBackgroundColour(parent->GetBackgroundColour());
     label->SetCanFocus(false);
     return label;
-}
-
-void ControlsPaneBase::AppendControl(wxFlexGridSizer* group, wxString const& labelText, wxControl* control)
-{
-    group->Add(CreateLabel(labelText), m_labelFlags);
-    group->Add(control, m_ctrlFlags);
-}
-
-void ControlsPaneBase::AppendSizer(wxFlexGridSizer* group, wxString const& labelText, wxSizer* sizer)
-{
-    group->Add(CreateLabel(labelText), m_labelFlags);
-    group->Add(sizer, m_ctrlFlags);
 }

@@ -26,8 +26,6 @@ public:
 SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
-    auto layout = new wxBoxSizer(wxVERTICAL);
-
     auto sceneTree
         = new wxTreeListCtrl(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTL_CHECKBOX | wxTL_NO_HEADER);
     sceneTree->AppendColumn("");
@@ -55,16 +53,13 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         (world.renderFlags & (RenderFlag_DrawLatticeVertex | RenderFlag_DrawLatticeEdge | RenderFlag_DrawLatticeFace))
             ? wxCHK_CHECKED
             : wxCHK_UNCHECKED);
+    GetSizer()->Add(sceneTree, wxSizerFlags(5).Expand());
 
-    auto* group = CreateGroup(1);
+    auto* panel = CreateControlGroup("Properties", 1);
     int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
-    m_slider = new wxSlider(this, wxID_ANY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
+    m_slider = new wxSlider(panel, wxID_ANY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
                             wxSL_HORIZONTAL | wxSL_LABELS);
-    AppendControl(group, "Model Transparency (%)", m_slider);
-
-    layout->Add(sceneTree, wxSizerFlags(5).Expand());
-    layout->Add(group, wxSizerFlags(1).Expand());
-    SetSizer(layout);
+    AppendControl(panel, "Model Transparency (%)", m_slider);
 
     sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CHECKED, [sceneTree](wxTreeListEvent& event) {
         auto* data = sceneTree->GetItemData(event.GetItem());

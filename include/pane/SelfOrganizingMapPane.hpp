@@ -23,9 +23,9 @@ public:
     bool IsProjectStopped() const;
 
 private:
-    wxSizer* PopulateParametersPanel();
-    wxSizer* PopulateDisplayPanel();
-    wxSizer* PopulateControlPanel();
+    void PopulateParametersPanel();
+    void PopulateDisplayPanel();
+    void PopulateControlPanel();
     void OnCreate(wxCommandEvent& event);
     void OnStop(wxCommandEvent& event);
     void OnRun(wxCommandEvent& event);

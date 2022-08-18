@@ -1,5 +1,5 @@
-#ifndef PANE_H
-#define PANE_H
+#ifndef CONTROLS_PANE_H
+#define CONTROLS_PANE_H
 
 #include <wx/event.h>
 #include <wx/scrolwin.h>
@@ -19,12 +19,14 @@ public:
     ControlsPaneBase(wxWindow* parent, WatermarkingProject& project);
 
 protected:
-    wxFlexGridSizer* CreateGroup(int rows);
-    wxTextCtrl* CreateLabel(wxString const& text);
-    void AppendControl(wxFlexGridSizer* group, wxString const& labelText, wxControl* control);
-    void AppendSizer(wxFlexGridSizer* group, wxString const& labelText, wxSizer* sizer);
+    wxWindow* CreateControlGroup(wxString const& title, int rows);
+    void AppendControl(wxWindow* parent, wxString const& labelText, wxControl* control);
+    void AppendSizer(wxWindow* parent, wxString const& labelText, wxSizer* sizer);
 
     WatermarkingProject& m_project;
+
+private:
+    wxTextCtrl* CreateLabel(wxWindow* parent, wxString const& text);
 };
 
 #endif
