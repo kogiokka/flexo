@@ -1,5 +1,5 @@
-#ifndef OPENGL_CANVAS_H
-#define OPENGL_CANVAS_H
+#ifndef SCENE_VIEWPORT_PANE_H
+#define SCENE_VIEWPORT_PANE_H
 
 #include <memory>
 #include <tuple>

@@ -1,5 +1,5 @@
-#ifndef COLLAPSIBLE_PANE
-#define COLLAPSIBLE_PANE
+#ifndef CONTROLS_GROUP_H
+#define CONTROLS_GROUP_H
 
 #include <wx/button.h>
 #include <wx/checkbox.h>

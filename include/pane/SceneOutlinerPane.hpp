@@ -1,5 +1,5 @@
-#ifndef SCENE_OUTLINER_PANEL_H
-#define SCENE_OUTLINER_PANEL_H
+#ifndef SCENE_OUTLINER_PANE_H
+#define SCENE_OUTLINER_PANE_H
 
 #include "pane/ControlsPaneBase.hpp"
 

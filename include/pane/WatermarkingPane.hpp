@@ -1,5 +1,5 @@
-#ifndef WATERMARK_PANEL
-#define WATERMARK_PANEL
+#ifndef WATERMARKING_PANE_H
+#define WATERMARKING_PANE_H
 
 #include <wx/event.h>
 

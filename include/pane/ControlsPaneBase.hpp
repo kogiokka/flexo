@@ -1,5 +1,5 @@
-#ifndef CONTROLS_PANE_H
-#define CONTROLS_PANE_H
+#ifndef CONTROLS_PANE_BASE_H
+#define CONTROLS_PANE_BASE_H
 
 #include <wx/event.h>
 #include <wx/scrolwin.h>

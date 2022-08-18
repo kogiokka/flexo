@@ -1,5 +1,5 @@
-#ifndef LATTICE_PANEL_H
-#define LATTICE_PANEL_H
+#ifndef LATTICE_PANE_H
+#define LATTICE_PANE_H
 
 #include "pane/ControlsPaneBase.hpp"
 

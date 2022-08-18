@@ -1,5 +1,5 @@
-#ifndef SELF_ORGANIZING_MAP_PANEL_H
-#define SELF_ORGANIZING_MAP_PANEL_H
+#ifndef SELF_ORGANIZING_MAP_PANE_H
+#define SELF_ORGANIZING_MAP_PANE_H
 
 #include <wx/button.h>
 #include <wx/panel.h>
