@@ -8,35 +8,28 @@
 #include "Lattice.hpp"
 #include "Project.hpp"
 #include "pane/LatticePane.hpp"
+#include "pane/ControlsGroup.hpp"
 
 wxDEFINE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
 LatticePane::LatticePane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
-    auto* panel = CreateControlGroup("Dimensions", 5);
+    auto* group = new ControlsGroup(this, "Dimensions", 5);
 
     wxIntegerValidator<int> validDimen;
     validDimen.SetRange(1, 512);
 
-    auto width
-        = new wxTextCtrl(panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validDimen);
-    auto height
-        = new wxTextCtrl(panel, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_CENTER, validDimen);
-    auto cyclicX = new wxCheckBox(panel, wxID_ANY, "Cyclic on X");
-    auto cyclicY = new wxCheckBox(panel, wxID_ANY, "Cyclic on Y");
-    auto initButton = new wxButton(panel, wxID_ANY, "Initialize");
+    auto* width = group->AddInputText("Lattice Width");
+    auto* height= group->AddInputText("Lattice Height");
+    auto* cyclicX = group->AddCheckBox("Cyclic on X", false);
+    auto* cyclicY = group->AddCheckBox("Cyclic on Y", false);
+    auto* initButton = group->AddButton("Initialize");
 
     *width << Lattice::Get(m_project).GetWidth();
     *height << Lattice::Get(m_project).GetHeight();
-    cyclicX->SetValue(false);
-    cyclicY->SetValue(false);
 
-    AppendControl(panel, "Lattice Width", width);
-    AppendControl(panel, "Lattice Height", height);
-    AppendControl(panel, "", cyclicX);
-    AppendControl(panel, "", cyclicY);
-    AppendControl(panel, "", initButton);
+    GetSizer()->Add(group, wxSizerFlags().Expand());
 
     width->Bind(wxEVT_TEXT, &LatticePane::OnLatticeWidth, this);
     height->Bind(wxEVT_TEXT, &LatticePane::OnLatticeHeight, this);

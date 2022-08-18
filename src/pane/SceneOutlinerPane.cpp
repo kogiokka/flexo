@@ -5,6 +5,7 @@
 #include <wx/treelist.h>
 
 #include "World.hpp"
+#include "pane/ControlsGroup.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 
 class IsShownFlag : public wxClientData
@@ -53,13 +54,12 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         (world.renderFlags & (RenderFlag_DrawLatticeVertex | RenderFlag_DrawLatticeEdge | RenderFlag_DrawLatticeFace))
             ? wxCHK_CHECKED
             : wxCHK_UNCHECKED);
-    GetSizer()->Add(sceneTree, wxSizerFlags(5).Expand());
 
-    auto* panel = CreateControlGroup("Properties", 1);
-    int const sliderInit = static_cast<int>(100.0f - world.modelColorAlpha * 100.0f);
-    m_slider = new wxSlider(panel, wxID_ANY, sliderInit, 0, 100, wxDefaultPosition, wxDefaultSize,
-                            wxSL_HORIZONTAL | wxSL_LABELS);
-    AppendControl(panel, "Model Transparency (%)", m_slider);
+    auto* group = new ControlsGroup(this, "Properties", 1);
+    m_slider = group->AddSliderFloat("Model Transparency (%)", (100.0f - world.modelColorAlpha * 100.0f), 0.0f, 100.0f);
+
+    GetSizer()->Add(sceneTree, wxSizerFlags(5).Expand());
+    GetSizer()->Add(group, wxSizerFlags().Expand());
 
     sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CHECKED, [sceneTree](wxTreeListEvent& event) {
         auto* data = sceneTree->GetItemData(event.GetItem());
@@ -67,12 +67,8 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         world.renderFlags ^= opt;
     });
 
-    m_slider->Bind(wxEVT_SLIDER, &SceneOutlinerPane::OnSliderTransparency, this);
-}
-
-void SceneOutlinerPane::OnSliderTransparency(wxCommandEvent&)
-{
-    float const range = static_cast<float>(m_slider->GetMax() - m_slider->GetMin());
-    float const value = static_cast<float>(m_slider->GetValue());
-    world.modelColorAlpha = (range - value) / range;
+    group->Bind(EVT_SLIDER_FLOAT, [](SliderFloatEvent& event) {
+        float const value = event.GetValue();
+        world.modelColorAlpha = (100.0f - value) / 100.0f;
+    });
 }

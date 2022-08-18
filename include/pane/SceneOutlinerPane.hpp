@@ -14,9 +14,6 @@ class SceneOutlinerPane : public ControlsPaneBase
 
 public:
     SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project);
-
-private:
-    void OnSliderTransparency(wxCommandEvent& event);
 };
 
 #endif

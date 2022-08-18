@@ -15,7 +15,6 @@ class SelfOrganizingMapPane : public ControlsPaneBase
     wxButton* m_btnStop;
     wxButton* m_btnRun;
     wxSlider* m_sldrNbhdRadius;
-    wxStaticText* m_nbhdRadiusText;
     bool m_isStopped;
 
 public:
@@ -31,7 +30,6 @@ private:
     void OnRun(wxCommandEvent& event);
     void OnMaxIterations(wxCommandEvent& event);
     void OnInitialLearningRate(wxCommandEvent& event);
-    void OnInitialNeighborhoodRadius(wxCommandEvent& event);
     void OnNeighborhoodRadiusPreset(wxCommandEvent& event);
 };
 

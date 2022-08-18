@@ -12,21 +12,11 @@ class WatermarkingProject;
 
 class ControlsPaneBase : public wxScrolledWindow
 {
-    wxSizerFlags m_labelFlags;
-    wxSizerFlags m_ctrlFlags;
-
 public:
     ControlsPaneBase(wxWindow* parent, WatermarkingProject& project);
 
 protected:
-    wxWindow* CreateControlGroup(wxString const& title, int rows);
-    void AppendControl(wxWindow* parent, wxString const& labelText, wxControl* control);
-    void AppendSizer(wxWindow* parent, wxString const& labelText, wxSizer* sizer);
-
     WatermarkingProject& m_project;
-
-private:
-    wxTextCtrl* CreateLabel(wxWindow* parent, wxString const& text);
 };
 
 #endif
