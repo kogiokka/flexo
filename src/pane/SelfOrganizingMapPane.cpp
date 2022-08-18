@@ -9,7 +9,6 @@
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
-#include "pane/ControlsGroup.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
@@ -31,7 +30,7 @@ bool SelfOrganizingMapPane::IsProjectStopped() const
 
 void SelfOrganizingMapPane::PopulateParametersPanel()
 {
-    auto* group = new ControlsGroup(this, "Hyperparameters", 3);
+    auto* group = AddGroup("Hyperparameters", 3);
 
     wxIntegerValidator<int> validMaxIter;
     wxFloatingPointValidator<float> validLearnRate(6, nullptr);
@@ -54,13 +53,11 @@ void SelfOrganizingMapPane::PopulateParametersPanel()
     m_sldrNbhdRadius->Bind(EVT_SLIDER_FLOAT, [this](SliderFloatEvent& event) {
         ProjectSettings::Get(m_project).SetNeighborhood(event.GetValue());
     });
-
-    GetSizer()->Add(group, wxSizerFlags().Expand());
 }
 
 void SelfOrganizingMapPane::PopulateDisplayPanel()
 {
-    auto* group = new ControlsGroup(this, "Display", 3);
+    auto* group = AddGroup("Display", 3);
 
     auto* currIterations = group->AddReadOnlyText("Iterations");
     auto* currNbhdRadius = group->AddReadOnlyText("Neighborhood Radius");
@@ -89,13 +86,11 @@ void SelfOrganizingMapPane::PopulateDisplayPanel()
             event.SetText(wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate()));
         }
     });
-
-    GetSizer()->Add(group, wxSizerFlags().Expand());
 }
 
 void SelfOrganizingMapPane::PopulateControlPanel()
 {
-    auto* group = new ControlsGroup(this, "Control", 3);
+    auto* group = AddGroup("Control", 3);
     m_btnCreate = group->AddButton("Create");
     m_btnStop = group->AddButton("Stop");
     m_btnRun = group->AddButton("Run");
@@ -114,8 +109,6 @@ void SelfOrganizingMapPane::PopulateControlPanel()
     m_btnCreate->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnCreate, this);
     m_btnStop->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnStop, this);
     m_btnRun->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnRun, this);
-
-    GetSizer()->Add(group, wxSizerFlags().Expand());
 }
 
 void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)

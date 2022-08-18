@@ -6,7 +6,6 @@
 #include <wx/treelist.h>
 
 #include "World.hpp"
-#include "pane/ControlsGroup.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 
 class IsShownFlag : public wxClientData
@@ -56,19 +55,18 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
             ? wxCHK_CHECKED
             : wxCHK_UNCHECKED);
 
-    auto* group = new ControlsGroup(this, "Properties", 1);
-    auto* slider
-        = group->AddSliderFloat("Model Transparency (%)", (100.0f - world.modelColorAlpha * 100.0f), 0.0f, 100.0f);
-
-    GetSizer()->Add(sceneTree, wxSizerFlags(5).Expand());
-    GetSizer()->Add(group, wxSizerFlags().Expand());
-
     sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CHECKED, [sceneTree](wxTreeListEvent& event) {
         auto* data = sceneTree->GetItemData(event.GetItem());
         RenderFlag opt = static_cast<IsShownFlag*>(data)->GetFlag();
         world.renderFlags ^= opt;
     });
 
+    GetSizer()->Add(sceneTree, wxSizerFlags(5).Expand());
+
+
+    auto* group = AddGroup("Properties", 1);
+    auto* slider
+        = group->AddSliderFloat("Model Transparency (%)", (100.0f - world.modelColorAlpha * 100.0f), 0.0f, 100.0f);
     slider->Bind(EVT_SLIDER_FLOAT, [](SliderFloatEvent& event) {
         float const value = event.GetValue();
         world.modelColorAlpha = (100.0f - value) / 100.0f;

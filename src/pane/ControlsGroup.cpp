@@ -4,10 +4,10 @@
 
 wxDEFINE_EVENT(EVT_SLIDER_FLOAT, SliderFloatEvent);
 
-ControlsGroup::ControlsGroup(wxWindow* parent, wxString const& title, int rows)
+ControlsGroup::ControlsGroup(wxWindow* parent, wxString const& title, int numRows)
     : wxCollapsiblePane(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)
 {
-    m_grid = new wxFlexGridSizer(rows, 2, 3, 10);
+    m_grid = new wxFlexGridSizer(numRows, 2, 3, 10);
     m_labelFlags = wxSizerFlags().Expand();
     m_ctrlFlags = wxSizerFlags().Expand();
 

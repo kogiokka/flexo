@@ -1,4 +1,4 @@
-#include <wx/collpane.h>
+#include <wx/sizer.h>
 
 #include "Project.hpp"
 #include "pane/ControlsPaneBase.hpp"
@@ -10,4 +10,11 @@ ControlsPaneBase::ControlsPaneBase(wxWindow* parent, WatermarkingProject& projec
     SetScrollRate(10, 10);
 
     SetSizer(new wxBoxSizer(wxVERTICAL));
+}
+
+ControlsGroup* ControlsPaneBase::AddGroup(wxString const& title, int numRows)
+{
+    auto* group = new ControlsGroup(this, title, numRows);
+    GetSizer()->Add(group, wxSizerFlags(0).Expand());
+    return group;
 }

@@ -44,7 +44,7 @@ class ControlsGroup : public wxCollapsiblePane
     wxSizerFlags m_ctrlFlags;
 
 public:
-    ControlsGroup(wxWindow* parent, wxString const& title, int rows);
+    ControlsGroup(wxWindow* parent, wxString const& title, int numRows);
     wxButton* AddButton(wxString const& label);
     wxCheckBox* AddCheckBox(wxString const& label, bool value);
     wxTextCtrl* AddInputText(wxString const& label, wxString const& value = wxEmptyString);

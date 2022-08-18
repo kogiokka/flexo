@@ -8,14 +8,13 @@
 #include "Lattice.hpp"
 #include "Project.hpp"
 #include "pane/LatticePane.hpp"
-#include "pane/ControlsGroup.hpp"
 
 wxDEFINE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
 
 LatticePane::LatticePane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
-    auto* group = new ControlsGroup(this, "Dimensions", 5);
+    auto* group = AddGroup("Properties", 5);
 
     wxIntegerValidator<int> validDimen;
     validDimen.SetRange(1, 512);
@@ -28,8 +27,6 @@ LatticePane::LatticePane(wxWindow* parent, WatermarkingProject& project)
 
     *width << Lattice::Get(m_project).GetWidth();
     *height << Lattice::Get(m_project).GetHeight();
-
-    GetSizer()->Add(group, wxSizerFlags().Expand());
 
     width->Bind(wxEVT_TEXT, &LatticePane::OnLatticeWidth, this);
     height->Bind(wxEVT_TEXT, &LatticePane::OnLatticeHeight, this);
