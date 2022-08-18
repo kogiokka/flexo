@@ -11,9 +11,9 @@ WatermarkingPane::WatermarkingPane(wxWindow* parent, WatermarkingProject& projec
     : ControlsPaneBase(parent, project)
 {
     auto* group = new ControlsGroup(this, "Control", 1);
-    auto* btnWatermark = group->AddButton("Watermark");
-    btnWatermark->Bind(wxEVT_UPDATE_UI,
-                       [this](wxUpdateUIEvent& event) { event.Enable(SelfOrganizingMap::Get(m_project).IsDone()); });
+    group->AddButton("Watermark");
+
+    Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(SelfOrganizingMap::Get(m_project).IsDone()); });
 
     GetSizer()->Add(group, wxSizerFlags().Expand());
 }
