@@ -3,8 +3,6 @@
 
 #include "pane/ControlsPaneBase.hpp"
 
-wxDECLARE_EVENT(EVT_TOGGLE_LATTICE_FLAG, wxCommandEvent);
-
 class LatticePane : public ControlsPaneBase
 {
 public:
@@ -13,10 +11,7 @@ public:
 private:
     void OnLatticeWidth(wxCommandEvent& event);
     void OnLatticeHeight(wxCommandEvent& event);
-    void OnFlagCyclicX(wxCommandEvent& event);
-    void OnFlagCyclicY(wxCommandEvent& event);
     void OnInitialize(wxCommandEvent& event);
 };
 
 #endif
-
