@@ -9,7 +9,7 @@
 #include "common/Logger.hpp"
 #include "pane/SceneViewportPane.hpp"
 
-wxDEFINE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
+wxDEFINE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
 enum {
@@ -70,20 +70,20 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     cameraMenu->Append(wxID_REFRESH, "Reset");
 
     auto modelsMenu = new wxMenu;
-    modelsMenu->Append(EVT_GENERATE_MODEL_DOME, "Generate Dome");
+    modelsMenu->Append(EVT_ADD_UV_SPHERE, "UV Sphere");
 
     auto menubar = new wxMenuBar;
     menubar->Append(fileMenu, "&File");
     menubar->Append(m_viewMenu, "&View");
     menubar->Append(cameraMenu, "&Camera");
-    menubar->Append(modelsMenu, "&Models");
+    menubar->Append(modelsMenu, "&Add");
 
     this->SetMenuBar(menubar);
 
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenFile, this, wxID_OPEN);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
-    Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_GENERATE_MODEL_DOME);
+    Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_ADD_UV_SPHERE);
 
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
@@ -155,8 +155,8 @@ void ProjectWindow::OnMenuCameraReset(wxCommandEvent&)
 // FIXME: Why do I need this?
 void ProjectWindow::OnMenuGenerateModelDome(wxCommandEvent&)
 {
-    wxCommandEvent event(EVT_GENERATE_MODEL_DOME);
-    event.SetId(EVT_GENERATE_MODEL_DOME);
+    wxCommandEvent event(EVT_ADD_UV_SPHERE);
+    event.SetId(EVT_ADD_UV_SPHERE);
     ProcessWindowEvent(event);
 }
 

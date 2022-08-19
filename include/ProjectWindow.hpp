@@ -10,7 +10,7 @@
 
 class WatermarkingProject;
 
-wxDECLARE_EVENT(EVT_GENERATE_MODEL_DOME, wxCommandEvent);
+wxDECLARE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDECLARE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
 class ProjectWindow final : public wxFrame

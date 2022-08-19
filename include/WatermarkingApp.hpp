@@ -21,7 +21,7 @@ public:
     void ImportVolumetricModel(wxString const& path);
     BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
-    void OnMenuGenerateModel(wxCommandEvent& event);
+    void OnMenuAddModel(wxCommandEvent& event);
     void OnMenuImportModel(wxCommandEvent& event);
 
 private:

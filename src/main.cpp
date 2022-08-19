@@ -22,7 +22,7 @@
 #include "pane/WatermarkingPane.hpp"
 
 wxBEGIN_EVENT_TABLE(WatermarkingApp, wxApp)
-    EVT_COMMAND(wxID_ANY, EVT_GENERATE_MODEL_DOME, WatermarkingApp::OnMenuGenerateModel)
+    EVT_COMMAND(wxID_ANY, EVT_ADD_UV_SPHERE, WatermarkingApp::OnMenuAddModel)
     EVT_COMMAND(wxID_ANY, EVT_IMPORT_MODEL, WatermarkingApp::OnMenuImportModel)
 wxEND_EVENT_TABLE()
 
@@ -240,7 +240,7 @@ BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positio
     return { max, min };
 }
 
-void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& event)
+void WatermarkingApp::OnMenuAddModel(wxCommandEvent& event)
 {
     if (world.theModel == nullptr) {
         wxMessageDialog dialog(&ProjectWindow::Get(*m_project), "Please import a model from the File menu first.",
@@ -252,7 +252,7 @@ void WatermarkingApp::OnMenuGenerateModel(wxCommandEvent& event)
     Mesh mesh;
     BoundingBox bbox = CalculateBoundingBox(world.theModel->positions);
 
-    if (event.GetId() == EVT_GENERATE_MODEL_DOME) {
+    if (event.GetId() == EVT_ADD_UV_SPHERE) {
         auto const& [max, min] = bbox;
         float const radius = glm::length((max - min) * 0.5f);
         int const numSegments = 60;
