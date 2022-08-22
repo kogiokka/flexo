@@ -6,6 +6,7 @@
 #include <wx/textctrl.h>
 #include <wx/valnum.h>
 
+#include "Lattice.hpp"
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
@@ -14,6 +15,7 @@
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
+    PopulateLatticePanel();
     PopulateParametersPanel();
     PopulateDisplayPanel();
     PopulateControlPanel();
@@ -26,6 +28,38 @@ SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProje
 bool SelfOrganizingMapPane::IsProjectStopped() const
 {
     return m_isStopped;
+}
+
+void SelfOrganizingMapPane::PopulateLatticePanel()
+{
+    auto* group = AddGroup("Lattice", 5);
+
+    wxIntegerValidator<int> validDimen;
+    validDimen.SetRange(1, 512);
+
+    auto* width = group->AddInputText("Lattice Width");
+    auto* height = group->AddInputText("Lattice Height");
+    auto* cyclicX = group->AddCheckBox("Cyclic on X", false);
+    auto* cyclicY = group->AddCheckBox("Cyclic on Y", false);
+    auto* initButton = group->AddButton("Initialize");
+
+    *width << Lattice::Get(m_project).GetWidth();
+    *height << Lattice::Get(m_project).GetHeight();
+
+    width->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnLatticeWidth, this);
+    height->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnLatticeHeight, this);
+    cyclicX->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) {
+        LatticeFlags flags = Lattice::Get(m_project).GetFlags() ^ LatticeFlags_CyclicX;
+        Lattice::Get(m_project).SetFlags(flags);
+    });
+    cyclicY->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) {
+        LatticeFlags flags = Lattice::Get(m_project).GetFlags() ^ LatticeFlags_CyclicY;
+        Lattice::Get(m_project).SetFlags(flags);
+    });
+    initButton->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnInitialize, this);
+
+    group->Bind(wxEVT_UPDATE_UI,
+                [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
 }
 
 void SelfOrganizingMapPane::PopulateParametersPanel()
@@ -178,4 +212,26 @@ void SelfOrganizingMapPane::OnNeighborhoodRadiusPreset(wxCommandEvent& event)
     wxCommandEvent sliderEvent(wxEVT_SLIDER);
     sliderEvent.SetInt(pos);
     m_sldrNbhdRadius->ProcessWindowEvent(sliderEvent);
+}
+
+void SelfOrganizingMapPane::OnLatticeWidth(wxCommandEvent& event)
+{
+    long tmp;
+    if (event.GetString().ToLong(&tmp)) {
+        Lattice::Get(m_project).SetWidth(tmp);
+    }
+}
+
+void SelfOrganizingMapPane::OnLatticeHeight(wxCommandEvent& event)
+{
+    long tmp;
+    if (event.GetString().ToLong(&tmp)) {
+        Lattice::Get(m_project).SetHeight(tmp);
+    }
+}
+
+void SelfOrganizingMapPane::OnInitialize(wxCommandEvent&)
+{
+    m_project.InitializeLattice();
+    m_project.UpdateLatticeGraphics();
 }

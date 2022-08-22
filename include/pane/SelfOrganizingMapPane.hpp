@@ -22,6 +22,7 @@ public:
     bool IsProjectStopped() const;
 
 private:
+    void PopulateLatticePanel();
     void PopulateParametersPanel();
     void PopulateDisplayPanel();
     void PopulateControlPanel();
@@ -31,6 +32,9 @@ private:
     void OnMaxIterations(wxCommandEvent& event);
     void OnInitialLearningRate(wxCommandEvent& event);
     void OnNeighborhoodRadiusPreset(wxCommandEvent& event);
+    void OnLatticeWidth(wxCommandEvent& event);
+    void OnLatticeHeight(wxCommandEvent& event);
+    void OnInitialize(wxCommandEvent& event);
 };
 
 #endif

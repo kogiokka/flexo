@@ -44,7 +44,6 @@ PRIVATE
     "src/pane/ControlsGroup.cpp"
     "src/pane/SceneOutlinerPane.cpp"
     "src/pane/SelfOrganizingMapPane.cpp"
-    "src/pane/LatticePane.cpp"
     "src/pane/WatermarkingPane.cpp"
     "src/pane/SceneViewportPane.cpp"
 

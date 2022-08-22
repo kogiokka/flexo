@@ -15,7 +15,6 @@
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
-#include "pane/LatticePane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
@@ -63,7 +62,6 @@ bool WatermarkingApp::OnInit()
     auto page = window.GetMainPage();
 
     auto* outliner = new SceneOutlinerPane(page, project);
-    auto* lattice = new LatticePane(page, project);
     auto* som = new SelfOrganizingMapPane(page, project);
     auto* watermarking = new WatermarkingPane(page, project);
     watermarking->Disable();
@@ -81,15 +79,6 @@ bool WatermarkingApp::OnInit()
                 wxAuiPaneInfo()
                     .Name("outliner")
                     .Caption("Scene Outliner")
-                    .Right()
-                    .Layer(1)
-                    .CloseButton(true)
-                    .MaximizeButton(true)
-                    .MinSize(minSize));
-    mgr.AddPane(lattice,
-                wxAuiPaneInfo()
-                    .Name("lattice")
-                    .Caption("Lattice")
                     .Right()
                     .Layer(1)
                     .CloseButton(true)

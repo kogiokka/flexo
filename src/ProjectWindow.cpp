@@ -15,7 +15,6 @@ wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 enum {
     TIMER_UPDATE_UI = wxID_HIGHEST + 1,
     EVT_VIEW_MENU_SCENE_VIEWPORT,
-    EVT_VIEW_MENU_LATTICE,
     EVT_VIEW_MENU_SOM,
     EVT_VIEW_MENU_WATERMARKING,
     EVT_VIEW_MENU_SCENE_OUTLINER,
@@ -62,7 +61,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     m_viewMenu = new wxMenu();
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_VIEWPORT, "Toggle 3D Viewport");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner");
-    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_LATTICE, "Toggle Lattice Pane");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SOM, "Toggle SOM Pane");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_WATERMARKING, "Toggle Watermarking Pane");
 
@@ -86,7 +84,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_ADD_UV_SPHERE);
 
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
-    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_LATTICE);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SOM);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
@@ -169,7 +166,6 @@ void ProjectWindow::OnTimerUpdateUI(wxTimerEvent&)
 {
     m_viewMenu->Check(EVT_VIEW_MENU_SCENE_VIEWPORT, m_mgr.GetPane("viewport").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_SCENE_OUTLINER, m_mgr.GetPane("outliner").IsShown());
-    m_viewMenu->Check(EVT_VIEW_MENU_LATTICE, m_mgr.GetPane("lattice").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_SOM, m_mgr.GetPane("som").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_WATERMARKING, m_mgr.GetPane("watermarking").IsShown());
 
@@ -181,9 +177,7 @@ void ProjectWindow::OnTogglePane(wxCommandEvent& event)
     wxString name;
     int const id = event.GetId();
 
-    if (id == EVT_VIEW_MENU_LATTICE) {
-        name = "lattice";
-    } else if (id == EVT_VIEW_MENU_SOM) {
+    if (id == EVT_VIEW_MENU_SOM) {
         name = "som";
     } else if (id == EVT_VIEW_MENU_WATERMARKING) {
         name = "watermarking";
