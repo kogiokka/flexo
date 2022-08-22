@@ -43,6 +43,9 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
     auto* cyclicY = group->AddCheckBox("Cyclic on Y", false);
     auto* initButton = group->AddButton("Initialize");
 
+    width->SetValidator(validDimen);
+    height->SetValidator(validDimen);
+
     *width << Lattice::Get(m_project).GetWidth();
     *height << Lattice::Get(m_project).GetHeight();
 
