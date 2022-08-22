@@ -14,14 +14,13 @@ WatermarkingProject::WatermarkingProject()
     , m_panel {}
     , m_dataset(nullptr)
 {
-    Bind(EVT_LATTICE_DIMENSIONS_CHANGED, &WatermarkingProject::OnLatticeDimensionsChanged, this);
 }
 
 void WatermarkingProject::CreateProject()
 {
     assert(m_dataset);
 
-    SelfOrganizingMap::Get(*this).CreateProcedure(Lattice::Get(*this), m_dataset);
+    SelfOrganizingMap::Get(*this).CreateProcedure(*LatticeList::Get(*this).GetCurrent(), m_dataset);
 
     world.isWatermarked = false;
 }
@@ -40,20 +39,20 @@ void WatermarkingProject::BuildLatticeMesh() const
     if (!m_isLatticeReady)
         return;
 
-    Lattice const& lattice = Lattice::Get(*this);
+    Lattice const& lattice = *LatticeList::Get(*this).GetCurrent();
     Mesh mesh;
 
     std::vector<glm::vec3> positions;
 
     // Positions
-    auto const& neurons = lattice.GetNeurons();
+    auto const& neurons = lattice.mNeurons;
     positions.reserve(neurons.size());
     for (Node const& n : neurons) {
         positions.emplace_back(n[0], n[1], n[2]);
     }
 
-    int const width = lattice.GetWidth();
-    int const height = lattice.GetHeight();
+    int const width = lattice.mWidth;
+    int const height = lattice.mHeight;
     // float const divisor = 1.1f; // FIXME
 
     float const w = static_cast<float>(width - 1);
@@ -124,8 +123,9 @@ void WatermarkingProject::UpdateLatticeEdges() const
 {
     std::vector<unsigned int> indices;
 
-    int const width = Lattice::Get(*this).GetWidth();
-    int const height = Lattice::Get(*this).GetHeight();
+    auto lattice = LatticeList::Get(*this).GetCurrent();
+    int const width = lattice->mWidth;
+    int const height = lattice->mHeight;
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);
@@ -185,28 +185,6 @@ void WatermarkingProject::DoWatermark()
     }
     world.theModel->textureCoords = textureCoords;
     world.isWatermarked = true;
-}
-
-void WatermarkingProject::OnLatticeDimensionsChanged(wxCommandEvent&)
-{
-    InitializeLattice();
-    UpdateLatticeGraphics();
-}
-
-// Init the lattice and calculate the initial neighborhood radius
-void WatermarkingProject::InitializeLattice()
-{
-    auto& lattice = Lattice::Get(*this);
-    int const width = lattice.GetWidth();
-    int const height = lattice.GetHeight();
-    float diagLen = sqrt(width * width + height * height);
-
-    lattice.Initialize();
-    ProjectSettings::Get(*this).SetNeighborhood(0.5f * diagLen);
-
-    wxCommandEvent event(EVT_NEIGHBORHOOD_RADIUS_PRESET);
-    event.SetString(wxString() << diagLen);
-    ProcessEvent(event);
 }
 
 void WatermarkingProject::UpdateLatticeGraphics()

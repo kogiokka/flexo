@@ -14,7 +14,6 @@
 #include "SelfOrganizingMap.hpp"
 
 wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
-wxDECLARE_EVENT(EVT_NEIGHBORHOOD_RADIUS_PRESET, wxCommandEvent);
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;
@@ -35,7 +34,6 @@ public:
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
     void OnLatticeDimensionsChanged(wxCommandEvent& event);
-    void InitializeLattice();
     void UpdateLatticeGraphics();
 
 private:

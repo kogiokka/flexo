@@ -10,12 +10,8 @@ WatermarkingPane::WatermarkingPane(wxWindow* parent, WatermarkingProject& projec
     : ControlsPaneBase(parent, project)
 {
     auto* group = AddGroup("Control", 1);
-    group->AddButton("Watermark");
+    auto* btn = group->AddButton("Watermark");
 
     Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(SelfOrganizingMap::Get(m_project).IsDone()); });
-}
-
-void WatermarkingPane::OnWatermark(wxCommandEvent&)
-{
-    m_project.DoWatermark();
+    btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_project.DoWatermark(); });
 }

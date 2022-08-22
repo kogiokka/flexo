@@ -1,6 +1,7 @@
 #ifndef LATTICE_H
 #define LATTICE_H
 
+#include <memory>
 #include <vector>
 
 #include <wx/event.h>
@@ -17,35 +18,36 @@ enum LatticeFlags_ : int {
     LatticeFlags_CyclicY = 1 << 2,
 };
 
+struct Lattice {
+    int mWidth;
+    int mHeight;
+    LatticeFlags mFlags;
+    std::vector<Node> mNeurons;
+};
+
 class WatermarkingProject;
+using ListOfLattice = std::vector<std::shared_ptr<Lattice>>;
 
-wxDECLARE_EVENT(EVT_LATTICE_DIMENSIONS_CHANGED, wxCommandEvent);
-
-class Lattice : public AttachableBase
+class LatticeList final : public AttachableBase, public ListOfLattice
 {
-public:
-    static Lattice& Get(WatermarkingProject& project);
-    static Lattice const& Get(WatermarkingProject const& project);
+    // privatize emplace_back and push_back method, use Add instead.
+    using ListOfLattice::emplace_back;
+    using ListOfLattice::push_back;
 
-    explicit Lattice(WatermarkingProject& project);
-    Lattice(Lattice const&) = delete;
-    Lattice& operator=(Lattice const&) = delete;
-    void Initialize();
-    void SetWidth(int width);
-    void SetHeight(int height);
-    void SetFlags(LatticeFlags flags);
-    int GetWidth() const;
-    int GetHeight() const;
-    LatticeFlags GetFlags() const;
-    std::vector<Node>& GetNeurons();
-    std::vector<Node> const& GetNeurons() const;
+public:
+    static LatticeList& Get(WatermarkingProject& project);
+    static LatticeList const& Get(WatermarkingProject const& project);
+
+    explicit LatticeList(WatermarkingProject& project);
+    LatticeList(LatticeList const&) = delete;
+    LatticeList& operator=(LatticeList const&) = delete;
+    void Add(int width, int height, LatticeFlags flags);
+    void SetCurrent(unsigned int index);
+    std::shared_ptr<Lattice> GetCurrent() const;
 
 private:
     WatermarkingProject& m_project;
-    int m_width;
-    int m_height;
-    LatticeFlags m_flags;
-    std::vector<Node> m_neurons;
+    std::shared_ptr<Lattice> m_curr;
 };
 
 #endif

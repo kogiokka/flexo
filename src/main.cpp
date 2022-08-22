@@ -110,8 +110,8 @@ bool WatermarkingApp::OnInit()
 
     wxUpdateUIEvent::SetUpdateInterval(16);
 
-    m_project->InitializeLattice();
-    m_project->UpdateLatticeGraphics();
+//     m_project->InitializeLattice();
+//     m_project->UpdateLatticeGraphics();
 
     return true;
 }

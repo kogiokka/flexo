@@ -1,98 +1,58 @@
+#include <cassert>
 #include <memory>
+#include <utility>
 
 #include "Lattice.hpp"
 #include "Project.hpp"
 #include "RandomRealNumber.hpp"
 
-wxDEFINE_EVENT(EVT_LATTICE_DIMENSIONS_CHANGED, wxCommandEvent);
-
 // Register factory: Lattice
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> SharedPtr<Lattice> { return std::make_shared<Lattice>(project); }
+    [](WatermarkingProject& project) -> SharedPtr<LatticeList> { return std::make_shared<LatticeList>(project); }
 };
 
-void Notify(WatermarkingProject& project)
+LatticeList& LatticeList::Get(WatermarkingProject& project)
 {
-    wxCommandEvent event(EVT_LATTICE_DIMENSIONS_CHANGED);
-    project.ProcessEvent(event);
+    return project.AttachedObjects::Get<LatticeList>(factoryKey);
 }
 
-Lattice& Lattice::Get(WatermarkingProject& project)
-{
-    return project.AttachedObjects::Get<Lattice>(factoryKey);
-}
-
-Lattice const& Lattice::Get(WatermarkingProject const& project)
+LatticeList const& LatticeList::Get(WatermarkingProject const& project)
 {
     return Get(const_cast<WatermarkingProject&>(project));
 }
 
-Lattice::Lattice(WatermarkingProject& project)
+LatticeList::LatticeList(WatermarkingProject& project)
     : m_project(project)
 {
-    m_width = 64;
-    m_height = 64;
-    m_flags = LatticeFlags_CyclicNone;
 }
 
-void Lattice::Initialize()
+void LatticeList::Add(int width, int height, LatticeFlags flags)
 {
-    RandomRealNumber<float> rng(-10.0f, 10.0f);
+    RandomRealNumber<float> rng(-100.0f, 100.0f);
 
-    m_neurons.clear();
-    for (int j = 0; j < m_height; ++j) {
-        for (int i = 0; i < m_width; ++i) {
-            m_neurons.emplace_back(i, j, rng.vector(3));
+    auto lattice = std::make_shared<Lattice>();
+    for (int j = 0; j < height; ++j) {
+        for (int i = 0; i < width; ++i) {
+            lattice->mNeurons.emplace_back(i, j, rng.vector(3));
         }
     }
+
+    lattice->mWidth = width;
+    lattice->mHeight = height;
+    lattice->mFlags = flags;
+
+    emplace_back(std::move(lattice));
 }
 
-void Lattice::SetWidth(int width)
+void LatticeList::SetCurrent(unsigned int index)
 {
-    if (m_width == width) {
+    if (index >= size()) {
         return;
     }
-
-    m_width = width;
-    Notify(m_project);
+    m_curr = operator[](index);
 }
 
-void Lattice::SetHeight(int height)
+std::shared_ptr<Lattice> LatticeList::GetCurrent() const
 {
-    if (m_height == height) {
-        return;
-    }
-
-    m_height = height;
-    Notify(m_project);
-}
-
-void Lattice::SetFlags(LatticeFlags flags)
-{
-    m_flags = flags;
-}
-
-int Lattice::GetWidth() const
-{
-    return m_width;
-}
-
-int Lattice::GetHeight() const
-{
-    return m_height;
-}
-
-LatticeFlags Lattice::GetFlags() const
-{
-    return m_flags;
-}
-
-std::vector<Node>& Lattice::GetNeurons()
-{
-    return m_neurons;
-}
-
-std::vector<Node> const& Lattice::GetNeurons() const
-{
-    return m_neurons;
+    return m_curr;
 }

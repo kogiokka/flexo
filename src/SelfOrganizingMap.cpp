@@ -70,9 +70,9 @@ void SelfOrganizingMap::CreateProcedure(Lattice& lattice, std::shared_ptr<InputD
 
 void SelfOrganizingMap::Train(Lattice& lattice, std::shared_ptr<InputData> dataset)
 {
-    auto& neurons = lattice.GetNeurons();
-    int const width = lattice.GetWidth();
-    int const height = lattice.GetHeight();
+    auto& neurons = lattice.mNeurons;
+    int const width = lattice.mWidth;
+    int const height = lattice.mHeight;
 
     while (m_iterations < m_maxIterations) {
         std::unique_lock lk(m_mut);
@@ -95,13 +95,13 @@ void SelfOrganizingMap::Train(Lattice& lattice, std::shared_ptr<InputData> datas
         Node const& bmu = neurons[index.x + index.y * width];
         UpdateNeighborhood(lattice, input, bmu, m_neighborhood);
 
-        if (lattice.GetFlags() & LatticeFlags_CyclicX) {
+        if (lattice.mFlags & LatticeFlags_CyclicX) {
             for (int y = 0; y < height; y++) {
                 neurons[y * width + width - 1] = neurons[y * width + 0];
             }
         }
 
-        if (lattice.GetFlags() & LatticeFlags_CyclicY) {
+        if (lattice.mFlags & LatticeFlags_CyclicY) {
             for (int x = 0; x < width; x++) {
                 neurons[(height - 1) * width + x] = neurons[0 * width + x];
             }
@@ -117,11 +117,11 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice const& lattice, glm::vec3 const& i
 {
     glm::ivec2 idx;
     float distMin = std::numeric_limits<float>::max();
-    for (int i = 0; i < lattice.GetWidth(); i++) {
-        for (int j = 0; j < lattice.GetHeight(); j++) {
+    for (int i = 0; i < lattice.mWidth; i++) {
+        for (int j = 0; j < lattice.mHeight; j++) {
             float sum = 0;
-            for (int k = 0; k < lattice.GetNeurons().front().Dimension(); k++) {
-                float const diff = input[k] - lattice.GetNeurons()[i + j * lattice.GetWidth()][k];
+            for (int k = 0; k < lattice.mNeurons.front().Dimension(); k++) {
+                float const diff = input[k] - lattice.mNeurons[i + j * lattice.mWidth][k];
                 sum += (diff * diff);
             }
             if (distMin > sum) {
@@ -135,10 +135,10 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice const& lattice, glm::vec3 const& i
 
 void SelfOrganizingMap::UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius)
 {
-    auto& neurons = lattice.GetNeurons();
-    LatticeFlags const flags = lattice.GetFlags();
-    int const width = lattice.GetWidth();
-    int const height = lattice.GetHeight();
+    auto& neurons = lattice.mNeurons;
+    LatticeFlags const flags = lattice.mFlags;
+    int const width = lattice.mWidth;
+    int const height = lattice.mHeight;
 
     int const rad = static_cast<int>(radius);
     int const radSqr = rad * rad;

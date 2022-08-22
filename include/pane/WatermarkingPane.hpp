@@ -9,9 +9,6 @@ class WatermarkingPane : public ControlsPaneBase
 {
 public:
     WatermarkingPane(wxWindow* parent, WatermarkingProject& project);
-
-private:
-    void OnWatermark(wxCommandEvent& event);
 };
 
 #endif

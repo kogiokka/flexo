@@ -7,6 +7,7 @@
 #include <wx/slider.h>
 #include <wx/stattext.h>
 
+#include "Lattice.hpp"
 #include "pane/ControlsPaneBase.hpp"
 
 class SelfOrganizingMapPane : public ControlsPaneBase
@@ -31,10 +32,7 @@ private:
     void OnRun(wxCommandEvent& event);
     void OnMaxIterations(wxCommandEvent& event);
     void OnInitialLearningRate(wxCommandEvent& event);
-    void OnNeighborhoodRadiusPreset(wxCommandEvent& event);
-    void OnLatticeWidth(wxCommandEvent& event);
-    void OnLatticeHeight(wxCommandEvent& event);
-    void OnInitialize(wxCommandEvent& event);
+    void SetupNeighborhoodRadiusSlider(float maxValue, float value);
 };
 
 #endif

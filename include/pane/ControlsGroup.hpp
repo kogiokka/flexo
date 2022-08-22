@@ -1,6 +1,7 @@
 #ifndef CONTROLS_GROUP_H
 #define CONTROLS_GROUP_H
 
+#include <wx/bmpcbox.h>
 #include <wx/button.h>
 #include <wx/checkbox.h>
 #include <wx/collpane.h>
@@ -50,6 +51,7 @@ public:
     wxTextCtrl* AddInputText(wxString const& label, wxString const& value = wxEmptyString);
     wxTextCtrl* AddReadOnlyText(wxString const& label, wxString const& value = wxEmptyString);
     wxSlider* AddSliderFloat(wxString const& label, float value, float minValue, float maxValue);
+    wxBitmapComboBox* AddBitmapComboBox(wxString const& label);
 
 private:
     void AppendControl(wxString const& labelText, wxControl* control);

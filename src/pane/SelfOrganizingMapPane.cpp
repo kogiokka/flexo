@@ -1,3 +1,4 @@
+#include <wx/artprov.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>
@@ -6,7 +7,6 @@
 #include <wx/textctrl.h>
 #include <wx/valnum.h>
 
-#include "Lattice.hpp"
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
@@ -21,8 +21,6 @@ SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProje
     PopulateControlPanel();
 
     m_isStopped = true;
-
-    m_project.Bind(EVT_NEIGHBORHOOD_RADIUS_PRESET, &SelfOrganizingMapPane::OnNeighborhoodRadiusPreset, this);
 }
 
 bool SelfOrganizingMapPane::IsProjectStopped() const
@@ -32,34 +30,48 @@ bool SelfOrganizingMapPane::IsProjectStopped() const
 
 void SelfOrganizingMapPane::PopulateLatticePanel()
 {
-    auto* group = AddGroup("Lattice", 5);
+    auto* group = AddGroup("Lattice", 6);
+
+    auto* comboBox = group->AddBitmapComboBox("Instances");
+    auto* widthText = group->AddInputText("Lattice Width");
+    auto* heightText = group->AddInputText("Lattice Height");
+    auto* cyclicX = group->AddCheckBox("Cyclic on X", false);
+    auto* cyclicY = group->AddCheckBox("Cyclic on Y", false);
+    auto* addBtn = group->AddButton("Add");
 
     wxIntegerValidator<int> validDimen;
     validDimen.SetRange(1, 512);
+    widthText->SetValidator(validDimen);
+    heightText->SetValidator(validDimen);
 
-    auto* width = group->AddInputText("Lattice Width");
-    auto* height = group->AddInputText("Lattice Height");
-    auto* cyclicX = group->AddCheckBox("Cyclic on X", false);
-    auto* cyclicY = group->AddCheckBox("Cyclic on Y", false);
-    auto* initButton = group->AddButton("Initialize");
-
-    width->SetValidator(validDimen);
-    height->SetValidator(validDimen);
-
-    *width << Lattice::Get(m_project).GetWidth();
-    *height << Lattice::Get(m_project).GetHeight();
-
-    width->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnLatticeWidth, this);
-    height->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnLatticeHeight, this);
-    cyclicX->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) {
-        LatticeFlags flags = Lattice::Get(m_project).GetFlags() ^ LatticeFlags_CyclicX;
-        Lattice::Get(m_project).SetFlags(flags);
+    comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
+        LatticeList::Get(m_project).SetCurrent(event.GetSelection());
+        auto lattice = LatticeList::Get(m_project).GetCurrent();
+        int const width = lattice->mWidth;
+        int const height = lattice->mHeight;
+        float const diagLen = sqrt(width * width + height * height);
+        float const radius = 0.5f * diagLen;
+        ProjectSettings::Get(m_project).SetNeighborhood(radius);
+        SetupNeighborhoodRadiusSlider(diagLen, radius);
+        m_project.UpdateLatticeGraphics();
     });
-    cyclicY->Bind(wxEVT_CHECKBOX, [this](wxCommandEvent&) {
-        LatticeFlags flags = Lattice::Get(m_project).GetFlags() ^ LatticeFlags_CyclicY;
-        Lattice::Get(m_project).SetFlags(flags);
+
+    addBtn->Bind(wxEVT_BUTTON, [this, widthText, heightText, cyclicX, cyclicY, comboBox](wxCommandEvent&) {
+        long width;
+        long height;
+        LatticeFlags flags = LatticeFlags_CyclicNone;
+        if (cyclicX->GetValue()) {
+            flags |= LatticeFlags_CyclicX;
+        }
+        if (cyclicY->GetValue()) {
+            flags |= LatticeFlags_CyclicY;
+        }
+        if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
+            LatticeList::Get(m_project).Add(width, height, flags);
+            comboBox->Append(wxString::Format("Lattice.00%lu", LatticeList::Get(m_project).size()),
+                             wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
+        }
     });
-    initButton->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnInitialize, this);
 
     group->Bind(wxEVT_UPDATE_UI,
                 [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
@@ -199,42 +211,14 @@ void SelfOrganizingMapPane::OnInitialLearningRate(wxCommandEvent& event)
     }
 }
 
-// FIXME: Better way to do this
-void SelfOrganizingMapPane::OnNeighborhoodRadiusPreset(wxCommandEvent& event)
+void SelfOrganizingMapPane::SetupNeighborhoodRadiusSlider(float maxValue, float value)
 {
-    double maxRadius;
-    if (event.GetString().ToDouble(&maxRadius)) {
-        m_sldrNbhdRadius->SetMax(static_cast<int>(maxRadius * 100.0f));
-    }
+    m_sldrNbhdRadius->SetMax(static_cast<int>(maxValue * 100.0f));
 
-    float const radius = SelfOrganizingMap::Get(m_project).GetInitialNeighborhood();
-
-    int const pos = static_cast<int>(radius * 100.0f);
+    int const pos = static_cast<int>(value * 100.0f);
     m_sldrNbhdRadius->SetValue(pos);
 
     wxCommandEvent sliderEvent(wxEVT_SLIDER);
     sliderEvent.SetInt(pos);
     m_sldrNbhdRadius->ProcessWindowEvent(sliderEvent);
-}
-
-void SelfOrganizingMapPane::OnLatticeWidth(wxCommandEvent& event)
-{
-    long tmp;
-    if (event.GetString().ToLong(&tmp)) {
-        Lattice::Get(m_project).SetWidth(tmp);
-    }
-}
-
-void SelfOrganizingMapPane::OnLatticeHeight(wxCommandEvent& event)
-{
-    long tmp;
-    if (event.GetString().ToLong(&tmp)) {
-        Lattice::Get(m_project).SetHeight(tmp);
-    }
-}
-
-void SelfOrganizingMapPane::OnInitialize(wxCommandEvent&)
-{
-    m_project.InitializeLattice();
-    m_project.UpdateLatticeGraphics();
 }
