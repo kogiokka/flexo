@@ -61,6 +61,10 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         world.renderFlags ^= opt;
     });
 
+    wxFont font = GetFont();
+    font.SetPointSize(font.GetPointSize() - 1);
+    sceneTree->SetFont(font);
+
     GetSizer()->Add(sceneTree, wxSizerFlags(5).Expand());
 
 

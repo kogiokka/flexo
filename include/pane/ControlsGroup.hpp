@@ -12,6 +12,7 @@
 #include <wx/string.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
+#include <wx/font.h>
 
 class SliderFloatEvent : public wxEvent
 {
@@ -43,6 +44,8 @@ class ControlsGroup : public wxCollapsiblePane
     wxFlexGridSizer* m_grid;
     wxSizerFlags m_labelFlags;
     wxSizerFlags m_ctrlFlags;
+    wxFont m_widgetFont;
+    wxFont m_widgetLabelFont;
 
 public:
     ControlsGroup(wxWindow* parent, wxString const& title, int numRows);

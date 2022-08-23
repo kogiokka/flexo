@@ -19,6 +19,12 @@ ControlsGroup::ControlsGroup(wxWindow* parent, wxString const& title, int numRow
     GetPane()->SetSizer(paneSizer);
     Expand();
 
+
+    wxFont font = GetFont();
+    font.SetPointSize(font.GetPointSize() - 1);
+    m_widgetFont = font;
+    m_widgetLabelFont = font;
+
     Bind(wxEVT_COLLAPSIBLEPANE_CHANGED, [parent](wxCollapsiblePaneEvent&) { parent->Layout(); });
 }
 
@@ -26,6 +32,7 @@ wxCheckBox* ControlsGroup::AddCheckBox(wxString const& label, bool value)
 {
     wxCheckBox* checkbox = new wxCheckBox(GetPane(), wxID_ANY, label);
     checkbox->SetValue(value);
+    checkbox->SetFont(m_widgetFont);
     AppendControl("", checkbox);
     return checkbox;
 }
@@ -33,6 +40,7 @@ wxCheckBox* ControlsGroup::AddCheckBox(wxString const& label, bool value)
 wxButton* ControlsGroup::AddButton(wxString const& label)
 {
     wxButton* button = new wxButton(GetPane(), wxID_ANY, label);
+    button->SetFont(m_widgetFont);
     AppendControl("", button);
     return button;
 }
@@ -40,6 +48,7 @@ wxButton* ControlsGroup::AddButton(wxString const& label)
 wxTextCtrl* ControlsGroup::AddInputText(wxString const& label, wxString const& value)
 {
     wxTextCtrl* text = new wxTextCtrl(GetPane(), wxID_ANY, value, wxDefaultPosition, wxDefaultSize, wxTE_CENTER);
+    text->SetFont(m_widgetFont);
     AppendControl(label, text);
     return text;
 }
@@ -62,6 +71,8 @@ wxSlider* ControlsGroup::AddSliderFloat(wxString const& label, float value, floa
                                     static_cast<int>(maxValue * scale));
     wxStaticText* text = new wxStaticText(pane, wxID_ANY, wxString::Format("%.2f", value), wxDefaultPosition,
                                           wxDefaultSize, wxALIGN_CENTER_HORIZONTAL);
+    slider->SetFont(m_widgetFont);
+    text->SetFont(m_widgetFont);
 
     slider->Bind(wxEVT_SLIDER, [this, text, slider](wxCommandEvent& event) {
         float const value = event.GetInt() * 0.01f;
@@ -84,6 +95,7 @@ wxBitmapComboBox* ControlsGroup::AddBitmapComboBox(wxString const& label)
     wxBitmapComboBox* comboBox = new wxBitmapComboBox(GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition,
                                                       wxDefaultSize, 0, nullptr);
     comboBox->SetCanFocus(false);
+    comboBox->SetFont(m_widgetFont);
 
     AppendControl(label, comboBox);
 
@@ -109,5 +121,6 @@ wxTextCtrl* ControlsGroup::CreateLabel(wxString const& text)
                                        wxBORDER_NONE | wxTE_RIGHT | wxTE_READONLY);
     label->SetBackgroundColour(pane->GetBackgroundColour());
     label->SetCanFocus(false);
+    label->SetFont(m_widgetLabelFont);
     return label;
 }

@@ -15,6 +15,7 @@ ControlsPaneBase::ControlsPaneBase(wxWindow* parent, WatermarkingProject& projec
 ControlsGroup* ControlsPaneBase::AddGroup(wxString const& title, int numRows)
 {
     auto* group = new ControlsGroup(this, title, numRows);
-    GetSizer()->Add(group, wxSizerFlags(0).Expand());
+    GetSizer()->AddSpacer(15);
+    GetSizer()->Add(group, wxSizerFlags(0).Expand().Border(wxLEFT | wxRIGHT, 15));
     return group;
 }
