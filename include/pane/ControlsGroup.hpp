@@ -50,6 +50,7 @@ class ControlsGroup : public wxCollapsiblePane
 public:
     ControlsGroup(wxWindow* parent, wxString const& title, int numRows);
     wxButton* AddButton(wxString const& label);
+    wxCheckBox* AddCheckBoxWithHeading(wxString const& heading, wxString const& label, bool value);
     wxCheckBox* AddCheckBox(wxString const& label, bool value);
     wxTextCtrl* AddInputText(wxString const& label, wxString const& value = wxEmptyString);
     wxTextCtrl* AddReadOnlyText(wxString const& label, wxString const& value = wxEmptyString);

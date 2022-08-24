@@ -19,7 +19,6 @@ ControlsGroup::ControlsGroup(wxWindow* parent, wxString const& title, int numRow
     GetPane()->SetSizer(paneSizer);
     Expand();
 
-
     wxFont font = GetFont();
     font.SetPointSize(font.GetPointSize() - 1);
     m_widgetFont = font;
@@ -28,13 +27,18 @@ ControlsGroup::ControlsGroup(wxWindow* parent, wxString const& title, int numRow
     Bind(wxEVT_COLLAPSIBLEPANE_CHANGED, [parent](wxCollapsiblePaneEvent&) { parent->Layout(); });
 }
 
-wxCheckBox* ControlsGroup::AddCheckBox(wxString const& label, bool value)
+wxCheckBox* ControlsGroup::AddCheckBoxWithHeading(wxString const& heading, wxString const& label, bool value)
 {
     wxCheckBox* checkbox = new wxCheckBox(GetPane(), wxID_ANY, label);
     checkbox->SetValue(value);
     checkbox->SetFont(m_widgetFont);
-    AppendControl("", checkbox);
+    AppendControl(heading, checkbox);
     return checkbox;
+}
+
+wxCheckBox* ControlsGroup::AddCheckBox(wxString const& label, bool value)
+{
+    return AddCheckBoxWithHeading("", label, value);
 }
 
 wxButton* ControlsGroup::AddButton(wxString const& label)
@@ -92,8 +96,8 @@ wxSlider* ControlsGroup::AddSliderFloat(wxString const& label, float value, floa
 
 wxBitmapComboBox* ControlsGroup::AddBitmapComboBox(wxString const& label)
 {
-    wxBitmapComboBox* comboBox = new wxBitmapComboBox(GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition,
-                                                      wxDefaultSize, 0, nullptr);
+    wxBitmapComboBox* comboBox
+        = new wxBitmapComboBox(GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, nullptr);
     comboBox->SetCanFocus(false);
     comboBox->SetFont(m_widgetFont);
 

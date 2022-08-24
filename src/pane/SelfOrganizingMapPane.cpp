@@ -35,8 +35,8 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
     auto* comboBox = group->AddBitmapComboBox("Instances");
     auto* widthText = group->AddInputText("Lattice Width");
     auto* heightText = group->AddInputText("Lattice Height");
-    auto* cyclicX = group->AddCheckBox("Cyclic on X", false);
-    auto* cyclicY = group->AddCheckBox("Cyclic on Y", false);
+    auto* cyclicX = group->AddCheckBoxWithHeading("Cyclic", "X", false);
+    auto* cyclicY = group->AddCheckBox("Y", false);
     auto* addBtn = group->AddButton("Add");
 
     wxIntegerValidator<int> validDimen;
