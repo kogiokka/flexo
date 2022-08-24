@@ -261,10 +261,10 @@ void Graphics::CheckProgramStatus(GLuint const program)
 
 std::string Graphics::SlurpShaderSource(std::string const& filename) const
 {
-    std::ifstream file;
+    std::fstream file;
     std::string source;
 
-    file.open(filename.data());
+    file.open(filename, std::fstream::in | std::fstream::binary);
     if (file.fail()) {
         Logger::error("Failed to open shader file: %s", filename.c_str());
     }
