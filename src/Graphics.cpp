@@ -1,4 +1,4 @@
-#include <filesystem>
+#include <cstdlib>
 #include <fstream>
 
 #include "Graphics.hpp"
@@ -263,13 +263,20 @@ std::string Graphics::SlurpShaderSource(std::string const& filename) const
 {
     std::fstream file;
     std::string source;
+    std::size_t size;
 
     file.open(filename, std::fstream::in | std::fstream::binary);
     if (file.fail()) {
         Logger::error("Failed to open shader file: %s", filename.c_str());
     }
-    source.resize(std::filesystem::file_size(filename));
-    file.read(source.data(), source.size());
+
+    file.seekg(0, std::fstream::end);
+    size = file.tellg();
+    file.seekg(0);
+
+    source.resize(size);
+    file.read(source.data(), size);
+
     file.close();
 
     return source;
