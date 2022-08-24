@@ -88,7 +88,7 @@ void SelfOrganizingMapPane::PopulateParametersPanel()
 
     auto* maxIterations = group->AddInputText("Max Iterations");
     auto* initLearnRate = group->AddInputText("Learning Rate");
-    m_sldrNbhdRadius = group->AddSliderFloat("Neighborhood Radius", 0.0f, 0.0f, 0.0f);
+    m_sldrNbhdRadius = group->AddSliderFloat("Neighborhood Radius", 0.0f, 0.0f, 1.0f);
 
     maxIterations->SetValidator(validMaxIter);
     initLearnRate->SetValidator(validLearnRate);
