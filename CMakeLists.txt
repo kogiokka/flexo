@@ -6,7 +6,7 @@ project("SOM Demo"
 )
 
 find_package(OpenGL REQUIRED)
-find_package(wxWidgets 3.1 COMPONENTS gl core aui REQUIRED)
+find_package(wxWidgets 3.1 COMPONENTS base gl core aui REQUIRED)
 find_package(glm REQUIRED)
 include(${wxWidgets_USE_FILE})
 
