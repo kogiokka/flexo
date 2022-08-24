@@ -68,7 +68,7 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
         }
         if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
             LatticeList::Get(m_project).Add(width, height, flags);
-            comboBox->Append(wxString::Format("Lattice.00%lu", LatticeList::Get(m_project).size()),
+            comboBox->Append(wxString::Format("Lattice.00%zu", LatticeList::Get(m_project).size()),
                              wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
         }
     });
