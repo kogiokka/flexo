@@ -17,9 +17,4 @@ namespace Bind
     {
         m_gfx->SetProgramPipeline(m_id);
     }
-
-    GLuint ProgramPipeline::GetId() const
-    {
-        return m_id;
-    }
 }

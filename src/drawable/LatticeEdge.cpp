@@ -27,8 +27,8 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", pipeline->GetId());
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", pipeline->GetId());
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", *pipeline);
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", *pipeline);
     AddBind(pipeline);
     AddBind(vs);
     AddBind(fs);

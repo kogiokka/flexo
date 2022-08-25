@@ -42,8 +42,8 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     m_ub.frag.material.shininess = 256.0f;
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert", pipeline->GetId());
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag", pipeline->GetId());
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert", *pipeline);
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag", *pipeline);
     AddBind(pipeline);
     AddBind(vs);
     AddBind(fs);

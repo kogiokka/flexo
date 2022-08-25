@@ -1,8 +1,10 @@
 #include "bindable/program/FragmentShaderProgram.hpp"
+#include "bindable/program/ProgramPipeline.hpp"
 
 namespace Bind
 {
-    FragmentShaderProgram::FragmentShaderProgram(Graphics& gfx, std::string const& filename, GLuint pipeline)
+    FragmentShaderProgram::FragmentShaderProgram(Graphics& gfx, std::string const& filename,
+                                                 ProgramPipeline const& pipeline)
         : Bindable(gfx)
         , m_pipeline(pipeline)
     {
@@ -16,6 +18,6 @@ namespace Bind
 
     void FragmentShaderProgram::Bind()
     {
-        m_gfx->SetProgramPipelineStages(m_pipeline, GL_FRAGMENT_SHADER_BIT, m_id);
+        m_gfx->SetProgramPipelineStages(m_pipeline.m_id, GL_FRAGMENT_SHADER_BIT, m_id);
     }
 }

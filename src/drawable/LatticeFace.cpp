@@ -41,8 +41,8 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     auto const& [img, w, h, ch] = world.pattern;
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeFace.vert", pipeline->GetId());
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeFace.frag", pipeline->GetId());
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeFace.vert", *pipeline);
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeFace.frag", *pipeline);
 
     AddBind(vs);
     AddBind(fs);

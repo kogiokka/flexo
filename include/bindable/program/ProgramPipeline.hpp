@@ -5,18 +5,22 @@
 
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "bindable/program/FragmentShaderProgram.hpp"
+#include "bindable/program/VertexShaderProgram.hpp"
 
 namespace Bind
 {
     class ProgramPipeline : public Bindable
     {
+        friend VertexShaderProgram;
+        friend FragmentShaderProgram;
+
         GLuint m_id;
 
     public:
         ProgramPipeline(Graphics& gfx);
         ~ProgramPipeline();
         virtual void Bind() override;
-        GLuint GetId() const;
     };
 }
 

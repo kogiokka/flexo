@@ -50,8 +50,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", pipeline->GetId());
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", pipeline->GetId());
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", *pipeline);
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", *pipeline);
     AddBind(pipeline);
     AddBind(vs);
     AddBind(fs);

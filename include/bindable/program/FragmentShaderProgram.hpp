@@ -11,15 +11,18 @@
 
 namespace Bind
 {
+    class ProgramPipeline;
+
     class FragmentShaderProgram : public Bindable
     {
-        GLuint m_id;
-        GLuint m_pipeline;
-
     public:
-        FragmentShaderProgram(Graphics& gfx, std::string const& filename, GLuint pipeline);
+        FragmentShaderProgram(Graphics& gfx, std::string const& filename, ProgramPipeline const& pipeline);
         ~FragmentShaderProgram() override;
         virtual void Bind() override;
+
+    private:
+        GLuint m_id;
+        ProgramPipeline const& m_pipeline;
     };
 }
 

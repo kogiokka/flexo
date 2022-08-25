@@ -5,10 +5,11 @@
 
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
-#include "bindable/program/VertexShaderProgram.hpp"
 
 namespace Bind
 {
+    class VertexShaderProgram;
+
     class InputLayout : public Bindable
     {
         GLuint m_id;

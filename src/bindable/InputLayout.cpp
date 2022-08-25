@@ -1,4 +1,5 @@
 #include "bindable/InputLayout.hpp"
+#include "bindable/program/VertexShaderProgram.hpp"
 
 namespace Bind
 {
@@ -7,7 +8,7 @@ namespace Bind
         : Bindable(gfx)
     {
         m_gfx->CreateInputLayout(m_id, inputElementDesc.data(), inputElementDesc.size(),
-                                 programWithInputSignature->GetId());
+                                 programWithInputSignature->m_id);
     }
 
     InputLayout::~InputLayout()

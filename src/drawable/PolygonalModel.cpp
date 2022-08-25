@@ -40,8 +40,8 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.material.shininess = 32.0f;
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/PolygonalModel.vert", pipeline->GetId());
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/PolygonalModel.frag", pipeline->GetId());
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/PolygonalModel.vert", *pipeline);
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/PolygonalModel.frag", *pipeline);
     AddBind(pipeline);
     AddBind(vs);
     AddBind(fs);

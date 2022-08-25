@@ -8,21 +8,24 @@
 
 #include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
-#include "bindable/program/ProgramPipeline.hpp"
+#include "bindable/InputLayout.hpp"
 
 namespace Bind
 {
+    class ProgramPipeline;
+
     class VertexShaderProgram : public Bindable
     {
-        GLuint m_id;
-        GLuint m_pipeline;
+        friend InputLayout;
 
     public:
-        VertexShaderProgram(Graphics& gfx, std::string const& filename, GLuint pipeline);
+        VertexShaderProgram(Graphics& gfx, std::string const& filename, ProgramPipeline const& pipeline);
         ~VertexShaderProgram() override;
         virtual void Bind() override;
-        void SetPipeline(GLuint pipeline);
-        GLuint GetId() const;
+
+    private:
+        GLuint m_id;
+        ProgramPipeline const& m_pipeline;
     };
 }
 

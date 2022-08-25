@@ -1,8 +1,10 @@
 #include "bindable/program/VertexShaderProgram.hpp"
+#include "bindable/program/ProgramPipeline.hpp"
 
 namespace Bind
 {
-    VertexShaderProgram::VertexShaderProgram(Graphics& gfx, std::string const& filename, GLuint pipeline)
+    VertexShaderProgram::VertexShaderProgram(Graphics& gfx, std::string const& filename,
+                                             ProgramPipeline const& pipeline)
         : Bindable(gfx)
         , m_pipeline(pipeline)
     {
@@ -16,16 +18,6 @@ namespace Bind
 
     void VertexShaderProgram::Bind()
     {
-        m_gfx->SetProgramPipelineStages(m_pipeline, GL_VERTEX_SHADER_BIT, m_id);
-    }
-
-    void VertexShaderProgram::SetPipeline(GLuint pipeline)
-    {
-        m_pipeline = pipeline;
-    }
-
-    GLuint VertexShaderProgram::GetId() const
-    {
-        return m_id;
+        m_gfx->SetProgramPipelineStages(m_pipeline.m_id, GL_VERTEX_SHADER_BIT, m_id);
     }
 }
