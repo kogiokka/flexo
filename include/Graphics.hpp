@@ -1,9 +1,12 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <functional>
+#include <string>
+#include <vector>
+
 #include <glad/glad.h>
 #include <glm/glm.hpp>
-#include <string>
 
 #include "Camera.hpp"
 
@@ -32,6 +35,17 @@ enum class ShaderStage {
     Comp,
 };
 
+enum class FillMode {
+    WireFrame,
+    Solid,
+};
+
+enum class CullMode {
+    None,
+    Front,
+    Back,
+};
+
 struct InputElementDesc {
     GLchar const* semanticName;
     InputFormat format;
@@ -56,8 +70,30 @@ struct Texture2dDesc {
     GLenum dataType;
 };
 
+struct RasterizerDesc {
+    FillMode fillMode;
+    CullMode cullMode;
+};
+
 struct BufferData {
     const void* mem;
+};
+
+class RasterizerState
+{
+    std::vector<std::function<void(void)>> m_ops;
+
+public:
+    void Append(std::function<void(void)> const& op)
+    {
+        m_ops.push_back(op);
+    }
+    void Operate() const
+    {
+        for (auto const& op : m_ops) {
+            op();
+        }
+    }
 };
 
 class Graphics
@@ -86,6 +122,7 @@ public:
     void CreateShaderProgram(GLuint& program);
     void CreateProgramPipeline(GLuint& pipeline);
     void CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename);
+    void CreateRasterizerState(RasterizerDesc const& desc, RasterizerState** ppState);
     void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filename);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
@@ -97,6 +134,7 @@ public:
     void SetShaderProgram(GLuint program);
     void SetProgramPipeline(GLuint pipeline);
     void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
+    void SetRasterizerState(RasterizerState const* state);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 
     void DeleteInputLayout(GLuint& layout);

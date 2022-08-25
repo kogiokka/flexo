@@ -5,6 +5,7 @@
 #include "World.hpp"
 #include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
+#include "bindable/RasterizerState.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
@@ -54,6 +55,7 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 2));
     AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
+    AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
 }
 
 LatticeVertex::~LatticeVertex()

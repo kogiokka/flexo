@@ -75,6 +75,42 @@ void Graphics::CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, 
     CheckProgramStatus(program);
 }
 
+void Graphics::CreateRasterizerState(RasterizerDesc const& desc, RasterizerState** ppState)
+{
+    *ppState = new RasterizerState();
+
+    RasterizerState* pState = *ppState;
+    switch (desc.cullMode) {
+    case CullMode::Back:
+        pState->Append([](void) -> void {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_BACK);
+        });
+        break;
+    case CullMode::Front:
+        pState->Append([](void) -> void {
+            glEnable(GL_CULL_FACE);
+            glCullFace(GL_FRONT);
+        });
+        break;
+    case CullMode::None:
+        pState->Append([](void) -> void {
+            glDisable(GL_CULL_FACE);
+            glCullFace(GL_NONE);
+        });
+        break;
+    };
+
+    switch (desc.fillMode) {
+    case FillMode::WireFrame:
+        pState->Append([](void) -> void { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); });
+        break;
+    case FillMode::Solid:
+        pState->Append([](void) -> void { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
+        break;
+    }
+}
+
 void Graphics::AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filename)
 {
     std::string const& source = SlurpShaderSource(filename);
@@ -146,6 +182,11 @@ void Graphics::SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLui
     glUseProgram(0);
     glBindProgramPipeline(pipeline);
     glUseProgramStages(pipeline, stages, program);
+}
+
+void Graphics::SetRasterizerState(RasterizerState const* state)
+{
+    state->Operate();
 }
 
 void Graphics::Draw(GLsizei vertexCount)

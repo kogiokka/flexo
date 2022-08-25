@@ -3,6 +3,7 @@
 #include "World.hpp"
 #include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
+#include "bindable/RasterizerState.hpp"
 #include "bindable/Texture2D.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
@@ -53,6 +54,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
+    AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
 }
 
 LatticeFace::~LatticeFace()
