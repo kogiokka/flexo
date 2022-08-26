@@ -96,7 +96,6 @@ void Graphics::CreateRasterizerState(RasterizerDesc const& desc, RasterizerState
     case CullMode::None:
         pState->Append([](void) -> void {
             glDisable(GL_CULL_FACE);
-            glCullFace(GL_NONE);
         });
         break;
     };
