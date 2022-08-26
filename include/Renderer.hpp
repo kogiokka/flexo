@@ -30,6 +30,7 @@ public:
     void LoadPolygonalModel();
     void LoadVolumetricModel();
     Camera& GetCamera();
+    std::vector<std::shared_ptr<DrawableBase>> const& GetDrawables() const;
 
 private:
     Graphics m_gfx;

@@ -140,3 +140,8 @@ Camera& Renderer::GetCamera()
 {
     return m_gfx.GetCamera();
 }
+
+std::vector<std::shared_ptr<DrawableBase>> const& Renderer::GetDrawables() const
+{
+    return m_objects;
+}

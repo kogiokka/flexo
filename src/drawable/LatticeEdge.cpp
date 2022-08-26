@@ -25,6 +25,8 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
 
     std::vector<glm::vec3> vertices = mesh.positions;
 
+    m_isVisible = true;
+
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
@@ -49,8 +51,6 @@ LatticeEdge::~LatticeEdge()
 
 void LatticeEdge::Update(Graphics&)
 {
-    m_isVisible = (world.renderFlags & RenderFlag_DrawLattice) && (world.renderFlags & RenderFlag_DrawLatticeEdge);
-
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         {
             Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
@@ -70,4 +70,9 @@ void LatticeEdge::Update(Graphics&)
 glm::mat4 LatticeEdge::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
+}
+
+std::string LatticeEdge::GetName() const
+{
+    return "Lattice Edge";
 }

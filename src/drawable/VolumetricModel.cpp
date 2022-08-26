@@ -34,6 +34,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
         vertices.push_back(v);
     }
 
+    m_isVisible = true;
+
     m_ub.vert.viewPos = gfx.GetCameraPosition();
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -75,8 +77,6 @@ VolumetricModel::~VolumetricModel()
 
 void VolumetricModel::Update(Graphics& gfx)
 {
-    m_isVisible = world.renderFlags & RenderFlag_DrawModel;
-
     m_ub.vert.viewPos = gfx.GetCameraPosition();
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.isWatermarked = world.isWatermarked;
@@ -100,4 +100,9 @@ void VolumetricModel::Update(Graphics& gfx)
 glm::mat4 VolumetricModel::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
+}
+
+std::string VolumetricModel::GetName() const
+{
+    return "Volumetric Model";
 }

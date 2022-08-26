@@ -29,6 +29,8 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
+    m_isVisible = false;
+
     m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
@@ -52,8 +54,6 @@ LightSource::~LightSource()
 
 void LightSource::Update(Graphics&)
 {
-    m_isVisible = world.renderFlags & RenderFlag_DrawLightSource;
-
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (buf != nullptr) {
@@ -66,4 +66,9 @@ void LightSource::Update(Graphics&)
 glm::mat4 LightSource::GetTransformMatrix() const
 {
     return glm::translate(glm::mat4(1.0f), world.lightPos) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
+}
+
+std::string LightSource::GetName() const
+{
+    return "Light";
 }

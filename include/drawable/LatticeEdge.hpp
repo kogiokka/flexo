@@ -27,5 +27,7 @@ public:
     ~LatticeEdge() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
+    std::string GetName() const override;
 };
+
 #endif

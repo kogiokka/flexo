@@ -29,6 +29,8 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
+    m_isVisible = false;
+
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
     m_ub.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
@@ -63,8 +65,6 @@ LatticeFace::~LatticeFace()
 
 void LatticeFace::Update(Graphics& gfx)
 {
-    m_isVisible = (world.renderFlags & RenderFlag_DrawLattice) && (world.renderFlags & RenderFlag_DrawLatticeFace);
-
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
 
@@ -96,4 +96,9 @@ void LatticeFace::Update(Graphics& gfx)
 glm::mat4 LatticeFace::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
+}
+
+std::string LatticeFace::GetName() const
+{
+    return "Lattice Face";
 }

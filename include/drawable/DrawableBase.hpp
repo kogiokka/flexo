@@ -2,6 +2,7 @@
 #define DRAWABLE_BASE_H
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -24,6 +25,15 @@ public:
     virtual glm::mat4 GetTransformMatrix() const = 0;
     virtual void Update(Graphics& gfx) = 0;
     virtual void AddBind(std::shared_ptr<Bind::Bindable> bind) = 0;
+    virtual std::string GetName() const = 0;
+    void SetVisible(bool visible)
+    {
+        m_isVisible = visible;
+    }
+    bool IsVisible() const
+    {
+        return m_isVisible;
+    }
 };
 
 #endif

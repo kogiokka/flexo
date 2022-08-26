@@ -29,6 +29,8 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
         vertices.push_back(v);
     }
 
+    m_isVisible = true;
+
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -61,8 +63,6 @@ PolygonalModel::~PolygonalModel()
 
 void PolygonalModel::Update(Graphics& gfx)
 {
-    m_isVisible = world.renderFlags & RenderFlag_DrawModel;
-
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -79,4 +79,9 @@ void PolygonalModel::Update(Graphics& gfx)
 glm::mat4 PolygonalModel::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
+}
+
+std::string PolygonalModel::GetName() const
+{
+    return "Polygonal Model";
 }

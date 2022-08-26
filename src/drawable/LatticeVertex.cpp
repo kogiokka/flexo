@@ -31,6 +31,8 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
         vertices.push_back(v);
     }
 
+    m_isVisible = true;
+
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = gfx.GetCameraPosition();
@@ -64,8 +66,6 @@ LatticeVertex::~LatticeVertex()
 
 void LatticeVertex::Update(Graphics& gfx)
 {
-    m_isVisible = (world.renderFlags & RenderFlag_DrawLattice) && (world.renderFlags & RenderFlag_DrawLatticeVertex);
-
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = gfx.GetCameraPosition();
@@ -89,4 +89,9 @@ void LatticeVertex::Update(Graphics& gfx)
 glm::mat4 LatticeVertex::GetTransformMatrix() const
 {
     return glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
+}
+
+std::string LatticeVertex::GetName() const
+{
+    return "Lattice Vertex";
 }

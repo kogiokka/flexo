@@ -53,10 +53,16 @@ bool WatermarkingApp::OnInit()
     world.cube = stlImp.ReadFile("res/models/cube.stl");
 
     m_project = std::make_shared<WatermarkingProject>();
-
     auto& project = *m_project;
     auto& window = ProjectWindow::Get(project);
     auto& viewport = SceneViewportPane::Get(project);
+
+    window.Show();
+    window.Maximize();
+    viewport.InitGL();
+    viewport.SetFocus();
+    // After OpenGL has been initialized
+    Renderer::Get(*m_project);
 
     auto& mgr = window.GetPaneManager();
     auto page = window.GetMainPage();
@@ -100,18 +106,7 @@ bool WatermarkingApp::OnInit()
                     .Hide());
     mgr.Update();
 
-    window.Show();
-    window.Maximize();
-    viewport.InitGL();
-
-    // After OpenGL has been initialized
-    Renderer::Get(*m_project);
-    viewport.SetFocus();
-
     wxUpdateUIEvent::SetUpdateInterval(16);
-
-//     m_project->InitializeLattice();
-//     m_project->UpdateLatticeGraphics();
 
     return true;
 }
