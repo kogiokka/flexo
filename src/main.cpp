@@ -127,7 +127,7 @@ void WatermarkingApp::ImportPolygonalModel(wxString const& path)
     }
 
     m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
-    Renderer::Get(*m_project).LoadPolygonalModel(*world.theModel);
+    Renderer::Get(*m_project).LoadPolygonalModel();
     Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(world.theModel->positions));
 }
 
@@ -332,7 +332,7 @@ void WatermarkingApp::OnMenuAddModel(wxCommandEvent& event)
 
     world.theModel = std::make_shared<Mesh>(mesh);
     m_project->SetDataset(std::make_shared<InputData>(mesh.positions));
-    Renderer::Get(*m_project).LoadPolygonalModel(*world.theModel);
+    Renderer::Get(*m_project).LoadPolygonalModel();
     Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(mesh.positions));
 }
 

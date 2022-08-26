@@ -29,43 +29,15 @@ Renderer const& Renderer::Get(WatermarkingProject const& project)
 
 Renderer::Renderer(int width, int height)
     : m_gfx(width, height)
-    , m_polyModel(nullptr)
-    , m_lightSource(nullptr)
-    , m_volModel(nullptr)
-    , m_latticeVert(nullptr)
-    , m_latticeEdge(nullptr)
-    , m_latticeFace(nullptr)
 {
-    m_lightSource = std::make_unique<LightSource>(m_gfx, world.uvsphere);
+    m_objects.push_back(std::make_shared<LightSource>(m_gfx, world.uvsphere));
 }
 
 void Renderer::Render()
 {
-    if (world.theModel) {
-        if (world.theModel->HasNormals()) { // FIXME Is this reliable?
-            m_polyModel->Update(m_gfx);
-            m_polyModel->Draw(m_gfx);
-        } else {
-            m_volModel->Update(m_gfx);
-            m_volModel->Draw(m_gfx);
-        }
-    }
-
-    if (m_latticeVert) {
-        m_latticeVert->Update(m_gfx);
-        m_latticeVert->Draw(m_gfx);
-    }
-    if (m_lightSource) {
-        m_lightSource->Update(m_gfx);
-        m_lightSource->Draw(m_gfx);
-    }
-    if (m_latticeEdge) {
-        m_latticeEdge->Update(m_gfx);
-        m_latticeEdge->Draw(m_gfx);
-    }
-    if (m_latticeFace) {
-        m_latticeFace->Update(m_gfx);
-        m_latticeFace->Draw(m_gfx);
+    for (auto const& obj : m_objects) {
+        obj->Update(m_gfx);
+        obj->Draw(m_gfx);
     }
 }
 
@@ -91,21 +63,77 @@ void Renderer::SetCameraView(BoundingBox const& box)
     camera.volumeSize = size;
 }
 
-void Renderer::LoadPolygonalModel(Mesh const& mesh)
-{
-    m_polyModel = std::make_unique<PolygonalModel>(m_gfx, mesh);
-}
-
 void Renderer::LoadLattice()
 {
-    m_latticeVert = std::make_unique<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
-    m_latticeEdge = std::make_unique<LatticeEdge>(m_gfx, world.neurons);
-    m_latticeFace = std::make_unique<LatticeFace>(m_gfx, world.latticeMesh);
+    LatticeVertex* vert = nullptr;
+    LatticeEdge* edge = nullptr;
+    LatticeFace* face = nullptr;
+
+    for (auto& obj : m_objects) {
+        vert = dynamic_cast<LatticeVertex*>(obj.get());
+        edge = dynamic_cast<LatticeEdge*>(obj.get());
+        face = dynamic_cast<LatticeFace*>(obj.get());
+        if (vert) {
+            obj = std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
+        }
+        if (edge) {
+            obj = std::make_shared<LatticeEdge>(m_gfx, world.neurons);
+        }
+        if (face) {
+            obj = std::make_shared<LatticeFace>(m_gfx, world.latticeMesh);
+        }
+    }
+
+    // These three drawables exist at the same time
+    if (!vert && !edge && !face) {
+        m_objects.push_back(std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons));
+        m_objects.push_back(std::make_shared<LatticeEdge>(m_gfx, world.neurons));
+        m_objects.push_back(std::make_shared<LatticeFace>(m_gfx, world.latticeMesh));
+    }
+}
+
+void Renderer::LoadPolygonalModel()
+{
+    for (auto& obj : m_objects) {
+        {
+            // Replace it with polygonal model
+            VolumetricModel* model = dynamic_cast<VolumetricModel*>(obj.get());
+            if (model) {
+                obj = std::make_shared<PolygonalModel>(m_gfx, *world.theModel);
+                return;
+            }
+        }
+        {
+            PolygonalModel* model = dynamic_cast<PolygonalModel*>(obj.get());
+            if (model) {
+                obj = std::make_shared<PolygonalModel>(m_gfx, *world.theModel);
+                return;
+            }
+        }
+    }
+    m_objects.push_back(std::make_shared<PolygonalModel>(m_gfx, *world.theModel));
 }
 
 void Renderer::LoadVolumetricModel()
 {
-    m_volModel = std::make_unique<VolumetricModel>(m_gfx, world.cube, *world.theModel);
+    for (auto& obj : m_objects) {
+        {
+            VolumetricModel* model = dynamic_cast<VolumetricModel*>(obj.get());
+            if (model) {
+                obj = std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel);
+                return;
+            }
+        }
+        {
+            // Replace it with volumetric model
+            PolygonalModel* model = dynamic_cast<PolygonalModel*>(obj.get());
+            if (model) {
+                obj = std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel);
+                return;
+            }
+        }
+    }
+    m_objects.push_back(std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel));
 }
 
 Camera& Renderer::GetCamera()

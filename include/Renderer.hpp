@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include <memory>
+#include <vector>
 
 #include "Attachable.hpp"
 #include "Graphics.hpp"
@@ -25,20 +26,14 @@ public:
     Renderer(int width, int height);
     void Render();
     void SetCameraView(BoundingBox const& box);
-    void LoadPolygonalModel(Mesh const& mesh);
     void LoadLattice();
+    void LoadPolygonalModel();
     void LoadVolumetricModel();
     Camera& GetCamera();
 
 private:
     Graphics m_gfx;
-
-    std::unique_ptr<PolygonalModel> m_polyModel;
-    std::unique_ptr<LightSource> m_lightSource;
-    std::unique_ptr<VolumetricModel> m_volModel;
-    std::unique_ptr<LatticeVertex> m_latticeVert;
-    std::unique_ptr<LatticeEdge> m_latticeEdge;
-    std::unique_ptr<LatticeFace> m_latticeFace;
+    std::vector<std::shared_ptr<DrawableBase>> m_objects;
 };
 
 #endif
