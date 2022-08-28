@@ -181,6 +181,14 @@ void WatermarkingProject::DoWatermark()
     world.isWatermarked = true;
 }
 
+void WatermarkingProject::UpdateDatasetGraphics()
+{
+    BuildLatticeMesh();
+
+    Renderer::Get(*this).LoadLattice();
+}
+
+
 void WatermarkingProject::UpdateLatticeGraphics()
 {
     // TODO: Better solution

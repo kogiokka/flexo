@@ -341,3 +341,14 @@ void WatermarkingApp::OnMenuImportModel(wxCommandEvent& event)
         ImportPolygonalModel(filepath);
     }
 }
+
+wxString WatermarkingApp::CreateDatasetLabel(std::string const& name, unsigned int id) const
+{
+    if (id == 0) {
+        return wxString(name);
+    }
+
+    std::ostringstream uniqNameStream;
+    uniqNameStream << name << "." << std::setw(3) << std::setfill('0') << id;
+    return wxString(uniqNameStream.str());
+}

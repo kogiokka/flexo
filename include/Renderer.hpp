@@ -3,7 +3,6 @@
 
 #include <memory>
 #include <string>
-#include <unordered_map>
 #include <vector>
 
 #include "Attachable.hpp"
@@ -16,11 +15,6 @@
 #include "drawable/LightSource.hpp"
 #include "drawable/PolygonalModel.hpp"
 #include "drawable/VolumetricModel.hpp"
-
-struct SceneObject {
-    int mId;
-    std::weak_ptr<DrawableBase> mDrawable;
-};
 
 class WatermarkingProject;
 
@@ -41,7 +35,7 @@ public:
 
 private:
     Graphics m_gfx;
-    std::unordered_map<std::string, std::shared_ptr<DrawableBase>> m_objects;
+    std::unordered_map<std::string, std::vector<std::shared_ptr<DrawableBase>>> m_objects;
 };
 
 #endif

@@ -30,14 +30,16 @@ Renderer const& Renderer::Get(WatermarkingProject const& project)
 Renderer::Renderer(int width, int height)
     : m_gfx(width, height)
 {
-    m_objects.push_back(std::make_shared<LightSource>(m_gfx, world.uvsphere));
+    m_objects["Light"].push_back(std::make_shared<LightSource>(m_gfx, world.uvsphere));
 }
 
 void Renderer::Render()
 {
-    for (auto const& obj : m_objects) {
-        obj->Update(m_gfx);
-        obj->Draw(m_gfx);
+    for (auto const& [name, objs] : m_objects) {
+        for (auto const& obj : objs) {
+            obj->Update(m_gfx);
+            obj->Draw(m_gfx);
+        }
     }
 }
 
@@ -69,26 +71,26 @@ void Renderer::LoadLattice()
     LatticeEdge* edge = nullptr;
     LatticeFace* face = nullptr;
 
-    for (auto& [name, obj] : m_objects) {
-        vert = dynamic_cast<LatticeVertex*>(obj.get());
-        edge = dynamic_cast<LatticeEdge*>(obj.get());
-        face = dynamic_cast<LatticeFace*>(obj.get());
+    for (auto& [name, objs] : m_objects) {
+        vert = dynamic_cast<LatticeVertex*>(objs.front().get());
+        edge = dynamic_cast<LatticeEdge*>(objs.front().get());
+        face = dynamic_cast<LatticeFace*>(objs.front().get());
         if (vert) {
-            obj = std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
+            objs.front() = std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
         }
         if (edge) {
-            obj = std::make_shared<LatticeEdge>(m_gfx, world.neurons);
+            objs.front() = std::make_shared<LatticeEdge>(m_gfx, world.neurons);
         }
         if (face) {
-            obj = std::make_shared<LatticeFace>(m_gfx, world.latticeMesh);
+            objs.front() = std::make_shared<LatticeFace>(m_gfx, world.latticeMesh);
         }
     }
 
     // These three drawables exist at the same time
     if (!vert && !edge && !face) {
-        m_objects["Lattice Vertex"] = std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
-        m_objects["Lattice Edge"] = std::make_shared<LatticeEdge>(m_gfx, world.neurons);
-        m_objects["Lattice Face"] = std::make_shared<LatticeFace>(m_gfx, world.latticeMesh);
+        m_objects.push_back(std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons));
+        m_objects.push_back(std::make_shared<LatticeEdge>(m_gfx, world.neurons));
+        m_objects.push_back(std::make_shared<LatticeFace>(m_gfx, world.latticeMesh));
     }
 }
 
@@ -107,7 +109,7 @@ Camera& Renderer::GetCamera()
     return m_gfx.GetCamera();
 }
 
-std::vector<std::shared_ptr<DrawableBase>> const& Renderer::GetDrawables() const
+std::unordered_map<std::string, std::vector<std::shared_ptr<DrawableBase>>> const& Renderer::GetDrawables() const
 {
     return m_objects;
 }

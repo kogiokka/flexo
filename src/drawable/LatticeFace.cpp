@@ -12,8 +12,11 @@
 #include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
 
-LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
+LatticeFace::LatticeFace(Graphics& gfx, std::string const& name, Mesh const& mesh)
+    : Drawable()
 {
+    m_name = name;
+
     std::vector<InputElementDesc> inputs = {
         { "position", InputFormat::Float3, 0, offsetof(VertexPNT, position), InputClassification::PerVertex, 0 },
         { "normal", InputFormat::Float3, 0, offsetof(VertexPNT, normal), InputClassification::PerVertex, 0 },
@@ -96,9 +99,4 @@ void LatticeFace::Update(Graphics& gfx)
 glm::mat4 LatticeFace::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
-}
-
-std::string LatticeFace::GetName() const
-{
-    return "Lattice Face";
 }

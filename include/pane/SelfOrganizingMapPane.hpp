@@ -1,6 +1,7 @@
 #ifndef SELF_ORGANIZING_MAP_PANE_H
 #define SELF_ORGANIZING_MAP_PANE_H
 
+#include <wx/bmpcbox.h>
 #include <wx/button.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
@@ -16,6 +17,7 @@ class SelfOrganizingMapPane : public ControlsPaneBase
     wxButton* m_btnStop;
     wxButton* m_btnRun;
     wxSlider* m_sldrNbhdRadius;
+    wxBitmapComboBox* m_datasetComboBox;
     bool m_isStopped;
 
 public:

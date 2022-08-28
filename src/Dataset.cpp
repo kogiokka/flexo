@@ -2,6 +2,8 @@
 #include "Project.hpp"
 #include "RandomRealNumber.hpp"
 
+wxDEFINE_EVENT(EVT_ADD_DATASET, wxCommandEvent);
+
 Dataset::Dataset()
     : m_pos()
     , m_rng()
@@ -42,6 +44,9 @@ DatasetList::DatasetList(WatermarkingProject& project)
 void DatasetList::Add(std::vector<glm::vec3> const& positions)
 {
     emplace_back(std::make_shared<Dataset>(positions));
+
+    wxCommandEvent event(EVT_ADD_DATASET);
+    m_project.ProcessEvent(event);
 }
 
 void DatasetList::SetCurrent(unsigned int index)

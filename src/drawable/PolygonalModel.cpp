@@ -80,10 +80,3 @@ glm::mat4 PolygonalModel::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
 }
-
-std::string PolygonalModel::GetName() const
-{
-    return "Polygonal Model";
-}
-
-

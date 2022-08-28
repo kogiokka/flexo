@@ -1,3 +1,6 @@
+#include <iomanip>
+#include <sstream>
+
 #include <wx/checkbox.h>
 #include <wx/clntdata.h>
 #include <wx/sizer.h>
@@ -14,28 +17,24 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     m_sceneTree = CreateSceneTree();
     GetSizer()->Add(m_sceneTree, wxSizerFlags(5).Expand());
 
-    Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent&) {
-        m_sceneTree->DeleteAllItems();
-        for (auto const& drawable : Renderer::Get(m_project).GetDrawables()) {
-            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetName());
-            m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
-        }
-    });
+    Bind(wxEVT_UPDATE_UI, &SceneOutlinerPane::OnUpdateUI, this);
 
     m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CHECKED, [this](wxTreeListEvent& event) {
         wxTreeListItem const item = event.GetItem();
         wxString const text = m_sceneTree->GetItemText(item);
-        for (auto& drawable : Renderer::Get(m_project).GetDrawables()) {
-            if (text == drawable->GetName()) {
-                switch (m_sceneTree->GetCheckedState(item)) {
-                case wxCHK_CHECKED:
-                    drawable->SetVisible(true);
-                    break;
-                case wxCHK_UNCHECKED:
-                    drawable->SetVisible(false);
-                    break;
-                default:
-                    break;
+        for (auto& [name, objs] : Renderer::Get(m_project).GetDrawables()) {
+            for (unsigned int i = 0; i < objs.size(); i++) {
+                if (text == CreateItemText(name, i)) {
+                    switch (m_sceneTree->GetCheckedState(item)) {
+                    case wxCHK_CHECKED:
+                        objs[i]->SetVisible(true);
+                        break;
+                    case wxCHK_UNCHECKED:
+                        objs[i]->SetVisible(false);
+                        break;
+                    default:
+                        break;
+                    }
                 }
             }
         }
@@ -60,4 +59,15 @@ wxTreeListCtrl* SceneOutlinerPane::CreateSceneTree()
     sceneTree->SetFont(font);
 
     return sceneTree;
+}
+
+void SceneOutlinerPane::OnUpdateUI(wxUpdateUIEvent&)
+{
+    m_sceneTree->DeleteAllItems();
+    for (auto const& [name, objs] : Renderer::Get(m_project).GetDrawables()) {
+        for (unsigned int i = 0; i < objs.size(); i++) {
+            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), CreateItemText(name, i));
+            m_sceneTree->CheckItem(item, objs[i]->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
+        }
+    }
 }

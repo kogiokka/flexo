@@ -23,11 +23,10 @@ class LatticeEdge : public IndexedDrawable
     UniformBlock m_ub;
 
 public:
-    LatticeEdge(Graphics& gfx, Mesh const& mesh);
+    LatticeEdge(Graphics& gfx, std::string const& name, Mesh const& mesh);
     ~LatticeEdge() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
-    std::string GetName() const override;
 };
 
 #endif

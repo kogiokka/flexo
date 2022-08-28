@@ -4,10 +4,14 @@
 #include <memory>
 #include <vector>
 
+#include <wx/event.h>
+
 #include <glm/glm.hpp>
 
 #include "Attachable.hpp"
 #include "RandomIntNumber.hpp"
+
+wxDECLARE_EVENT(EVT_ADD_DATASET, wxCommandEvent);
 
 class Dataset
 {

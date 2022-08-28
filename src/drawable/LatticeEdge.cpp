@@ -16,9 +16,11 @@
 #include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeEdge.hpp"
 
-LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
+LatticeEdge::LatticeEdge(Graphics& gfx, std::string const& name, Mesh const& mesh)
     : m_ub {}
 {
+    m_name = name;
+
     std::vector<InputElementDesc> inputs = {
         { "position", InputFormat::Float3, 0, 0, InputClassification::PerVertex, 0 },
     };
@@ -70,9 +72,4 @@ void LatticeEdge::Update(Graphics&)
 glm::mat4 LatticeEdge::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
-}
-
-std::string LatticeEdge::GetName() const
-{
-    return "Lattice Edge";
 }

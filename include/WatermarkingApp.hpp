@@ -25,6 +25,8 @@ public:
     void OnMenuImportModel(wxCommandEvent& event);
 
 private:
+    wxString CreateDatasetLabel(std::string const& name, unsigned int id) const
+
     wxDECLARE_EVENT_TABLE();
 };
 

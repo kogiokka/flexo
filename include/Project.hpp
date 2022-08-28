@@ -32,6 +32,7 @@ public:
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
     void OnLatticeDimensionsChanged(wxCommandEvent& event);
+    void UpdateDatasetGraphics();
     void UpdateLatticeGraphics();
 
 private:

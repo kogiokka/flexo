@@ -14,9 +14,11 @@
 #include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeVertex.hpp"
 
-LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
+LatticeVertex::LatticeVertex(Graphics& gfx, std::string const& name, Mesh const& instanceMesh, Mesh const& perInstanceData)
     : m_ub {}
 {
+    m_name = name;
+
     std::vector<InputElementDesc> inputs = {
         { "position", InputFormat::Float3, 0, offsetof(VertexPN, position), InputClassification::PerVertex, 0 },
         { "normal", InputFormat::Float3, 0, offsetof(VertexPN, normal), InputClassification::PerVertex, 0 },
@@ -89,9 +91,4 @@ void LatticeVertex::Update(Graphics& gfx)
 glm::mat4 LatticeVertex::GetTransformMatrix() const
 {
     return glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
-}
-
-std::string LatticeVertex::GetName() const
-{
-    return "Lattice Vertex";
 }

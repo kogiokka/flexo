@@ -1,6 +1,8 @@
 #ifndef SCENE_OUTLINER_PANE_H
 #define SCENE_OUTLINER_PANE_H
 
+#include <string>
+
 #include <wx/treelist.h>
 
 #include "pane/ControlsPaneBase.hpp"
@@ -12,6 +14,8 @@ public:
 
 private:
     wxTreeListCtrl* CreateSceneTree();
+    void OnUpdateUI(wxUpdateUIEvent& event);
+    wxString CreateItemText(std::string const& name, unsigned int id) const;
 
     wxTreeListCtrl* m_sceneTree;
 };

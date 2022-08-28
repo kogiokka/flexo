@@ -36,11 +36,10 @@ class LatticeFace : public Drawable
     UniformBlock m_ub;
 
 public:
-    LatticeFace(Graphics& gfx, Mesh const& mesh);
+    LatticeFace(Graphics& gfx, std::string const& name, Mesh const& mesh);
     ~LatticeFace() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;
-    std::string GetName() const override;
 };
 
 #endif

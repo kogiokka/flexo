@@ -14,6 +14,7 @@ class DrawableBase
 {
 protected:
     bool m_isVisible;
+    std::string m_name;
     std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
 
 public:
@@ -33,6 +34,14 @@ public:
     bool IsVisible() const
     {
         return m_isVisible;
+    }
+    void SetName(std::string const& name)
+    {
+        m_name = name;
+    }
+    std::string GetName() const
+    {
+        return m_name;
     }
 };
 

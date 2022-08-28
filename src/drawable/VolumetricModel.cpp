@@ -101,8 +101,3 @@ glm::mat4 VolumetricModel::GetTransformMatrix() const
 {
     return glm::mat4(1.0f);
 }
-
-std::string VolumetricModel::GetName() const
-{
-    return "Volumetric Model";
-}

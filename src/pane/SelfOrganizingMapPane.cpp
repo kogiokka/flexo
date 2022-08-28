@@ -1,3 +1,6 @@
+#include <iomanip>
+#include <sstream>
+
 #include <wx/artprov.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
@@ -8,6 +11,7 @@
 #include <wx/valnum.h>
 
 #include "Project.hpp"
+#include "Renderer.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
@@ -16,11 +20,17 @@ SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProje
     : ControlsPaneBase(parent, project)
 {
     PopulateLatticePanel();
+    PopulateDatasetPanel();
     PopulateParametersPanel();
     PopulateDisplayPanel();
     PopulateControlPanel();
 
     m_isStopped = true;
+
+    m_project.Bind(EVT_ADD_DATASET, [this](wxCommandEvent& event) {
+        m_datasetComboBox->Append(event.GetString(),
+                                  wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
+    });
 }
 
 bool SelfOrganizingMapPane::IsProjectStopped() const
@@ -80,8 +90,9 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
 void SelfOrganizingMapPane::PopulateDatasetPanel()
 {
     auto* group = AddGroup("Dataset", 1);
-    auto* comboBox = group->AddBitmapComboBox("Instances");
-    comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
+    m_datasetComboBox = group->AddBitmapComboBox("Instances");
+    m_datasetComboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
+        DatasetList::Get(m_project).SetCurrent(event.GetSelection());
     });
 }
 
