@@ -45,7 +45,7 @@ SelfOrganizingMap::~SelfOrganizingMap()
     StopWorker();
 }
 
-void SelfOrganizingMap::CreateProcedure(Lattice& lattice, std::shared_ptr<InputData> dataset)
+void SelfOrganizingMap::CreateProcedure(Lattice& lattice, Dataset& dataset)
 {
     {
         StopWorker();
@@ -62,13 +62,13 @@ void SelfOrganizingMap::CreateProcedure(Lattice& lattice, std::shared_ptr<InputD
     m_rate = m_initialRate;
     m_neighborhood = m_initialNeighborhood;
 
-    void (SelfOrganizingMap::*Train)(Lattice&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
-    m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
+    void (SelfOrganizingMap::*Train)(Lattice&, Dataset&) = &SelfOrganizingMap::Train;
+    m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), std::ref(dataset));
 
     Logger::info("Training worker created");
 }
 
-void SelfOrganizingMap::Train(Lattice& lattice, std::shared_ptr<InputData> dataset)
+void SelfOrganizingMap::Train(Lattice& lattice, Dataset& dataset)
 {
     auto& neurons = lattice.mNeurons;
     int const width = lattice.mWidth;
@@ -81,7 +81,7 @@ void SelfOrganizingMap::Train(Lattice& lattice, std::shared_ptr<InputData> datas
             break;
         }
 
-        glm::vec3 const input = dataset->GetInput();
+        glm::vec3 const input = dataset.GetInput();
         float const progress = static_cast<float>(m_iterations);
 
         float const remains = static_cast<float>(m_maxIterations - m_iterations);

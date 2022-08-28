@@ -8,7 +8,6 @@
 #include <wx/weakref.h>
 
 #include "Attachable.hpp"
-#include "InputData.hpp"
 #include "Lattice.hpp"
 #include "ProjectSettings.hpp"
 #include "SelfOrganizingMap.hpp"
@@ -29,7 +28,6 @@ public:
     void StopProject();
     void BuildLatticeMesh() const;
     void DoWatermark();
-    void SetDataset(std::shared_ptr<InputData> dataset);
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
@@ -40,7 +38,6 @@ private:
     bool m_isLatticeReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-    std::shared_ptr<InputData> m_dataset;
 
     void UpdateLatticeEdges() const;
 };

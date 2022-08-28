@@ -7,6 +7,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "Dataset.hpp"
 #include "Mesh.hpp"
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
@@ -121,8 +122,8 @@ void WatermarkingApp::ImportPolygonalModel(wxString const& path)
         world.theModel = std::make_shared<Mesh>(stlImp.ReadFile(path.ToStdString()));
     }
 
-    m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
-    Renderer::Get(*m_project).LoadPolygonalModel();
+    DatasetList::Get(*m_project).Add(world.theModel->positions);
+    Renderer::Get(*m_project).SubmitPolygonalModel(*world.theModel);
     Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(world.theModel->positions));
 }
 
@@ -190,8 +191,8 @@ void WatermarkingApp::ImportVolumetricModel(wxString const& path)
     texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
     Logger::info("%lu voxels will be rendered.", pos.size());
 
-    m_project->SetDataset(std::make_shared<InputData>(pos));
-    Renderer::Get(*m_project).LoadVolumetricModel();
+    DatasetList::Get(*m_project).Add(pos);
+    Renderer::Get(*m_project).SubmitVolumetricModel(world.cube, *world.theModel);
     Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(world.theModel->positions));
 }
 
@@ -326,8 +327,8 @@ void WatermarkingApp::OnMenuAddModel(wxCommandEvent& event)
     }
 
     world.theModel = std::make_shared<Mesh>(mesh);
-    m_project->SetDataset(std::make_shared<InputData>(mesh.positions));
-    Renderer::Get(*m_project).LoadPolygonalModel();
+    DatasetList::Get(*m_project).Add(mesh.positions);
+    Renderer::Get(*m_project).SubmitPolygonalModel(*world.theModel);
     Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(mesh.positions));
 }
 

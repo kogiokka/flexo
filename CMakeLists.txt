@@ -54,7 +54,7 @@ PRIVATE
     "src/Node.cpp"
     "src/Util.cpp"
     "src/World.cpp"
-    "src/InputData.cpp"
+    "src/Dataset.cpp"
     "src/VolumeData.cpp"
     "src/Image.cpp"
     "src/common/Logger.cpp"

@@ -69,7 +69,7 @@ void Renderer::LoadLattice()
     LatticeEdge* edge = nullptr;
     LatticeFace* face = nullptr;
 
-    for (auto& obj : m_objects) {
+    for (auto& [name, obj] : m_objects) {
         vert = dynamic_cast<LatticeVertex*>(obj.get());
         edge = dynamic_cast<LatticeEdge*>(obj.get());
         face = dynamic_cast<LatticeFace*>(obj.get());
@@ -86,54 +86,20 @@ void Renderer::LoadLattice()
 
     // These three drawables exist at the same time
     if (!vert && !edge && !face) {
-        m_objects.push_back(std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons));
-        m_objects.push_back(std::make_shared<LatticeEdge>(m_gfx, world.neurons));
-        m_objects.push_back(std::make_shared<LatticeFace>(m_gfx, world.latticeMesh));
+        m_objects["Lattice Vertex"] = std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
+        m_objects["Lattice Edge"] = std::make_shared<LatticeEdge>(m_gfx, world.neurons);
+        m_objects["Lattice Face"] = std::make_shared<LatticeFace>(m_gfx, world.latticeMesh);
     }
 }
 
-void Renderer::LoadPolygonalModel()
+void Renderer::SubmitPolygonalModel(Mesh const& mesh)
 {
-    for (auto& obj : m_objects) {
-        {
-            // Replace it with polygonal model
-            VolumetricModel* model = dynamic_cast<VolumetricModel*>(obj.get());
-            if (model) {
-                obj = std::make_shared<PolygonalModel>(m_gfx, *world.theModel);
-                return;
-            }
-        }
-        {
-            PolygonalModel* model = dynamic_cast<PolygonalModel*>(obj.get());
-            if (model) {
-                obj = std::make_shared<PolygonalModel>(m_gfx, *world.theModel);
-                return;
-            }
-        }
-    }
-    m_objects.push_back(std::make_shared<PolygonalModel>(m_gfx, *world.theModel));
+    m_objects.push_back(std::make_shared<PolygonalModel>(m_gfx, mesh));
 }
 
-void Renderer::LoadVolumetricModel()
+void Renderer::SubmitVolumetricModel(Mesh const& instanceMesh, Mesh const& perInstanceData)
 {
-    for (auto& obj : m_objects) {
-        {
-            VolumetricModel* model = dynamic_cast<VolumetricModel*>(obj.get());
-            if (model) {
-                obj = std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel);
-                return;
-            }
-        }
-        {
-            // Replace it with volumetric model
-            PolygonalModel* model = dynamic_cast<PolygonalModel*>(obj.get());
-            if (model) {
-                obj = std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel);
-                return;
-            }
-        }
-    }
-    m_objects.push_back(std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel));
+    m_objects.push_back(std::make_shared<VolumetricModel>(m_gfx, instanceMesh, perInstanceData));
 }
 
 Camera& Renderer::GetCamera()

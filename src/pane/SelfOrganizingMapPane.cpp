@@ -77,6 +77,14 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
                 [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
 }
 
+void SelfOrganizingMapPane::PopulateDatasetPanel()
+{
+    auto* group = AddGroup("Dataset", 1);
+    auto* comboBox = group->AddBitmapComboBox("Instances");
+    comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
+    });
+}
+
 void SelfOrganizingMapPane::PopulateParametersPanel()
 {
     auto* group = AddGroup("Hyperparameters", 3);

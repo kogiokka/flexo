@@ -24,6 +24,7 @@ public:
 
 private:
     void PopulateLatticePanel();
+    void PopulateDatasetPanel();
     void PopulateParametersPanel();
     void PopulateDisplayPanel();
     void PopulateControlPanel();

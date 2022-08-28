@@ -13,6 +13,7 @@
 
 class Drawable : public DrawableBase
 {
+    int m_id;
     Bind::VertexBuffer const* m_buffer;
 
 public:

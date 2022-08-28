@@ -1,5 +1,6 @@
 #include <glm/glm.hpp>
 
+#include "Dataset.hpp"
 #include "Project.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
@@ -12,15 +13,13 @@ WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)
     , m_frame {}
     , m_panel {}
-    , m_dataset(nullptr)
 {
 }
 
 void WatermarkingProject::CreateProject()
 {
-    assert(m_dataset);
-
-    SelfOrganizingMap::Get(*this).CreateProcedure(*LatticeList::Get(*this).GetCurrent(), m_dataset);
+    SelfOrganizingMap::Get(*this).CreateProcedure(*LatticeList::Get(*this).GetCurrent(),
+                                                  *DatasetList::Get(*this).GetCurrent());
 
     world.isWatermarked = false;
 }
@@ -140,11 +139,6 @@ void WatermarkingProject::UpdateLatticeEdges() const
     }
 
     world.latticeEdges = indices;
-}
-
-void WatermarkingProject::SetDataset(std::shared_ptr<InputData> dataset)
-{
-    m_dataset = dataset;
 }
 
 void WatermarkingProject::SetFrame(wxFrame* frame)

@@ -10,7 +10,7 @@
 #include <wx/event.h>
 
 #include "Attachable.hpp"
-#include "InputData.hpp"
+#include "Dataset.hpp"
 #include "Lattice.hpp"
 
 class WatermarkingProject;
@@ -37,7 +37,7 @@ public:
     ~SelfOrganizingMap();
     SelfOrganizingMap(SelfOrganizingMap const&) = delete;
     SelfOrganizingMap& operator=(SelfOrganizingMap const&) = delete;
-    void CreateProcedure(Lattice& lattice, std::shared_ptr<InputData> dataset);
+    void CreateProcedure(Lattice& lattice, Dataset& dataset);
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
@@ -53,7 +53,7 @@ public:
     float GetLearningRate() const;
 
 private:
-    void Train(Lattice& lattice, std::shared_ptr<InputData> dataset);
+    void Train(Lattice& lattice, Dataset& dataset);
     glm::ivec2 FindBMU(Lattice const& lattice, glm::vec3 const& input) const;
     void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius);
 
