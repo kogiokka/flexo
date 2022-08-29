@@ -13,8 +13,6 @@
 #include "ProjectSettings.hpp"
 #include "SelfOrganizingMap.hpp"
 
-wxDECLARE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
-
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;
 

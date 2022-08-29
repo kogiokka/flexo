@@ -5,9 +5,6 @@
 #include "World.hpp"
 #include "common/Logger.hpp"
 
-wxDEFINE_EVENT(EVT_LATTICE_MESH_READY, wxCommandEvent);
-wxDEFINE_EVENT(EVT_NEIGHBORHOOD_RADIUS_PRESET, wxCommandEvent);
-
 WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)
     , m_frame {}
