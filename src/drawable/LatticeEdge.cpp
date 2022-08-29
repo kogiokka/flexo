@@ -16,7 +16,7 @@
 #include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeEdge.hpp"
 
-LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
+LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices)
     : m_ub {}
 {
     std::vector<InputElementDesc> inputs = {
@@ -39,7 +39,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh)
     AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<Bind::IndexBuffer>(gfx, world.latticeEdges));
+    AddBind(std::make_shared<Bind::IndexBuffer>(gfx, indices));
     AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
     AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));

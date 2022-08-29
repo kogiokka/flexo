@@ -19,7 +19,6 @@ public:
     virtual void OnUnhandledException() override;
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
-    BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
 
     void OnMenuAddModel(wxCommandEvent& event);
     void OnMenuImportModel(wxCommandEvent& event);

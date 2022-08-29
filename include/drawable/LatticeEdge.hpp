@@ -1,7 +1,7 @@
 #ifndef LATTICE_EDGE_H
 #define LATTICE_EDGE_H
 
-#include <memory>
+#include <vector>
 
 #include <glm/glm.hpp>
 
@@ -23,7 +23,7 @@ class LatticeEdge : public IndexedDrawable
     UniformBlock m_ub;
 
 public:
-    LatticeEdge(Graphics& gfx, Mesh const& mesh);
+    LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices);
     ~LatticeEdge() override;
     void Update(Graphics& gfx) override;
     glm::mat4 GetTransformMatrix() const override;

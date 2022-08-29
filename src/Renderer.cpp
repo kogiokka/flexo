@@ -63,7 +63,8 @@ void Renderer::SetCameraView(BoundingBox const& box)
     camera.volumeSize = size;
 }
 
-void Renderer::LoadLattice()
+void Renderer::LoadLattice(Mesh const& vertexMesh, Mesh const& perVertexData, Mesh const& latticeMesh,
+                           std::vector<unsigned int> const& indices)
 {
     LatticeVertex* vert = nullptr;
     LatticeEdge* edge = nullptr;
@@ -74,53 +75,57 @@ void Renderer::LoadLattice()
         edge = dynamic_cast<LatticeEdge*>(obj.get());
         face = dynamic_cast<LatticeFace*>(obj.get());
         if (vert) {
-            obj = std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons);
+            obj = std::make_shared<LatticeVertex>(m_gfx, vertexMesh, perVertexData);
         }
         if (edge) {
-            obj = std::make_shared<LatticeEdge>(m_gfx, world.neurons);
+            obj = std::make_shared<LatticeEdge>(m_gfx, perVertexData, indices);
         }
         if (face) {
-            obj = std::make_shared<LatticeFace>(m_gfx, world.latticeMesh);
+            obj = std::make_shared<LatticeFace>(m_gfx, latticeMesh);
         }
     }
 
     // These three drawables exist at the same time
     if (!vert && !edge && !face) {
-        m_objects.push_back(std::make_shared<LatticeVertex>(m_gfx, world.uvsphere, world.neurons));
-        m_objects.push_back(std::make_shared<LatticeEdge>(m_gfx, world.neurons));
-        m_objects.push_back(std::make_shared<LatticeFace>(m_gfx, world.latticeMesh));
+        m_objects.push_back(std::make_shared<LatticeVertex>(m_gfx, vertexMesh, perVertexData));
+        m_objects.push_back(std::make_shared<LatticeEdge>(m_gfx, perVertexData, indices));
+        m_objects.push_back(std::make_shared<LatticeFace>(m_gfx, latticeMesh));
     }
 }
 
-void Renderer::LoadPolygonalModel()
+void Renderer::LoadPolygonalModel(Mesh const& mesh)
 {
+    SetCameraView(CalculateBoundingBox(mesh.positions));
+
     for (auto& obj : m_objects) {
         {
             // Replace it with polygonal model
             VolumetricModel* model = dynamic_cast<VolumetricModel*>(obj.get());
             if (model) {
-                obj = std::make_shared<PolygonalModel>(m_gfx, *world.theModel);
+                obj = std::make_shared<PolygonalModel>(m_gfx, mesh);
                 return;
             }
         }
         {
             PolygonalModel* model = dynamic_cast<PolygonalModel*>(obj.get());
             if (model) {
-                obj = std::make_shared<PolygonalModel>(m_gfx, *world.theModel);
+                obj = std::make_shared<PolygonalModel>(m_gfx, mesh);
                 return;
             }
         }
     }
-    m_objects.push_back(std::make_shared<PolygonalModel>(m_gfx, *world.theModel));
+    m_objects.push_back(std::make_shared<PolygonalModel>(m_gfx, mesh));
 }
 
-void Renderer::LoadVolumetricModel()
+void Renderer::LoadVolumetricModel(Mesh const& instanceMesh, Mesh const& perInstanceData)
 {
+    SetCameraView(CalculateBoundingBox(perInstanceData.positions));
+
     for (auto& obj : m_objects) {
         {
             VolumetricModel* model = dynamic_cast<VolumetricModel*>(obj.get());
             if (model) {
-                obj = std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel);
+                obj = std::make_shared<VolumetricModel>(m_gfx, instanceMesh, perInstanceData);
                 return;
             }
         }
@@ -128,12 +133,41 @@ void Renderer::LoadVolumetricModel()
             // Replace it with volumetric model
             PolygonalModel* model = dynamic_cast<PolygonalModel*>(obj.get());
             if (model) {
-                obj = std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel);
+                obj = std::make_shared<VolumetricModel>(m_gfx, instanceMesh, perInstanceData);
                 return;
             }
         }
     }
-    m_objects.push_back(std::make_shared<VolumetricModel>(m_gfx, world.cube, *world.theModel));
+    m_objects.push_back(std::make_shared<VolumetricModel>(m_gfx, instanceMesh, perInstanceData));
+}
+
+BoundingBox Renderer::CalculateBoundingBox(std::vector<glm::vec3> positions)
+{
+    const float FLOAT_MAX = std::numeric_limits<float>::max();
+    glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
+    glm::vec3 max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
+
+    for (auto const& p : positions) {
+        if (p.x > max.x) {
+            max.x = p.x;
+        }
+        if (p.y > max.y) {
+            max.y = p.y;
+        }
+        if (p.z > max.z) {
+            max.z = p.z;
+        }
+        if (p.x < min.x) {
+            min.x = p.x;
+        }
+        if (p.y < min.y) {
+            min.y = p.y;
+        }
+        if (p.z < min.z) {
+            min.z = p.z;
+        }
+    }
+    return { max, min };
 }
 
 Camera& Renderer::GetCamera()

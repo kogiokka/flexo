@@ -61,8 +61,6 @@ bool WatermarkingApp::OnInit()
     window.Maximize();
     viewport.InitGL();
     viewport.SetFocus();
-    // After OpenGL has been initialized
-    Renderer::Get(*m_project);
 
     auto& mgr = window.GetPaneManager();
     auto page = window.GetMainPage();
@@ -122,8 +120,7 @@ void WatermarkingApp::ImportPolygonalModel(wxString const& path)
     }
 
     m_project->SetDataset(std::make_shared<InputData>(world.theModel->positions));
-    Renderer::Get(*m_project).LoadPolygonalModel();
-    Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(world.theModel->positions));
+    SceneOutlinerPane::Get(*m_project).SubmitPolygon(*world.theModel);
 }
 
 void WatermarkingApp::ImportVolumetricModel(wxString const& path)
@@ -191,37 +188,7 @@ void WatermarkingApp::ImportVolumetricModel(wxString const& path)
     Logger::info("%lu voxels will be rendered.", pos.size());
 
     m_project->SetDataset(std::make_shared<InputData>(pos));
-    Renderer::Get(*m_project).LoadVolumetricModel();
-    Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(world.theModel->positions));
-}
-
-BoundingBox WatermarkingApp::CalculateBoundingBox(std::vector<glm::vec3> positions)
-{
-    const float FLOAT_MAX = std::numeric_limits<float>::max();
-    glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
-    glm::vec3 max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
-
-    for (auto const& p : positions) {
-        if (p.x > max.x) {
-            max.x = p.x;
-        }
-        if (p.y > max.y) {
-            max.y = p.y;
-        }
-        if (p.z > max.z) {
-            max.z = p.z;
-        }
-        if (p.x < min.x) {
-            min.x = p.x;
-        }
-        if (p.y < min.y) {
-            min.y = p.y;
-        }
-        if (p.z < min.z) {
-            min.z = p.z;
-        }
-    }
-    return { max, min };
+    SceneOutlinerPane::Get(*m_project).SubmitVolume(world.cube, *world.theModel);
 }
 
 void WatermarkingApp::OnMenuAddModel(wxCommandEvent& event)
@@ -234,7 +201,9 @@ void WatermarkingApp::OnMenuAddModel(wxCommandEvent& event)
     }
 
     Mesh mesh;
-    BoundingBox bbox = CalculateBoundingBox(world.theModel->positions);
+
+    // FIXME Better way to get the bounding box
+    BoundingBox bbox = Renderer::Get(*m_project).CalculateBoundingBox(world.theModel->positions);
 
     if (event.GetId() == EVT_ADD_UV_SPHERE) {
         auto const& [max, min] = bbox;
@@ -327,8 +296,7 @@ void WatermarkingApp::OnMenuAddModel(wxCommandEvent& event)
 
     world.theModel = std::make_shared<Mesh>(mesh);
     m_project->SetDataset(std::make_shared<InputData>(mesh.positions));
-    Renderer::Get(*m_project).LoadPolygonalModel();
-    Renderer::Get(*m_project).SetCameraView(CalculateBoundingBox(mesh.positions));
+    SceneOutlinerPane::Get(*m_project).SubmitPolygon(mesh);
 }
 
 void WatermarkingApp::OnMenuImportModel(wxCommandEvent& event)

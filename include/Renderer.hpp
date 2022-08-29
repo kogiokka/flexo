@@ -26,9 +26,11 @@ public:
     Renderer(int width, int height);
     void Render();
     void SetCameraView(BoundingBox const& box);
-    void LoadLattice();
-    void LoadPolygonalModel();
-    void LoadVolumetricModel();
+    void LoadLattice(Mesh const& vertexMesh, Mesh const& perVertexData, Mesh const& latticeMesh,
+                     std::vector<unsigned int> const& indices);
+    void LoadPolygonalModel(Mesh const& mesh);
+    void LoadVolumetricModel(Mesh const& instanceMesh, Mesh const& perInstanceData);
+    BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
     Camera& GetCamera();
     std::vector<std::shared_ptr<DrawableBase>> const& GetDrawables() const;
 

@@ -4,9 +4,32 @@
 #include <wx/slider.h>
 #include <wx/stattext.h>
 
+#include "Project.hpp"
+#include "ProjectWindow.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
 #include "pane/SceneOutlinerPane.hpp"
+
+// Register factory: SceneOutlinerPane
+static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
+    [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
+        auto& window = ProjectWindow::Get(project);
+        wxWindow* mainPage = window.GetMainPage();
+        wxASSERT(mainPage != nullptr);
+
+        return new SceneOutlinerPane(mainPage, project);
+    }
+};
+
+SceneOutlinerPane& SceneOutlinerPane::Get(WatermarkingProject& project)
+{
+    return project.AttachedWindows::Get<SceneOutlinerPane>(factoryKey);
+}
+
+SceneOutlinerPane const& SceneOutlinerPane::Get(WatermarkingProject const& project)
+{
+    return Get(const_cast<WatermarkingProject&>(project));
+}
 
 SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
@@ -60,4 +83,20 @@ wxTreeListCtrl* SceneOutlinerPane::CreateSceneTree()
     sceneTree->SetFont(font);
 
     return sceneTree;
+}
+
+void SceneOutlinerPane::SubmitLattice(Mesh const& vertexMesh, Mesh const& perVertexData, Mesh const& latticeMesh,
+                                      std::vector<unsigned int> const& indices)
+{
+    Renderer::Get(m_project).LoadLattice(vertexMesh, perVertexData, latticeMesh, indices);
+}
+
+void SceneOutlinerPane::SubmitPolygon(Mesh const& mesh)
+{
+    Renderer::Get(m_project).LoadPolygonalModel(mesh);
+}
+
+void SceneOutlinerPane::SubmitVolume(Mesh const& instanceMesh, Mesh const& perInstanceData)
+{
+    Renderer::Get(m_project).LoadVolumetricModel(instanceMesh, perInstanceData);
 }

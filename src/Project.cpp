@@ -189,6 +189,5 @@ void WatermarkingProject::UpdateLatticeGraphics()
     // TODO: Better solution
     m_isLatticeReady = true;
     BuildLatticeMesh();
-
-    Renderer::Get(*this).LoadLattice();
+    Renderer::Get(*this).LoadLattice(world.uvsphere, world.neurons, world.latticeMesh, world.latticeEdges);
 }
