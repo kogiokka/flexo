@@ -10,21 +10,14 @@
 
 class WatermarkingApp : public wxApp
 {
-    std::shared_ptr<WatermarkingProject> m_project;
-
 public:
     WatermarkingApp();
     virtual bool OnInit() override;
     virtual int OnExit() override;
     virtual void OnUnhandledException() override;
-    void ImportPolygonalModel(wxString const& path);
-    void ImportVolumetricModel(wxString const& path);
-
-    void OnMenuAddModel(wxCommandEvent& event);
-    void OnMenuImportModel(wxCommandEvent& event);
 
 private:
-    wxDECLARE_EVENT_TABLE();
+    std::shared_ptr<WatermarkingProject> m_project;
 };
 
 #endif

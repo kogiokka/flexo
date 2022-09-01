@@ -21,9 +21,8 @@ public:
     InstancedDrawable(InstancedDrawable const&) = delete;
     virtual ~InstancedDrawable() = default;
 
-    virtual void Draw(Graphics& gfx) const override;
+    virtual void Bind(Graphics& gfx) const override;
     virtual void Update(Graphics& gfx) override;
-    virtual glm::mat4 GetTransformMatrix() const override = 0;
     void AddBind(std::shared_ptr<Bind::Bindable> bind) override;
 };
 

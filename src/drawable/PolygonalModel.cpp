@@ -1,6 +1,7 @@
 #include <utility>
 #include <vector>
 
+#include "Task.hpp"
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/InputLayout.hpp"
@@ -42,19 +43,24 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.frag.material.shininess = 32.0f;
 
+    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+
+    Task draw;
+    draw.mDrawable = this;
+
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/PolygonalModel.vert", *pipeline);
     auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/PolygonalModel.frag", *pipeline);
-    AddBind(pipeline);
-    AddBind(vs);
-    AddBind(fs);
+    draw.AddBindable(pipeline);
+    draw.AddBindable(vs);
+    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
 
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
-    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
+    AddTask(draw);
 }
 
 PolygonalModel::~PolygonalModel()
@@ -67,18 +73,14 @@ void PolygonalModel::Update(Graphics& gfx)
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
 
-    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
-        if (buf != nullptr) {
-            buf->Update(m_ub);
-            break;
+    // FIXME Need to rework UniformBuffer creation/update
+    auto const& taskBinds = m_tasks.front().mBinds;
+    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
+        Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
+        if (ub != nullptr) {
+            ub->Update(m_ub);
         }
     }
-}
-
-glm::mat4 PolygonalModel::GetTransformMatrix() const
-{
-    return glm::mat4(1.0f);
 }
 
 std::string PolygonalModel::GetName() const

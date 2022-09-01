@@ -8,23 +8,23 @@
 #include <glm/glm.hpp>
 
 #include "Graphics.hpp"
+#include "Task.hpp"
 #include "bindable/Bindable.hpp"
+
+class Renderer;
 
 class DrawableBase
 {
-protected:
-    bool m_isVisible;
-    std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
-
 public:
     DrawableBase() = default;
     DrawableBase(DrawableBase const&) = delete;
     virtual ~DrawableBase() = default;
-
-    virtual void Draw(Graphics& gfx) const = 0;
-    virtual glm::mat4 GetTransformMatrix() const = 0;
-    virtual void Update(Graphics& gfx) = 0;
     virtual void AddBind(std::shared_ptr<Bind::Bindable> bind) = 0;
+    void Submit(Renderer& renderer) const;
+    void AddTask(Task task);
+
+    virtual void Update(Graphics& gfx) = 0;
+    virtual void Bind(Graphics& gfx) const = 0;
     virtual std::string GetName() const = 0;
     void SetVisible(bool visible)
     {
@@ -34,6 +34,11 @@ public:
     {
         return m_isVisible;
     }
+
+protected:
+    bool m_isVisible;
+    std::vector<Task> m_tasks;
+    std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
 };
 
 #endif

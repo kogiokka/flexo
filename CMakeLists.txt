@@ -63,6 +63,7 @@ PRIVATE
     "src/assetlib/STL/STLImporter.cpp"
 
     "src/Graphics.cpp"
+    "src/Task.cpp"
     "src/bindable/Bindable.cpp"
     "src/bindable/Primitive.cpp"
     "src/bindable/InputLayout.cpp"
@@ -76,6 +77,7 @@ PRIVATE
     "src/bindable/program/ProgramPipeline.cpp"
     "src/bindable/program/VertexShaderProgram.cpp"
     "src/bindable/program/FragmentShaderProgram.cpp"
+    "src/drawable/DrawableBase.cpp"
     "src/drawable/Drawable.cpp"
     "src/drawable/IndexedDrawable.cpp"
     "src/drawable/InstancedDrawable.cpp"

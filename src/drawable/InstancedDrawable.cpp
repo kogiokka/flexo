@@ -6,7 +6,7 @@ InstancedDrawable::InstancedDrawable()
     m_perInstanceData = nullptr;
 }
 
-void InstancedDrawable::Draw(Graphics& gfx) const
+void InstancedDrawable::Bind(Graphics& gfx) const
 {
     if (m_isVisible) {
         for (auto& b : m_binds) {

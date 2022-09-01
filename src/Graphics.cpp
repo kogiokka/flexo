@@ -2,7 +2,28 @@
 #include <fstream>
 
 #include "Graphics.hpp"
+#include "Project.hpp"
 #include "common/Logger.hpp"
+#include "pane/SceneViewportPane.hpp"
+
+// Register factory: Graphics
+static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
+    [](WatermarkingProject& project) -> SharedPtr<Graphics> {
+        auto const& viewport = SceneViewportPane::Get(project);
+        wxSize const size = viewport.GetClientSize() * viewport.GetContentScaleFactor();
+        return std::make_shared<Graphics>(size.x, size.y);
+    }
+};
+
+Graphics& Graphics::Get(WatermarkingProject& project)
+{
+    return project.AttachedObjects::Get<Graphics>(factoryKey);
+}
+
+Graphics const& Graphics::Get(WatermarkingProject const& project)
+{
+    return Get(const_cast<WatermarkingProject&>(project));
+}
 
 Graphics::Graphics(int width, int height)
     : m_camera(width, height)
@@ -94,9 +115,7 @@ void Graphics::CreateRasterizerState(RasterizerDesc const& desc, RasterizerState
         });
         break;
     case CullMode::None:
-        pState->Append([](void) -> void {
-            glDisable(GL_CULL_FACE);
-        });
+        pState->Append([](void) -> void { glDisable(GL_CULL_FACE); });
         break;
     };
 

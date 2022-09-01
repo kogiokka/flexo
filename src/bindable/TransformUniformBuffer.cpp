@@ -2,16 +2,16 @@
 
 namespace Bind
 {
-    TransformUniformBuffer::TransformUniformBuffer(Graphics& gfx, DrawableBase const& parent)
+    TransformUniformBuffer::TransformUniformBuffer(Graphics& gfx, glm::mat4 transform)
         : Bindable(gfx)
         , m_buffer(gfx)
-        , m_parent(parent)
+        , m_mat(transform)
     {
     }
 
     void TransformUniformBuffer::Bind()
     {
-        m_buffer.Update({ m_parent.GetTransformMatrix(), m_gfx->GetViewProjectionMatrix() });
+        m_buffer.Update({ m_mat, m_gfx->GetViewProjectionMatrix() });
         m_buffer.Bind();
     }
 }

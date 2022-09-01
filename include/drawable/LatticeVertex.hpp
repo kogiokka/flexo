@@ -38,7 +38,6 @@ public:
     LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
     ~LatticeVertex() override;
     void Update(Graphics& gfx) override;
-    glm::mat4 GetTransformMatrix() const override;
     std::string GetName() const override;
 };
 #endif

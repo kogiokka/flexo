@@ -1,6 +1,7 @@
 #include <utility>
 #include <vector>
 
+#include "Task.hpp"
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/InputLayout.hpp"
@@ -52,23 +53,28 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     auto const& [img, w, h, ch] = world.pattern;
     m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
-    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", *pipeline);
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", *pipeline);
-    AddBind(pipeline);
-    AddBind(vs);
-    AddBind(fs);
-
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 2));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 3));
-    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
-    AddBind(m_texColor);
-    AddBind(m_texPattern);
+
+    Task draw;
+    draw.mDrawable = this;
+
+    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert", *pipeline);
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag", *pipeline);
+    draw.AddBindable(pipeline);
+    draw.AddBindable(vs);
+    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
+    draw.AddBindable(m_texColor);
+    draw.AddBindable(m_texPattern);
+
+    AddTask(draw);
 }
 
 VolumetricModel::~VolumetricModel()
@@ -82,24 +88,20 @@ void VolumetricModel::Update(Graphics& gfx)
     m_ub.vert.isWatermarked = world.isWatermarked;
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        {
-            Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-            if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
-                vb->Update(world.theModel->textureCoords);
-            }
-        }
-        {
-            Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
-            if (ub != nullptr) {
-                ub->Update(m_ub);
-            }
+        Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
+        if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
+            vb->Update(world.theModel->textureCoords);
         }
     }
-}
 
-glm::mat4 VolumetricModel::GetTransformMatrix() const
-{
-    return glm::mat4(1.0f);
+    // FIXME Need to rework UniformBuffer creation/update
+    auto const& taskBinds = m_tasks.front().mBinds;
+    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
+        Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
+        if (ub != nullptr) {
+            ub->Update(m_ub);
+        }
+    }
 }
 
 std::string VolumetricModel::GetName() const

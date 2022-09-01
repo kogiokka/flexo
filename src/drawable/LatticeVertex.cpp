@@ -1,6 +1,7 @@
 #include <utility>
 #include <vector>
 
+#include "Task.hpp"
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/InputLayout.hpp"
@@ -44,20 +45,26 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.frag.material.shininess = 256.0f;
 
-    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert", *pipeline);
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag", *pipeline);
-    AddBind(pipeline);
-    AddBind(vs);
-    AddBind(fs);
-
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 2));
-    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
+
+    Task draw;
+    draw.mDrawable = this;
+
+    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert", *pipeline);
+    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag", *pipeline);
+    draw.AddBindable(pipeline);
+    draw.AddBindable(vs);
+    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    draw.AddBindable(
+        std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f)));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
+
+    AddTask(draw);
 }
 
 LatticeVertex::~LatticeVertex()
@@ -71,24 +78,20 @@ void LatticeVertex::Update(Graphics& gfx)
     m_ub.frag.light.position = gfx.GetCameraPosition();
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        {
-            Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-            if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
-                vb->Update(world.neurons.positions);
-            }
-        }
-        {
-            Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
-            if (ub != nullptr) {
-                ub->Update(m_ub);
-            }
+        Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
+        if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
+            vb->Update(world.neurons.positions);
         }
     }
-}
 
-glm::mat4 LatticeVertex::GetTransformMatrix() const
-{
-    return glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
+    // FIXME Need to rework UniformBuffer creation/update
+    auto const& taskBinds = m_tasks.front().mBinds;
+    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
+        Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
+        if (ub != nullptr) {
+            ub->Update(m_ub);
+        }
+    }
 }
 
 std::string LatticeVertex::GetName() const

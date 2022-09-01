@@ -40,7 +40,6 @@ public:
     PolygonalModel(Graphics& gfx, Mesh const& mesh);
     ~PolygonalModel() override;
     void Update(Graphics& gfx) override;
-    glm::mat4 GetTransformMatrix() const override;
     std::string GetName() const override;
 };
 

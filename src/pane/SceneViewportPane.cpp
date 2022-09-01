@@ -4,6 +4,7 @@
 #include <fstream>
 #include <iostream>
 
+#include "Graphics.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
@@ -52,7 +53,7 @@ SceneViewportPane const& SceneViewportPane::Get(WatermarkingProject const& proje
 }
 
 SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id,
-                                      wxPoint const& pos, wxSize const& size, WatermarkingProject& project)
+                                     wxPoint const& pos, wxSize const& size, WatermarkingProject& project)
     : wxGLCanvas(parent, dispAttrs, id, pos, size)
     , m_project(project)
     , m_context(nullptr)
@@ -80,7 +81,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
 
     UpdateScene();
 
-    Renderer::Get(m_project).Render();
+    Renderer::Get(m_project).Render(Graphics::Get(m_project));
 
     SwapBuffers();
 }
@@ -111,7 +112,7 @@ void SceneViewportPane::InitGL()
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
     std::cout << "Version:      " << glGetString(GL_VERSION) << "\n"
-              << "Renderer:     " << glGetString(GL_RENDERER) << "\n"
+              << "Graphics:     " << glGetString(GL_RENDERER) << "\n"
               << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
 }
@@ -125,7 +126,7 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
         return;
 
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    Renderer::Get(m_project).GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
+    Graphics::Get(m_project).GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
 
     SetCurrent(*m_context);
     glViewport(0, 0, size.x, size.y);
@@ -134,7 +135,7 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
 {
     int direction = event.GetWheelRotation() / 120;
-    float& zoom = Renderer::Get(m_project).GetCamera().zoom;
+    float& zoom = Graphics::Get(m_project).GetCamera().zoom;
     float const tmp_zoom = zoom + direction * -0.02f;
     constexpr float min = 0.01f;
     constexpr float max = 10.0f;
@@ -152,14 +153,14 @@ void SceneViewportPane::OnMouseLeftDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    m_originTranslate = std::make_tuple(x, y, Renderer::Get(m_project).GetCamera().center);
+    m_originTranslate = std::make_tuple(x, y, Graphics::Get(m_project).GetCamera().center);
 }
 
 void SceneViewportPane::OnMouseRightDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    auto& coord = Renderer::Get(m_project).GetCamera().coord;
+    auto& coord = Graphics::Get(m_project).GetCamera().coord;
     // Change rotating direction if the camera passes through the polars.
     // Theta is guaranteed to be on either [0, pi] or (pi, 2 * pi).
     if (coord.theta > MATH_PI)
@@ -175,7 +176,7 @@ void SceneViewportPane::OnMouseMotion(wxMouseEvent& event)
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
 
-    auto& cam = Renderer::Get(m_project).GetCamera();
+    auto& cam = Graphics::Get(m_project).GetCamera();
 
     if (event.LeftIsDown()) {
         auto const& [oX, oY, oTarget] = m_originTranslate;
@@ -199,7 +200,7 @@ void SceneViewportPane::OnUpdateUI(wxUpdateUIEvent&)
 void SceneViewportPane::ResetCamera()
 {
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    Renderer::Get(m_project).GetCamera() = Camera(size.x, size.y);
+    Graphics::Get(m_project).GetCamera() = Camera(size.x, size.y);
 }
 
 void SceneViewportPane::UpdateScene()

@@ -14,12 +14,6 @@ public:
     static SceneOutlinerPane const& Get(WatermarkingProject const& project);
 
     SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project);
-
-    void SubmitLattice(Mesh const& vertexMesh, Mesh const& perVertexData, Mesh const& latticeMesh,
-                       std::vector<unsigned int> const& indices);
-    void SubmitPolygon(Mesh const& mesh);
-    void SubmitVolume(Mesh const& instanceMesh, Mesh const& perInstanceData);
-
 private:
     wxTreeListCtrl* CreateSceneTree();
 

@@ -3,7 +3,7 @@
 
 #include "drawable/LightSource.hpp"
 
-#include "Vertex.hpp"
+#include "Task.hpp"
 #include "World.hpp"
 #include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
@@ -30,22 +30,27 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     }
 
     m_isVisible = false;
-
     m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+
+    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+
+    Task draw;
+    draw.mDrawable = this;
 
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LightSource.vert", *pipeline);
     auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LightSource.frag", *pipeline);
-    AddBind(pipeline);
-    AddBind(vs);
-    AddBind(fs);
+    draw.AddBindable(pipeline);
+    draw.AddBindable(vs);
+    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(
+        gfx, glm::translate(glm::mat4(1.0f), world.lightPos) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f))); // FIXME
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
 
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
-    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
+    AddTask(draw);
 }
 
 LightSource::~LightSource()
@@ -54,18 +59,14 @@ LightSource::~LightSource()
 
 void LightSource::Update(Graphics&)
 {
-    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        Bind::UniformBuffer<UniformBlock>* buf = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
-        if (buf != nullptr) {
-            buf->Update(m_ub);
-            break;
+    // FIXME Need to rework UniformBuffer creation/update
+    auto const& taskBinds = m_tasks.front().mBinds;
+    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
+        Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
+        if (ub != nullptr) {
+            ub->Update(m_ub);
         }
     }
-}
-
-glm::mat4 LightSource::GetTransformMatrix() const
-{
-    return glm::translate(glm::mat4(1.0f), world.lightPos) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f);
 }
 
 std::string LightSource::GetName() const

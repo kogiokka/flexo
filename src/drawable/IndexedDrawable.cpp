@@ -5,7 +5,7 @@ IndexedDrawable::IndexedDrawable()
     m_buffer = nullptr;
 }
 
-void IndexedDrawable::Draw(Graphics& gfx) const
+void IndexedDrawable::Bind(Graphics& gfx) const
 {
     if (m_isVisible) {
         for (auto& b : m_binds) {

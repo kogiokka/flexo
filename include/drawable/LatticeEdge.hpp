@@ -26,7 +26,6 @@ public:
     LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices);
     ~LatticeEdge() override;
     void Update(Graphics& gfx) override;
-    glm::mat4 GetTransformMatrix() const override;
     std::string GetName() const override;
 };
 

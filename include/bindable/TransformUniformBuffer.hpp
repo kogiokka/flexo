@@ -19,10 +19,10 @@ namespace Bind
         };
 
         UniformBuffer<TransformMatrices> m_buffer;
-        DrawableBase const& m_parent;
+        glm::mat4 m_mat;
 
     public:
-        TransformUniformBuffer(Graphics& gfx, DrawableBase const& parent);
+        TransformUniformBuffer(Graphics& gfx, glm::mat4 transform);
         void Bind() override;
     };
 }

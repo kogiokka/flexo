@@ -5,7 +5,7 @@ Drawable::Drawable()
     m_buffer = nullptr;
 }
 
-void Drawable::Draw(Graphics& gfx) const
+void Drawable::Bind(Graphics& gfx) const
 {
     if (m_isVisible) {
         for (auto& b : m_binds) {
@@ -26,3 +26,4 @@ void Drawable::AddBind(std::shared_ptr<Bind::Bindable> bind)
     }
     m_binds.push_back(bind);
 }
+

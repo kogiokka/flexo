@@ -44,7 +44,6 @@ public:
     VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
     ~VolumetricModel() override;
     void Update(Graphics& gfx) override;
-    glm::mat4 GetTransformMatrix() const override;
     std::string GetName() const override;
 };
 

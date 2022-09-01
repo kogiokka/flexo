@@ -2,6 +2,7 @@
 #define WATERMARKING_PROJECT_H
 
 #include <memory>
+#include <vector>
 
 #include <wx/event.h>
 #include <wx/frame.h>
@@ -12,6 +13,7 @@
 #include "Lattice.hpp"
 #include "ProjectSettings.hpp"
 #include "SelfOrganizingMap.hpp"
+#include "drawable/DrawableBase.hpp"
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;
@@ -31,16 +33,24 @@ public:
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
-    void OnLatticeDimensionsChanged(wxCommandEvent& event);
     void UpdateLatticeGraphics();
 
 private:
+    void UpdateLatticeEdges() const;
+    void ImportPolygonalModel(wxString const& path);
+    void ImportVolumetricModel(wxString const& path);
+    void OnMenuAddModel(wxCommandEvent& event);
+    void OnMenuImportModel(wxCommandEvent& event);
+    void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
+    void SetLatticeDrawables(std::vector<std::shared_ptr<DrawableBase>>& drawables);
+
     bool m_isLatticeReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
     std::shared_ptr<InputData> m_dataset;
 
-    void UpdateLatticeEdges() const;
+    // FIXME This is a temporary solution
+    std::vector<std::shared_ptr<DrawableBase>> m_drawables; // Store the shared pointers until the project exits.
 };
 
 #endif

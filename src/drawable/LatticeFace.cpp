@@ -1,4 +1,5 @@
 #include "drawable/LatticeFace.hpp"
+#include "Task.hpp"
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "bindable/InputLayout.hpp"
@@ -43,20 +44,25 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 
     auto const& [img, w, h, ch] = world.pattern;
 
+    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+
+    Task draw;
+    draw.mDrawable = this;
+
     auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeFace.vert", *pipeline);
     auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeFace.frag", *pipeline);
+    draw.AddBindable(pipeline);
+    draw.AddBindable(vs);
+    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
+    draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
 
-    AddBind(vs);
-    AddBind(fs);
-    AddBind(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
-    AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
-    AddBind(pipeline);
-    AddBind(std::make_shared<Bind::TransformUniformBuffer>(gfx, *this));
-    AddBind(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    AddBind(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
-    AddBind(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
+    AddTask(draw);
 }
 
 LatticeFace::~LatticeFace()
@@ -69,33 +75,29 @@ void LatticeFace::Update(Graphics& gfx)
     m_ub.frag.light.position = world.lightPos;
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        {
-            Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-            if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
-                std::vector<VertexPNT> vertices;
-                vertices.resize(world.latticeMesh.positions.size());
-                for (unsigned int i = 0; i < world.latticeMesh.positions.size(); i++) {
-                    VertexPNT v;
-                    v.position = world.latticeMesh.positions[i];
-                    v.normal = world.latticeMesh.normals[i];
-                    v.texcoord = world.latticeMesh.textureCoords[i];
-                    vertices[i] = v;
-                }
-                vb->Update(vertices);
+        Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
+        if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
+            std::vector<VertexPNT> vertices;
+            vertices.resize(world.latticeMesh.positions.size());
+            for (unsigned int i = 0; i < world.latticeMesh.positions.size(); i++) {
+                VertexPNT v;
+                v.position = world.latticeMesh.positions[i];
+                v.normal = world.latticeMesh.normals[i];
+                v.texcoord = world.latticeMesh.textureCoords[i];
+                vertices[i] = v;
             }
-        }
-        {
-            Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
-            if (ub != nullptr) {
-                ub->Update(m_ub);
-            }
+            vb->Update(vertices);
         }
     }
-}
 
-glm::mat4 LatticeFace::GetTransformMatrix() const
-{
-    return glm::mat4(1.0f);
+    // FIXME Need to rework UniformBuffer creation/update
+    auto const& taskBinds = m_tasks.front().mBinds;
+    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
+        Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
+        if (ub != nullptr) {
+            ub->Update(m_ub);
+        }
+    }
 }
 
 std::string LatticeFace::GetName() const

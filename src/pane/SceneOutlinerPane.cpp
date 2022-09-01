@@ -8,6 +8,7 @@
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
+#include "drawable/DrawableBase.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 
 // Register factory: SceneOutlinerPane
@@ -39,7 +40,9 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
 
     Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent&) {
         m_sceneTree->DeleteAllItems();
-        for (auto const& drawable : Renderer::Get(m_project).GetDrawables()) {
+        // Each drawable has only one task currently
+        for (auto const& task : Renderer::Get(m_project).GetTasks()) {
+            auto drawable = task.mDrawable;
             auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetName());
             m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
         }
@@ -48,7 +51,8 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CHECKED, [this](wxTreeListEvent& event) {
         wxTreeListItem const item = event.GetItem();
         wxString const text = m_sceneTree->GetItemText(item);
-        for (auto& drawable : Renderer::Get(m_project).GetDrawables()) {
+        for (auto const& task : Renderer::Get(m_project).GetTasks()) {
+            auto drawable = task.mDrawable;
             if (text == drawable->GetName()) {
                 switch (m_sceneTree->GetCheckedState(item)) {
                 case wxCHK_CHECKED:
@@ -83,20 +87,4 @@ wxTreeListCtrl* SceneOutlinerPane::CreateSceneTree()
     sceneTree->SetFont(font);
 
     return sceneTree;
-}
-
-void SceneOutlinerPane::SubmitLattice(Mesh const& vertexMesh, Mesh const& perVertexData, Mesh const& latticeMesh,
-                                      std::vector<unsigned int> const& indices)
-{
-    Renderer::Get(m_project).LoadLattice(vertexMesh, perVertexData, latticeMesh, indices);
-}
-
-void SceneOutlinerPane::SubmitPolygon(Mesh const& mesh)
-{
-    Renderer::Get(m_project).LoadPolygonalModel(mesh);
-}
-
-void SceneOutlinerPane::SubmitVolume(Mesh const& instanceMesh, Mesh const& perInstanceData)
-{
-    Renderer::Get(m_project).LoadVolumetricModel(instanceMesh, perInstanceData);
 }

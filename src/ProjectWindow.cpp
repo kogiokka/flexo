@@ -136,7 +136,7 @@ void ProjectWindow::OnOpenFile(wxCommandEvent&)
 
     wxCommandEvent event(EVT_IMPORT_MODEL);
     event.SetString(filepath);
-    ProcessWindowEvent(event);
+    m_project.ProcessEvent(event);
 }
 
 void ProjectWindow::OnExit(wxCommandEvent&)
@@ -154,7 +154,7 @@ void ProjectWindow::OnMenuGenerateModelDome(wxCommandEvent&)
 {
     wxCommandEvent event(EVT_ADD_UV_SPHERE);
     event.SetId(EVT_ADD_UV_SPHERE);
-    ProcessWindowEvent(event);
+    m_project.ProcessEvent(event);
 }
 
 wxWindow* ProjectWindow::GetMainPage()

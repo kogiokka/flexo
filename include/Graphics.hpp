@@ -8,6 +8,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
+#include "Attachable.hpp"
 #include "Camera.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
@@ -96,7 +97,10 @@ public:
     }
 };
 
-class Graphics
+
+class WatermarkingProject;
+
+class Graphics : public AttachableBase
 {
     struct Context {
         GLenum primitive;
@@ -114,6 +118,9 @@ class Graphics
     Camera m_camera;
 
 public:
+    static Graphics& Get(WatermarkingProject& project);
+    static Graphics const& Get(WatermarkingProject const& project);
+
     Graphics(int width, int height);
     void CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements,
                            GLuint const programWithInputSignature);
