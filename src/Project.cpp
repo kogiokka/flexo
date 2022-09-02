@@ -429,12 +429,17 @@ void WatermarkingProject::SetModelDrawable(std::shared_ptr<DrawableBase> drawabl
 {
     auto& renderer = Renderer::Get(*this);
     auto& tasks = renderer.GetTasks();
-    bool (*const FindDrawable)(Task&) = [](Task& task) {
-        auto* d = task.mDrawable;
-        return (dynamic_cast<PolygonalModel*>(d) || dynamic_cast<VolumetricModel*>(d));
+    bool (*const FindTask)(Task&) = [](Task& task) {
+        auto* dptr = task.mDrawable;
+        return (dynamic_cast<PolygonalModel*>(dptr) || dynamic_cast<VolumetricModel*>(dptr));
     };
-    tasks.erase(std::remove_if(tasks.begin(), tasks.end(), FindDrawable), tasks.end());
+    bool (*const FindDrawable)(std::shared_ptr<DrawableBase>&) = [](std::shared_ptr<DrawableBase>& drawable) {
+        auto* dptr = drawable.get();
+        return (dynamic_cast<PolygonalModel*>(dptr) || dynamic_cast<VolumetricModel*>(dptr));
+    };
 
+    tasks.erase(std::remove_if(tasks.begin(), tasks.end(), FindTask), tasks.end());
+    m_drawables.erase(std::remove_if(m_drawables.begin(), m_drawables.end(), FindDrawable), m_drawables.end());
     drawable->Submit(renderer);
     m_drawables.push_back(drawable);
 }
@@ -443,15 +448,19 @@ void WatermarkingProject::SetLatticeDrawables(std::vector<std::shared_ptr<Drawab
 {
     auto& renderer = Renderer::Get(*this);
     auto& tasks = renderer.GetTasks();
-
-    bool (*const FindDrawable)(Task&) = [](Task& task) {
-        auto* d = task.mDrawable;
-        return (dynamic_cast<LatticeVertex*>(d) || dynamic_cast<LatticeEdge*>(d) || dynamic_cast<LatticeFace*>(d));
+    bool (*const FindTask)(Task&) = [](Task& task) {
+        auto* dptr = task.mDrawable;
+        return (dynamic_cast<LatticeVertex*>(dptr) || dynamic_cast<LatticeEdge*>(dptr)
+                || dynamic_cast<LatticeFace*>(dptr));
     };
-    tasks.erase(std::remove_if(tasks.begin(), tasks.end(), FindDrawable), tasks.end());
+    bool (*const FindDrawable)(std::shared_ptr<DrawableBase>&) = [](std::shared_ptr<DrawableBase>& drawable) {
+        auto* dptr = drawable.get();
+        return (dynamic_cast<LatticeVertex*>(dptr) || dynamic_cast<LatticeEdge*>(dptr)
+                || dynamic_cast<LatticeFace*>(dptr));
+    };
 
-    for (auto& d : drawables) {
-        d->Submit(renderer);
-    }
+    tasks.erase(std::remove_if(tasks.begin(), tasks.end(), FindTask), tasks.end());
+    m_drawables.erase(std::remove_if(m_drawables.begin(), m_drawables.end(), FindDrawable), m_drawables.end());
+    std::for_each(drawables.begin(), drawables.end(), [&renderer](auto& d) { d->Submit(renderer); });
     m_drawables.insert(m_drawables.end(), drawables.begin(), drawables.end());
 }
