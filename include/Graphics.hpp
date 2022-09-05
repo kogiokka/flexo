@@ -97,6 +97,15 @@ public:
     }
 };
 
+struct Viewport {
+    float x;
+    float y;
+    float width;
+    float height;
+    double nearDepth;
+    double farDepth;
+};
+
 class WatermarkingProject;
 
 class Graphics : public AttachableBase
@@ -141,6 +150,7 @@ public:
     void SetProgramPipeline(GLuint pipeline);
     void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
     void SetRasterizerState(RasterizerState const* state);
+    void SetViewports(unsigned int numViewports, Viewport* viewports);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 
     void DeleteInputLayout(GLuint& layout);

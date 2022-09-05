@@ -129,6 +129,28 @@ void Graphics::CreateRasterizerState(RasterizerDesc const& desc, RasterizerState
     }
 }
 
+void Graphics::SetViewports(unsigned int numViewports, Viewport* viewports)
+{
+    float* viewportParams = static_cast<float*>(malloc(numViewports * 4 * sizeof(float)));
+    double* depthRangeParams = static_cast<double*>(malloc(numViewports * 2 * sizeof(double)));
+
+    for (unsigned int i = 0; i < numViewports; i++) {
+        auto const& v = viewports[i];
+        viewportParams[i * 4 + 0] = v.x;
+        viewportParams[i * 4 + 1] = v.y;
+        viewportParams[i * 4 + 2] = v.width;
+        viewportParams[i * 4 + 3] = v.height;
+        depthRangeParams[i * 2 + 0] = v.nearDepth;
+        depthRangeParams[i * 2 + 1] = v.farDepth;
+    }
+
+    glViewportArrayv(0, numViewports, viewportParams);
+    glDepthRangeArrayv(0, numViewports, depthRangeParams);
+
+    free(viewportParams);
+    free(depthRangeParams);
+}
+
 void Graphics::AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filename)
 {
     std::string const& source = SlurpShaderSource(filename);

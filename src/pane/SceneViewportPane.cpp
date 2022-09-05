@@ -129,7 +129,15 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
     Graphics::Get(m_project).GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
 
     SetCurrent(*m_context);
-    glViewport(0, 0, size.x, size.y);
+
+    Viewport v;
+    v.x = 0.0f;
+    v.y = 0.0f;
+    v.width = size.x;
+    v.height = size.y;
+    v.nearDepth = 0.0;
+    v.farDepth = 1.0;
+    Graphics::Get(m_project).SetViewports(1, &v);
 }
 
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
