@@ -41,7 +41,7 @@ namespace Bind
         , m_count(vertices.size())
     {
         BufferDesc desc;
-        BufferData data;
+        ResourceData data;
 
         desc.target = GL_ARRAY_BUFFER;
         desc.usage = GL_DYNAMIC_DRAW;

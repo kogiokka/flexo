@@ -76,8 +76,8 @@ struct RasterizerDesc {
     CullMode cullMode;
 };
 
-struct BufferData {
-    const void* mem;
+struct ResourceData {
+    void const* mem;
 };
 
 class RasterizerState
@@ -96,7 +96,6 @@ public:
         }
     }
 };
-
 
 class WatermarkingProject;
 
@@ -124,8 +123,8 @@ public:
     Graphics(int width, int height);
     void CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements,
                            GLuint const programWithInputSignature);
-    void CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data);
-    void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data);
+    void CreateBuffer(GLuint& buffer, BufferDesc const& desc, ResourceData const& data);
+    void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, ResourceData const& data);
     void CreateShaderProgram(GLuint& program);
     void CreateProgramPipeline(GLuint& pipeline);
     void CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename);

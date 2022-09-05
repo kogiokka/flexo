@@ -8,7 +8,7 @@ namespace Bind
         , m_count(indices.size())
     {
         BufferDesc desc;
-        BufferData data;
+        ResourceData data;
 
         desc.target = GL_ELEMENT_ARRAY_BUFFER;
         desc.usage = GL_STATIC_DRAW;

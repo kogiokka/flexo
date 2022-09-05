@@ -30,7 +30,7 @@ namespace Bind
         , m_bindingIndex(bindingIndex)
     {
         BufferDesc desc;
-        BufferData data;
+        ResourceData data;
 
         desc.target = GL_UNIFORM_BUFFER;
         desc.usage = GL_STREAM_DRAW;
@@ -48,7 +48,7 @@ namespace Bind
         , m_bindingIndex(bindingIndex)
     {
         BufferDesc desc;
-        BufferData data;
+        ResourceData data;
 
         desc.target = GL_UNIFORM_BUFFER;
         desc.usage = GL_STREAM_DRAW;

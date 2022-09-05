@@ -53,14 +53,14 @@ void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputEl
     }
 }
 
-void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, BufferData const& data)
+void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, ResourceData const& data)
 {
     glGenBuffers(1, &buffer);
     glBindBuffer(desc.target, buffer);
     glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
 }
 
-void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, BufferData const& data)
+void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, ResourceData const& data)
 {
     constexpr GLint BORDER = 0;
     glGenTextures(1, &texture);

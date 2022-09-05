@@ -32,7 +32,7 @@ namespace Bind
         , m_unit(unit)
     {
         Texture2dDesc desc;
-        BufferData data;
+        ResourceData data;
 
         desc.width = width;
         desc.height = height;
