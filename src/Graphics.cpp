@@ -68,13 +68,47 @@ void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc
     glActiveTexture(unit);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, desc.textureFormat, desc.width, desc.height, BORDER, desc.pixelFormat, desc.dataType,
                  data.mem);
     glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void Graphics::CreateSampler(GLuint& sampler, SamplerDesc const& desc)
+{
+    glGenSamplers(1, &sampler);
+
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, desc.coordinateS);
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, desc.coordinateT);
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_R, desc.coordinateR);
+
+    switch (desc.filter) {
+    case Filter_MinMagNearest_NoMip:
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        break;
+    case Filter_MinMagLinear_NoMip:
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        break;
+    case Filter_MinMagNearest_MipNearest:
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        break;
+    case Filter_MinMagNearest_MipLinear:
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        break;
+    case Filter_MinMagLinear_MipNearest:
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        break;
+    case Filter_MinMagLinear_MipLinear:
+        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        break;
+    default:
+        break;
+    }
 }
 
 void Graphics::CreateShaderProgram(GLuint& program)
@@ -207,6 +241,11 @@ void Graphics::SetTexture(GLenum target, GLuint texture, GLuint unit)
     glBindTexture(target, texture);
 }
 
+void Graphics::SetSampler(GLuint unit, GLuint sampler)
+{
+    glBindSampler(unit, sampler);
+}
+
 void Graphics::SetShaderProgram(GLuint program)
 {
     glUseProgram(program);
@@ -268,6 +307,11 @@ void Graphics::DeleteBuffer(GLuint& buffer)
 void Graphics::DeleteTexture(GLuint& texture)
 {
     glDeleteTextures(1, &texture);
+}
+
+void Graphics::DeleteSampler(GLuint& sampler)
+{
+    glDeleteSamplers(1, &sampler);
 }
 
 void Graphics::DeleteShaderProgram(GLuint& program)

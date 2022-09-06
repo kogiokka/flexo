@@ -47,6 +47,22 @@ enum class CullMode {
     Back,
 };
 
+typedef enum {
+    Filter_MinMagNearest_NoMip= 0x0,
+    Filter_MinMagLinear_NoMip = 0x1,
+    Filter_MinMagNearest_MipLinear = 0x2,
+    Filter_MinMagNearest_MipNearest = 0x3,
+    Filter_MinMagLinear_MipNearest = 0x4,
+    Filter_MinMagLinear_MipLinear = 0x5,
+} Filter;
+
+typedef enum {
+    TextureCoordinatesMode_Wrap = GL_REPEAT,
+    TextureCoordinatesMode_Mirror = GL_MIRRORED_REPEAT,
+    TextureCoordinatesMode_Clamp = GL_CLAMP_TO_EDGE,
+    TextureCoordinatesMode_Border = GL_CLAMP_TO_BORDER,
+} TextureCoordinatesMode;
+
 struct InputElementDesc {
     GLchar const* semanticName;
     InputFormat format;
@@ -69,6 +85,13 @@ struct Texture2dDesc {
     GLenum textureFormat;
     GLenum pixelFormat;
     GLenum dataType;
+};
+
+struct SamplerDesc {
+    Filter filter;
+    TextureCoordinatesMode coordinateS;
+    TextureCoordinatesMode coordinateT;
+    TextureCoordinatesMode coordinateR;
 };
 
 struct RasterizerDesc {
@@ -134,6 +157,7 @@ public:
                            GLuint const programWithInputSignature);
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, ResourceData const& data);
     void CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, ResourceData const& data);
+    void CreateSampler(GLuint& sampler, SamplerDesc const& desc);
     void CreateShaderProgram(GLuint& program);
     void CreateProgramPipeline(GLuint& pipeline);
     void CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename);
@@ -146,6 +170,7 @@ public:
     void SetInputLayout(GLuint const layout);
     void SetIndexBuffer(GLuint buffer, GLenum elementDataType, GLvoid const* offsetOfFirstIndex);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
+    void SetSampler(GLuint unit, GLuint sampler);
     void SetShaderProgram(GLuint program);
     void SetProgramPipeline(GLuint pipeline);
     void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
@@ -156,6 +181,7 @@ public:
     void DeleteInputLayout(GLuint& layout);
     void DeleteBuffer(GLuint& buffer);
     void DeleteTexture(GLuint& texture);
+    void DeleteSampler(GLuint& sampler);
     void DeleteShaderProgram(GLuint& program);
     void DeleteProgramPipeline(GLuint& pipeline);
     void ClearBuffer(float red, float green, float blue) const;

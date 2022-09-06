@@ -7,6 +7,7 @@
 #include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/RasterizerState.hpp"
+#include "bindable/Sampler.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
@@ -53,6 +54,12 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     auto const& [img, w, h, ch] = world.pattern;
     m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
 
+    SamplerDesc samplerDesc;
+    samplerDesc.coordinateS = TextureCoordinatesMode_Wrap;
+    samplerDesc.coordinateT = TextureCoordinatesMode_Wrap;
+    samplerDesc.coordinateR = TextureCoordinatesMode_Wrap;
+    samplerDesc.filter = Filter_MinMagNearest_NoMip;
+
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 2));
@@ -73,6 +80,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
     draw.AddBindable(m_texColor);
     draw.AddBindable(m_texPattern);
+    draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
+    draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 1));
 
     AddTask(draw);
 }

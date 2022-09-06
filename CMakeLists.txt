@@ -71,6 +71,7 @@ PRIVATE
     "src/bindable/UniformBuffer.cpp"
     "src/bindable/VertexBuffer.cpp"
     "src/bindable/Texture2D.cpp"
+    "src/bindable/Sampler.cpp"
     "src/bindable/TransformUniformBuffer.cpp"
     "src/bindable/RasterizerState.cpp"
     "src/bindable/program/ShaderProgram.cpp"

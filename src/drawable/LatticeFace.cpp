@@ -5,6 +5,7 @@
 #include "bindable/InputLayout.hpp"
 #include "bindable/Primitive.hpp"
 #include "bindable/RasterizerState.hpp"
+#include "bindable/Sampler.hpp"
 #include "bindable/Texture2D.hpp"
 #include "bindable/TransformUniformBuffer.hpp"
 #include "bindable/UniformBuffer.hpp"
@@ -31,6 +32,12 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     }
 
     m_isVisible = false;
+
+    SamplerDesc samplerDesc;
+    samplerDesc.coordinateS = TextureCoordinatesMode_Wrap;
+    samplerDesc.coordinateT = TextureCoordinatesMode_Wrap;
+    samplerDesc.coordinateR = TextureCoordinatesMode_Wrap;
+    samplerDesc.filter = Filter_MinMagNearest_MipNearest;
 
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -60,6 +67,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE0));
+    draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
 
     AddTask(draw);
