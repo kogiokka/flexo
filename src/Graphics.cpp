@@ -65,7 +65,7 @@ void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc
     constexpr GLint BORDER = 0;
     glGenTextures(1, &texture);
 
-    glActiveTexture(unit);
+    glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(GL_TEXTURE_2D, texture);
 
     glTexImage2D(GL_TEXTURE_2D, 0, desc.textureFormat, desc.width, desc.height, BORDER, desc.pixelFormat, desc.dataType,
@@ -237,7 +237,7 @@ void Graphics::SetIndexBuffer(GLuint buffer, GLenum elementDataType, const GLvoi
 
 void Graphics::SetTexture(GLenum target, GLuint texture, GLuint unit)
 {
-    glActiveTexture(unit);
+    glActiveTexture(GL_TEXTURE0 + unit);
     glBindTexture(target, texture);
 }
 

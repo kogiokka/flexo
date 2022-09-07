@@ -50,9 +50,9 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     m_ub.vert.isWatermarked = false;
 
     float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    m_texColor = std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, GL_TEXTURE0);
+    m_texColor = std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, 0);
     auto const& [img, w, h, ch] = world.pattern;
-    m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, GL_TEXTURE1);
+    m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, 1);
 
     SamplerDesc samplerDesc;
     samplerDesc.coordinateS = TextureCoordinatesMode_Wrap;

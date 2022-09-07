@@ -16,7 +16,7 @@ namespace Bind
 
     public:
         template <typename T>
-        Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit);
+        Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLuint unit);
         ~Texture2D() override;
         void Bind() override;
 
@@ -26,7 +26,7 @@ namespace Bind
     };
 
     template <typename T>
-    Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLenum unit)
+    Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLuint unit)
         : Bindable(gfx)
         , m_id(0)
         , m_unit(unit)
