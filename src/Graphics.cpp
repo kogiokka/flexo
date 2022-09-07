@@ -6,6 +6,24 @@
 #include "common/Logger.hpp"
 #include "pane/SceneViewportPane.hpp"
 
+class _GLState
+{
+    using _Op = std::function<void(void)>;
+    std::vector<_Op> m_ops;
+
+public:
+    void Add(_Op op)
+    {
+        m_ops.push_back(op);
+    }
+    void Execute() const
+    {
+        for (auto const& op : m_ops) {
+            op();
+        }
+    }
+};
+
 // Register factory: Graphics
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> SharedPtr<Graphics> {
@@ -133,32 +151,28 @@ void Graphics::CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, 
 void Graphics::CreateRasterizerState(RasterizerDesc const& desc, RasterizerState** ppState)
 {
     *ppState = new RasterizerState();
-
     RasterizerState* pState = *ppState;
+
     switch (desc.cullMode) {
     case CullMode::Back:
-        pState->Append([](void) -> void {
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_BACK);
-        });
+        pState->Add(std::bind(glEnable, GL_CULL_FACE));
+        pState->Add(std::bind(glCullFace, GL_BACK));
         break;
     case CullMode::Front:
-        pState->Append([](void) -> void {
-            glEnable(GL_CULL_FACE);
-            glCullFace(GL_FRONT);
-        });
+        pState->Add(std::bind(glEnable, GL_CULL_FACE));
+        pState->Add(std::bind(glCullFace, GL_FRONT));
         break;
     case CullMode::None:
-        pState->Append([](void) -> void { glDisable(GL_CULL_FACE); });
+        pState->Add(std::bind(glDisable, GL_CULL_FACE));
         break;
     };
 
     switch (desc.fillMode) {
     case FillMode::WireFrame:
-        pState->Append([](void) -> void { glPolygonMode(GL_FRONT_AND_BACK, GL_LINE); });
+        pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE));
         break;
     case FillMode::Solid:
-        pState->Append([](void) -> void { glPolygonMode(GL_FRONT_AND_BACK, GL_FILL); });
+        pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL));
         break;
     }
 }
@@ -169,15 +183,13 @@ void Graphics::CreateBlendState(BlendDesc const& desc, BlendState** ppState)
     BlendState* pState = *ppState;
 
     if (desc.enable) {
-        pState->Append([](void) -> void { glEnable(GL_BLEND); });
+        pState->Add(std::bind(glEnable, GL_BLEND));
     } else {
-        pState->Append([](void) -> void { glDisable(GL_BLEND); });
+        pState->Add(std::bind(glDisable, GL_BLEND));
     }
 
-    pState->Append([desc](void) -> void {
-        glBlendEquationSeparate(desc.eqRGB, desc.eqAlpha);
-        glBlendFuncSeparate(desc.srcRGB, desc.dstRGB, desc.srcAlpha, desc.dstAlpha);
-    });
+    pState->Add(std::bind(glBlendEquationSeparate, desc.eqRGB, desc.eqAlpha));
+    pState->Add(std::bind(glBlendFuncSeparate, desc.srcRGB, desc.dstRGB, desc.srcAlpha, desc.dstAlpha));
 }
 
 void Graphics::SetViewports(unsigned int numViewports, Viewport* viewports)
@@ -282,12 +294,12 @@ void Graphics::SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLui
 
 void Graphics::SetRasterizerState(RasterizerState const* state)
 {
-    state->Operate();
+    state->Execute();
 }
 
 void Graphics::SetBlendState(BlendState const* state)
 {
-    state->Operate();
+    state->Execute();
 }
 
 void Graphics::Draw(GLsizei vertexCount)

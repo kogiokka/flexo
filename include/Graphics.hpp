@@ -134,38 +134,9 @@ struct ResourceData {
     void const* mem;
 };
 
-class RasterizerState
-{
-    std::vector<std::function<void(void)>> m_ops;
-
-public:
-    void Append(std::function<void(void)> const& op)
-    {
-        m_ops.push_back(op);
-    }
-    void Operate() const
-    {
-        for (auto const& op : m_ops) {
-            op();
-        }
-    }
-};
-
-struct BlendState {
-    std::vector<std::function<void(void)>> m_ops;
-
-public:
-    void Append(std::function<void(void)> const& op)
-    {
-        m_ops.push_back(op);
-    }
-    void Operate() const
-    {
-        for (auto const& op : m_ops) {
-            op();
-        }
-    }
-};
+class _GLState;
+using RasterizerState = _GLState;
+using BlendState = _GLState;
 
 struct Viewport {
     float x;
