@@ -23,6 +23,7 @@ LatticeList const& LatticeList::Get(WatermarkingProject const& project)
 
 LatticeList::LatticeList(WatermarkingProject& project)
     : m_project(project)
+    , m_curr(nullptr)
 {
 }
 

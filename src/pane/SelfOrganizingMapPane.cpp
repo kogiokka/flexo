@@ -169,6 +169,12 @@ void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
         return;
     }
 
+    if (!LatticeList::Get(m_project).GetCurrent()) {
+        wxMessageDialog dialog(this, "Please create and select a lattice first!", "Error", wxCENTER | wxICON_ERROR);
+        dialog.ShowModal();
+        return;
+    }
+
     m_btnCreate->Disable();
     m_btnStop->Enable();
     m_btnRun->Enable();
