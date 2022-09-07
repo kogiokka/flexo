@@ -48,7 +48,7 @@ enum class CullMode {
 };
 
 typedef enum {
-    Filter_MinMagNearest_NoMip= 0x0,
+    Filter_MinMagNearest_NoMip = 0x0,
     Filter_MinMagLinear_NoMip = 0x1,
     Filter_MinMagNearest_MipLinear = 0x2,
     Filter_MinMagNearest_MipNearest = 0x3,
@@ -62,6 +62,27 @@ typedef enum {
     TextureCoordinatesMode_Clamp = GL_CLAMP_TO_EDGE,
     TextureCoordinatesMode_Border = GL_CLAMP_TO_BORDER,
 } TextureCoordinatesMode;
+
+typedef enum {
+    Blend_Zero = GL_ZERO,
+    Blend_One = GL_ONE,
+    Blend_SrcAlpha = GL_SRC_ALPHA,
+    Blend_DstAlpha = GL_DST_ALPHA,
+    Blend_SrcColor = GL_SRC_COLOR,
+    Blend_DstColor = GL_DST_COLOR,
+    Blend_OneMinusSrcAlpha = GL_ONE_MINUS_SRC_ALPHA,
+    Blend_OneMinusDstAlpha = GL_ONE_MINUS_DST_ALPHA,
+    Blend_OneMinusSrcColor = GL_ONE_MINUS_SRC_COLOR,
+    Blend_OneMinusDstColor = GL_ONE_MINUS_DST_COLOR,
+} Blend;
+
+typedef enum {
+    BlendEq_Add = GL_FUNC_ADD,
+    BlendEq_Subtract = GL_FUNC_SUBTRACT,
+    BlendEq_ReverseSubtract = GL_FUNC_REVERSE_SUBTRACT,
+    BlendEq_Min = GL_MIN,
+    BlendEq_Max = GL_MAX,
+} BlendEq;
 
 struct InputElementDesc {
     GLchar const* semanticName;
@@ -99,12 +120,38 @@ struct RasterizerDesc {
     CullMode cullMode;
 };
 
+struct BlendDesc {
+    bool enable;
+    Blend srcRGB;
+    Blend dstRGB;
+    BlendEq eqRGB;
+    Blend srcAlpha;
+    Blend dstAlpha;
+    BlendEq eqAlpha;
+};
+
 struct ResourceData {
     void const* mem;
 };
 
 class RasterizerState
 {
+    std::vector<std::function<void(void)>> m_ops;
+
+public:
+    void Append(std::function<void(void)> const& op)
+    {
+        m_ops.push_back(op);
+    }
+    void Operate() const
+    {
+        for (auto const& op : m_ops) {
+            op();
+        }
+    }
+};
+
+struct BlendState {
     std::vector<std::function<void(void)>> m_ops;
 
 public:
@@ -162,6 +209,7 @@ public:
     void CreateProgramPipeline(GLuint& pipeline);
     void CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename);
     void CreateRasterizerState(RasterizerDesc const& desc, RasterizerState** ppState);
+    void CreateBlendState(BlendDesc const& desc, BlendState** ppState);
     void AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filename);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
@@ -175,6 +223,7 @@ public:
     void SetProgramPipeline(GLuint pipeline);
     void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
     void SetRasterizerState(RasterizerState const* state);
+    void SetBlendState(BlendState const* state);
     void SetViewports(unsigned int numViewports, Viewport* viewports);
     void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
 

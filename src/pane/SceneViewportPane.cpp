@@ -92,6 +92,8 @@ void SceneViewportPane::InitGL()
     m_isGLLoaded = gladLoadGL();
     assert(m_isGLLoaded);
 
+    auto& gfx = Graphics::Get(m_project);
+
 #ifndef NDEBUG
     glDebugMessageCallback(
         []([[maybe_unused]] GLenum source, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id,
@@ -108,8 +110,22 @@ void SceneViewportPane::InitGL()
 #endif
 
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    BlendState* blendState = nullptr;
+
+    BlendDesc blendDesc;
+    blendDesc.enable = true;
+    blendDesc.srcRGB = Blend_SrcAlpha;
+    blendDesc.srcAlpha = Blend_One;
+    blendDesc.eqRGB = BlendEq_Add;
+    blendDesc.dstRGB = Blend_OneMinusSrcAlpha;
+    blendDesc.dstAlpha = Blend_Zero;
+    blendDesc.eqRGB = BlendEq_Add;
+
+    gfx.CreateBlendState(blendDesc, &blendState);
+    gfx.SetBlendState(blendState);
+
+    delete blendState;
 
     std::cout << "Version:      " << glGetString(GL_VERSION) << "\n"
               << "Graphics:     " << glGetString(GL_RENDERER) << "\n"

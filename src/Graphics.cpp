@@ -163,6 +163,23 @@ void Graphics::CreateRasterizerState(RasterizerDesc const& desc, RasterizerState
     }
 }
 
+void Graphics::CreateBlendState(BlendDesc const& desc, BlendState** ppState)
+{
+    *ppState = new BlendState();
+    BlendState* pState = *ppState;
+
+    if (desc.enable) {
+        pState->Append([](void) -> void { glEnable(GL_BLEND); });
+    } else {
+        pState->Append([](void) -> void { glDisable(GL_BLEND); });
+    }
+
+    pState->Append([desc](void) -> void {
+        glBlendEquationSeparate(desc.eqRGB, desc.eqAlpha);
+        glBlendFuncSeparate(desc.srcRGB, desc.dstRGB, desc.srcAlpha, desc.dstAlpha);
+    });
+}
+
 void Graphics::SetViewports(unsigned int numViewports, Viewport* viewports)
 {
     float* viewportParams = static_cast<float*>(malloc(numViewports * 4 * sizeof(float)));
@@ -264,6 +281,11 @@ void Graphics::SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLui
 }
 
 void Graphics::SetRasterizerState(RasterizerState const* state)
+{
+    state->Operate();
+}
+
+void Graphics::SetBlendState(BlendState const* state)
 {
     state->Operate();
 }
