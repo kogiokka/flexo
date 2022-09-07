@@ -37,8 +37,6 @@ class VolumetricModel : public InstancedDrawable
     };
 
     UniformBlock m_ub;
-    std::shared_ptr<Bind::Texture2D> m_texColor;
-    std::shared_ptr<Bind::Texture2D> m_texPattern;
 
 public:
     VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);

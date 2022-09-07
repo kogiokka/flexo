@@ -18,8 +18,6 @@
 
 VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
     : m_ub {}
-    , m_texColor(nullptr)
-    , m_texPattern(nullptr)
 {
     std::vector<InputElementDesc> inputs = {
         { "position", InputFormat::Float3, 0, offsetof(VertexPN, position), InputClassification::PerVertex, 0 },
@@ -50,9 +48,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     m_ub.vert.isWatermarked = false;
 
     float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
-    m_texColor = std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, 0);
     auto const& [img, w, h, ch] = world.pattern;
-    m_texPattern = std::make_shared<Bind::Texture2D>(gfx, img, w, h, 1);
 
     SamplerDesc samplerDesc;
     samplerDesc.coordinateS = TextureCoordinatesMode_Wrap;
@@ -78,8 +74,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
-    draw.AddBindable(m_texColor);
-    draw.AddBindable(m_texPattern);
+    draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, 0));
+    draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, img, w, h, 1));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 1));
 
