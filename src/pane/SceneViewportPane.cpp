@@ -120,13 +120,9 @@ void SceneViewportPane::InitGL()
     blendDesc.dstAlpha = Blend_Zero;
     blendDesc.eqAlpha = BlendEq_Add;
 
-    std::shared_ptr<BlendState> blend;
-    BlendState* ptr = nullptr;
-
-    gfx.CreateBlendState(blendDesc, &ptr);
-    blend.reset(ptr);
-
-    gfx.SetBlendState(blend.get());
+    GLPtr<BlendState> blend;
+    gfx.CreateBlendState(blendDesc, &blend);
+    gfx.SetBlendState(blend.Get());
 
     std::cout << "Version:      " << glGetString(GL_VERSION) << "\n"
               << "Graphics:     " << glGetString(GL_RENDERER) << "\n"

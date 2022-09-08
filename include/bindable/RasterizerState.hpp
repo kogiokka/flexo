@@ -13,7 +13,7 @@ namespace Bind
     class RasterizerState : public Bindable
     {
     protected:
-        std::shared_ptr<::RasterizerState> m_state;
+        GLPtr<::RasterizerState> m_state;
 
     public:
         RasterizerState(Graphics& gfx, RasterizerDesc const& desc);

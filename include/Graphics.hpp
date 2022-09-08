@@ -134,6 +134,29 @@ struct ResourceData {
     void const* mem;
 };
 
+template <typename T>
+class GLPtr
+{
+    T* m_ptr;
+
+public:
+    GLPtr()
+        : m_ptr(nullptr)
+    {
+    }
+    ~GLPtr()
+    {
+        delete m_ptr;
+    }
+    T** operator&()
+    {
+        return &m_ptr;
+    }
+    T* Get()
+    {
+        return m_ptr;
+    }
+};
 
 class _GLState
 {
