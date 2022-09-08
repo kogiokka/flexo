@@ -63,6 +63,7 @@ PRIVATE
     "src/assetlib/STL/STLImporter.cpp"
 
     "src/Graphics.cpp"
+    "src/RenderTarget.cpp"
     "src/Task.cpp"
     "src/bindable/Bindable.cpp"
     "src/bindable/Primitive.cpp"

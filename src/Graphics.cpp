@@ -3,6 +3,7 @@
 
 #include "Graphics.hpp"
 #include "Project.hpp"
+#include "RenderTarget.hpp"
 #include "common/Logger.hpp"
 #include "pane/SceneViewportPane.hpp"
 
@@ -40,6 +41,47 @@ Graphics const& Graphics::Get(WatermarkingProject const& project)
 Graphics::Graphics(int width, int height)
     : m_camera(width, height)
 {
+    // Default framebuffer
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
+    float quadVerts[] = { -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
+                          -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f };
+
+    std::vector<InputElementDesc> inputs = {
+        { "position", InputFormat::Float2, 0, 0, InputClassification::PerVertex, 0 },
+        { "textureCoord", InputFormat::Float2, 0, sizeof(float) * 2, InputClassification::PerVertex, 0 },
+    };
+
+    CreateProgramPipeline(m_ctx.pipeline);
+    CreateSeparableShaderProgram(m_ctx.vert, ShaderStage::Vert, "shader/Screen.vert");
+    CreateSeparableShaderProgram(m_ctx.frag, ShaderStage::Frag, "shader/Screen.frag");
+    CreateInputLayout(m_ctx.layout, inputs.data(), inputs.size(), m_ctx.vert);
+
+    BufferDesc bufferDesc;
+    bufferDesc.target = GL_ARRAY_BUFFER;
+    bufferDesc.usage = GL_STATIC_DRAW;
+    bufferDesc.byteWidth = 4 * sizeof(float) * 6;
+    bufferDesc.stride = 4 * sizeof(float);
+    ResourceData quadVertsData;
+    quadVertsData.mem = quadVerts;
+    CreateBuffer(m_ctx.buffer, bufferDesc, quadVertsData);
+
+    RasterizerDesc rasDesc { FillMode::Solid, CullMode::Back };
+    CreateRasterizerState(rasDesc, &m_ctx.state);
+}
+
+Graphics::~Graphics()
+{
+    DeleteProgramPipeline(m_ctx.pipeline);
+    DeleteShaderProgram(m_ctx.vert);
+    DeleteShaderProgram(m_ctx.frag);
+    DeleteInputLayout(m_ctx.layout);
+    DeleteBuffer(m_ctx.buffer);
+}
+
+void Graphics::CreateRenderTarget(int width, int height, RenderTarget** ppRenderTarget)
+{
+    *ppRenderTarget = new RenderTarget(width, height);
 }
 
 void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements,
@@ -233,6 +275,12 @@ void Graphics::LinkShaderProgram(const GLuint program)
     CheckProgramStatus(program);
 }
 
+void Graphics::SetRenderTarget(RenderTarget* target)
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, target->GetFrame());
+    m_ctx.screenTexture = target->GetTexture();
+}
+
 void Graphics::SetInputLayout(GLuint const layout)
 {
     glBindVertexArray(layout);
@@ -311,15 +359,34 @@ void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCou
     glDrawArraysInstanced(m_ctx.primitive, 0, vertexCountPerInstance, instanceCount);
 }
 
+void Graphics::Present()
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    SetPrimitive(GL_TRIANGLES);
+    GLintptr offset = 0;
+    GLsizei stride = 4 * sizeof(float);
+    SetVertexBuffers(0, 1, &m_ctx.buffer, &offset, &stride);
+
+    SetProgramPipeline(m_ctx.pipeline);
+    SetProgramPipelineStages(m_ctx.pipeline, GL_VERTEX_SHADER_BIT, m_ctx.vert);
+    SetProgramPipelineStages(m_ctx.pipeline, GL_FRAGMENT_SHADER_BIT, m_ctx.frag);
+
+    SetInputLayout(m_ctx.layout);
+
+    // FIXME It seems to collide with LatticeFace texture when the unit is set to 0.
+    SetTexture(GL_TEXTURE_2D, m_ctx.screenTexture, 20);
+    SetRasterizerState(m_ctx.state.Get());
+
+    glDisable(GL_DEPTH_TEST);
+    Draw(6);
+}
+
 void Graphics::SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex)
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, uniform);
-}
-
-void Graphics::ClearBuffer(float red, float green, float blue) const
-{
-    glClearColor(red, green, blue, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void Graphics::DeleteInputLayout(GLuint& layout)
@@ -350,6 +417,18 @@ void Graphics::DeleteShaderProgram(GLuint& program)
 void Graphics::DeleteProgramPipeline(GLuint& pipeline)
 {
     glDeleteProgramPipelines(1, &pipeline);
+}
+
+void Graphics::ClearRenderTarget(RenderTarget* target, float const color[4]) const
+{
+    GLint current;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &current);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, target->GetFrame());
+    glClearColor(color[0], color[1], color[2], color[3]);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, current);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const

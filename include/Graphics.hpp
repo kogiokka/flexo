@@ -10,6 +10,7 @@
 
 #include "Attachable.hpp"
 #include "Camera.hpp"
+#include "RenderTarget.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
@@ -188,6 +189,13 @@ class Graphics : public AttachableBase
         GLenum primitive;
         GLenum elementDataType;
         const GLvoid* offsetOfFirstIndex;
+        GLuint pipeline;
+        GLuint vert;
+        GLuint frag;
+        GLuint layout;
+        GLuint buffer;
+        GLuint screenTexture;
+        GLPtr<::RasterizerState> state;
     };
 
     struct GLAttribFormat {
@@ -204,6 +212,8 @@ public:
     static Graphics const& Get(WatermarkingProject const& project);
 
     Graphics(int width, int height);
+    ~Graphics();
+    void CreateRenderTarget(int width, int height, RenderTarget** ppRenderTarget);
     void CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements,
                            GLuint const programWithInputSignature);
     void CreateBuffer(GLuint& buffer, BufferDesc const& desc, ResourceData const& data);
@@ -219,6 +229,7 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
                           GLsizei const* strides);
+    void SetRenderTarget(RenderTarget* target);
     void SetInputLayout(GLuint const layout);
     void SetIndexBuffer(GLuint buffer, GLenum elementDataType, GLvoid const* offsetOfFirstIndex);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
@@ -237,7 +248,7 @@ public:
     void DeleteSampler(GLuint& sampler);
     void DeleteShaderProgram(GLuint& program);
     void DeleteProgramPipeline(GLuint& pipeline);
-    void ClearBuffer(float red, float green, float blue) const;
+    void ClearRenderTarget(RenderTarget* target, float const color[4]) const;
 
     glm::mat4 GetViewProjectionMatrix() const;
     glm::vec3 GetCameraPosition() const;
@@ -248,6 +259,7 @@ public:
     void Draw(GLsizei vertexCount);
     void DrawIndexed(GLsizei indexCount);
     void DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCount);
+    void Present();
 
 private:
     int UniformLocation(std::string const& uniformName) const;

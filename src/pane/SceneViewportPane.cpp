@@ -4,13 +4,14 @@
 #include <fstream>
 #include <iostream>
 
-#include "Graphics.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 #include "pane/SceneViewportPane.hpp"
+
+#include "Vertex.hpp"
 
 enum {
     Pane_SceneViewport = wxID_HIGHEST + 1,
@@ -76,12 +77,17 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     wxPaintDC dc(this);
     SetCurrent(*m_context);
 
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    auto& gfx = Graphics::Get(m_project);
 
+    float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    gfx.ClearRenderTarget(m_renderTarget.Get(), bgColor);
+    gfx.SetRenderTarget(m_renderTarget.Get());
+
+    glEnable(GL_DEPTH_TEST);
     UpdateScene();
-
     Renderer::Get(m_project).Render(Graphics::Get(m_project));
+
+    gfx.Present();
 
     SwapBuffers();
 }
@@ -93,6 +99,9 @@ void SceneViewportPane::InitGL()
     assert(m_isGLLoaded);
 
     auto& gfx = Graphics::Get(m_project);
+    wxSize const size = GetClientSize() * GetContentScaleFactor();
+    gfx.CreateRenderTarget(size.x, size.y, &m_renderTarget);
+    gfx.SetRenderTarget(m_renderTarget.Get());
 
 #ifndef NDEBUG
     glDebugMessageCallback(
@@ -108,8 +117,6 @@ void SceneViewportPane::InitGL()
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
-
-    glEnable(GL_DEPTH_TEST);
 
     BlendDesc blendDesc;
     blendDesc.enable = true;
@@ -142,6 +149,11 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
     Graphics::Get(m_project).GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
 
     SetCurrent(*m_context);
+
+    m_renderTarget = GLPtr<RenderTarget>();
+    auto& gfx = Graphics::Get(m_project);
+    gfx.CreateRenderTarget(size.x, size.y, &m_renderTarget);
+    gfx.SetRenderTarget(m_renderTarget.Get());
 
     Viewport v;
     v.x = 0.0f;
@@ -242,3 +254,5 @@ float SceneViewportPane::RoundGuard(float radian)
     else
         return radian;
 }
+
+
