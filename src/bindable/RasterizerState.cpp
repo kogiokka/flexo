@@ -5,7 +5,9 @@ namespace Bind
     RasterizerState::RasterizerState(Graphics& gfx, RasterizerDesc const& desc)
         : Bindable(gfx)
     {
-        m_gfx->CreateRasterizerState(desc, &m_state);
+        ::RasterizerState* ptr = nullptr;
+        m_gfx->CreateRasterizerState(desc, &ptr);
+        m_state.reset(ptr);
     }
 
     RasterizerState::~RasterizerState()
@@ -14,6 +16,6 @@ namespace Bind
 
     void RasterizerState::Bind()
     {
-        m_gfx->SetRasterizerState(m_state);
+        m_gfx->SetRasterizerState(m_state.get());
     }
 }

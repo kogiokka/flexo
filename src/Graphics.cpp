@@ -6,23 +6,17 @@
 #include "common/Logger.hpp"
 #include "pane/SceneViewportPane.hpp"
 
-class _GLState
+void _GLState::Add(_Op op)
 {
-    using _Op = std::function<void(void)>;
-    std::vector<_Op> m_ops;
+    m_ops.push_back(op);
+}
 
-public:
-    void Add(_Op op)
-    {
-        m_ops.push_back(op);
+void _GLState::Execute() const
+{
+    for (auto const& op : m_ops) {
+        op();
     }
-    void Execute() const
-    {
-        for (auto const& op : m_ops) {
-            op();
-        }
-    }
-};
+}
 
 // Register factory: Graphics
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {

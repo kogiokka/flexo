@@ -134,7 +134,17 @@ struct ResourceData {
     void const* mem;
 };
 
-class _GLState;
+
+class _GLState
+{
+    using _Op = std::function<void(void)>;
+    std::vector<_Op> m_ops;
+
+public:
+    void Add(_Op op);
+    void Execute() const;
+};
+
 using RasterizerState = _GLState;
 using BlendState = _GLState;
 

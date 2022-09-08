@@ -111,8 +111,6 @@ void SceneViewportPane::InitGL()
 
     glEnable(GL_DEPTH_TEST);
 
-    BlendState* blendState = nullptr;
-
     BlendDesc blendDesc;
     blendDesc.enable = true;
     blendDesc.srcRGB = Blend_SrcAlpha;
@@ -122,10 +120,13 @@ void SceneViewportPane::InitGL()
     blendDesc.dstAlpha = Blend_Zero;
     blendDesc.eqAlpha = BlendEq_Add;
 
-    gfx.CreateBlendState(blendDesc, &blendState);
-    gfx.SetBlendState(blendState);
+    std::shared_ptr<BlendState> blend;
+    BlendState* ptr = nullptr;
 
-    delete blendState;
+    gfx.CreateBlendState(blendDesc, &ptr);
+    blend.reset(ptr);
+
+    gfx.SetBlendState(blend.get());
 
     std::cout << "Version:      " << glGetString(GL_VERSION) << "\n"
               << "Graphics:     " << glGetString(GL_RENDERER) << "\n"
