@@ -116,11 +116,11 @@ void SceneViewportPane::InitGL()
     BlendDesc blendDesc;
     blendDesc.enable = true;
     blendDesc.srcRGB = Blend_SrcAlpha;
-    blendDesc.srcAlpha = Blend_One;
-    blendDesc.eqRGB = BlendEq_Add;
     blendDesc.dstRGB = Blend_OneMinusSrcAlpha;
-    blendDesc.dstAlpha = Blend_Zero;
     blendDesc.eqRGB = BlendEq_Add;
+    blendDesc.srcAlpha = Blend_One;
+    blendDesc.dstAlpha = Blend_Zero;
+    blendDesc.eqAlpha = BlendEq_Add;
 
     gfx.CreateBlendState(blendDesc, &blendState);
     gfx.SetBlendState(blendState);
