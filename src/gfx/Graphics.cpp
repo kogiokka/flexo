@@ -41,7 +41,9 @@ Graphics const& Graphics::Get(WatermarkingProject const& project)
 Graphics::Graphics(int width, int height)
     : m_camera(width, height)
 {
-    // Default framebuffer
+    m_ctx.framebuffer = 0;
+
+    // Setup the default framebuffer
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 
     float quadVerts[] = { -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
@@ -279,6 +281,7 @@ void Graphics::LinkShaderProgram(const GLuint program)
 void Graphics::SetRenderTarget(GLWRRenderTarget* target)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, target->GetFrame());
+    m_ctx.framebuffer = target->GetFrame();
     m_ctx.screenTexture = target->GetTexture();
 }
 
@@ -422,14 +425,10 @@ void Graphics::DeleteProgramPipeline(GLuint& pipeline)
 
 void Graphics::ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const
 {
-    GLint current;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &current);
-
     glBindFramebuffer(GL_FRAMEBUFFER, target->GetFrame());
     glClearColor(color[0], color[1], color[2], color[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, current);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const

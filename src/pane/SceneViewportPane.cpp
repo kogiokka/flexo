@@ -81,7 +81,6 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
 
     float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
     gfx.ClearRenderTarget(m_renderTarget.Get(), bgColor);
-    gfx.SetRenderTarget(m_renderTarget.Get());
 
     glEnable(GL_DEPTH_TEST);
     UpdateScene();
@@ -254,5 +253,3 @@ float SceneViewportPane::RoundGuard(float radian)
     else
         return radian;
 }
-
-

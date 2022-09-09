@@ -194,6 +194,7 @@ class Graphics : public AttachableBase
         GLuint frag;
         GLuint layout;
         GLuint buffer;
+        GLuint framebuffer;
         GLuint screenTexture;
         GLWRPtr<GLWRRasterizerState> state;
     };
