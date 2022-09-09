@@ -83,7 +83,7 @@ typedef enum {
     GLWRBlendEq_ReverseSubtract = GL_FUNC_REVERSE_SUBTRACT,
     GLWRBlendEq_Min = GL_MIN,
     GLWRBlendEq_Max = GL_MAX,
-} GWLRBlendEq;
+} GLWRBlendEq;
 
 struct GLWRInputElementDesc {
     GLchar const* semanticName;
@@ -125,10 +125,10 @@ struct GLWRBlendDesc {
     bool enable;
     GLWRBlend srcRGB;
     GLWRBlend dstRGB;
-    GWLRBlendEq eqRGB;
+    GLWRBlendEq eqRGB;
     GLWRBlend srcAlpha;
     GLWRBlend dstAlpha;
-    GWLRBlendEq eqAlpha;
+    GLWRBlendEq eqAlpha;
 };
 
 struct GLWRResourceData {
