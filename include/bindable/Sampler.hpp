@@ -1,15 +1,15 @@
 #ifndef SAMPLER_H
 #define SAMPLER_H
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {
     class Sampler : public Bindable
     {
     public:
-        Sampler(Graphics& gfx, SamplerDesc samplerDesc, GLuint textureUnit);
+        Sampler(Graphics& gfx, GLWRSamplerDesc samplerDesc, GLuint textureUnit);
         ~Sampler() override;
         void Bind() override;
 

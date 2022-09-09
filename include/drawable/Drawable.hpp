@@ -6,10 +6,10 @@
 
 #include <glm/glm.hpp>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "drawable/DrawableBase.hpp"
+#include "gfx/Graphics.hpp"
 
 class Drawable : public DrawableBase
 {

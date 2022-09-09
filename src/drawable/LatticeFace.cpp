@@ -16,10 +16,10 @@
 
 LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float3, 0, offsetof(VertexPNT, position), InputClassification::PerVertex, 0 },
-        { "normal", InputFormat::Float3, 0, offsetof(VertexPNT, normal), InputClassification::PerVertex, 0 },
-        { "textureCoord", InputFormat::Float2, 0, offsetof(VertexPNT, texcoord), InputClassification::PerVertex, 0 },
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRInputFormat::Float3, 0, offsetof(VertexPNT, position), GLWRInputClassification::PerVertex, 0 },
+        { "normal", GLWRInputFormat::Float3, 0, offsetof(VertexPNT, normal), GLWRInputClassification::PerVertex, 0 },
+        { "textureCoord", GLWRInputFormat::Float2, 0, offsetof(VertexPNT, texcoord), GLWRInputClassification::PerVertex, 0 },
     };
 
     std::vector<VertexPNT> vertices;
@@ -33,11 +33,11 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 
     m_isVisible = false;
 
-    SamplerDesc samplerDesc;
-    samplerDesc.coordinateS = TextureCoordinatesMode_Wrap;
-    samplerDesc.coordinateT = TextureCoordinatesMode_Wrap;
-    samplerDesc.coordinateR = TextureCoordinatesMode_Wrap;
-    samplerDesc.filter = Filter_MinMagNearest_MipNearest;
+    GLWRSamplerDesc samplerDesc;
+    samplerDesc.coordinateS = GLWRTextureCoordinatesMode_Wrap;
+    samplerDesc.coordinateT = GLWRTextureCoordinatesMode_Wrap;
+    samplerDesc.coordinateR = GLWRTextureCoordinatesMode_Wrap;
+    samplerDesc.filter = GLWRFilter_MinMagNearest_MipNearest;
 
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -68,7 +68,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, img, w, h, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::Solid, GLWRCullMode::None }));
 
     AddTask(draw);
 }

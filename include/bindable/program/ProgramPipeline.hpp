@@ -3,10 +3,10 @@
 
 #include <glad/glad.h>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {

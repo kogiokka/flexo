@@ -6,7 +6,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "Graphics.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "Renderer.hpp"
@@ -20,6 +19,7 @@
 #include "drawable/LightSource.hpp"
 #include "drawable/PolygonalModel.hpp"
 #include "drawable/VolumetricModel.hpp"
+#include "gfx/Graphics.hpp"
 
 WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)

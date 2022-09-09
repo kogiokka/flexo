@@ -118,16 +118,16 @@ void SceneViewportPane::InitGL()
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
 
-    BlendDesc blendDesc;
+    GLWRBlendDesc blendDesc;
     blendDesc.enable = true;
-    blendDesc.srcRGB = Blend_SrcAlpha;
-    blendDesc.dstRGB = Blend_OneMinusSrcAlpha;
-    blendDesc.eqRGB = BlendEq_Add;
-    blendDesc.srcAlpha = Blend_One;
-    blendDesc.dstAlpha = Blend_Zero;
-    blendDesc.eqAlpha = BlendEq_Add;
+    blendDesc.srcRGB = GLWRBlend_SrcAlpha;
+    blendDesc.dstRGB = GLWRBlend_OneMinusSrcAlpha;
+    blendDesc.eqRGB = GLWRBlendEq_Add;
+    blendDesc.srcAlpha = GLWRBlend_One;
+    blendDesc.dstAlpha = GLWRBlend_Zero;
+    blendDesc.eqAlpha = GLWRBlendEq_Add;
 
-    GLPtr<BlendState> blend;
+    GLWRPtr<GLWRBlendState> blend;
     gfx.CreateBlendState(blendDesc, &blend);
     gfx.SetBlendState(blend.Get());
 
@@ -150,12 +150,12 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
 
     SetCurrent(*m_context);
 
-    m_renderTarget = GLPtr<RenderTarget>();
+    m_renderTarget = GLWRPtr<GLWRRenderTarget>();
     auto& gfx = Graphics::Get(m_project);
     gfx.CreateRenderTarget(size.x, size.y, &m_renderTarget);
     gfx.SetRenderTarget(m_renderTarget.Get());
 
-    Viewport v;
+    GLWRViewport v;
     v.x = 0.0f;
     v.y = 0.0f;
     v.width = size.x;

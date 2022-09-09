@@ -10,8 +10,8 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {
@@ -23,7 +23,7 @@ namespace Bind
         ShaderProgram(Graphics& gfx);
         ~ShaderProgram() override;
         void Bind() override;
-        void Attach(ShaderStage stage, std::string const& filepath);
+        void Attach(GLWRShaderStage stage, std::string const& filepath);
         void Link();
     };
 }

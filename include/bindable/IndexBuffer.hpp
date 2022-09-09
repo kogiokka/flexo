@@ -5,8 +5,8 @@
 
 #include <glad/glad.h>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {

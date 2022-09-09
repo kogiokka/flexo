@@ -4,8 +4,8 @@
 #include <cstring>
 #include <string>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {
@@ -29,8 +29,8 @@ namespace Bind
         , m_id(0)
         , m_bindingIndex(bindingIndex)
     {
-        BufferDesc desc;
-        ResourceData data;
+        GLWRBufferDesc desc;
+        GLWRResourceData data;
 
         desc.target = GL_UNIFORM_BUFFER;
         desc.usage = GL_STREAM_DRAW;
@@ -47,8 +47,8 @@ namespace Bind
         , m_id(0)
         , m_bindingIndex(bindingIndex)
     {
-        BufferDesc desc;
-        ResourceData data;
+        GLWRBufferDesc desc;
+        GLWRResourceData data;
 
         desc.target = GL_UNIFORM_BUFFER;
         desc.usage = GL_STREAM_DRAW;

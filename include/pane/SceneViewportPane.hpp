@@ -13,7 +13,7 @@
 #include <wx/glcanvas.h>
 #include <wx/string.h>
 
-#include "Graphics.hpp"
+#include "gfx/Graphics.hpp"
 
 class WatermarkingProject;
 
@@ -38,7 +38,7 @@ public:
 
 private:
     WatermarkingProject& m_project;
-    GLPtr<RenderTarget> m_renderTarget;
+    GLWRPtr<GLWRRenderTarget> m_renderTarget;
     std::unique_ptr<wxGLContext> m_context;
     bool m_isGLLoaded;
     float m_rateMove;

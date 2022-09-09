@@ -1,18 +1,18 @@
 #include <cstdlib>
 #include <fstream>
 
-#include "Graphics.hpp"
 #include "Project.hpp"
 #include "RenderTarget.hpp"
 #include "common/Logger.hpp"
+#include "gfx/Graphics.hpp"
 #include "pane/SceneViewportPane.hpp"
 
-void _GLState::Add(_Op op)
+void _GLWRState::Add(_Op op)
 {
     m_ops.push_back(op);
 }
 
-void _GLState::Execute() const
+void _GLWRState::Execute() const
 {
     for (auto const& op : m_ops) {
         op();
@@ -47,26 +47,26 @@ Graphics::Graphics(int width, int height)
     float quadVerts[] = { -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
                           -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f };
 
-    std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float2, 0, 0, InputClassification::PerVertex, 0 },
-        { "textureCoord", InputFormat::Float2, 0, sizeof(float) * 2, InputClassification::PerVertex, 0 },
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRInputFormat::Float2, 0, 0, GLWRInputClassification::PerVertex, 0 },
+        { "textureCoord", GLWRInputFormat::Float2, 0, sizeof(float) * 2, GLWRInputClassification::PerVertex, 0 },
     };
 
     CreateProgramPipeline(m_ctx.pipeline);
-    CreateSeparableShaderProgram(m_ctx.vert, ShaderStage::Vert, "shader/Screen.vert");
-    CreateSeparableShaderProgram(m_ctx.frag, ShaderStage::Frag, "shader/Screen.frag");
+    CreateSeparableShaderProgram(m_ctx.vert, GLWRShaderStage::Vert, "shader/Screen.vert");
+    CreateSeparableShaderProgram(m_ctx.frag, GLWRShaderStage::Frag, "shader/Screen.frag");
     CreateInputLayout(m_ctx.layout, inputs.data(), inputs.size(), m_ctx.vert);
 
-    BufferDesc bufferDesc;
+    GLWRBufferDesc bufferDesc;
     bufferDesc.target = GL_ARRAY_BUFFER;
     bufferDesc.usage = GL_STATIC_DRAW;
     bufferDesc.byteWidth = 4 * sizeof(float) * 6;
     bufferDesc.stride = 4 * sizeof(float);
-    ResourceData quadVertsData;
+    GLWRResourceData quadVertsData;
     quadVertsData.mem = quadVerts;
     CreateBuffer(m_ctx.buffer, bufferDesc, quadVertsData);
 
-    RasterizerDesc rasDesc { FillMode::Solid, CullMode::Back };
+    GLWRRasterizerDesc rasDesc { GLWRFillMode::Solid, GLWRCullMode::Back };
     CreateRasterizerState(rasDesc, &m_ctx.state);
 }
 
@@ -79,12 +79,12 @@ Graphics::~Graphics()
     DeleteBuffer(m_ctx.buffer);
 }
 
-void Graphics::CreateRenderTarget(int width, int height, RenderTarget** ppRenderTarget)
+void Graphics::CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget)
 {
-    *ppRenderTarget = new RenderTarget(width, height);
+    *ppRenderTarget = new GLWRRenderTarget(width, height);
 }
 
-void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputElementDesc, int const numElements,
+void Graphics::CreateInputLayout(GLuint& layout, GLWRInputElementDesc const* inputElementDesc, int const numElements,
                                  GLuint const programWithInputSignature)
 {
     glGenVertexArrays(1, &layout);
@@ -101,20 +101,21 @@ void Graphics::CreateInputLayout(GLuint& layout, InputElementDesc const* inputEl
         glVertexAttribFormat(location, size, type, normalized, desc.byteOffset);
         glVertexAttribBinding(location, desc.inputSlot);
         glVertexBindingDivisor(desc.inputSlot, 0);
-        if (desc.inputSlotClass == InputClassification::PerInstance) {
+        if (desc.inputSlotClass == GLWRInputClassification::PerInstance) {
             glVertexBindingDivisor(desc.inputSlot, desc.instanceDataStepRate);
         }
     }
 }
 
-void Graphics::CreateBuffer(GLuint& buffer, BufferDesc const& desc, ResourceData const& data)
+void Graphics::CreateBuffer(GLuint& buffer, GLWRBufferDesc const& desc, GLWRResourceData const& data)
 {
     glGenBuffers(1, &buffer);
     glBindBuffer(desc.target, buffer);
     glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
 }
 
-void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc const& desc, ResourceData const& data)
+void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, GLWRTexture2DDesc const& desc,
+                               GLWRResourceData const& data)
 {
     constexpr GLint BORDER = 0;
     glGenTextures(1, &texture);
@@ -127,7 +128,7 @@ void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, Texture2dDesc
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void Graphics::CreateSampler(GLuint& sampler, SamplerDesc const& desc)
+void Graphics::CreateSampler(GLuint& sampler, GLWRSamplerDesc const& desc)
 {
     glGenSamplers(1, &sampler);
 
@@ -136,27 +137,27 @@ void Graphics::CreateSampler(GLuint& sampler, SamplerDesc const& desc)
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_R, desc.coordinateR);
 
     switch (desc.filter) {
-    case Filter_MinMagNearest_NoMip:
+    case GLWRFilter_MinMagNearest_NoMip:
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
-    case Filter_MinMagLinear_NoMip:
+    case GLWRFilter_MinMagLinear_NoMip:
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
-    case Filter_MinMagNearest_MipNearest:
+    case GLWRFilter_MinMagNearest_MipNearest:
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
-    case Filter_MinMagNearest_MipLinear:
+    case GLWRFilter_MinMagNearest_MipLinear:
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
-    case Filter_MinMagLinear_MipNearest:
+    case GLWRFilter_MinMagLinear_MipNearest:
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
-    case Filter_MinMagLinear_MipLinear:
+    case GLWRFilter_MinMagLinear_MipLinear:
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
@@ -175,7 +176,7 @@ void Graphics::CreateProgramPipeline(GLuint& pipeline)
     glGenProgramPipelines(1, &pipeline);
 }
 
-void Graphics::CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, std::string const& filename)
+void Graphics::CreateSeparableShaderProgram(GLuint& program, GLWRShaderStage stage, std::string const& filename)
 {
     std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
@@ -184,39 +185,39 @@ void Graphics::CreateSeparableShaderProgram(GLuint& program, ShaderStage stage, 
     CheckProgramStatus(program);
 }
 
-void Graphics::CreateRasterizerState(RasterizerDesc const& desc, RasterizerState** ppState)
+void Graphics::CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasterizerState** ppState)
 {
-    *ppState = new RasterizerState();
-    RasterizerState* pState = *ppState;
+    *ppState = new GLWRRasterizerState();
+    GLWRRasterizerState* pState = *ppState;
 
     switch (desc.cullMode) {
-    case CullMode::Back:
+    case GLWRCullMode::Back:
         pState->Add(std::bind(glEnable, GL_CULL_FACE));
         pState->Add(std::bind(glCullFace, GL_BACK));
         break;
-    case CullMode::Front:
+    case GLWRCullMode::Front:
         pState->Add(std::bind(glEnable, GL_CULL_FACE));
         pState->Add(std::bind(glCullFace, GL_FRONT));
         break;
-    case CullMode::None:
+    case GLWRCullMode::None:
         pState->Add(std::bind(glDisable, GL_CULL_FACE));
         break;
     };
 
     switch (desc.fillMode) {
-    case FillMode::WireFrame:
+    case GLWRFillMode::WireFrame:
         pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE));
         break;
-    case FillMode::Solid:
+    case GLWRFillMode::Solid:
         pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL));
         break;
     }
 }
 
-void Graphics::CreateBlendState(BlendDesc const& desc, BlendState** ppState)
+void Graphics::CreateBlendState(GLWRBlendDesc const& desc, GLWRBlendState** ppState)
 {
-    *ppState = new BlendState();
-    BlendState* pState = *ppState;
+    *ppState = new GLWRBlendState();
+    GLWRBlendState* pState = *ppState;
 
     if (desc.enable) {
         pState->Add(std::bind(glEnable, GL_BLEND));
@@ -228,7 +229,7 @@ void Graphics::CreateBlendState(BlendDesc const& desc, BlendState** ppState)
     pState->Add(std::bind(glBlendFuncSeparate, desc.srcRGB, desc.dstRGB, desc.srcAlpha, desc.dstAlpha));
 }
 
-void Graphics::SetViewports(unsigned int numViewports, Viewport* viewports)
+void Graphics::SetViewports(unsigned int numViewports, GLWRViewport* viewports)
 {
     float* viewportParams = static_cast<float*>(malloc(numViewports * 4 * sizeof(float)));
     double* depthRangeParams = static_cast<double*>(malloc(numViewports * 2 * sizeof(double)));
@@ -250,7 +251,7 @@ void Graphics::SetViewports(unsigned int numViewports, Viewport* viewports)
     free(depthRangeParams);
 }
 
-void Graphics::AttachShaderStage(GLuint const program, ShaderStage stage, std::string const& filename)
+void Graphics::AttachShaderStage(GLuint const program, GLWRShaderStage stage, std::string const& filename)
 {
     std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
@@ -275,7 +276,7 @@ void Graphics::LinkShaderProgram(const GLuint program)
     CheckProgramStatus(program);
 }
 
-void Graphics::SetRenderTarget(RenderTarget* target)
+void Graphics::SetRenderTarget(GLWRRenderTarget* target)
 {
     glBindFramebuffer(GL_FRAMEBUFFER, target->GetFrame());
     m_ctx.screenTexture = target->GetTexture();
@@ -334,12 +335,12 @@ void Graphics::SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLui
     glUseProgramStages(pipeline, stages, program);
 }
 
-void Graphics::SetRasterizerState(RasterizerState const* state)
+void Graphics::SetRasterizerState(GLWRRasterizerState const* state)
 {
     state->Execute();
 }
 
-void Graphics::SetBlendState(BlendState const* state)
+void Graphics::SetBlendState(GLWRBlendState const* state)
 {
     state->Execute();
 }
@@ -419,7 +420,7 @@ void Graphics::DeleteProgramPipeline(GLuint& pipeline)
     glDeleteProgramPipelines(1, &pipeline);
 }
 
-void Graphics::ClearRenderTarget(RenderTarget* target, float const color[4]) const
+void Graphics::ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const
 {
     GLint current;
     glGetIntegerv(GL_FRAMEBUFFER_BINDING, &current);
@@ -514,43 +515,43 @@ std::string Graphics::SlurpShaderSource(std::string const& filename) const
     return source;
 }
 
-GLenum Graphics::Enum::Resolve(ShaderStage const stage)
+GLenum Graphics::Enum::Resolve(GLWRShaderStage const stage)
 {
     switch (stage) {
-    case ShaderStage::Vert:
+    case GLWRShaderStage::Vert:
         return GL_VERTEX_SHADER;
-    case ShaderStage::Tesc:
+    case GLWRShaderStage::Tesc:
         return GL_TESS_CONTROL_SHADER;
-    case ShaderStage::Tese:
+    case GLWRShaderStage::Tese:
         return GL_TESS_EVALUATION_SHADER;
-    case ShaderStage::Geom:
+    case GLWRShaderStage::Geom:
         return GL_GEOMETRY_SHADER;
-    case ShaderStage::Frag:
+    case GLWRShaderStage::Frag:
         return GL_FRAGMENT_SHADER;
-    case ShaderStage::Comp:
+    case GLWRShaderStage::Comp:
         return GL_COMPUTE_SHADER;
     }
 }
 
-Graphics::GLAttribFormat Graphics::Enum::Resolve(InputFormat const format)
+Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRInputFormat const format)
 {
     switch (format) {
-    case InputFormat::Float2:
+    case GLWRInputFormat::Float2:
         return GLAttribFormat { 2, GL_FLOAT, GL_FALSE };
         break;
-    case InputFormat::Float3:
+    case GLWRInputFormat::Float3:
         return GLAttribFormat { 3, GL_FLOAT, GL_FALSE };
         break;
-    case InputFormat::Uint2:
+    case GLWRInputFormat::Uint2:
         return GLAttribFormat { 2, GL_UNSIGNED_INT, GL_FALSE };
         break;
-    case InputFormat::Uint3:
+    case GLWRInputFormat::Uint3:
         return GLAttribFormat { 3, GL_UNSIGNED_INT, GL_FALSE };
         break;
-    case InputFormat::Uint2Norm:
+    case GLWRInputFormat::Uint2Norm:
         return GLAttribFormat { 2, GL_UNSIGNED_INT, GL_TRUE };
         break;
-    case InputFormat::Uint3Norm:
+    case GLWRInputFormat::Uint3Norm:
         return GLAttribFormat { 3, GL_UNSIGNED_INT, GL_TRUE };
         break;
     }

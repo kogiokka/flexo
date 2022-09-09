@@ -1,8 +1,8 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 #include <vector>
 
@@ -22,7 +22,7 @@ namespace Bind
 
     protected:
         template <typename T>
-        void DetermineDataType(Texture2dDesc& desc) const;
+        void DetermineDataType(GLWRTexture2DDesc& desc) const;
     };
 
     template <typename T>
@@ -31,8 +31,8 @@ namespace Bind
         , m_id(0)
         , m_unit(unit)
     {
-        Texture2dDesc desc;
-        ResourceData data;
+        GLWRTexture2DDesc desc;
+        GLWRResourceData data;
 
         desc.width = width;
         desc.height = height;
@@ -46,10 +46,10 @@ namespace Bind
     }
 
     template <>
-    void Texture2D::DetermineDataType<float>(Texture2dDesc& desc) const;
+    void Texture2D::DetermineDataType<float>(GLWRTexture2DDesc& desc) const;
 
     template <>
-    void Texture2D::DetermineDataType<unsigned char>(Texture2dDesc& desc) const;
+    void Texture2D::DetermineDataType<unsigned char>(GLWRTexture2DDesc& desc) const;
 }
 
 #endif

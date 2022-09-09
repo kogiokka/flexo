@@ -4,8 +4,8 @@
 #include <memory>
 #include <vector>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 class DrawableBase;
 

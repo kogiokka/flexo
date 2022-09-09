@@ -6,9 +6,9 @@
 
 #include <glad/glad.h>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 #include "bindable/InputLayout.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {

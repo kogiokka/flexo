@@ -5,10 +5,10 @@
 
 #include <glm/glm.hpp>
 
-#include "Graphics.hpp"
 #include "Mesh.hpp"
 #include "bindable/Texture2D.hpp"
 #include "drawable/InstancedDrawable.hpp"
+#include "gfx/Graphics.hpp"
 
 class VolumetricModel : public InstancedDrawable
 {

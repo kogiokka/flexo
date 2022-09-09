@@ -2,7 +2,7 @@
 
 namespace Bind
 {
-    Sampler::Sampler(Graphics& gfx, SamplerDesc samplerDesc, GLuint textureUnit)
+    Sampler::Sampler(Graphics& gfx, GLWRSamplerDesc samplerDesc, GLuint textureUnit)
         : Bindable(gfx)
         , m_unit(textureUnit)
     {

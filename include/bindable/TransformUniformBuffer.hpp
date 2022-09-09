@@ -4,10 +4,10 @@
 #include <cstring>
 #include <string>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 #include "bindable/UniformBuffer.hpp"
 #include "drawable/Drawable.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {

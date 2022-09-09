@@ -3,9 +3,9 @@
 
 #include <glm/glm.hpp>
 
-#include "Graphics.hpp"
 #include "Mesh.hpp"
 #include "drawable/Drawable.hpp"
+#include "gfx/Graphics.hpp"
 
 class LatticeFace : public Drawable
 {

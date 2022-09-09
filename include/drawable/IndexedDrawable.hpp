@@ -6,10 +6,10 @@
 
 #include <glm/glm.hpp>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
 #include "bindable/IndexBuffer.hpp"
 #include "drawable/DrawableBase.hpp"
+#include "gfx/Graphics.hpp"
 
 class IndexedDrawable : public DrawableBase
 {

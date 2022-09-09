@@ -23,7 +23,7 @@ namespace Bind
         m_gfx->LinkShaderProgram(m_id);
     }
 
-    void ShaderProgram::Attach(ShaderStage stage, std::string const& filepath)
+    void ShaderProgram::Attach(GLWRShaderStage stage, std::string const& filepath)
     {
         m_gfx->AttachShaderStage(m_id, stage, filepath);
     }

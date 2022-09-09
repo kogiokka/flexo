@@ -5,18 +5,18 @@
 
 #include <glad/glad.h>
 
-#include "Graphics.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {
     class RasterizerState : public Bindable
     {
     protected:
-        GLPtr<::RasterizerState> m_state;
+        GLWRPtr<GLWRRasterizerState> m_state;
 
     public:
-        RasterizerState(Graphics& gfx, RasterizerDesc const& desc);
+        RasterizerState(Graphics& gfx, GLWRRasterizerDesc const& desc);
         ~RasterizerState() override;
         void Bind() override;
     };

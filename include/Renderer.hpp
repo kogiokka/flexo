@@ -5,9 +5,9 @@
 #include <vector>
 
 #include "Attachable.hpp"
-#include "Graphics.hpp"
 #include "Mesh.hpp"
 #include "Task.hpp"
+#include "gfx/Graphics.hpp"
 
 class WatermarkingProject;
 

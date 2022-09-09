@@ -1,7 +1,7 @@
-#include "RenderTarget.hpp"
+#include "gfx/GLWRRenderTarget.hpp"
 #include "common/Logger.hpp"
 
-RenderTarget::RenderTarget(int width, int height)
+GLWRRenderTarget::GLWRRenderTarget(int width, int height)
 {
     glGenFramebuffers(1, &m_frame);
     glGenTextures(1, &m_texture);
@@ -30,19 +30,19 @@ RenderTarget::RenderTarget(int width, int height)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-RenderTarget::~RenderTarget()
+GLWRRenderTarget::~GLWRRenderTarget()
 {
     glDeleteRenderbuffers(1, &m_rbo);
     glDeleteTextures(1, &m_texture);
     glDeleteFramebuffers(1, &m_frame);
 }
 
-GLuint RenderTarget::GetFrame() const
+GLuint GLWRRenderTarget::GetFrame() const
 {
     return m_frame;
 }
 
-GLuint RenderTarget::GetTexture() const
+GLuint GLWRRenderTarget::GetTexture() const
 {
     return m_texture;
 }

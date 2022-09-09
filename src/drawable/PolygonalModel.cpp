@@ -17,9 +17,9 @@
 
 PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float3, 0, offsetof(VertexPN, position), InputClassification::PerVertex, 0 },
-        { "normal", InputFormat::Float3, 0, offsetof(VertexPN, normal), InputClassification::PerVertex, 0 },
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRInputFormat::Float3, 0, offsetof(VertexPN, position), GLWRInputClassification::PerVertex, 0 },
+        { "normal", GLWRInputFormat::Float3, 0, offsetof(VertexPN, normal), GLWRInputClassification::PerVertex, 0 },
     };
 
     std::vector<VertexPN> vertices;
@@ -58,7 +58,7 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::None }));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::Solid, GLWRCullMode::None }));
 
     AddTask(draw);
 }

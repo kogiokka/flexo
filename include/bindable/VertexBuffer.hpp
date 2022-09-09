@@ -3,9 +3,9 @@
 
 #include <vector>
 
-#include "Graphics.hpp"
 #include "Vertex.hpp"
 #include "bindable/Bindable.hpp"
+#include "gfx/Graphics.hpp"
 
 namespace Bind
 {
@@ -40,8 +40,8 @@ namespace Bind
         , m_stride(sizeof(T))
         , m_count(vertices.size())
     {
-        BufferDesc desc;
-        ResourceData data;
+        GLWRBufferDesc desc;
+        GLWRResourceData data;
 
         desc.target = GL_ARRAY_BUFFER;
         desc.usage = GL_DYNAMIC_DRAW;

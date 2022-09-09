@@ -17,8 +17,8 @@
 
 LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<InputElementDesc> inputs = {
-        { "position", InputFormat::Float3, 0, 0, InputClassification::PerVertex, 0 },
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRInputFormat::Float3, 0, 0, GLWRInputClassification::PerVertex, 0 },
     };
 
     std::vector<VertexPN> vertices;
@@ -48,7 +48,7 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(
         gfx, glm::translate(glm::mat4(1.0f), world.lightPos) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f))); // FIXME
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, RasterizerDesc { FillMode::Solid, CullMode::Back }));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::Solid, GLWRCullMode::Back }));
 
     AddTask(draw);
 }
