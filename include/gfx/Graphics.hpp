@@ -14,39 +14,39 @@
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
-enum class GLWRInputClassification {
-    PerVertex,
-    PerInstance,
-};
+typedef enum {
+    GLWRInputClassification_PerVertex,
+    GLWRInputClassification_PerInstance,
+} GLWRInputClassification;
 
-enum class GLWRInputFormat {
-    Float2,
-    Float3,
-    Uint2,
-    Uint3,
-    Uint2Norm,
-    Uint3Norm,
-};
+typedef enum {
+    GLWRFormat_Float2,
+    GLWRFormat_Float3,
+    GLWRFormat_Uint2,
+    GLWRFormat_Uint3,
+    GLWRFormat_Uint2Norm,
+    GLWRFormat_Uint3Norm,
+} GLWRFormat;
 
-enum class GLWRShaderStage {
-    Vert,
-    Tesc,
-    Tese,
-    Geom,
-    Frag,
-    Comp,
-};
+typedef enum {
+    GLWRShaderStage_Vert = GL_VERTEX_SHADER,
+    GLWRShaderStage_Tesc = GL_TESS_CONTROL_SHADER,
+    GLWRShaderStage_Tese = GL_TESS_EVALUATION_SHADER,
+    GLWRShaderStage_Geom = GL_GEOMETRY_SHADER,
+    GLWRShaderStage_Frag = GL_FRAGMENT_SHADER,
+    GLWRShaderStage_Comp = GL_COMPUTE_SHADER,
+} GLWRShaderStage;
 
-enum class GLWRFillMode {
-    WireFrame,
-    Solid,
-};
+typedef enum {
+    GLWRFillMode_WireFrame,
+    GLWRFillMode_Solid,
+} GLWRFillMode;
 
-enum class GLWRCullMode {
-    None,
-    Front,
-    Back,
-};
+typedef enum {
+    GLWRCullMode_None,
+    GLWRCullMode_Front,
+    GLWRCullMode_Back,
+} GLWRCullMode;
 
 typedef enum {
     GLWRFilter_MinMagNearest_NoMip = 0x0,
@@ -87,7 +87,7 @@ typedef enum {
 
 struct GLWRInputElementDesc {
     GLchar const* semanticName;
-    GLWRInputFormat format;
+    GLWRFormat format;
     GLuint inputSlot;
     GLuint byteOffset;
     GLWRInputClassification inputSlotClass;
@@ -270,8 +270,7 @@ private:
     std::string SlurpShaderSource(std::string const& filename) const;
 
     struct Enum {
-        static GLAttribFormat Resolve(GLWRInputFormat const format);
-        static GLenum Resolve(GLWRShaderStage const stage);
+        static GLAttribFormat Resolve(GLWRFormat const format);
     };
 };
 

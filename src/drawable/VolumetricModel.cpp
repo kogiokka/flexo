@@ -20,10 +20,10 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRInputFormat::Float3, 0, offsetof(VertexPN, position), GLWRInputClassification::PerVertex, 0 },
-        { "normal", GLWRInputFormat::Float3, 0, offsetof(VertexPN, normal), GLWRInputClassification::PerVertex, 0 },
-        { "textureCoord", GLWRInputFormat::Float2, 2, 0, GLWRInputClassification::PerInstance, 1 },
-        { "translation", GLWRInputFormat::Float3, 3, 0, GLWRInputClassification::PerInstance, 1 },
+        { "position", GLWRFormat_Float3, 0, offsetof(VertexPN, position), GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 0, offsetof(VertexPN, normal), GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 2, 0, GLWRInputClassification_PerInstance, 1 },
+        { "translation", GLWRFormat_Float3, 3, 0, GLWRInputClassification_PerInstance, 1 },
     };
 
     std::vector<VertexPN> vertices;
@@ -73,7 +73,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::Solid, GLWRCullMode::Back }));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back }));
     draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, 0));
     draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, img, w, h, 1));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));

@@ -50,13 +50,13 @@ Graphics::Graphics(int width, int height)
                           -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f };
 
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRInputFormat::Float2, 0, 0, GLWRInputClassification::PerVertex, 0 },
-        { "textureCoord", GLWRInputFormat::Float2, 0, sizeof(float) * 2, GLWRInputClassification::PerVertex, 0 },
+        { "position", GLWRFormat_Float2, 0, 0, GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 0, sizeof(float) * 2, GLWRInputClassification_PerVertex, 0 },
     };
 
     CreateProgramPipeline(m_ctx.pipeline);
-    CreateSeparableShaderProgram(m_ctx.vert, GLWRShaderStage::Vert, "shader/Screen.vert");
-    CreateSeparableShaderProgram(m_ctx.frag, GLWRShaderStage::Frag, "shader/Screen.frag");
+    CreateSeparableShaderProgram(m_ctx.vert, GLWRShaderStage::GLWRShaderStage_Vert, "shader/Screen.vert");
+    CreateSeparableShaderProgram(m_ctx.frag, GLWRShaderStage::GLWRShaderStage_Frag, "shader/Screen.frag");
     CreateInputLayout(m_ctx.layout, inputs.data(), inputs.size(), m_ctx.vert);
 
     GLWRBufferDesc bufferDesc;
@@ -68,7 +68,7 @@ Graphics::Graphics(int width, int height)
     quadVertsData.mem = quadVerts;
     CreateBuffer(m_ctx.buffer, bufferDesc, quadVertsData);
 
-    GLWRRasterizerDesc rasDesc { GLWRFillMode::Solid, GLWRCullMode::Back };
+    GLWRRasterizerDesc rasDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back };
     CreateRasterizerState(rasDesc, &m_ctx.state);
 }
 
@@ -103,7 +103,7 @@ void Graphics::CreateInputLayout(GLuint& layout, GLWRInputElementDesc const* inp
         glVertexAttribFormat(location, size, type, normalized, desc.byteOffset);
         glVertexAttribBinding(location, desc.inputSlot);
         glVertexBindingDivisor(desc.inputSlot, 0);
-        if (desc.inputSlotClass == GLWRInputClassification::PerInstance) {
+        if (desc.inputSlotClass == GLWRInputClassification_PerInstance) {
             glVertexBindingDivisor(desc.inputSlot, desc.instanceDataStepRate);
         }
     }
@@ -182,7 +182,7 @@ void Graphics::CreateSeparableShaderProgram(GLuint& program, GLWRShaderStage sta
 {
     std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
-    program = glCreateShaderProgramv(Enum::Resolve(stage), 1, shaderSourceArray);
+    program = glCreateShaderProgramv(stage, 1, shaderSourceArray);
 
     CheckProgramStatus(program);
 }
@@ -193,24 +193,24 @@ void Graphics::CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasteri
     GLWRRasterizerState* pState = *ppState;
 
     switch (desc.cullMode) {
-    case GLWRCullMode::Back:
+    case GLWRCullMode::GLWRCullMode_Back:
         pState->Add(std::bind(glEnable, GL_CULL_FACE));
         pState->Add(std::bind(glCullFace, GL_BACK));
         break;
-    case GLWRCullMode::Front:
+    case GLWRCullMode::GLWRCullMode_Front:
         pState->Add(std::bind(glEnable, GL_CULL_FACE));
         pState->Add(std::bind(glCullFace, GL_FRONT));
         break;
-    case GLWRCullMode::None:
+    case GLWRCullMode::GLWRCullMode_None:
         pState->Add(std::bind(glDisable, GL_CULL_FACE));
         break;
     };
 
     switch (desc.fillMode) {
-    case GLWRFillMode::WireFrame:
+    case GLWRFillMode::GLWRFillMode_WireFrame:
         pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE));
         break;
-    case GLWRFillMode::Solid:
+    case GLWRFillMode::GLWRFillMode_Solid:
         pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL));
         break;
     }
@@ -258,7 +258,7 @@ void Graphics::AttachShaderStage(GLuint const program, GLWRShaderStage stage, st
     std::string const& source = SlurpShaderSource(filename);
     char const* const shaderSourceArray[1] = { source.c_str() };
 
-    GLuint shaderObject = glCreateShader(Enum::Resolve(stage));
+    GLuint shaderObject = glCreateShader(stage);
     glShaderSource(shaderObject, 1, shaderSourceArray, nullptr);
     glCompileShader(shaderObject);
     if (!IsShaderCompiled(shaderObject)) {
@@ -514,43 +514,25 @@ std::string Graphics::SlurpShaderSource(std::string const& filename) const
     return source;
 }
 
-GLenum Graphics::Enum::Resolve(GLWRShaderStage const stage)
-{
-    switch (stage) {
-    case GLWRShaderStage::Vert:
-        return GL_VERTEX_SHADER;
-    case GLWRShaderStage::Tesc:
-        return GL_TESS_CONTROL_SHADER;
-    case GLWRShaderStage::Tese:
-        return GL_TESS_EVALUATION_SHADER;
-    case GLWRShaderStage::Geom:
-        return GL_GEOMETRY_SHADER;
-    case GLWRShaderStage::Frag:
-        return GL_FRAGMENT_SHADER;
-    case GLWRShaderStage::Comp:
-        return GL_COMPUTE_SHADER;
-    }
-}
-
-Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRInputFormat const format)
+Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRFormat const format)
 {
     switch (format) {
-    case GLWRInputFormat::Float2:
+    case GLWRFormat_Float2:
         return GLAttribFormat { 2, GL_FLOAT, GL_FALSE };
         break;
-    case GLWRInputFormat::Float3:
+    case GLWRFormat_Float3:
         return GLAttribFormat { 3, GL_FLOAT, GL_FALSE };
         break;
-    case GLWRInputFormat::Uint2:
+    case GLWRFormat_Uint2:
         return GLAttribFormat { 2, GL_UNSIGNED_INT, GL_FALSE };
         break;
-    case GLWRInputFormat::Uint3:
+    case GLWRFormat_Uint3:
         return GLAttribFormat { 3, GL_UNSIGNED_INT, GL_FALSE };
         break;
-    case GLWRInputFormat::Uint2Norm:
+    case GLWRFormat_Uint2Norm:
         return GLAttribFormat { 2, GL_UNSIGNED_INT, GL_TRUE };
         break;
-    case GLWRInputFormat::Uint3Norm:
+    case GLWRFormat_Uint3Norm:
         return GLAttribFormat { 3, GL_UNSIGNED_INT, GL_TRUE };
         break;
     }

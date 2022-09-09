@@ -21,7 +21,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned i
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRInputFormat::Float3, 0, 0, GLWRInputClassification::PerVertex, 0 },
+        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
     };
 
     std::vector<glm::vec3> vertices = mesh.positions;
@@ -46,7 +46,7 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned i
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::Solid, GLWRCullMode::Back }));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back }));
 
     AddTask(draw);
 }

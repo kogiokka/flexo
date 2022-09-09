@@ -17,9 +17,9 @@
 LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
 {
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRInputFormat::Float3, 0, offsetof(VertexPNT, position), GLWRInputClassification::PerVertex, 0 },
-        { "normal", GLWRInputFormat::Float3, 0, offsetof(VertexPNT, normal), GLWRInputClassification::PerVertex, 0 },
-        { "textureCoord", GLWRInputFormat::Float2, 0, offsetof(VertexPNT, texcoord), GLWRInputClassification::PerVertex, 0 },
+        { "position", GLWRFormat_Float3, 0, offsetof(VertexPNT, position), GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 0, offsetof(VertexPNT, normal), GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 0, offsetof(VertexPNT, texcoord), GLWRInputClassification_PerVertex, 0 },
     };
 
     std::vector<VertexPNT> vertices;
@@ -68,7 +68,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, img, w, h, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::Solid, GLWRCullMode::None }));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_None }));
 
     AddTask(draw);
 }

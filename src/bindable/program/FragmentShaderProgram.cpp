@@ -8,7 +8,7 @@ namespace Bind
         : Bindable(gfx)
         , m_pipeline(pipeline)
     {
-        m_gfx->CreateSeparableShaderProgram(m_id, GLWRShaderStage::Frag, filename);
+        m_gfx->CreateSeparableShaderProgram(m_id, GLWRShaderStage::GLWRShaderStage_Frag, filename);
     }
 
     FragmentShaderProgram::~FragmentShaderProgram()

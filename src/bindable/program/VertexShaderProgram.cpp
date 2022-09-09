@@ -8,7 +8,7 @@ namespace Bind
         : Bindable(gfx)
         , m_pipeline(pipeline)
     {
-        m_gfx->CreateSeparableShaderProgram(m_id, GLWRShaderStage::Vert, filename);
+        m_gfx->CreateSeparableShaderProgram(m_id, GLWRShaderStage::GLWRShaderStage_Vert, filename);
     }
 
     VertexShaderProgram::~VertexShaderProgram()
