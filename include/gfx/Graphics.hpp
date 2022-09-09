@@ -11,6 +11,7 @@
 #include "Attachable.hpp"
 #include "Camera.hpp"
 #include "gfx/GLWRBuffer.hpp"
+#include "gfx/GLWRInputLayout.hpp"
 #include "gfx/GLWRRenderTarget.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
@@ -196,6 +197,7 @@ class Graphics : public AttachableBase
         GLuint layout;
         GLuint framebuffer;
         GLuint screenTexture;
+        GLWRPtr<GLWRInputLayout> inputLayout;
         GLWRPtr<GLWRBuffer> buffer;
         GLWRPtr<GLWRRasterizerState> state;
     };
@@ -216,8 +218,8 @@ public:
     Graphics(int width, int height);
     ~Graphics();
     void CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget);
-    void CreateInputLayout(GLuint& layout, GLWRInputElementDesc const* inputElementDesc, int const numElements,
-                           GLuint const programWithInputSignature);
+    void CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
+                           GLuint const programWithInputSignature, GLWRInputLayout** ppInputLayout);
     void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer);
     void CreateTexture2D(GLuint& texture, GLuint const unit, GLWRTexture2DDesc const& desc,
                          GLWRResourceData const& data);
@@ -233,7 +235,7 @@ public:
     void SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);
     void SetRenderTarget(GLWRRenderTarget* target);
-    void SetInputLayout(GLuint const layout);
+    void SetInputLayout(GLWRInputLayout* pInputLayout);
     void SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirstIndex, GLWRBuffer const* pBuffer);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
     void SetSampler(GLuint unit, GLuint sampler);
@@ -245,7 +247,6 @@ public:
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
     void SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer);
 
-    void DeleteInputLayout(GLuint& layout);
     void DeleteTexture(GLuint& texture);
     void DeleteSampler(GLuint& sampler);
     void DeleteShaderProgram(GLuint& program);

@@ -57,7 +57,7 @@ Graphics::Graphics(int width, int height)
     CreateProgramPipeline(m_ctx.pipeline);
     CreateSeparableShaderProgram(m_ctx.vert, GLWRShaderStage::GLWRShaderStage_Vert, "shader/Screen.vert");
     CreateSeparableShaderProgram(m_ctx.frag, GLWRShaderStage::GLWRShaderStage_Frag, "shader/Screen.frag");
-    CreateInputLayout(m_ctx.layout, inputs.data(), inputs.size(), m_ctx.vert);
+    CreateInputLayout(inputs.data(), inputs.size(), m_ctx.vert, &m_ctx.inputLayout);
 
     GLWRBufferDesc bufferDesc;
     bufferDesc.target = GL_ARRAY_BUFFER;
@@ -77,7 +77,6 @@ Graphics::~Graphics()
     DeleteProgramPipeline(m_ctx.pipeline);
     DeleteShaderProgram(m_ctx.vert);
     DeleteShaderProgram(m_ctx.frag);
-    DeleteInputLayout(m_ctx.layout);
 }
 
 void Graphics::CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget)
@@ -85,12 +84,13 @@ void Graphics::CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRe
     *ppRenderTarget = new GLWRRenderTarget(width, height);
 }
 
-void Graphics::CreateInputLayout(GLuint& layout, GLWRInputElementDesc const* inputElementDesc, int const numElements,
-                                 GLuint const programWithInputSignature)
+void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
+                                 GLuint const programWithInputSignature, GLWRInputLayout** ppInputLayout)
 {
-    glGenVertexArrays(1, &layout);
-    glBindVertexArray(layout);
-    for (int i = 0; i < numElements; i++) {
+    *ppInputLayout = new GLWRInputLayout();
+
+    SetInputLayout(*ppInputLayout);
+    for (unsigned int i = 0; i < numElements; i++) {
         auto const& desc = inputElementDesc[i];
         GLint location = glGetAttribLocation(programWithInputSignature, desc.semanticName);
         if (location == -1) {
@@ -106,6 +106,7 @@ void Graphics::CreateInputLayout(GLuint& layout, GLWRInputElementDesc const* inp
             glVertexBindingDivisor(desc.inputSlot, desc.instanceDataStepRate);
         }
     }
+    SetInputLayout(m_ctx.inputLayout.Get());
 }
 
 void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer)
@@ -286,9 +287,9 @@ void Graphics::SetRenderTarget(GLWRRenderTarget* target)
     m_ctx.screenTexture = target->GetTexture();
 }
 
-void Graphics::SetInputLayout(GLuint const layout)
+void Graphics::SetInputLayout(GLWRInputLayout* pInputLayout)
 {
-    glBindVertexArray(layout);
+    glBindVertexArray(pInputLayout->m_id);
 }
 
 void Graphics::SetPrimitive(GLenum primitive)
@@ -379,7 +380,7 @@ void Graphics::Present()
     SetProgramPipelineStages(m_ctx.pipeline, GL_VERTEX_SHADER_BIT, m_ctx.vert);
     SetProgramPipelineStages(m_ctx.pipeline, GL_FRAGMENT_SHADER_BIT, m_ctx.frag);
 
-    SetInputLayout(m_ctx.layout);
+    SetInputLayout(m_ctx.inputLayout.Get());
 
     // FIXME It seems to collide with LatticeFace texture when the unit is set to 0.
     SetTexture(GL_TEXTURE_2D, m_ctx.screenTexture, 20);
@@ -392,11 +393,6 @@ void Graphics::Present()
 void Graphics::SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer)
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, pBuffer->m_id);
-}
-
-void Graphics::DeleteInputLayout(GLuint& layout)
-{
-    glDeleteVertexArrays(1, &layout);
 }
 
 void Graphics::DeleteTexture(GLuint& texture)

@@ -12,7 +12,7 @@ namespace Bind
 
     class InputLayout : public Bindable
     {
-        GLuint m_id;
+        GLWRPtr<GLWRInputLayout> m_inputLayout;
 
     public:
         InputLayout(Graphics& gfx, std::vector<GLWRInputElementDesc> const& inputElementDesc,

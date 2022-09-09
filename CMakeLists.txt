@@ -64,6 +64,7 @@ PRIVATE
 
     "src/gfx/Graphics.cpp"
     "src/gfx/GLWRBuffer.cpp"
+    "src/gfx/GLWRInputLayout.cpp"
     "src/gfx/GLWRRenderTarget.cpp"
     "src/Task.cpp"
     "src/bindable/Bindable.cpp"

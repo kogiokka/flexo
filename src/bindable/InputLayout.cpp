@@ -7,17 +7,16 @@ namespace Bind
                              VertexShaderProgram const* programWithInputSignature)
         : Bindable(gfx)
     {
-        m_gfx->CreateInputLayout(m_id, inputElementDesc.data(), inputElementDesc.size(),
-                                 programWithInputSignature->m_id);
+        m_gfx->CreateInputLayout(inputElementDesc.data(), inputElementDesc.size(), programWithInputSignature->m_id,
+                                 &m_inputLayout);
     }
 
     InputLayout::~InputLayout()
     {
-        m_gfx->DeleteInputLayout(m_id);
     }
 
     void InputLayout::Bind()
     {
-        m_gfx->SetInputLayout(m_id);
+        m_gfx->SetInputLayout(m_inputLayout.Get());
     }
 }
