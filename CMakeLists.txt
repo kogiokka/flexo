@@ -63,6 +63,7 @@ PRIVATE
     "src/assetlib/STL/STLImporter.cpp"
 
     "src/gfx/Graphics.cpp"
+    "src/gfx/GLWRBuffer.cpp"
     "src/gfx/GLWRRenderTarget.cpp"
     "src/Task.cpp"
     "src/bindable/Bindable.cpp"

@@ -12,7 +12,7 @@ namespace Bind
     template <typename T>
     class UniformBuffer : public Bindable
     {
-        GLuint m_id;
+        GLWRPtr<GLWRBuffer> m_buffer;
         GLuint m_bindingIndex;
 
     public:
@@ -26,7 +26,6 @@ namespace Bind
     template <typename T>
     UniformBuffer<T>::UniformBuffer(Graphics& gfx, GLuint bindingIndex)
         : Bindable(gfx)
-        , m_id(0)
         , m_bindingIndex(bindingIndex)
     {
         GLWRBufferDesc desc;
@@ -38,13 +37,12 @@ namespace Bind
         desc.stride = sizeof(T);
 
         data.mem = nullptr;
-        m_gfx->CreateBuffer(m_id, desc, data);
+        m_gfx->CreateBuffer(&desc, &data, &m_buffer);
     }
 
     template <typename T>
     UniformBuffer<T>::UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex)
         : Bindable(gfx)
-        , m_id(0)
         , m_bindingIndex(bindingIndex)
     {
         GLWRBufferDesc desc;
@@ -56,25 +54,26 @@ namespace Bind
         desc.stride = sizeof(T);
 
         data.mem = &uniformBlock;
-        m_gfx->CreateBuffer(m_id, desc, data);
+        m_gfx->CreateBuffer(&desc, &data, &m_buffer);
     }
 
     template <typename T>
     UniformBuffer<T>::~UniformBuffer()
     {
-        m_gfx->DeleteBuffer(m_id);
     }
 
     template <typename T>
     void UniformBuffer<T>::Bind()
     {
-        m_gfx->SetUniformBuffer(m_id, m_bindingIndex);
+        m_gfx->SetUniformBuffer(m_bindingIndex, m_buffer.Get());
     }
 
     template <typename T>
     void UniformBuffer<T>::Update(T const& uniformBlock)
     {
-        m_gfx->UpdateBuffer(m_id, GL_UNIFORM_BUFFER, 0, sizeof(T), &uniformBlock);
+        GLWRResourceData data;
+        data.mem = &uniformBlock;
+        m_gfx->UpdateBuffer(GL_UNIFORM_BUFFER, 0, sizeof(T), &data, m_buffer.Get());
     }
 }
 

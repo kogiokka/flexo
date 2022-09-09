@@ -10,6 +10,7 @@
 
 #include "Attachable.hpp"
 #include "Camera.hpp"
+#include "gfx/GLWRBuffer.hpp"
 #include "gfx/GLWRRenderTarget.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
@@ -193,9 +194,9 @@ class Graphics : public AttachableBase
         GLuint vert;
         GLuint frag;
         GLuint layout;
-        GLuint buffer;
         GLuint framebuffer;
         GLuint screenTexture;
+        GLWRPtr<GLWRBuffer> buffer;
         GLWRPtr<GLWRRasterizerState> state;
     };
 
@@ -217,7 +218,7 @@ public:
     void CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget);
     void CreateInputLayout(GLuint& layout, GLWRInputElementDesc const* inputElementDesc, int const numElements,
                            GLuint const programWithInputSignature);
-    void CreateBuffer(GLuint& buffer, GLWRBufferDesc const& desc, GLWRResourceData const& data);
+    void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer);
     void CreateTexture2D(GLuint& texture, GLuint const unit, GLWRTexture2DDesc const& desc,
                          GLWRResourceData const& data);
     void CreateSampler(GLuint& sampler, GLWRSamplerDesc const& desc);
@@ -229,11 +230,11 @@ public:
     void AttachShaderStage(GLuint const program, GLWRShaderStage stage, std::string const& filename);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
-    void SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
-                          GLsizei const* strides);
+    void SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
+                          GLintptr const* offsets);
     void SetRenderTarget(GLWRRenderTarget* target);
     void SetInputLayout(GLuint const layout);
-    void SetIndexBuffer(GLuint buffer, GLenum elementDataType, GLvoid const* offsetOfFirstIndex);
+    void SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirstIndex, GLWRBuffer const* pBuffer);
     void SetTexture(GLenum target, GLuint texture, GLuint unit);
     void SetSampler(GLuint unit, GLuint sampler);
     void SetShaderProgram(GLuint program);
@@ -242,10 +243,9 @@ public:
     void SetRasterizerState(GLWRRasterizerState const* state);
     void SetBlendState(GLWRBlendState const* state);
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
-    void SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex);
+    void SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer);
 
     void DeleteInputLayout(GLuint& layout);
-    void DeleteBuffer(GLuint& buffer);
     void DeleteTexture(GLuint& texture);
     void DeleteSampler(GLuint& sampler);
     void DeleteShaderProgram(GLuint& program);
@@ -256,7 +256,8 @@ public:
     glm::vec3 GetCameraPosition() const;
     Camera& GetCamera();
 
-    void UpdateBuffer(GLuint const buffer, GLenum target, GLintptr offset, GLsizei byteWidth, void const* data);
+    void UpdateBuffer(GLenum target, GLintptr offset, GLsizei byteWidth, GLWRResourceData const* data,
+                      GLWRBuffer* pBuffer);
 
     void Draw(GLsizei vertexCount);
     void DrawIndexed(GLsizei indexCount);

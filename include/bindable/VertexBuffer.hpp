@@ -12,7 +12,7 @@ namespace Bind
     class VertexBuffer : public Bindable
     {
     protected:
-        GLuint m_id;
+        GLWRPtr<GLWRBuffer> m_buffer;
         GLuint m_startAttrib;
         GLsizei m_stride;
         GLuint m_count;
@@ -35,7 +35,6 @@ namespace Bind
     template <typename T>
     VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib)
         : Bindable(gfx)
-        , m_id(0)
         , m_startAttrib(startAttrib)
         , m_stride(sizeof(T))
         , m_count(vertices.size())
@@ -49,13 +48,15 @@ namespace Bind
         desc.stride = m_stride;
         data.mem = vertices.data();
 
-        m_gfx->CreateBuffer(m_id, desc, data);
+        m_gfx->CreateBuffer(&desc, &data, &m_buffer);
     }
 
     template <typename T>
     void VertexBuffer::Update(std::vector<T> const& vertices)
     {
-        m_gfx->UpdateBuffer(m_id, GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(T), vertices.data());
+        GLWRResourceData data;
+        data.mem = vertices.data();
+        m_gfx->UpdateBuffer(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(T), &data, m_buffer.Get());
     }
 }
 

@@ -4,7 +4,6 @@ namespace Bind
 {
     IndexBuffer::IndexBuffer(Graphics& gfx, std::vector<unsigned int> const& indices)
         : Bindable(gfx)
-        , m_id(0)
         , m_count(indices.size())
     {
         GLWRBufferDesc desc;
@@ -16,17 +15,16 @@ namespace Bind
         desc.stride = sizeof(unsigned int);
         data.mem = indices.data();
 
-        m_gfx->CreateBuffer(m_id, desc, data);
+        m_gfx->CreateBuffer(&desc, &data, &m_buffer);
     }
 
     IndexBuffer::~IndexBuffer()
     {
-        m_gfx->DeleteBuffer(m_id);
     }
 
     void IndexBuffer::Bind()
     {
-        m_gfx->SetIndexBuffer(m_id, GL_UNSIGNED_INT, 0);
+        m_gfx->SetIndexBuffer(GL_UNSIGNED_INT, 0, m_buffer.Get());
     }
 
     GLuint IndexBuffer::GetCount() const

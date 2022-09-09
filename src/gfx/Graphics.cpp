@@ -66,7 +66,7 @@ Graphics::Graphics(int width, int height)
     bufferDesc.stride = 4 * sizeof(float);
     GLWRResourceData quadVertsData;
     quadVertsData.mem = quadVerts;
-    CreateBuffer(m_ctx.buffer, bufferDesc, quadVertsData);
+    CreateBuffer(&bufferDesc, &quadVertsData, &m_ctx.buffer);
 
     GLWRRasterizerDesc rasDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back };
     CreateRasterizerState(rasDesc, &m_ctx.state);
@@ -78,7 +78,6 @@ Graphics::~Graphics()
     DeleteShaderProgram(m_ctx.vert);
     DeleteShaderProgram(m_ctx.frag);
     DeleteInputLayout(m_ctx.layout);
-    DeleteBuffer(m_ctx.buffer);
 }
 
 void Graphics::CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget)
@@ -109,11 +108,13 @@ void Graphics::CreateInputLayout(GLuint& layout, GLWRInputElementDesc const* inp
     }
 }
 
-void Graphics::CreateBuffer(GLuint& buffer, GLWRBufferDesc const& desc, GLWRResourceData const& data)
+void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer)
 {
-    glGenBuffers(1, &buffer);
-    glBindBuffer(desc.target, buffer);
-    glBufferData(desc.target, desc.byteWidth, data.mem, desc.usage);
+    *ppBuffer = new GLWRBuffer();
+    GLWRBuffer& buffer = **ppBuffer;
+
+    glBindBuffer(pDesc->target, buffer.m_id);
+    glBufferData(pDesc->target, pDesc->byteWidth, initialData->mem, pDesc->usage);
 }
 
 void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, GLWRTexture2DDesc const& desc,
@@ -295,17 +296,17 @@ void Graphics::SetPrimitive(GLenum primitive)
     m_ctx.primitive = primitive;
 }
 
-void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLuint const* buffers, GLintptr const* offsets,
-                                GLsizei const* strides)
+void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
+                                GLintptr const* offsets)
 {
     for (int i = 0; i < numBuffers; i++) {
-        glBindVertexBuffer(first + i, buffers[i], offsets[i], strides[i]);
+        glBindVertexBuffer(first + i, buffers[i]->m_id, offsets[i], strides[i]);
     }
 }
 
-void Graphics::SetIndexBuffer(GLuint buffer, GLenum elementDataType, const GLvoid* offsetOfFirstIndex)
+void Graphics::SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirstIndex, GLWRBuffer const* pBuffer)
 {
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->m_id);
     m_ctx.elementDataType = elementDataType;
     m_ctx.offsetOfFirstIndex = offsetOfFirstIndex;
 }
@@ -372,7 +373,7 @@ void Graphics::Present()
     SetPrimitive(GL_TRIANGLES);
     GLintptr offset = 0;
     GLsizei stride = 4 * sizeof(float);
-    SetVertexBuffers(0, 1, &m_ctx.buffer, &offset, &stride);
+    SetVertexBuffers(0, 1, &m_ctx.buffer, &stride, &offset);
 
     SetProgramPipeline(m_ctx.pipeline);
     SetProgramPipelineStages(m_ctx.pipeline, GL_VERTEX_SHADER_BIT, m_ctx.vert);
@@ -388,19 +389,14 @@ void Graphics::Present()
     Draw(6);
 }
 
-void Graphics::SetUniformBuffer(GLuint const uniform, GLuint const bindingIndex)
+void Graphics::SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer)
 {
-    glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, uniform);
+    glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, pBuffer->m_id);
 }
 
 void Graphics::DeleteInputLayout(GLuint& layout)
 {
     glDeleteVertexArrays(1, &layout);
-}
-
-void Graphics::DeleteBuffer(GLuint& buffer)
-{
-    glDeleteBuffers(1, &buffer);
 }
 
 void Graphics::DeleteTexture(GLuint& texture)
@@ -446,10 +442,11 @@ Camera& Graphics::GetCamera()
     return m_camera;
 }
 
-void Graphics::UpdateBuffer(GLuint const buffer, GLenum target, GLintptr offset, GLsizei byteWidth, void const* data)
+void Graphics::UpdateBuffer(GLenum target, GLintptr offset, GLsizei byteWidth, GLWRResourceData const* data,
+                            GLWRBuffer* pBuffer)
 {
-    glBindBuffer(target, buffer);
-    glBufferSubData(target, offset, byteWidth, data);
+    glBindBuffer(target, pBuffer->m_id);
+    glBufferSubData(target, offset, byteWidth, data->mem);
 }
 
 bool Graphics::IsShaderCompiled(GLuint const shaderObject)
