@@ -24,7 +24,7 @@ namespace Bind
 
     void IndexBuffer::Bind()
     {
-        m_gfx->SetIndexBuffer(GL_UNSIGNED_INT, 0, m_buffer.Get());
+        m_gfx->SetIndexBuffer(m_buffer.Get(), GLWRFormat_Uint, 0);
     }
 
     GLuint IndexBuffer::GetCount() const

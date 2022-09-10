@@ -308,11 +308,15 @@ void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const*
     }
 }
 
-void Graphics::SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirstIndex, GLWRBuffer const* pBuffer)
+void Graphics::SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset)
 {
+    auto const attrFormat = Enum::Resolve(format);
+
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, pBuffer->m_id);
-    m_ctx.elementDataType = elementDataType;
-    m_ctx.offsetOfFirstIndex = offsetOfFirstIndex;
+
+    m_ctx.indexBufferFormat = attrFormat.type;
+    m_ctx.offsetOfFirstIndex = 0;
+    m_ctx.offsetOfFirstIndex += offset;
 }
 
 void Graphics::SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D)
@@ -364,7 +368,7 @@ void Graphics::Draw(GLsizei vertexCount)
 
 void Graphics::DrawIndexed(GLsizei indexCount)
 {
-    glDrawElements(m_ctx.primitive, indexCount, m_ctx.elementDataType, m_ctx.offsetOfFirstIndex);
+    glDrawElements(m_ctx.primitive, indexCount, m_ctx.indexBufferFormat, m_ctx.offsetOfFirstIndex);
 }
 
 void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCount)
@@ -515,6 +519,9 @@ Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRFormat const format)
         break;
     case GLWRFormat_Float3:
         return GLAttribFormat { 3, GL_FLOAT, GL_FALSE };
+        break;
+    case GLWRFormat_Uint:
+        return GLAttribFormat { 1, GL_UNSIGNED_INT, GL_FALSE };
         break;
     case GLWRFormat_Uint2:
         return GLAttribFormat { 2, GL_UNSIGNED_INT, GL_FALSE };

@@ -26,6 +26,7 @@ typedef enum {
 typedef enum {
     GLWRFormat_Float2,
     GLWRFormat_Float3,
+    GLWRFormat_Uint,
     GLWRFormat_Uint2,
     GLWRFormat_Uint3,
     GLWRFormat_Uint2Norm,
@@ -191,8 +192,8 @@ class Graphics : public AttachableBase
 {
     struct Context {
         GLenum primitive;
-        GLenum elementDataType;
-        const GLvoid* offsetOfFirstIndex;
+        GLenum indexBufferFormat;
+        GLubyte* offsetOfFirstIndex;
         GLuint pipeline;
         GLuint vert;
         GLuint frag;
@@ -239,7 +240,7 @@ public:
                           GLintptr const* offsets);
     void SetRenderTarget(GLWRRenderTarget* target);
     void SetInputLayout(GLWRInputLayout* pInputLayout);
-    void SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirstIndex, GLWRBuffer const* pBuffer);
+    void SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset);
     void SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D);
     void SetSamplers(unsigned int startUnit, unsigned int numSamplers, GLWRSampler* const* ppSamplers);
     void SetShaderProgram(GLuint program);
