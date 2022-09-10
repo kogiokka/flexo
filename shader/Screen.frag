@@ -6,7 +6,7 @@ in VertOut {
     vec2 textureCoord;
 } inData;
 
-layout (binding = 20) uniform sampler2D screenTexture;
+layout (binding = 0) uniform sampler2D screenTexture;
 
 void main()
 {

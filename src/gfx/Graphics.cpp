@@ -285,6 +285,7 @@ void Graphics::SetRenderTarget(GLWRRenderTarget* target)
     glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
 
     m_ctx.screenTexture = target->m_texture->m_id;
+    m_ctx.screenSampler = target->m_sampler;
     m_ctx.targetFrame = target->m_frame;
 }
 
@@ -385,9 +386,9 @@ void Graphics::Present()
 
     SetInputLayout(m_ctx.inputLayout.Get());
 
-    // FIXME It seems to collide with LatticeFace texture when the unit is set to 0.
-    glActiveTexture(GL_TEXTURE0 + 20);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, m_ctx.screenTexture);
+    glBindSampler(0, m_ctx.screenSampler);
     SetRasterizerState(m_ctx.state.Get());
 
     glDisable(GL_DEPTH_TEST);
