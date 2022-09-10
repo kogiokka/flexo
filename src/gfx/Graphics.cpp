@@ -44,7 +44,7 @@ Graphics::Graphics(int width, int height)
     m_ctx.framebuffer = 0;
 
     // Setup the default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 
     float quadVerts[] = { -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
                           -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f };
@@ -118,17 +118,17 @@ void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const*
     glBufferData(pDesc->target, pDesc->byteWidth, initialData->mem, pDesc->usage);
 }
 
-void Graphics::CreateTexture2D(GLuint& texture, GLuint const unit, GLWRTexture2DDesc const& desc,
-                               GLWRResourceData const& data)
+void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
+                               GLWRTexture2D** ppTexture2D)
 {
+    *ppTexture2D = new GLWRTexture2D();
+
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, (*ppTexture2D)->m_id); // Bind the new texture to the context so we can modify it.
+
     constexpr GLint BORDER = 0;
-    glGenTextures(1, &texture);
-
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexImage2D(GL_TEXTURE_2D, 0, desc.textureFormat, desc.width, desc.height, BORDER, desc.pixelFormat, desc.dataType,
-                 data.mem);
+    glTexImage2D(GL_TEXTURE_2D, 0, pDesc->textureFormat, pDesc->width, pDesc->height, BORDER, pDesc->pixelFormat,
+                 pDesc->dataType, pInitialData->mem);
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
@@ -282,9 +282,10 @@ void Graphics::LinkShaderProgram(const GLuint program)
 
 void Graphics::SetRenderTarget(GLWRRenderTarget* target)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, target->GetFrame());
-    m_ctx.framebuffer = target->GetFrame();
-    m_ctx.screenTexture = target->GetTexture();
+    glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
+
+    m_ctx.screenTexture = target->m_texture->m_id;
+    m_ctx.framebuffer = target->m_frame;
 }
 
 void Graphics::SetInputLayout(GLWRInputLayout* pInputLayout)
@@ -312,10 +313,12 @@ void Graphics::SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirs
     m_ctx.offsetOfFirstIndex = offsetOfFirstIndex;
 }
 
-void Graphics::SetTexture(GLenum target, GLuint texture, GLuint unit)
+void Graphics::SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D)
 {
-    glActiveTexture(GL_TEXTURE0 + unit);
-    glBindTexture(target, texture);
+    for (unsigned int i = 0; i < numTextures; i++) {
+        glActiveTexture(GL_TEXTURE0 + startUnit + i);
+        glBindTexture(GL_TEXTURE_2D, ppTexture2D[i]->m_id);
+    }
 }
 
 void Graphics::SetSampler(GLuint unit, GLuint sampler)
@@ -383,7 +386,8 @@ void Graphics::Present()
     SetInputLayout(m_ctx.inputLayout.Get());
 
     // FIXME It seems to collide with LatticeFace texture when the unit is set to 0.
-    SetTexture(GL_TEXTURE_2D, m_ctx.screenTexture, 20);
+    glActiveTexture(GL_TEXTURE0 + 20);
+    glBindTexture(GL_TEXTURE_2D, m_ctx.screenTexture);
     SetRasterizerState(m_ctx.state.Get());
 
     glDisable(GL_DEPTH_TEST);
@@ -417,7 +421,7 @@ void Graphics::DeleteProgramPipeline(GLuint& pipeline)
 
 void Graphics::ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, target->GetFrame());
+    glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
     glClearColor(color[0], color[1], color[2], color[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
@@ -530,3 +534,4 @@ Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRFormat const format)
         break;
     }
 }
+

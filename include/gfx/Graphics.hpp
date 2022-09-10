@@ -13,6 +13,7 @@
 #include "gfx/GLWRBuffer.hpp"
 #include "gfx/GLWRInputLayout.hpp"
 #include "gfx/GLWRRenderTarget.hpp"
+#include "gfx/GLWRTexture2D.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
@@ -195,10 +196,10 @@ class Graphics : public AttachableBase
         GLuint vert;
         GLuint frag;
         GLuint layout;
-        GLuint framebuffer;
-        GLuint screenTexture;
         GLWRPtr<GLWRInputLayout> inputLayout;
         GLWRPtr<GLWRBuffer> buffer;
+        GLenum screenTexture;
+        GLenum framebuffer;
         GLWRPtr<GLWRRasterizerState> state;
     };
 
@@ -221,8 +222,8 @@ public:
     void CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
                            GLuint const programWithInputSignature, GLWRInputLayout** ppInputLayout);
     void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer);
-    void CreateTexture2D(GLuint& texture, GLuint const unit, GLWRTexture2DDesc const& desc,
-                         GLWRResourceData const& data);
+    void CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
+                         GLWRTexture2D** ppTexture2D);
     void CreateSampler(GLuint& sampler, GLWRSamplerDesc const& desc);
     void CreateShaderProgram(GLuint& program);
     void CreateProgramPipeline(GLuint& pipeline);
@@ -237,7 +238,7 @@ public:
     void SetRenderTarget(GLWRRenderTarget* target);
     void SetInputLayout(GLWRInputLayout* pInputLayout);
     void SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirstIndex, GLWRBuffer const* pBuffer);
-    void SetTexture(GLenum target, GLuint texture, GLuint unit);
+    void SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D);
     void SetSampler(GLuint unit, GLuint sampler);
     void SetShaderProgram(GLuint program);
     void SetProgramPipeline(GLuint pipeline);

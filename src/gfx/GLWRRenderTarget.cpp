@@ -3,11 +3,13 @@
 
 GLWRRenderTarget::GLWRRenderTarget(int width, int height)
 {
+    m_texture = new GLWRTexture2D();
+
     glGenFramebuffers(1, &m_frame);
-    glGenTextures(1, &m_texture);
     glGenRenderbuffers(1, &m_rbo);
 
-    glBindTexture(GL_TEXTURE_2D, m_texture);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, m_texture->m_id);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -17,7 +19,7 @@ GLWRRenderTarget::GLWRRenderTarget(int width, int height)
 
     // Attach color buffer
     GLint mipmapLevel = 0;
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture, mipmapLevel);
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_texture->m_id, mipmapLevel);
     // Attach depth buffer
     glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
     glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, width, height);
@@ -33,16 +35,6 @@ GLWRRenderTarget::GLWRRenderTarget(int width, int height)
 GLWRRenderTarget::~GLWRRenderTarget()
 {
     glDeleteRenderbuffers(1, &m_rbo);
-    glDeleteTextures(1, &m_texture);
     glDeleteFramebuffers(1, &m_frame);
-}
-
-GLuint GLWRRenderTarget::GetFrame() const
-{
-    return m_frame;
-}
-
-GLuint GLWRRenderTarget::GetTexture() const
-{
-    return m_texture;
+    delete m_texture;
 }

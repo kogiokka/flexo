@@ -3,17 +3,20 @@
 
 #include <glad/glad.h>
 
+#include <gfx/GLWRTexture2D.hpp>
+
+class Graphics;
+
 class GLWRRenderTarget
 {
+    friend Graphics;
     GLuint m_frame;
-    GLuint m_texture;
     GLuint m_rbo;
+    GLWRTexture2D* m_texture;
 
 public:
     GLWRRenderTarget(int width, int height);
     ~GLWRRenderTarget();
-    GLuint GetFrame() const;
-    GLuint GetTexture() const;
 };
 
 #endif
