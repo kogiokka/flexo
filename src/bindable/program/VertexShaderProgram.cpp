@@ -6,7 +6,7 @@ namespace Bind
         : Bindable(gfx)
     {
 
-        std::string source = m_gfx->SlurpShaderSource(filename);
+        std::string source = Graphics::SlurpShaderSource(filename);
         m_gfx->CreateVertexShader(source.data(), &m_program);
     }
 

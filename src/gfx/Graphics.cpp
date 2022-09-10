@@ -54,8 +54,9 @@ Graphics::Graphics(int width, int height)
         { "textureCoord", GLWRFormat_Float2, 0, sizeof(float) * 2, GLWRInputClassification_PerVertex, 0 },
     };
 
-    CreateProgramPipeline(m_ctx.pipeline);
-    SetProgramPipeline(m_ctx.pipeline);
+    glUseProgram(0);
+    glGenProgramPipelines(1, &m_ctx.pipeline);
+    glBindProgramPipeline(m_ctx.pipeline);
 
     std::string vertSource = SlurpShaderSource("shader/Screen.vert");
     std::string fragSource = SlurpShaderSource("shader/Screen.frag");
@@ -189,11 +190,6 @@ void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSampl
     default:
         break;
     }
-}
-
-void Graphics::CreateProgramPipeline(GLuint& pipeline)
-{
-    glGenProgramPipelines(1, &pipeline);
 }
 
 void Graphics::CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasterizerState** ppState)
@@ -356,19 +352,6 @@ void Graphics::SetShaderProgram(GLuint program)
     glUseProgram(program);
 }
 
-void Graphics::SetProgramPipeline(GLuint pipeline)
-{
-    m_ctx.pipeline = pipeline;
-    glBindProgramPipeline(pipeline);
-}
-
-void Graphics::SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program)
-{
-    glUseProgram(0);
-    glBindProgramPipeline(pipeline);
-    glUseProgramStages(pipeline, stages, program);
-}
-
 void Graphics::SetRasterizerState(GLWRRasterizerState const* state)
 {
     state->Execute();
@@ -405,7 +388,6 @@ void Graphics::Present()
     GLsizei stride = 4 * sizeof(float);
     SetVertexBuffers(0, 1, &m_ctx.buffer, &stride, &offset);
 
-    SetProgramPipeline(m_ctx.pipeline);
     SetVertexShader(m_ctx.vert.Get());
     SetFragmentShader(m_ctx.frag.Get());
 
@@ -496,7 +478,7 @@ void Graphics::CheckProgramStatus(GLuint const program)
     Logger::error("Shader program linking error: %s\n", log.data());
 }
 
-std::string Graphics::SlurpShaderSource(std::string const& filename) const
+std::string Graphics::SlurpShaderSource(std::string const& filename)
 {
     std::fstream file;
     std::string source;

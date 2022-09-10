@@ -5,7 +5,7 @@ namespace Bind
     FragmentShaderProgram::FragmentShaderProgram(Graphics& gfx, std::string const& filename)
         : Bindable(gfx)
     {
-        std::string const source = gfx.SlurpShaderSource(filename);
+        std::string const source = Graphics::SlurpShaderSource(filename);
         m_gfx->CreateFragmentShader(source.data(), &m_program);
     }
 

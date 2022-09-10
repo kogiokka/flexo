@@ -13,6 +13,7 @@
 #include "gfx/GLWRBuffer.hpp"
 #include "gfx/GLWRFragmentShader.hpp"
 #include "gfx/GLWRInputLayout.hpp"
+#include "gfx/GLWRPtr.hpp"
 #include "gfx/GLWRRenderTarget.hpp"
 #include "gfx/GLWRSampler.hpp"
 #include "gfx/GLWRTexture2D.hpp"
@@ -133,30 +134,6 @@ struct GLWRResourceData {
     void const* mem;
 };
 
-template <typename T>
-class GLWRPtr
-{
-    T* m_ptr;
-
-public:
-    GLWRPtr()
-        : m_ptr(nullptr)
-    {
-    }
-    ~GLWRPtr()
-    {
-        delete m_ptr;
-    }
-    T** operator&()
-    {
-        return &m_ptr;
-    }
-    T* Get()
-    {
-        return m_ptr;
-    }
-};
-
 class _GLWRState
 {
     using _Op = std::function<void(void)>;
@@ -225,7 +202,6 @@ public:
     void CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSamplerState);
     void CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasterizerState** ppState);
     void CreateBlendState(GLWRBlendDesc const& desc, GLWRBlendState** ppState);
-    void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);
@@ -256,15 +232,13 @@ public:
     void DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCount);
     void Present();
 
-    std::string SlurpShaderSource(std::string const& filename) const;
+    static std::string SlurpShaderSource(std::string const& filename);
 
 private:
-    void CreateProgramPipeline(GLuint& pipeline);
-    void SetProgramPipeline(GLuint pipeline);
-    void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
     void AttachShaderStage(GLuint const program, GLenum stage, char const* source);
     int UniformLocation(std::string const& uniformName) const;
     bool IsShaderCompiled(GLuint const shaderObject);
+    void LinkShaderProgram(GLuint const program);
     void CheckProgramStatus(GLuint const programObject);
 
     struct Enum {
