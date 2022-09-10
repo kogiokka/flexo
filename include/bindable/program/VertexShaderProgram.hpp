@@ -1,7 +1,6 @@
 #ifndef VERTEX_SHADER_PROGRAM_H
 #define VERTEX_SHADER_PROGRAM_H
 
-#include <memory>
 #include <string>
 
 #include <glad/glad.h>
@@ -12,20 +11,17 @@
 
 namespace Bind
 {
-    class ProgramPipeline;
-
     class VertexShaderProgram : public Bindable
     {
         friend InputLayout;
 
     public:
-        VertexShaderProgram(Graphics& gfx, std::string const& filename, ProgramPipeline const& pipeline);
+        VertexShaderProgram(Graphics& gfx, std::string const& filename);
         ~VertexShaderProgram() override;
         virtual void Bind() override;
 
     private:
-        GLuint m_id;
-        ProgramPipeline const& m_pipeline;
+        GLWRPtr<GLWRVertexShader> m_program;
     };
 }
 

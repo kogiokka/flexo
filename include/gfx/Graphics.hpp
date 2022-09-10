@@ -11,10 +11,12 @@
 #include "Attachable.hpp"
 #include "Camera.hpp"
 #include "gfx/GLWRBuffer.hpp"
+#include "gfx/GLWRFragmentShader.hpp"
 #include "gfx/GLWRInputLayout.hpp"
 #include "gfx/GLWRRenderTarget.hpp"
 #include "gfx/GLWRSampler.hpp"
 #include "gfx/GLWRTexture2D.hpp"
+#include "gfx/GLWRVertexShader.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
@@ -32,15 +34,6 @@ typedef enum {
     GLWRFormat_Uint2Norm,
     GLWRFormat_Uint3Norm,
 } GLWRFormat;
-
-typedef enum {
-    GLWRShaderStage_Vert = GL_VERTEX_SHADER,
-    GLWRShaderStage_Tesc = GL_TESS_CONTROL_SHADER,
-    GLWRShaderStage_Tese = GL_TESS_EVALUATION_SHADER,
-    GLWRShaderStage_Geom = GL_GEOMETRY_SHADER,
-    GLWRShaderStage_Frag = GL_FRAGMENT_SHADER,
-    GLWRShaderStage_Comp = GL_COMPUTE_SHADER,
-} GLWRShaderStage;
 
 typedef enum {
     GLWRFillMode_WireFrame,
@@ -195,8 +188,8 @@ class Graphics : public AttachableBase
         GLenum indexBufferFormat;
         GLubyte* offsetOfFirstIndex;
         GLuint pipeline;
-        GLuint vert;
-        GLuint frag;
+        GLWRPtr<GLWRVertexShader> vert;
+        GLWRPtr<GLWRFragmentShader> frag;
         GLuint layout;
         GLWRPtr<GLWRInputLayout> inputLayout;
         GLWRPtr<GLWRBuffer> buffer;
@@ -223,36 +216,32 @@ public:
     ~Graphics();
     void CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget);
     void CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
-                           GLuint const programWithInputSignature, GLWRInputLayout** ppInputLayout);
+                           GLWRVertexShader const* pProgramWithInputSignature, GLWRInputLayout** ppInputLayout);
+    void CreateVertexShader(char const* source, GLWRVertexShader** ppVertexShader);
+    void CreateFragmentShader(char const* source, GLWRFragmentShader** ppFragmentShader);
     void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer);
     void CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
                          GLWRTexture2D** ppTexture2D);
     void CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSamplerState);
-    void CreateShaderProgram(GLuint& program);
-    void CreateProgramPipeline(GLuint& pipeline);
-    void CreateSeparableShaderProgram(GLuint& program, GLWRShaderStage stage, std::string const& filename);
     void CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasterizerState** ppState);
     void CreateBlendState(GLWRBlendDesc const& desc, GLWRBlendState** ppState);
-    void AttachShaderStage(GLuint const program, GLWRShaderStage stage, std::string const& filename);
     void LinkShaderProgram(GLuint const program);
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);
     void SetRenderTarget(GLWRRenderTarget* target);
     void SetInputLayout(GLWRInputLayout* pInputLayout);
+    void SetVertexShader(GLWRVertexShader* ppVertexShader);
+    void SetFragmentShader(GLWRFragmentShader* pFragmentShader);
     void SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset);
     void SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D);
     void SetSamplers(unsigned int startUnit, unsigned int numSamplers, GLWRSampler* const* ppSamplers);
     void SetShaderProgram(GLuint program);
-    void SetProgramPipeline(GLuint pipeline);
-    void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
     void SetRasterizerState(GLWRRasterizerState const* state);
     void SetBlendState(GLWRBlendState const* state);
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
     void SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer);
 
-    void DeleteShaderProgram(GLuint& program);
-    void DeleteProgramPipeline(GLuint& pipeline);
     void ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const;
 
     glm::mat4 GetViewProjectionMatrix() const;
@@ -267,11 +256,16 @@ public:
     void DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCount);
     void Present();
 
+    std::string SlurpShaderSource(std::string const& filename) const;
+
 private:
+    void CreateProgramPipeline(GLuint& pipeline);
+    void SetProgramPipeline(GLuint pipeline);
+    void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
+    void AttachShaderStage(GLuint const program, GLenum stage, char const* source);
     int UniformLocation(std::string const& uniformName) const;
     bool IsShaderCompiled(GLuint const shaderObject);
     void CheckProgramStatus(GLuint const programObject);
-    std::string SlurpShaderSource(std::string const& filename) const;
 
     struct Enum {
         static GLAttribFormat Resolve(GLWRFormat const format);

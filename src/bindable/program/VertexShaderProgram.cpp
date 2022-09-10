@@ -1,23 +1,21 @@
 #include "bindable/program/VertexShaderProgram.hpp"
-#include "bindable/program/ProgramPipeline.hpp"
 
 namespace Bind
 {
-    VertexShaderProgram::VertexShaderProgram(Graphics& gfx, std::string const& filename,
-                                             ProgramPipeline const& pipeline)
+    VertexShaderProgram::VertexShaderProgram(Graphics& gfx, std::string const& filename)
         : Bindable(gfx)
-        , m_pipeline(pipeline)
     {
-        m_gfx->CreateSeparableShaderProgram(m_id, GLWRShaderStage::GLWRShaderStage_Vert, filename);
+
+        std::string source = m_gfx->SlurpShaderSource(filename);
+        m_gfx->CreateVertexShader(source.data(), &m_program);
     }
 
     VertexShaderProgram::~VertexShaderProgram()
     {
-        m_gfx->DeleteShaderProgram(m_id);
     }
 
     void VertexShaderProgram::Bind()
     {
-        m_gfx->SetProgramPipelineStages(m_pipeline.m_id, GL_VERTEX_SHADER_BIT, m_id);
+        m_gfx->SetVertexShader(m_program.Get());
     }
 }

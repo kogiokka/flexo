@@ -13,7 +13,6 @@
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
-#include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeEdge.hpp"
 
@@ -37,16 +36,14 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned i
     Task draw;
     draw.mDrawable = this;
 
-    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert", *pipeline);
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag", *pipeline);
-    draw.AddBindable(pipeline);
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back }));
+    draw.AddBindable(std::make_shared<Bind::RasterizerState>(
+        gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back }));
 
     AddTask(draw);
 }

@@ -4,11 +4,11 @@
 namespace Bind
 {
     InputLayout::InputLayout(Graphics& gfx, std::vector<GLWRInputElementDesc> const& inputElementDesc,
-                             VertexShaderProgram const* programWithInputSignature)
+                             VertexShaderProgram* programWithInputSignature)
         : Bindable(gfx)
     {
-        m_gfx->CreateInputLayout(inputElementDesc.data(), inputElementDesc.size(), programWithInputSignature->m_id,
-                                 &m_inputLayout);
+        m_gfx->CreateInputLayout(inputElementDesc.data(), inputElementDesc.size(),
+                                 programWithInputSignature->m_program.Get(), &m_inputLayout);
     }
 
     InputLayout::~InputLayout()

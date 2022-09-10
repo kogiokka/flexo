@@ -12,7 +12,6 @@
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
-#include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
 
 LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
@@ -38,12 +37,9 @@ LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
     Task draw;
     draw.mDrawable = this;
 
-    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LightSource.vert", *pipeline);
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LightSource.frag", *pipeline);
-    draw.AddBindable(pipeline);
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LightSource.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LightSource.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(
         gfx, glm::translate(glm::mat4(1.0f), world.lightPos) * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f))); // FIXME

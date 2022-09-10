@@ -11,7 +11,6 @@
 #include "bindable/UniformBuffer.hpp"
 #include "bindable/VertexBuffer.hpp"
 #include "bindable/program/FragmentShaderProgram.hpp"
-#include "bindable/program/ProgramPipeline.hpp"
 #include "bindable/program/VertexShaderProgram.hpp"
 #include "drawable/LatticeVertex.hpp"
 
@@ -52,12 +51,9 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     Task draw;
     draw.mDrawable = this;
 
-    auto pipeline = std::make_shared<Bind::ProgramPipeline>(gfx);
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert", *pipeline);
-    auto fs = std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag", *pipeline);
-    draw.AddBindable(pipeline);
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(fs);
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(
         std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f)));

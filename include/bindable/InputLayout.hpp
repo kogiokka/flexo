@@ -9,14 +9,13 @@
 namespace Bind
 {
     class VertexShaderProgram;
-
     class InputLayout : public Bindable
     {
         GLWRPtr<GLWRInputLayout> m_inputLayout;
 
     public:
         InputLayout(Graphics& gfx, std::vector<GLWRInputElementDesc> const& inputElementDesc,
-                    VertexShaderProgram const* programWithInputSignature);
+                    VertexShaderProgram* programWithInputSignature);
         ~InputLayout() override;
         void Bind() override;
     };

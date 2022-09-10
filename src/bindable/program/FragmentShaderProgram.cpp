@@ -1,23 +1,20 @@
 #include "bindable/program/FragmentShaderProgram.hpp"
-#include "bindable/program/ProgramPipeline.hpp"
 
 namespace Bind
 {
-    FragmentShaderProgram::FragmentShaderProgram(Graphics& gfx, std::string const& filename,
-                                                 ProgramPipeline const& pipeline)
+    FragmentShaderProgram::FragmentShaderProgram(Graphics& gfx, std::string const& filename)
         : Bindable(gfx)
-        , m_pipeline(pipeline)
     {
-        m_gfx->CreateSeparableShaderProgram(m_id, GLWRShaderStage::GLWRShaderStage_Frag, filename);
+        std::string const source = gfx.SlurpShaderSource(filename);
+        m_gfx->CreateFragmentShader(source.data(), &m_program);
     }
 
     FragmentShaderProgram::~FragmentShaderProgram()
     {
-        m_gfx->DeleteShaderProgram(m_id);
     }
 
     void FragmentShaderProgram::Bind()
     {
-        m_gfx->SetProgramPipelineStages(m_pipeline.m_id, GL_FRAGMENT_SHADER_BIT, m_id);
+        m_gfx->SetFragmentShader(m_program.Get());
     }
 }

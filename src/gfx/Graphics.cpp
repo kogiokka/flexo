@@ -55,9 +55,13 @@ Graphics::Graphics(int width, int height)
     };
 
     CreateProgramPipeline(m_ctx.pipeline);
-    CreateSeparableShaderProgram(m_ctx.vert, GLWRShaderStage::GLWRShaderStage_Vert, "shader/Screen.vert");
-    CreateSeparableShaderProgram(m_ctx.frag, GLWRShaderStage::GLWRShaderStage_Frag, "shader/Screen.frag");
-    CreateInputLayout(inputs.data(), inputs.size(), m_ctx.vert, &m_ctx.inputLayout);
+    SetProgramPipeline(m_ctx.pipeline);
+
+    std::string vertSource = SlurpShaderSource("shader/Screen.vert");
+    std::string fragSource = SlurpShaderSource("shader/Screen.frag");
+    CreateVertexShader(vertSource.data(), &m_ctx.vert);
+    CreateFragmentShader(fragSource.data(), &m_ctx.frag);
+    CreateInputLayout(inputs.data(), inputs.size(), m_ctx.vert.Get(), &m_ctx.inputLayout);
 
     GLWRBufferDesc bufferDesc;
     bufferDesc.target = GL_ARRAY_BUFFER;
@@ -74,9 +78,7 @@ Graphics::Graphics(int width, int height)
 
 Graphics::~Graphics()
 {
-    DeleteProgramPipeline(m_ctx.pipeline);
-    DeleteShaderProgram(m_ctx.vert);
-    DeleteShaderProgram(m_ctx.frag);
+    glDeleteProgramPipelines(1, &m_ctx.pipeline);
 }
 
 void Graphics::CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget)
@@ -85,14 +87,14 @@ void Graphics::CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRe
 }
 
 void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
-                                 GLuint const programWithInputSignature, GLWRInputLayout** ppInputLayout)
+                                 GLWRVertexShader const* pProgramWithInputSignature, GLWRInputLayout** ppInputLayout)
 {
     *ppInputLayout = new GLWRInputLayout();
 
     SetInputLayout(*ppInputLayout);
     for (unsigned int i = 0; i < numElements; i++) {
         auto const& desc = inputElementDesc[i];
-        GLint location = glGetAttribLocation(programWithInputSignature, desc.semanticName);
+        GLint location = glGetAttribLocation(pProgramWithInputSignature->m_id, desc.semanticName);
         if (location == -1) {
             Logger::error("Invalid semantic name: %s", desc.semanticName);
             return;
@@ -107,6 +109,24 @@ void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, u
         }
     }
     SetInputLayout(m_ctx.inputLayout.Get());
+}
+
+void Graphics::CreateVertexShader(char const* source, GLWRVertexShader** ppVertexShader)
+{
+    *ppVertexShader = new GLWRVertexShader();
+
+    GLuint const program = (*ppVertexShader)->m_id;
+    AttachShaderStage(program, GL_VERTEX_SHADER, source);
+    CheckProgramStatus(program);
+}
+
+void Graphics::CreateFragmentShader(char const* source, GLWRFragmentShader** ppFragmentShader)
+{
+    *ppFragmentShader = new GLWRFragmentShader();
+
+    GLuint const program = (*ppFragmentShader)->m_id;
+    AttachShaderStage(program, GL_FRAGMENT_SHADER, source);
+    CheckProgramStatus(program);
 }
 
 void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer)
@@ -171,23 +191,9 @@ void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSampl
     }
 }
 
-void Graphics::CreateShaderProgram(GLuint& program)
-{
-    program = glCreateProgram();
-}
-
 void Graphics::CreateProgramPipeline(GLuint& pipeline)
 {
     glGenProgramPipelines(1, &pipeline);
-}
-
-void Graphics::CreateSeparableShaderProgram(GLuint& program, GLWRShaderStage stage, std::string const& filename)
-{
-    std::string const& source = SlurpShaderSource(filename);
-    char const* const shaderSourceArray[1] = { source.c_str() };
-    program = glCreateShaderProgramv(stage, 1, shaderSourceArray);
-
-    CheckProgramStatus(program);
 }
 
 void Graphics::CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasterizerState** ppState)
@@ -256,19 +262,20 @@ void Graphics::SetViewports(unsigned int numViewports, GLWRViewport* viewports)
     free(depthRangeParams);
 }
 
-void Graphics::AttachShaderStage(GLuint const program, GLWRShaderStage stage, std::string const& filename)
+void Graphics::AttachShaderStage(GLuint const program, GLenum stage, char const* source)
 {
-    std::string const& source = SlurpShaderSource(filename);
-    char const* const shaderSourceArray[1] = { source.c_str() };
+    char const* const shaderSourceArray[1] = { source };
 
     GLuint shaderObject = glCreateShader(stage);
     glShaderSource(shaderObject, 1, shaderSourceArray, nullptr);
     glCompileShader(shaderObject);
     if (!IsShaderCompiled(shaderObject)) {
-        Logger::error("Shader object compilation error: %s", filename.c_str());
+        Logger::error("Shader object compilation error: %s", source);
     }
     glAttachShader(program, shaderObject);
     glDeleteShader(shaderObject);
+
+    LinkShaderProgram(program);
 }
 
 void Graphics::LinkShaderProgram(const GLuint program)
@@ -293,6 +300,16 @@ void Graphics::SetRenderTarget(GLWRRenderTarget* target)
 void Graphics::SetInputLayout(GLWRInputLayout* pInputLayout)
 {
     glBindVertexArray(pInputLayout->m_id);
+}
+
+void Graphics::SetVertexShader(GLWRVertexShader* ppVertexShader)
+{
+    glUseProgramStages(m_ctx.pipeline, GL_VERTEX_SHADER_BIT, ppVertexShader->m_id);
+}
+
+void Graphics::SetFragmentShader(GLWRFragmentShader* ppFragmentShader)
+{
+    glUseProgramStages(m_ctx.pipeline, GL_FRAGMENT_SHADER_BIT, ppFragmentShader->m_id);
 }
 
 void Graphics::SetPrimitive(GLenum primitive)
@@ -341,6 +358,7 @@ void Graphics::SetShaderProgram(GLuint program)
 
 void Graphics::SetProgramPipeline(GLuint pipeline)
 {
+    m_ctx.pipeline = pipeline;
     glBindProgramPipeline(pipeline);
 }
 
@@ -388,8 +406,8 @@ void Graphics::Present()
     SetVertexBuffers(0, 1, &m_ctx.buffer, &stride, &offset);
 
     SetProgramPipeline(m_ctx.pipeline);
-    SetProgramPipelineStages(m_ctx.pipeline, GL_VERTEX_SHADER_BIT, m_ctx.vert);
-    SetProgramPipelineStages(m_ctx.pipeline, GL_FRAGMENT_SHADER_BIT, m_ctx.frag);
+    SetVertexShader(m_ctx.vert.Get());
+    SetFragmentShader(m_ctx.frag.Get());
 
     SetInputLayout(m_ctx.inputLayout.Get());
 
@@ -407,16 +425,6 @@ void Graphics::Present()
 void Graphics::SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer)
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, pBuffer->m_id);
-}
-
-void Graphics::DeleteShaderProgram(GLuint& program)
-{
-    glDeleteProgram(program);
-}
-
-void Graphics::DeleteProgramPipeline(GLuint& pipeline)
-{
-    glDeleteProgramPipelines(1, &pipeline);
 }
 
 void Graphics::ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const
