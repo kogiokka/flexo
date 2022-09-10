@@ -199,7 +199,7 @@ class Graphics : public AttachableBase
         GLWRPtr<GLWRInputLayout> inputLayout;
         GLWRPtr<GLWRBuffer> buffer;
         GLenum screenTexture;
-        GLenum framebuffer;
+        GLenum targetFrame;
         GLWRPtr<GLWRRasterizerState> state;
     };
 

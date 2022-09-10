@@ -41,10 +41,10 @@ Graphics const& Graphics::Get(WatermarkingProject const& project)
 Graphics::Graphics(int width, int height)
     : m_camera(width, height)
 {
-    m_ctx.framebuffer = 0;
+    m_ctx.targetFrame = 0;
 
     // Setup the default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
 
     float quadVerts[] = { -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
                           -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f };
@@ -285,7 +285,7 @@ void Graphics::SetRenderTarget(GLWRRenderTarget* target)
     glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
 
     m_ctx.screenTexture = target->m_texture->m_id;
-    m_ctx.framebuffer = target->m_frame;
+    m_ctx.targetFrame = target->m_frame;
 }
 
 void Graphics::SetInputLayout(GLWRInputLayout* pInputLayout)
@@ -392,6 +392,8 @@ void Graphics::Present()
 
     glDisable(GL_DEPTH_TEST);
     Draw(6);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
 }
 
 void Graphics::SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer)
@@ -424,7 +426,7 @@ void Graphics::ClearRenderTarget(GLWRRenderTarget* target, float const color[4])
     glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
     glClearColor(color[0], color[1], color[2], color[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const
@@ -534,4 +536,3 @@ Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRFormat const format)
         break;
     }
 }
-
