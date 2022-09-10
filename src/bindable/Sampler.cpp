@@ -6,16 +6,15 @@ namespace Bind
         : Bindable(gfx)
         , m_unit(textureUnit)
     {
-        m_gfx->CreateSampler(m_id, samplerDesc);
+        m_gfx->CreateSampler(&samplerDesc, &m_sampler);
     }
 
     Sampler::~Sampler()
     {
-        m_gfx->DeleteSampler(m_id);
     }
 
     void Sampler::Bind()
     {
-        m_gfx->SetSampler(m_unit, m_id);
+        m_gfx->SetSamplers(m_unit, 1, &m_sampler);
     }
 }

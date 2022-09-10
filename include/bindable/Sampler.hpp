@@ -14,8 +14,8 @@ namespace Bind
         void Bind() override;
 
     protected:
-        GLuint m_id;
         GLuint m_unit;
+        GLWRPtr<GLWRSampler> m_sampler;
     };
 }
 

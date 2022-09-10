@@ -132,15 +132,16 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void Graphics::CreateSampler(GLuint& sampler, GLWRSamplerDesc const& desc)
+void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSampler)
 {
-    glGenSamplers(1, &sampler);
+    *ppSampler = new GLWRSampler();
+    GLuint sampler = (*ppSampler)->m_id;
 
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, desc.coordinateS);
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, desc.coordinateT);
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_R, desc.coordinateR);
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, pDesc->coordinateS);
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, pDesc->coordinateT);
+    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_R, pDesc->coordinateR);
 
-    switch (desc.filter) {
+    switch (pDesc->filter) {
     case GLWRFilter_MinMagNearest_NoMip:
         glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
         glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
@@ -285,7 +286,7 @@ void Graphics::SetRenderTarget(GLWRRenderTarget* target)
     glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
 
     m_ctx.screenTexture = target->m_texture->m_id;
-    m_ctx.screenSampler = target->m_sampler;
+    m_ctx.screenSampler = target->m_sampler->m_id;
     m_ctx.targetFrame = target->m_frame;
 }
 
@@ -322,9 +323,11 @@ void Graphics::SetTexture2D(unsigned int startUnit, unsigned int numTextures, GL
     }
 }
 
-void Graphics::SetSampler(GLuint unit, GLuint sampler)
+void Graphics::SetSamplers(unsigned int startUnit, unsigned int numSamplers, GLWRSampler* const* ppSamplers)
 {
-    glBindSampler(unit, sampler);
+    for (unsigned int i = 0; i < numSamplers; i++) {
+        glBindSampler(startUnit + i, ppSamplers[i]->m_id);
+    }
 }
 
 void Graphics::SetShaderProgram(GLuint program)
@@ -400,16 +403,6 @@ void Graphics::Present()
 void Graphics::SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer)
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, pBuffer->m_id);
-}
-
-void Graphics::DeleteTexture(GLuint& texture)
-{
-    glDeleteTextures(1, &texture);
-}
-
-void Graphics::DeleteSampler(GLuint& sampler)
-{
-    glDeleteSamplers(1, &sampler);
 }
 
 void Graphics::DeleteShaderProgram(GLuint& program)

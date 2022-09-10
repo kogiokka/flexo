@@ -13,6 +13,7 @@
 #include "gfx/GLWRBuffer.hpp"
 #include "gfx/GLWRInputLayout.hpp"
 #include "gfx/GLWRRenderTarget.hpp"
+#include "gfx/GLWRSampler.hpp"
 #include "gfx/GLWRTexture2D.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
@@ -225,7 +226,7 @@ public:
     void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer);
     void CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
                          GLWRTexture2D** ppTexture2D);
-    void CreateSampler(GLuint& sampler, GLWRSamplerDesc const& desc);
+    void CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSamplerState);
     void CreateShaderProgram(GLuint& program);
     void CreateProgramPipeline(GLuint& pipeline);
     void CreateSeparableShaderProgram(GLuint& program, GLWRShaderStage stage, std::string const& filename);
@@ -240,7 +241,7 @@ public:
     void SetInputLayout(GLWRInputLayout* pInputLayout);
     void SetIndexBuffer(GLenum elementDataType, GLvoid const* offsetOfFirstIndex, GLWRBuffer const* pBuffer);
     void SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D);
-    void SetSampler(GLuint unit, GLuint sampler);
+    void SetSamplers(unsigned int startUnit, unsigned int numSamplers, GLWRSampler* const* ppSamplers);
     void SetShaderProgram(GLuint program);
     void SetProgramPipeline(GLuint pipeline);
     void SetProgramPipelineStages(GLuint pipeline, GLbitfield stages, GLuint program);
@@ -249,8 +250,6 @@ public:
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
     void SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer);
 
-    void DeleteTexture(GLuint& texture);
-    void DeleteSampler(GLuint& sampler);
     void DeleteShaderProgram(GLuint& program);
     void DeleteProgramPipeline(GLuint& pipeline);
     void ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const;

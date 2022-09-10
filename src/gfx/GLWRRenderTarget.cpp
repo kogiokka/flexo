@@ -4,6 +4,7 @@
 GLWRRenderTarget::GLWRRenderTarget(int width, int height)
 {
     m_texture = new GLWRTexture2D();
+    m_sampler = new GLWRSampler();
 
     glGenFramebuffers(1, &m_frame);
     glGenRenderbuffers(1, &m_rbo);
@@ -13,9 +14,8 @@ GLWRRenderTarget::GLWRRenderTarget(int width, int height)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
     glBindTexture(GL_TEXTURE_2D, 0);
 
-    glGenSamplers(1, &m_sampler);
-    glSamplerParameteri(m_sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glSamplerParameteri(m_sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glSamplerParameteri(m_sampler->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glSamplerParameteri(m_sampler->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_frame);
 
@@ -39,4 +39,5 @@ GLWRRenderTarget::~GLWRRenderTarget()
     glDeleteRenderbuffers(1, &m_rbo);
     glDeleteFramebuffers(1, &m_frame);
     delete m_texture;
+    delete m_sampler;
 }

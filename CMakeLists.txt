@@ -65,6 +65,7 @@ PRIVATE
     "src/gfx/Graphics.cpp"
     "src/gfx/GLWRBuffer.cpp"
     "src/gfx/GLWRInputLayout.cpp"
+    "src/gfx/GLWRSampler.cpp"
     "src/gfx/GLWRTexture2D.cpp"
     "src/gfx/GLWRRenderTarget.cpp"
     "src/Task.cpp"
