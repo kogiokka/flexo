@@ -11,7 +11,7 @@ namespace Bind
     class Texture2D : public Bindable
     {
     protected:
-        GLWRPtr<GLWRTexture2D> m_texture;
+        GLWRPtr<GLWRShaderResourceView> m_resource;
         GLuint m_unit;
 
     public:
@@ -35,13 +35,20 @@ namespace Bind
 
         desc.width = width;
         desc.height = height;
-        desc.textureFormat = GL_RGBA;
+        desc.textureFormat = GL_RGBA32F;
         desc.pixelFormat = GL_RGBA;
 
         DetermineDataType<T>(desc);
 
         data.mem = textureData;
-        m_gfx->CreateTexture2D(&desc, &data, &m_texture);
+
+        GLWRPtr<GLWRTexture2D> texture;
+        m_gfx->CreateTexture2D(&desc, &data, &texture);
+
+        GLWRShaderResourceViewDesc viewDesc;
+        viewDesc.target = GL_TEXTURE_2D;
+        viewDesc.format = GL_RGBA32F;
+        m_gfx->CreateShaderResourceView(texture.Get(), &viewDesc, &m_resource);
     }
 
     template <>

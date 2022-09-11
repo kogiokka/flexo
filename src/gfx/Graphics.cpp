@@ -145,11 +145,19 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, (*ppTexture2D)->m_id); // Bind the new texture to the context so we can modify it.
-
-    constexpr GLint BORDER = 0;
-    glTexImage2D(GL_TEXTURE_2D, 0, pDesc->textureFormat, pDesc->width, pDesc->height, BORDER, pDesc->pixelFormat,
-                 pDesc->dataType, pInitialData->mem);
+    glTexStorage2D(GL_TEXTURE_2D, 1, pDesc->textureFormat, pDesc->width, pDesc->height);
+    glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pDesc->width, pDesc->height, pDesc->pixelFormat, pDesc->dataType,
+                    pInitialData->mem);
     glGenerateMipmap(GL_TEXTURE_2D);
+}
+
+void Graphics::CreateShaderResourceView(GLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
+                                        GLWRShaderResourceView** ppResourceView)
+{
+    *ppResourceView = new GLWRShaderResourceView();
+
+    glTextureView((*ppResourceView)->m_id, pDesc->target, pResource->m_id, pDesc->format, 0, 1, 0, 1);
+    (*ppResourceView)->m_target = pDesc->target;
 }
 
 void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSampler)
@@ -331,11 +339,12 @@ void Graphics::SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsi
     m_ctx.offsetOfFirstIndex += offset;
 }
 
-void Graphics::SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D)
+void Graphics::SetShaderResources(unsigned int startUnit, unsigned int numTextures,
+                                  GLWRShaderResourceView* const* ppResourceViews)
 {
     for (unsigned int i = 0; i < numTextures; i++) {
         glActiveTexture(GL_TEXTURE0 + startUnit + i);
-        glBindTexture(GL_TEXTURE_2D, ppTexture2D[i]->m_id);
+        glBindTexture(ppResourceViews[i]->m_target, ppResourceViews[i]->m_id);
     }
 }
 

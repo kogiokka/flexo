@@ -1,11 +1,10 @@
 #include "gfx/GLWRTexture2D.hpp"
 
 GLWRTexture2D::GLWRTexture2D()
+    : GLWRResource()
 {
-    glGenTextures(1, &m_id);
 }
 
 GLWRTexture2D::~GLWRTexture2D()
 {
-    glDeleteTextures(1, &m_id);
 }

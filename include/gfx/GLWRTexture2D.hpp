@@ -3,14 +3,13 @@
 
 #include <glad/glad.h>
 
-class Graphics;
+#include "gfx/GLWRResource.hpp"
+
 class GLWRRenderTarget;
 
-class GLWRTexture2D
+class GLWRTexture2D : public GLWRResource
 {
-    friend Graphics;
     friend GLWRRenderTarget;
-    GLuint m_id;
 
 public:
     GLWRTexture2D();

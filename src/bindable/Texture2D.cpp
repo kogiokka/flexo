@@ -10,7 +10,7 @@ namespace Bind
 
     void Texture2D::Bind()
     {
-        m_gfx->SetTexture2D(m_unit, 1, &m_texture);
+        m_gfx->SetShaderResources(m_unit, 1, &m_resource);
     }
 
     template <>

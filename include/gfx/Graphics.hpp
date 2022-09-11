@@ -15,7 +15,9 @@
 #include "gfx/GLWRInputLayout.hpp"
 #include "gfx/GLWRPtr.hpp"
 #include "gfx/GLWRRenderTarget.hpp"
+#include "gfx/GLWRResource.hpp"
 #include "gfx/GLWRSampler.hpp"
+#include "gfx/GLWRShaderResourceView.hpp"
 #include "gfx/GLWRTexture2D.hpp"
 #include "gfx/GLWRVertexShader.hpp"
 
@@ -134,6 +136,11 @@ struct GLWRResourceData {
     void const* mem;
 };
 
+struct GLWRShaderResourceViewDesc {
+    GLenum format;
+    GLenum target;
+};
+
 class _GLWRState
 {
     using _Op = std::function<void(void)>;
@@ -199,6 +206,8 @@ public:
     void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer);
     void CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
                          GLWRTexture2D** ppTexture2D);
+    void CreateShaderResourceView(GLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
+                                  GLWRShaderResourceView** ppResourceView);
     void CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSamplerState);
     void CreateRasterizerState(GLWRRasterizerDesc const* pDesc, GLWRRasterizerState** ppState);
     void CreateBlendState(GLWRBlendDesc const* pDesc, GLWRBlendState** ppState);
@@ -210,7 +219,8 @@ public:
     void SetVertexShader(GLWRVertexShader* ppVertexShader);
     void SetFragmentShader(GLWRFragmentShader* pFragmentShader);
     void SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset);
-    void SetTexture2D(unsigned int startUnit, unsigned int numTextures, GLWRTexture2D* const* ppTexture2D);
+    void SetShaderResources(unsigned int startUnit, unsigned int numTextures,
+                            GLWRShaderResourceView* const* ppResourceViews);
     void SetSamplers(unsigned int startUnit, unsigned int numSamplers, GLWRSampler* const* ppSamplers);
     void SetShaderProgram(GLuint program);
     void SetRasterizerState(GLWRRasterizerState const* state);
