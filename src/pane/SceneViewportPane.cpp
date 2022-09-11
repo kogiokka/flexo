@@ -84,7 +84,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
 
     glEnable(GL_DEPTH_TEST);
     UpdateScene();
-    Renderer::Get(m_project).Render(Graphics::Get(m_project));
+    Renderer::Get(m_project).Render(gfx);
 
     gfx.Present();
 
