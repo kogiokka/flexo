@@ -5,7 +5,7 @@ namespace Bind
     RasterizerState::RasterizerState(Graphics& gfx, GLWRRasterizerDesc const& desc)
         : Bindable(gfx)
     {
-        m_gfx->CreateRasterizerState(desc, &m_state);
+        m_gfx->CreateRasterizerState(&desc, &m_state);
     }
 
     RasterizerState::~RasterizerState()

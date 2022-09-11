@@ -2,7 +2,6 @@
 #include <fstream>
 
 #include "Project.hpp"
-#include "RenderTarget.hpp"
 #include "common/Logger.hpp"
 #include "gfx/Graphics.hpp"
 #include "pane/SceneViewportPane.hpp"
@@ -74,7 +73,7 @@ Graphics::Graphics(int width, int height)
     CreateBuffer(&bufferDesc, &quadVertsData, &m_ctx.buffer);
 
     GLWRRasterizerDesc rasDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back };
-    CreateRasterizerState(rasDesc, &m_ctx.state);
+    CreateRasterizerState(&rasDesc, &m_ctx.state);
 }
 
 Graphics::~Graphics()
@@ -192,12 +191,12 @@ void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSampl
     }
 }
 
-void Graphics::CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasterizerState** ppState)
+void Graphics::CreateRasterizerState(GLWRRasterizerDesc const* pDesc, GLWRRasterizerState** ppState)
 {
     *ppState = new GLWRRasterizerState();
     GLWRRasterizerState* pState = *ppState;
 
-    switch (desc.cullMode) {
+    switch (pDesc->cullMode) {
     case GLWRCullMode::GLWRCullMode_Back:
         pState->Add(std::bind(glEnable, GL_CULL_FACE));
         pState->Add(std::bind(glCullFace, GL_BACK));
@@ -211,7 +210,7 @@ void Graphics::CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasteri
         break;
     };
 
-    switch (desc.fillMode) {
+    switch (pDesc->fillMode) {
     case GLWRFillMode::GLWRFillMode_WireFrame:
         pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE));
         break;
@@ -221,19 +220,19 @@ void Graphics::CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasteri
     }
 }
 
-void Graphics::CreateBlendState(GLWRBlendDesc const& desc, GLWRBlendState** ppState)
+void Graphics::CreateBlendState(GLWRBlendDesc const* pDesc, GLWRBlendState** ppState)
 {
     *ppState = new GLWRBlendState();
     GLWRBlendState* pState = *ppState;
 
-    if (desc.enable) {
+    if (pDesc->enable) {
         pState->Add(std::bind(glEnable, GL_BLEND));
     } else {
         pState->Add(std::bind(glDisable, GL_BLEND));
     }
 
-    pState->Add(std::bind(glBlendEquationSeparate, desc.eqRGB, desc.eqAlpha));
-    pState->Add(std::bind(glBlendFuncSeparate, desc.srcRGB, desc.dstRGB, desc.srcAlpha, desc.dstAlpha));
+    pState->Add(std::bind(glBlendEquationSeparate, pDesc->eqRGB, pDesc->eqAlpha));
+    pState->Add(std::bind(glBlendFuncSeparate, pDesc->srcRGB, pDesc->dstRGB, pDesc->srcAlpha, pDesc->dstAlpha));
 }
 
 void Graphics::SetViewports(unsigned int numViewports, GLWRViewport* viewports)

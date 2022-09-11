@@ -200,8 +200,8 @@ public:
     void CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
                          GLWRTexture2D** ppTexture2D);
     void CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSamplerState);
-    void CreateRasterizerState(GLWRRasterizerDesc const& desc, GLWRRasterizerState** ppState);
-    void CreateBlendState(GLWRBlendDesc const& desc, GLWRBlendState** ppState);
+    void CreateRasterizerState(GLWRRasterizerDesc const* pDesc, GLWRRasterizerState** ppState);
+    void CreateBlendState(GLWRBlendDesc const* pDesc, GLWRBlendState** ppState);
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);

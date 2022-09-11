@@ -127,7 +127,7 @@ void SceneViewportPane::InitGL()
     blendDesc.eqAlpha = GLWRBlendEq_Add;
 
     GLWRPtr<GLWRBlendState> blend;
-    gfx.CreateBlendState(blendDesc, &blend);
+    gfx.CreateBlendState(&blendDesc, &blend);
     gfx.SetBlendState(blend.Get());
 
     std::cout << "Version:      " << glGetString(GL_VERSION) << "\n"
