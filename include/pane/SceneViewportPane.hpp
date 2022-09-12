@@ -38,7 +38,7 @@ public:
 
 private:
     WatermarkingProject& m_project;
-    GLWRPtr<IGLWRRenderTarget> m_renderTarget;
+    GLWRPtr<IGLWRRenderTargetView> m_frame;
     std::unique_ptr<wxGLContext> m_context;
     bool m_isGLLoaded;
     float m_rateMove;
@@ -48,6 +48,7 @@ private:
     std::tuple<float, float, glm::vec3> m_originTranslate;
 
     inline float RoundGuard(float radian);
+    void InitFrame(Graphics& gfx);
 
     wxDECLARE_EVENT_TABLE();
 };

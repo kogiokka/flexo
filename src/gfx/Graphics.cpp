@@ -30,10 +30,7 @@ Graphics const& Graphics::Get(WatermarkingProject const& project)
 Graphics::Graphics(int width, int height)
     : m_camera(width, height)
 {
-    m_ctx.targetFrame = 0;
-
-    // Setup the default framebuffer
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
+    glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind the Default framebuffer
 
     float quadVerts[] = { -1.0f, 1.0f, 0.0f, 1.0f, -1.0f, -1.0f, 0.0f, 0.0f, 1.0f, -1.0f, 1.0f, 0.0f,
                           -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  -1.0f, 1.0f, 0.0f, 1.0f, 1.0f,  1.0f, 1.0f };
@@ -64,6 +61,8 @@ Graphics::Graphics(int width, int height)
 
     GLWRRasterizerDesc rasDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back };
     CreateRasterizerState(&rasDesc, &m_ctx.state);
+
+    glGenFramebuffers(1, &m_ctx.framebuffer); // The framebuffer that will become our render target.
 }
 
 Graphics::~Graphics()
@@ -71,9 +70,18 @@ Graphics::~Graphics()
     glDeleteProgramPipelines(1, &m_ctx.pipeline);
 }
 
-void Graphics::CreateRenderTarget(int width, int height, IGLWRRenderTarget** ppRenderTarget)
+void Graphics::CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTargetViewDesc const* pDesc,
+                                      IGLWRRenderTargetView** ppRenderTargetView)
 {
-    *ppRenderTarget = new IGLWRRenderTarget(width, height);
+    *ppRenderTargetView = new IGLWRRenderTargetView();
+
+    IGLWRRenderTargetView* view = *ppRenderTargetView;
+    glBindFramebuffer(GL_FRAMEBUFFER, view->m_id);
+    GLint mipmapLevel = 0;
+    view->m_target = pDesc->target;
+    glTextureView(view->m_textureView, pDesc->target, pResource->m_id, pDesc->format, 0, 1, 0, 1);
+    // Attach color buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, view->m_textureView, mipmapLevel);
 }
 
 void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
@@ -281,13 +289,13 @@ void Graphics::LinkShaderProgram(const GLuint program)
     CheckProgramStatus(program);
 }
 
-void Graphics::SetRenderTarget(IGLWRRenderTarget* target)
+void Graphics::SetRenderTargetView(IGLWRRenderTargetView* pRenderTargetView)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, target->m_id);
+    m_ctx.framebuffer = pRenderTargetView->m_id;
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 
-    m_ctx.screenTexture = target->m_texture->m_id;
-    m_ctx.screenSampler = target->m_sampler->m_id;
-    m_ctx.targetFrame = target->m_id;
+    m_ctx.screenTexture = pRenderTargetView->m_textureView;
+    m_ctx.screenSampler = pRenderTargetView->m_sampler;
 }
 
 void Graphics::SetInputLayout(IGLWRInputLayout* pInputLayout)
@@ -399,7 +407,7 @@ void Graphics::Present()
     glDisable(GL_DEPTH_TEST);
     Draw(6);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 }
 
 void Graphics::SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer)
@@ -407,12 +415,12 @@ void Graphics::SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pB
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, pBuffer->m_id);
 }
 
-void Graphics::ClearRenderTarget(IGLWRRenderTarget* target, float const color[4]) const
+void Graphics::ClearRenderTargetView(IGLWRRenderTargetView* pRenderTargetView, float const color[4]) const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, target->m_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, pRenderTargetView->m_id);
     glClearColor(color[0], color[1], color[2], color[3]);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
+    glClear(GL_COLOR_BUFFER_BIT);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const

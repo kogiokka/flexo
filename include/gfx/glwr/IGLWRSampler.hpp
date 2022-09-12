@@ -4,12 +4,12 @@
 #include "gfx/glwr/IGLWRBase.hpp"
 
 class Graphics;
-class IGLWRRenderTarget;
+class IGLWRRenderTargetView;
 
 class IGLWRSampler : public IGLWRBase
 {
     friend Graphics;
-    friend IGLWRRenderTarget;
+    friend IGLWRRenderTargetView;
 
 private:
     IGLWRSampler();

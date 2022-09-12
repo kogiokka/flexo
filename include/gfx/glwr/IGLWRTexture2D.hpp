@@ -4,12 +4,12 @@
 #include "gfx/glwr/IGLWRResource.hpp"
 
 class Graphcis;
-class IGLWRRenderTarget;
+class IGLWRRenderTargetView;
 
 class IGLWRTexture2D : public IGLWRResource
 {
     friend Graphics;
-    friend IGLWRRenderTarget;
+    friend IGLWRRenderTargetView;
 
 private:
     IGLWRTexture2D();

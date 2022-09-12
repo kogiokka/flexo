@@ -80,7 +80,8 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     auto& gfx = Graphics::Get(m_project);
 
     float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    gfx.ClearRenderTarget(m_renderTarget.Get(), bgColor);
+    gfx.ClearRenderTargetView(m_frame.Get(), bgColor);
+    glClear(GL_DEPTH_BUFFER_BIT);
 
     glEnable(GL_DEPTH_TEST);
     m_project.BuildLatticeMesh();
@@ -98,9 +99,7 @@ void SceneViewportPane::InitGL()
     assert(m_isGLLoaded);
 
     auto& gfx = Graphics::Get(m_project);
-    wxSize const size = GetClientSize() * GetContentScaleFactor();
-    gfx.CreateRenderTarget(size.x, size.y, &m_renderTarget);
-    gfx.SetRenderTarget(m_renderTarget.Get());
+    InitFrame(gfx);
 
 #ifndef NDEBUG
     glDebugMessageCallback(
@@ -149,10 +148,9 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
 
     SetCurrent(*m_context);
 
-    m_renderTarget = GLWRPtr<IGLWRRenderTarget>();
     auto& gfx = Graphics::Get(m_project);
-    gfx.CreateRenderTarget(size.x, size.y, &m_renderTarget);
-    gfx.SetRenderTarget(m_renderTarget.Get());
+
+    InitFrame(gfx);
 
     GLWRViewport v;
     v.x = 0.0f;
@@ -161,7 +159,7 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
     v.height = size.y;
     v.nearDepth = 0.0;
     v.farDepth = 1.0;
-    Graphics::Get(m_project).SetViewports(1, &v);
+    gfx.SetViewports(1, &v);
 }
 
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
@@ -244,4 +242,39 @@ float SceneViewportPane::RoundGuard(float radian)
         return radian - MATH_2_MUL_PI;
     else
         return radian;
+}
+
+void SceneViewportPane::InitFrame(Graphics& gfx)
+{
+    m_frame = GLWRPtr<IGLWRRenderTargetView>();
+
+    IGLWRTexture2D* texture = nullptr;
+    wxSize const size = GetClientSize() * GetContentScaleFactor();
+    GLWRTexture2DDesc texDesc;
+    GLWRResourceData initData;
+    texDesc.textureFormat = GL_RGB32F;
+    texDesc.pixelFormat = GL_RGB;
+    texDesc.dataType = GL_UNSIGNED_BYTE;
+    texDesc.width = size.x;
+    texDesc.height = size.y;
+    initData.mem = nullptr;
+    gfx.CreateTexture2D(&texDesc, &initData, &texture);
+
+    GLWRRenderTargetViewDesc viewDesc;
+    viewDesc.target = GL_TEXTURE_2D;
+    viewDesc.format = GL_RGB32F;
+    gfx.CreateRenderTargetView(texture, &viewDesc, &m_frame);
+    gfx.SetRenderTargetView(m_frame.Get());
+    texture->Release();
+
+    static GLuint m_rbo;
+    glDeleteRenderbuffers(1, &m_rbo);
+    glGenRenderbuffers(1, &m_rbo);
+    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
+    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
+    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
+
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        Logger::error("Framebuffer failed to generate!");
+    }
 }

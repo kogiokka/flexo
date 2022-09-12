@@ -12,7 +12,7 @@
 #include "gfx/glwr/IGLWRBuffer.hpp"
 #include "gfx/glwr/IGLWRFragmentShader.hpp"
 #include "gfx/glwr/IGLWRInputLayout.hpp"
-#include "gfx/glwr/IGLWRRenderTarget.hpp"
+#include "gfx/glwr/IGLWRRenderTargetView.hpp"
 #include "gfx/glwr/IGLWRResource.hpp"
 #include "gfx/glwr/IGLWRSampler.hpp"
 #include "gfx/glwr/IGLWRShaderResourceView.hpp"
@@ -140,6 +140,11 @@ struct GLWRShaderResourceViewDesc {
     GLenum target;
 };
 
+struct GLWRRenderTargetViewDesc {
+    GLenum format;
+    GLenum target;
+};
+
 struct GLWRViewport {
     float x;
     float y;
@@ -165,7 +170,7 @@ class Graphics : public AttachableBase
         GLWRPtr<IGLWRBuffer> buffer;
         GLenum screenTexture;
         GLenum screenSampler;
-        GLenum targetFrame;
+        GLenum framebuffer;
         GLWRPtr<IGLWRRasterizerState> state;
     };
 
@@ -184,7 +189,8 @@ public:
 
     Graphics(int width, int height);
     ~Graphics();
-    void CreateRenderTarget(int width, int height, IGLWRRenderTarget** ppRenderTarget);
+    void CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTargetViewDesc const* pDesc,
+                            IGLWRRenderTargetView** ppRenderTargetView);
     void CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
                            IGLWRVertexShader const* pProgramWithInputSignature, IGLWRInputLayout** ppInputLayout);
     void CreateVertexShader(char const* source, IGLWRVertexShader** ppVertexShader);
@@ -200,7 +206,7 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);
-    void SetRenderTarget(IGLWRRenderTarget* target);
+    void SetRenderTargetView(IGLWRRenderTargetView* pRenderTargetView);
     void SetInputLayout(IGLWRInputLayout* pInputLayout);
     void SetVertexShader(IGLWRVertexShader* ppVertexShader);
     void SetFragmentShader(IGLWRFragmentShader* pFragmentShader);
@@ -214,7 +220,7 @@ public:
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
     void SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer);
 
-    void ClearRenderTarget(IGLWRRenderTarget* target, float const color[4]) const;
+    void ClearRenderTargetView(IGLWRRenderTargetView* target, float const color[4]) const;
 
     glm::mat4 GetViewProjectionMatrix() const;
     glm::vec3 GetCameraPosition() const;

@@ -70,7 +70,7 @@ PRIVATE
     "src/gfx/glwr/IGLWRSampler.cpp"
     "src/gfx/glwr/IGLWRResource.cpp"
     "src/gfx/glwr/IGLWRTexture2D.cpp"
-    "src/gfx/glwr/IGLWRRenderTarget.cpp"
+    "src/gfx/glwr/IGLWRRenderTargetView.cpp"
     "src/gfx/glwr/IGLWRShaderResourceView.cpp"
     "src/Task.cpp"
     "src/gfx/bindable//Bindable.cpp"
