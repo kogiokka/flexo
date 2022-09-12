@@ -1,6 +1,8 @@
 #include <cstdlib>
 #include <fstream>
 
+#include <stb_image.h>
+
 #include "Project.hpp"
 #include "common/Logger.hpp"
 #include "gfx/Graphics.hpp"
@@ -507,6 +509,39 @@ std::string Graphics::SlurpShaderSource(std::string const& filename)
     file.close();
 
     return source;
+}
+
+void Graphics::CreateShaderResourceViewFromFile(Graphics* pContext, char const* filename,
+                                                GLWRShaderResourceView** ppResourceView)
+{
+    int width, height, channels;
+    stbi_set_flip_vertically_on_load(0);
+    stbi_uc* image = stbi_load(filename, &width, &height, &channels, STBI_rgb_alpha);
+
+    if (image == nullptr) {
+        Logger::error("Failed to open image: %s. %s", filename, stbi_failure_reason());
+    }
+
+    GLWRPtr<GLWRTexture2D> texture;
+
+    GLWRTexture2DDesc texDesc;
+    texDesc.width = width;
+    texDesc.height = height;
+    texDesc.textureFormat = GL_RGBA32F;
+    texDesc.pixelFormat = GL_RGBA;
+    texDesc.dataType = GL_UNSIGNED_BYTE;
+
+    GLWRResourceData resData;
+    resData.mem = image;
+
+    GLWRShaderResourceViewDesc viewDesc;
+    viewDesc.format = GL_RGBA32F;
+    viewDesc.target = GL_TEXTURE_2D;
+
+    pContext->CreateTexture2D(&texDesc, &resData, &texture);
+    pContext->CreateShaderResourceView(texture.Get(), &viewDesc, ppResourceView);
+
+    stbi_image_free(image);
 }
 
 Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRFormat const format)

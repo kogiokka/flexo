@@ -243,6 +243,7 @@ public:
     void Present();
 
     static std::string SlurpShaderSource(std::string const& filename);
+    static void CreateShaderResourceViewFromFile(Graphics* pContext, char const* filename, GLWRShaderResourceView** ppResourceView);
 
 private:
     void AttachShaderStage(GLuint const program, GLenum stage, char const* source);

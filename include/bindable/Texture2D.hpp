@@ -15,6 +15,7 @@ namespace Bind
         GLuint m_unit;
 
     public:
+        Texture2D(Graphics& gfx, char const* filename, GLuint unit);
         template <typename T>
         Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLuint unit);
         ~Texture2D() override;

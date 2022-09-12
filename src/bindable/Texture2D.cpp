@@ -4,6 +4,13 @@
 
 namespace Bind
 {
+    Texture2D::Texture2D(Graphics& gfx, char const* filename, GLuint unit)
+        : Bindable(gfx)
+        , m_unit(unit)
+    {
+        Graphics::CreateShaderResourceViewFromFile(&gfx, filename, &m_resource);
+    }
+
     Texture2D::~Texture2D()
     {
     }

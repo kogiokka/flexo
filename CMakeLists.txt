@@ -56,7 +56,6 @@ PRIVATE
     "src/World.cpp"
     "src/InputData.cpp"
     "src/VolumeData.cpp"
-    "src/Image.cpp"
     "src/common/Logger.cpp"
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
