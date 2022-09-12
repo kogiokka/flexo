@@ -17,7 +17,7 @@ private:
 
     GLuint m_textureView;
     GLuint m_sampler;
-    GLenum m_target;
+    GLenum m_dimensions;
 };
 
 #endif

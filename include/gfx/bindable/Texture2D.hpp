@@ -36,7 +36,7 @@ namespace Bind
 
         desc.width = width;
         desc.height = height;
-        desc.textureFormat = GL_RGBA32F;
+        desc.internalFormat = GL_RGBA32F;
         desc.pixelFormat = GL_RGBA;
 
         DetermineDataType<T>(desc);
@@ -50,6 +50,7 @@ namespace Bind
         viewDesc.target = GL_TEXTURE_2D;
         viewDesc.format = GL_RGBA32F;
         m_gfx->CreateShaderResourceView(texture.Get(), &viewDesc, &m_resource);
+        m_gfx->GenerateMips(m_resource.Get());
     }
 
     template <>

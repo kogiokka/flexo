@@ -63,6 +63,8 @@ Graphics::Graphics(int width, int height)
     CreateRasterizerState(&rasDesc, &m_ctx.state);
 
     glGenFramebuffers(1, &m_ctx.framebuffer); // The framebuffer that will become our render target.
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 Graphics::~Graphics()
@@ -76,12 +78,18 @@ void Graphics::CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTarget
     *ppRenderTargetView = new IGLWRRenderTargetView();
 
     IGLWRRenderTargetView* view = *ppRenderTargetView;
-    glBindFramebuffer(GL_FRAMEBUFFER, view->m_id);
-    GLint mipmapLevel = 0;
-    view->m_target = pDesc->target;
-    glTextureView(view->m_textureView, pDesc->target, pResource->m_id, pDesc->format, 0, 1, 0, 1);
-    // Attach color buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, view->m_textureView, mipmapLevel);
+    view->m_dimensions = pDesc->dimensions;
+    glTextureView(view->m_textureView, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+}
+
+void Graphics::CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencilViewDesc const* pDesc,
+                                      IGLWRDepthStencilView** ppDepthStencilView)
+{
+    *ppDepthStencilView = new IGLWRDepthStencilView();
+
+    IGLWRDepthStencilView* view = *ppDepthStencilView;
+    view->m_dimensions = pDesc->dimensions;
+    glTextureView(view->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
 }
 
 void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
@@ -143,10 +151,9 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, (*ppTexture2D)->m_id); // Bind the new texture to the context so we can modify it.
-    glTexStorage2D(GL_TEXTURE_2D, 1, pDesc->textureFormat, pDesc->width, pDesc->height);
+    glTexStorage2D(GL_TEXTURE_2D, 1, pDesc->internalFormat, pDesc->width, pDesc->height);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pDesc->width, pDesc->height, pDesc->pixelFormat, pDesc->dataType,
                     pInitialData->mem);
-    glGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void Graphics::CreateShaderResourceView(IGLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
@@ -289,13 +296,32 @@ void Graphics::LinkShaderProgram(const GLuint program)
     CheckProgramStatus(program);
 }
 
-void Graphics::SetRenderTargetView(IGLWRRenderTargetView* pRenderTargetView)
+void Graphics::SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* const* pRenderTargetView,
+                                IGLWRDepthStencilView* pDepthStencilView)
 {
-    m_ctx.framebuffer = pRenderTargetView->m_id;
+    // FIXME
+    m_ctx.framebuffer = pRenderTargetView[0]->m_id;
+    m_ctx.screenTexture = pRenderTargetView[0]->m_textureView;
+    m_ctx.screenSampler = pRenderTargetView[0]->m_sampler;
+    pDepthStencilView->m_parent = pRenderTargetView[0]->m_id;
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 
-    m_ctx.screenTexture = pRenderTargetView->m_textureView;
-    m_ctx.screenSampler = pRenderTargetView->m_sampler;
+    GLint mipmapLevel = 0;
+    // Attach color buffer
+    for (unsigned int i = 0; i < numViews; i++) {
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, pRenderTargetView[i]->m_dimensions,
+                               pRenderTargetView[i]->m_textureView, mipmapLevel);
+    }
+    // Attach depth-stencil buffer
+    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, pDepthStencilView->m_dimensions,
+                           pDepthStencilView->m_id, mipmapLevel);
+
+#ifndef NDEBUG
+    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+        Logger::error("Framebuffer failed to generate!");
+    }
+#endif
 }
 
 void Graphics::SetInputLayout(IGLWRInputLayout* pInputLayout)
@@ -406,6 +432,7 @@ void Graphics::Present()
 
     glDisable(GL_DEPTH_TEST);
     Draw(6);
+    glEnable(GL_DEPTH_TEST);
 
     glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 }
@@ -421,6 +448,21 @@ void Graphics::ClearRenderTargetView(IGLWRRenderTargetView* pRenderTargetView, f
     glClearColor(color[0], color[1], color[2], color[3]);
     glClear(GL_COLOR_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
+}
+
+void Graphics::ClearDepthStencilView(IGLWRDepthStencilView* pDepthStencilView, GLWRClearFlag flags, float depth,
+                                     uint8_t stencil) const
+{
+    glBindFramebuffer(GL_FRAMEBUFFER, pDepthStencilView->m_parent);
+    glClearDepth(depth);
+    glClearStencil(stencil);
+    glClear(flags);
+}
+
+void Graphics::GenerateMips(IGLWRShaderResourceView* pShaderResourceView)
+{
+    glBindTexture(pShaderResourceView->m_target, pShaderResourceView->m_id);
+    glGenerateMipmap(pShaderResourceView->m_target);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const
@@ -523,7 +565,7 @@ void Graphics::CreateShaderResourceViewFromFile(Graphics* pContext, char const* 
     GLWRTexture2DDesc texDesc;
     texDesc.width = width;
     texDesc.height = height;
-    texDesc.textureFormat = GL_RGBA32F;
+    texDesc.internalFormat = GL_RGBA32F;
     texDesc.pixelFormat = GL_RGBA;
     texDesc.dataType = GL_UNSIGNED_BYTE;
 

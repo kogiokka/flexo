@@ -13,7 +13,6 @@ IGLWRRenderTargetView::IGLWRRenderTargetView()
 
 IGLWRRenderTargetView::~IGLWRRenderTargetView()
 {
-    // glDeleteRenderbuffers(1, &m_rbo);
     glDeleteTextures(1, &m_textureView);
     glDeleteSamplers(1, &m_sampler);
 }

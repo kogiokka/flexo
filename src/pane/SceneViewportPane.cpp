@@ -80,10 +80,9 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     auto& gfx = Graphics::Get(m_project);
 
     float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
-    gfx.ClearRenderTargetView(m_frame.Get(), bgColor);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    gfx.ClearRenderTargetView(m_rtv.Get(), bgColor);
+    gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
-    glEnable(GL_DEPTH_TEST);
     m_project.BuildLatticeMesh();
     Renderer::Get(m_project).Render(gfx);
 
@@ -246,35 +245,47 @@ float SceneViewportPane::RoundGuard(float radian)
 
 void SceneViewportPane::InitFrame(Graphics& gfx)
 {
-    m_frame = GLWRPtr<IGLWRRenderTargetView>();
+    m_rtv = GLWRPtr<IGLWRRenderTargetView>();
+    m_dsv = GLWRPtr<IGLWRDepthStencilView>();
 
-    IGLWRTexture2D* texture = nullptr;
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    GLWRTexture2DDesc texDesc;
-    GLWRResourceData initData;
-    texDesc.textureFormat = GL_RGB32F;
-    texDesc.pixelFormat = GL_RGB;
-    texDesc.dataType = GL_UNSIGNED_BYTE;
-    texDesc.width = size.x;
-    texDesc.height = size.y;
-    initData.mem = nullptr;
-    gfx.CreateTexture2D(&texDesc, &initData, &texture);
 
-    GLWRRenderTargetViewDesc viewDesc;
-    viewDesc.target = GL_TEXTURE_2D;
-    viewDesc.format = GL_RGB32F;
-    gfx.CreateRenderTargetView(texture, &viewDesc, &m_frame);
-    gfx.SetRenderTargetView(m_frame.Get());
-    texture->Release();
+    {
+        IGLWRTexture2D* texture = nullptr;
+        GLWRTexture2DDesc texDesc;
+        GLWRResourceData initData;
+        texDesc.internalFormat = GL_RGB32F;
+        texDesc.pixelFormat = GL_RGB;
+        texDesc.dataType = GL_UNSIGNED_BYTE;
+        texDesc.width = size.x;
+        texDesc.height = size.y;
+        initData.mem = nullptr;
+        gfx.CreateTexture2D(&texDesc, &initData, &texture);
 
-    static GLuint m_rbo;
-    glDeleteRenderbuffers(1, &m_rbo);
-    glGenRenderbuffers(1, &m_rbo);
-    glBindRenderbuffer(GL_RENDERBUFFER, m_rbo);
-    glRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT, size.x, size.y);
-    glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, m_rbo);
-
-    if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        Logger::error("Framebuffer failed to generate!");
+        GLWRRenderTargetViewDesc viewDesc;
+        viewDesc.dimensions = GL_TEXTURE_2D;
+        viewDesc.internalFormat = GL_RGB32F;
+        gfx.CreateRenderTargetView(texture, &viewDesc, &m_rtv);
+        texture->Release();
     }
+    {
+        IGLWRTexture2D* texture = nullptr;
+        GLWRTexture2DDesc texDesc;
+        GLWRResourceData initData;
+        texDesc.internalFormat = GL_DEPTH24_STENCIL8;
+        texDesc.pixelFormat = GL_DEPTH_COMPONENT;
+        texDesc.dataType = GL_UNSIGNED_BYTE;
+        texDesc.width = size.x;
+        texDesc.height = size.y;
+        initData.mem = nullptr;
+        gfx.CreateTexture2D(&texDesc, &initData, &texture);
+
+        GLWRDepthStencilViewDesc viewDesc;
+        viewDesc.dimensions = GL_TEXTURE_2D;
+        viewDesc.internalFormat = GL_DEPTH24_STENCIL8;
+        gfx.CreateDepthStencilView(texture, &viewDesc, &m_dsv);
+        texture->Release();
+    }
+
+    gfx.SetRenderTargets(1, &m_rtv, m_dsv.Get());
 }

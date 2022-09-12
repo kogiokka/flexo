@@ -1,6 +1,7 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
+#include <cstdint>
 #include <string>
 
 #include <glad/glad.h>
@@ -10,6 +11,7 @@
 #include "Camera.hpp"
 #include "gfx/glwr/GLWRPtr.hpp"
 #include "gfx/glwr/IGLWRBuffer.hpp"
+#include "gfx/glwr/IGLWRDepthStencilView.hpp"
 #include "gfx/glwr/IGLWRFragmentShader.hpp"
 #include "gfx/glwr/IGLWRInputLayout.hpp"
 #include "gfx/glwr/IGLWRRenderTargetView.hpp"
@@ -85,6 +87,11 @@ typedef enum {
     GLWRBlendEq_Max = GL_MAX,
 } GLWRBlendEq;
 
+typedef enum {
+    GLWRClearFlag_Depth = GL_DEPTH_BUFFER_BIT,
+    GLWRClearFlag_Stencil = GL_STENCIL_BUFFER_BIT,
+} GLWRClearFlag;
+
 struct GLWRInputElementDesc {
     GLchar const* semanticName;
     GLWRFormat format;
@@ -104,7 +111,7 @@ struct GLWRBufferDesc {
 struct GLWRTexture2DDesc {
     GLsizei width;
     GLsizei height;
-    GLenum textureFormat;
+    GLenum internalFormat;
     GLenum pixelFormat;
     GLenum dataType;
 };
@@ -141,8 +148,13 @@ struct GLWRShaderResourceViewDesc {
 };
 
 struct GLWRRenderTargetViewDesc {
-    GLenum format;
-    GLenum target;
+    GLenum internalFormat;
+    GLenum dimensions;
+};
+
+struct GLWRDepthStencilViewDesc {
+    GLenum internalFormat;
+    GLenum dimensions;
 };
 
 struct GLWRViewport {
@@ -190,7 +202,9 @@ public:
     Graphics(int width, int height);
     ~Graphics();
     void CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTargetViewDesc const* pDesc,
-                            IGLWRRenderTargetView** ppRenderTargetView);
+                                IGLWRRenderTargetView** ppRenderTargetView);
+    void CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencilViewDesc const* pDesc,
+                                IGLWRDepthStencilView** ppDepthStencilView);
     void CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
                            IGLWRVertexShader const* pProgramWithInputSignature, IGLWRInputLayout** ppInputLayout);
     void CreateVertexShader(char const* source, IGLWRVertexShader** ppVertexShader);
@@ -206,7 +220,8 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(GLuint first, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);
-    void SetRenderTargetView(IGLWRRenderTargetView* pRenderTargetView);
+    void SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* const* pRenderTargetView,
+                          IGLWRDepthStencilView* ppDepthStencilView);
     void SetInputLayout(IGLWRInputLayout* pInputLayout);
     void SetVertexShader(IGLWRVertexShader* ppVertexShader);
     void SetFragmentShader(IGLWRFragmentShader* pFragmentShader);
@@ -220,7 +235,10 @@ public:
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
     void SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer);
 
-    void ClearRenderTargetView(IGLWRRenderTargetView* target, float const color[4]) const;
+    void ClearRenderTargetView(IGLWRRenderTargetView* pRenderTargetView, float const color[4]) const;
+    void ClearDepthStencilView(IGLWRDepthStencilView* pDepthStencilView, GLWRClearFlag flags, float depth = 1.0f,
+                               uint8_t stencil = 0) const;
+    void GenerateMips(IGLWRShaderResourceView* pShaderResourceView);
 
     glm::mat4 GetViewProjectionMatrix() const;
     glm::vec3 GetCameraPosition() const;
