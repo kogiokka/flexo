@@ -47,7 +47,6 @@ private:
     std::tuple<int, int, float, float> m_originRotate;
     std::tuple<float, float, glm::vec3> m_originTranslate;
 
-    void UpdateScene();
     inline float RoundGuard(float radian);
 
     wxDECLARE_EVENT_TABLE();

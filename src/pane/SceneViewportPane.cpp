@@ -83,7 +83,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearRenderTarget(m_renderTarget.Get(), bgColor);
 
     glEnable(GL_DEPTH_TEST);
-    UpdateScene();
+    m_project.BuildLatticeMesh();
     Renderer::Get(m_project).Render(gfx);
 
     gfx.Present();
@@ -233,14 +233,6 @@ void SceneViewportPane::ResetCamera()
 {
     wxSize const size = GetClientSize() * GetContentScaleFactor();
     Graphics::Get(m_project).GetCamera() = Camera(size.x, size.y);
-}
-
-void SceneViewportPane::UpdateScene()
-{
-    if (world.renderFlags & RenderFlag_DrawLatticeVertex || world.renderFlags & RenderFlag_DrawLatticeEdge
-        || world.renderFlags & RenderFlag_DrawLatticeFace) {
-        m_project.BuildLatticeMesh();
-    }
 }
 
 // Restrict both phi and theta within 0 and 360 degrees.
