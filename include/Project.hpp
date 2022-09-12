@@ -13,7 +13,7 @@
 #include "Lattice.hpp"
 #include "ProjectSettings.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "drawable/DrawableBase.hpp"
+#include "gfx/drawable/DrawableBase.hpp"
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;

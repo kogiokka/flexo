@@ -3,9 +3,9 @@
 
 #include <wx/aui/framemanager.h>
 #include <wx/frame.h>
+#include <wx/menu.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
-#include <wx/menu.h>
 #include <wx/timer.h>
 
 class WatermarkingProject;

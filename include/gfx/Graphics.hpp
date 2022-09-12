@@ -10,16 +10,16 @@
 
 #include "Attachable.hpp"
 #include "Camera.hpp"
-#include "gfx/GLWRBuffer.hpp"
-#include "gfx/GLWRFragmentShader.hpp"
-#include "gfx/GLWRInputLayout.hpp"
-#include "gfx/GLWRPtr.hpp"
-#include "gfx/GLWRRenderTarget.hpp"
-#include "gfx/GLWRResource.hpp"
-#include "gfx/GLWRSampler.hpp"
-#include "gfx/GLWRShaderResourceView.hpp"
-#include "gfx/GLWRTexture2D.hpp"
-#include "gfx/GLWRVertexShader.hpp"
+#include "gfx/glwr/GLWRBuffer.hpp"
+#include "gfx/glwr/GLWRFragmentShader.hpp"
+#include "gfx/glwr/GLWRInputLayout.hpp"
+#include "gfx/glwr/GLWRPtr.hpp"
+#include "gfx/glwr/GLWRRenderTarget.hpp"
+#include "gfx/glwr/GLWRResource.hpp"
+#include "gfx/glwr/GLWRSampler.hpp"
+#include "gfx/glwr/GLWRShaderResourceView.hpp"
+#include "gfx/glwr/GLWRTexture2D.hpp"
+#include "gfx/glwr/GLWRVertexShader.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
@@ -243,7 +243,8 @@ public:
     void Present();
 
     static std::string SlurpShaderSource(std::string const& filename);
-    static void CreateShaderResourceViewFromFile(Graphics* pContext, char const* filename, GLWRShaderResourceView** ppResourceView);
+    static void CreateShaderResourceViewFromFile(Graphics* pContext, char const* filename,
+                                                 GLWRShaderResourceView** ppResourceView);
 
 private:
     void AttachShaderStage(GLuint const program, GLenum stage, char const* source);

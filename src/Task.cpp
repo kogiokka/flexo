@@ -1,5 +1,5 @@
 #include "Task.hpp"
-#include "drawable/DrawableBase.hpp"
+#include "gfx/drawable/DrawableBase.hpp"
 
 void Task::AddBindable(std::shared_ptr<Bind::Bindable> bind)
 {

@@ -7,12 +7,12 @@
 #include <wx/collpane.h>
 #include <wx/control.h>
 #include <wx/event.h>
+#include <wx/font.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
 #include <wx/string.h>
 #include <wx/textctrl.h>
 #include <wx/window.h>
-#include <wx/font.h>
 
 class SliderFloatEvent : public wxEvent
 {

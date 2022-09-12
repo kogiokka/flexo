@@ -6,9 +6,9 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "Renderer.hpp"
 #include "World.hpp"
-#include "drawable/DrawableBase.hpp"
+#include "gfx/Renderer.hpp"
+#include "gfx/drawable/DrawableBase.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 
 // Register factory: SceneOutlinerPane

@@ -6,9 +6,9 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "Renderer.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
+#include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
 
 #include "Vertex.hpp"

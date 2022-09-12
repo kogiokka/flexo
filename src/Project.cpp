@@ -8,18 +8,18 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "Renderer.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
-#include "drawable/LatticeEdge.hpp"
-#include "drawable/LatticeFace.hpp"
-#include "drawable/LatticeVertex.hpp"
-#include "drawable/LightSource.hpp"
-#include "drawable/PolygonalModel.hpp"
-#include "drawable/VolumetricModel.hpp"
 #include "gfx/Graphics.hpp"
+#include "gfx/Renderer.hpp"
+#include "gfx/drawable/LatticeEdge.hpp"
+#include "gfx/drawable/LatticeFace.hpp"
+#include "gfx/drawable/LatticeVertex.hpp"
+#include "gfx/drawable/LightSource.hpp"
+#include "gfx/drawable/PolygonalModel.hpp"
+#include "gfx/drawable/VolumetricModel.hpp"
 
 WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)

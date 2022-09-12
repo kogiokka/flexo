@@ -14,6 +14,7 @@ public:
     static SceneOutlinerPane const& Get(WatermarkingProject const& project);
 
     SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project);
+
 private:
     wxTreeListCtrl* CreateSceneTree();
 
