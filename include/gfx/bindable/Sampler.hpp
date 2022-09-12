@@ -15,7 +15,7 @@ namespace Bind
 
     protected:
         GLuint m_unit;
-        GLWRPtr<GLWRSampler> m_sampler;
+        GLWRPtr<IGLWRSampler> m_sampler;
     };
 }
 

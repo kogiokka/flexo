@@ -13,7 +13,7 @@ namespace Bind
     class RasterizerState : public Bindable
     {
     protected:
-        GLWRPtr<GLWRRasterizerState> m_state;
+        GLWRPtr<IGLWRRasterizerState> m_state;
 
     public:
         RasterizerState(Graphics& gfx, GLWRRasterizerDesc const& desc);

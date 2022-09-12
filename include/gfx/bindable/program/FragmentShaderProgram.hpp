@@ -18,7 +18,7 @@ namespace Bind
         virtual void Bind() override;
 
     private:
-        GLWRPtr<GLWRFragmentShader> m_program;
+        GLWRPtr<IGLWRFragmentShader> m_program;
     };
 }
 

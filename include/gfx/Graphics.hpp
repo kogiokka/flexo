@@ -1,25 +1,24 @@
 #ifndef GRAPHICS_H
 #define GRAPHICS_H
 
-#include <functional>
 #include <string>
-#include <vector>
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
 #include "Attachable.hpp"
 #include "Camera.hpp"
-#include "gfx/glwr/GLWRBuffer.hpp"
-#include "gfx/glwr/GLWRFragmentShader.hpp"
-#include "gfx/glwr/GLWRInputLayout.hpp"
 #include "gfx/glwr/GLWRPtr.hpp"
-#include "gfx/glwr/GLWRRenderTarget.hpp"
-#include "gfx/glwr/GLWRResource.hpp"
-#include "gfx/glwr/GLWRSampler.hpp"
-#include "gfx/glwr/GLWRShaderResourceView.hpp"
-#include "gfx/glwr/GLWRTexture2D.hpp"
-#include "gfx/glwr/GLWRVertexShader.hpp"
+#include "gfx/glwr/IGLWRBuffer.hpp"
+#include "gfx/glwr/IGLWRFragmentShader.hpp"
+#include "gfx/glwr/IGLWRInputLayout.hpp"
+#include "gfx/glwr/IGLWRRenderTarget.hpp"
+#include "gfx/glwr/IGLWRResource.hpp"
+#include "gfx/glwr/IGLWRSampler.hpp"
+#include "gfx/glwr/IGLWRShaderResourceView.hpp"
+#include "gfx/glwr/IGLWRState.hpp"
+#include "gfx/glwr/IGLWRTexture2D.hpp"
+#include "gfx/glwr/IGLWRVertexShader.hpp"
 
 #define STD140_ALIGN alignas(sizeof(float) * 4)
 
@@ -141,19 +140,6 @@ struct GLWRShaderResourceViewDesc {
     GLenum target;
 };
 
-class _GLWRState
-{
-    using _Op = std::function<void(void)>;
-    std::vector<_Op> m_ops;
-
-public:
-    void Add(_Op op);
-    void Execute() const;
-};
-
-using GLWRRasterizerState = _GLWRState;
-using GLWRBlendState = _GLWRState;
-
 struct GLWRViewport {
     float x;
     float y;
@@ -172,15 +158,15 @@ class Graphics : public AttachableBase
         GLenum indexBufferFormat;
         GLubyte* offsetOfFirstIndex;
         GLuint pipeline;
-        GLWRPtr<GLWRVertexShader> vert;
-        GLWRPtr<GLWRFragmentShader> frag;
+        GLWRPtr<IGLWRVertexShader> vert;
+        GLWRPtr<IGLWRFragmentShader> frag;
         GLuint layout;
-        GLWRPtr<GLWRInputLayout> inputLayout;
-        GLWRPtr<GLWRBuffer> buffer;
+        GLWRPtr<IGLWRInputLayout> inputLayout;
+        GLWRPtr<IGLWRBuffer> buffer;
         GLenum screenTexture;
         GLenum screenSampler;
         GLenum targetFrame;
-        GLWRPtr<GLWRRasterizerState> state;
+        GLWRPtr<IGLWRRasterizerState> state;
     };
 
     struct GLAttribFormat {
@@ -198,44 +184,44 @@ public:
 
     Graphics(int width, int height);
     ~Graphics();
-    void CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget);
+    void CreateRenderTarget(int width, int height, IGLWRRenderTarget** ppRenderTarget);
     void CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
-                           GLWRVertexShader const* pProgramWithInputSignature, GLWRInputLayout** ppInputLayout);
-    void CreateVertexShader(char const* source, GLWRVertexShader** ppVertexShader);
-    void CreateFragmentShader(char const* source, GLWRFragmentShader** ppFragmentShader);
-    void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer);
+                           IGLWRVertexShader const* pProgramWithInputSignature, IGLWRInputLayout** ppInputLayout);
+    void CreateVertexShader(char const* source, IGLWRVertexShader** ppVertexShader);
+    void CreateFragmentShader(char const* source, IGLWRFragmentShader** ppFragmentShader);
+    void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, IGLWRBuffer** ppBuffer);
     void CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
-                         GLWRTexture2D** ppTexture2D);
-    void CreateShaderResourceView(GLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
-                                  GLWRShaderResourceView** ppResourceView);
-    void CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSamplerState);
-    void CreateRasterizerState(GLWRRasterizerDesc const* pDesc, GLWRRasterizerState** ppState);
-    void CreateBlendState(GLWRBlendDesc const* pDesc, GLWRBlendState** ppState);
+                         IGLWRTexture2D** ppTexture2D);
+    void CreateShaderResourceView(IGLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
+                                  IGLWRShaderResourceView** ppResourceView);
+    void CreateSampler(GLWRSamplerDesc const* pDesc, IGLWRSampler** ppSamplerState);
+    void CreateRasterizerState(GLWRRasterizerDesc const* pDesc, IGLWRRasterizerState** ppState);
+    void CreateBlendState(GLWRBlendDesc const* pDesc, IGLWRBlendState** ppState);
     void SetPrimitive(GLenum primitive);
-    void SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
+    void SetVertexBuffers(GLuint first, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);
-    void SetRenderTarget(GLWRRenderTarget* target);
-    void SetInputLayout(GLWRInputLayout* pInputLayout);
-    void SetVertexShader(GLWRVertexShader* ppVertexShader);
-    void SetFragmentShader(GLWRFragmentShader* pFragmentShader);
-    void SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset);
+    void SetRenderTarget(IGLWRRenderTarget* target);
+    void SetInputLayout(IGLWRInputLayout* pInputLayout);
+    void SetVertexShader(IGLWRVertexShader* ppVertexShader);
+    void SetFragmentShader(IGLWRFragmentShader* pFragmentShader);
+    void SetIndexBuffer(IGLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset);
     void SetShaderResources(unsigned int startUnit, unsigned int numTextures,
-                            GLWRShaderResourceView* const* ppResourceViews);
-    void SetSamplers(unsigned int startUnit, unsigned int numSamplers, GLWRSampler* const* ppSamplers);
+                            IGLWRShaderResourceView* const* ppResourceViews);
+    void SetSamplers(unsigned int startUnit, unsigned int numSamplers, IGLWRSampler* const* ppSamplers);
     void SetShaderProgram(GLuint program);
-    void SetRasterizerState(GLWRRasterizerState const* state);
-    void SetBlendState(GLWRBlendState const* state);
+    void SetRasterizerState(IGLWRRasterizerState const* state);
+    void SetBlendState(IGLWRBlendState const* state);
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
-    void SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer);
+    void SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer);
 
-    void ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const;
+    void ClearRenderTarget(IGLWRRenderTarget* target, float const color[4]) const;
 
     glm::mat4 GetViewProjectionMatrix() const;
     glm::vec3 GetCameraPosition() const;
     Camera& GetCamera();
 
     void UpdateBuffer(GLenum target, GLintptr offset, GLsizei byteWidth, GLWRResourceData const* data,
-                      GLWRBuffer* pBuffer);
+                      IGLWRBuffer* pBuffer);
 
     void Draw(GLsizei vertexCount);
     void DrawIndexed(GLsizei indexCount);
@@ -244,7 +230,7 @@ public:
 
     static std::string SlurpShaderSource(std::string const& filename);
     static void CreateShaderResourceViewFromFile(Graphics* pContext, char const* filename,
-                                                 GLWRShaderResourceView** ppResourceView);
+                                                 IGLWRShaderResourceView** ppResourceView);
 
 private:
     void AttachShaderStage(GLuint const program, GLenum stage, char const* source);

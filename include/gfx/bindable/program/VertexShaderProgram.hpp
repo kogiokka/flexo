@@ -21,7 +21,7 @@ namespace Bind
         virtual void Bind() override;
 
     private:
-        GLWRPtr<GLWRVertexShader> m_program;
+        GLWRPtr<IGLWRVertexShader> m_program;
     };
 }
 

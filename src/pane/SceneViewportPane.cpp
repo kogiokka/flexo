@@ -126,7 +126,7 @@ void SceneViewportPane::InitGL()
     blendDesc.dstAlpha = GLWRBlend_Zero;
     blendDesc.eqAlpha = GLWRBlendEq_Add;
 
-    GLWRPtr<GLWRBlendState> blend;
+    GLWRPtr<IGLWRBlendState> blend;
     gfx.CreateBlendState(&blendDesc, &blend);
     gfx.SetBlendState(blend.Get());
 
@@ -149,7 +149,7 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
 
     SetCurrent(*m_context);
 
-    m_renderTarget = GLWRPtr<GLWRRenderTarget>();
+    m_renderTarget = GLWRPtr<IGLWRRenderTarget>();
     auto& gfx = Graphics::Get(m_project);
     gfx.CreateRenderTarget(size.x, size.y, &m_renderTarget);
     gfx.SetRenderTarget(m_renderTarget.Get());

@@ -1,12 +1,12 @@
-#include "gfx/glwr/GLWRRenderTarget.hpp"
+#include "gfx/glwr/IGLWRRenderTarget.hpp"
 #include "common/Logger.hpp"
 
-GLWRRenderTarget::GLWRRenderTarget(int width, int height)
+IGLWRRenderTarget::IGLWRRenderTarget(int width, int height)
 {
-    m_texture = new GLWRTexture2D();
-    m_sampler = new GLWRSampler();
+    m_texture = new IGLWRTexture2D();
+    m_sampler = new IGLWRSampler();
 
-    glGenFramebuffers(1, &m_frame);
+    glGenFramebuffers(1, &m_id);
     glGenRenderbuffers(1, &m_rbo);
 
     glActiveTexture(GL_TEXTURE0);
@@ -17,7 +17,7 @@ GLWRRenderTarget::GLWRRenderTarget(int width, int height)
     glSamplerParameteri(m_sampler->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glSamplerParameteri(m_sampler->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_frame);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_id);
 
     // Attach color buffer
     GLint mipmapLevel = 0;
@@ -34,10 +34,10 @@ GLWRRenderTarget::GLWRRenderTarget(int width, int height)
     glBindFramebuffer(GL_FRAMEBUFFER, 0);
 }
 
-GLWRRenderTarget::~GLWRRenderTarget()
+IGLWRRenderTarget::~IGLWRRenderTarget()
 {
     glDeleteRenderbuffers(1, &m_rbo);
-    glDeleteFramebuffers(1, &m_frame);
+    glDeleteFramebuffers(1, &m_id);
     delete m_texture;
     delete m_sampler;
 }

@@ -11,7 +11,7 @@ namespace Bind
     class Texture2D : public Bindable
     {
     protected:
-        GLWRPtr<GLWRShaderResourceView> m_resource;
+        GLWRPtr<IGLWRShaderResourceView> m_resource;
         GLuint m_unit;
 
     public:
@@ -43,7 +43,7 @@ namespace Bind
 
         data.mem = textureData;
 
-        GLWRPtr<GLWRTexture2D> texture;
+        GLWRPtr<IGLWRTexture2D> texture;
         m_gfx->CreateTexture2D(&desc, &data, &texture);
 
         GLWRShaderResourceViewDesc viewDesc;

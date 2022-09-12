@@ -1,12 +1,12 @@
-#include "gfx/glwr/GLWRVertexShader.hpp"
+#include "gfx/glwr/IGLWRVertexShader.hpp"
 
-GLWRVertexShader::GLWRVertexShader()
+IGLWRVertexShader::IGLWRVertexShader()
 {
     m_id = glCreateProgram();
     glProgramParameteri(m_id, GL_PROGRAM_SEPARABLE, GL_TRUE);
 }
 
-GLWRVertexShader::~GLWRVertexShader()
+IGLWRVertexShader::~IGLWRVertexShader()
 {
     glDeleteProgram(m_id);
 }

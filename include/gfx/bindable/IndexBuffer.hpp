@@ -13,7 +13,7 @@ namespace Bind
     class IndexBuffer : public Bindable
     {
     protected:
-        GLWRPtr<GLWRBuffer> m_buffer;
+        GLWRPtr<IGLWRBuffer> m_buffer;
         GLuint m_count;
 
     public:

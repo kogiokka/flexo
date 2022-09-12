@@ -12,7 +12,7 @@ namespace Bind
     class VertexBuffer : public Bindable
     {
     protected:
-        GLWRPtr<GLWRBuffer> m_buffer;
+        GLWRPtr<IGLWRBuffer> m_buffer;
         GLuint m_startAttrib;
         GLsizei m_stride;
         GLuint m_count;

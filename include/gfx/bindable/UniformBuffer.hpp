@@ -12,7 +12,7 @@ namespace Bind
     template <typename T>
     class UniformBuffer : public Bindable
     {
-        GLWRPtr<GLWRBuffer> m_buffer;
+        GLWRPtr<IGLWRBuffer> m_buffer;
         GLuint m_bindingIndex;
 
     public:

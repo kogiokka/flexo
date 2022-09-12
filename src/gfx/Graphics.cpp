@@ -8,18 +8,6 @@
 #include "gfx/Graphics.hpp"
 #include "pane/SceneViewportPane.hpp"
 
-void _GLWRState::Add(_Op op)
-{
-    m_ops.push_back(op);
-}
-
-void _GLWRState::Execute() const
-{
-    for (auto const& op : m_ops) {
-        op();
-    }
-}
-
 // Register factory: Graphics
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
     [](WatermarkingProject& project) -> SharedPtr<Graphics> {
@@ -83,15 +71,15 @@ Graphics::~Graphics()
     glDeleteProgramPipelines(1, &m_ctx.pipeline);
 }
 
-void Graphics::CreateRenderTarget(int width, int height, GLWRRenderTarget** ppRenderTarget)
+void Graphics::CreateRenderTarget(int width, int height, IGLWRRenderTarget** ppRenderTarget)
 {
-    *ppRenderTarget = new GLWRRenderTarget(width, height);
+    *ppRenderTarget = new IGLWRRenderTarget(width, height);
 }
 
 void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
-                                 GLWRVertexShader const* pProgramWithInputSignature, GLWRInputLayout** ppInputLayout)
+                                 IGLWRVertexShader const* pProgramWithInputSignature, IGLWRInputLayout** ppInputLayout)
 {
-    *ppInputLayout = new GLWRInputLayout();
+    *ppInputLayout = new IGLWRInputLayout();
 
     SetInputLayout(*ppInputLayout);
     for (unsigned int i = 0; i < numElements; i++) {
@@ -113,37 +101,37 @@ void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, u
     SetInputLayout(m_ctx.inputLayout.Get());
 }
 
-void Graphics::CreateVertexShader(char const* source, GLWRVertexShader** ppVertexShader)
+void Graphics::CreateVertexShader(char const* source, IGLWRVertexShader** ppVertexShader)
 {
-    *ppVertexShader = new GLWRVertexShader();
+    *ppVertexShader = new IGLWRVertexShader();
 
     GLuint const program = (*ppVertexShader)->m_id;
     AttachShaderStage(program, GL_VERTEX_SHADER, source);
     CheckProgramStatus(program);
 }
 
-void Graphics::CreateFragmentShader(char const* source, GLWRFragmentShader** ppFragmentShader)
+void Graphics::CreateFragmentShader(char const* source, IGLWRFragmentShader** ppFragmentShader)
 {
-    *ppFragmentShader = new GLWRFragmentShader();
+    *ppFragmentShader = new IGLWRFragmentShader();
 
     GLuint const program = (*ppFragmentShader)->m_id;
     AttachShaderStage(program, GL_FRAGMENT_SHADER, source);
     CheckProgramStatus(program);
 }
 
-void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, GLWRBuffer** ppBuffer)
+void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, IGLWRBuffer** ppBuffer)
 {
-    *ppBuffer = new GLWRBuffer();
-    GLWRBuffer& buffer = **ppBuffer;
+    *ppBuffer = new IGLWRBuffer();
+    IGLWRBuffer& buffer = **ppBuffer;
 
     glBindBuffer(pDesc->target, buffer.m_id);
     glBufferData(pDesc->target, pDesc->byteWidth, initialData->mem, pDesc->usage);
 }
 
 void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
-                               GLWRTexture2D** ppTexture2D)
+                               IGLWRTexture2D** ppTexture2D)
 {
-    *ppTexture2D = new GLWRTexture2D();
+    *ppTexture2D = new IGLWRTexture2D();
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, (*ppTexture2D)->m_id); // Bind the new texture to the context so we can modify it.
@@ -153,18 +141,18 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
     glGenerateMipmap(GL_TEXTURE_2D);
 }
 
-void Graphics::CreateShaderResourceView(GLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
-                                        GLWRShaderResourceView** ppResourceView)
+void Graphics::CreateShaderResourceView(IGLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
+                                        IGLWRShaderResourceView** ppResourceView)
 {
-    *ppResourceView = new GLWRShaderResourceView();
+    *ppResourceView = new IGLWRShaderResourceView();
 
     glTextureView((*ppResourceView)->m_id, pDesc->target, pResource->m_id, pDesc->format, 0, 1, 0, 1);
     (*ppResourceView)->m_target = pDesc->target;
 }
 
-void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSampler)
+void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, IGLWRSampler** ppSampler)
 {
-    *ppSampler = new GLWRSampler();
+    *ppSampler = new IGLWRSampler();
     GLuint sampler = (*ppSampler)->m_id;
 
     glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, pDesc->coordinateS);
@@ -201,10 +189,10 @@ void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, GLWRSampler** ppSampl
     }
 }
 
-void Graphics::CreateRasterizerState(GLWRRasterizerDesc const* pDesc, GLWRRasterizerState** ppState)
+void Graphics::CreateRasterizerState(GLWRRasterizerDesc const* pDesc, IGLWRRasterizerState** ppState)
 {
-    *ppState = new GLWRRasterizerState();
-    GLWRRasterizerState* pState = *ppState;
+    *ppState = new IGLWRRasterizerState();
+    IGLWRRasterizerState* pState = *ppState;
 
     switch (pDesc->cullMode) {
     case GLWRCullMode::GLWRCullMode_Back:
@@ -230,10 +218,10 @@ void Graphics::CreateRasterizerState(GLWRRasterizerDesc const* pDesc, GLWRRaster
     }
 }
 
-void Graphics::CreateBlendState(GLWRBlendDesc const* pDesc, GLWRBlendState** ppState)
+void Graphics::CreateBlendState(GLWRBlendDesc const* pDesc, IGLWRBlendState** ppState)
 {
-    *ppState = new GLWRBlendState();
-    GLWRBlendState* pState = *ppState;
+    *ppState = new IGLWRBlendState();
+    IGLWRBlendState* pState = *ppState;
 
     if (pDesc->enable) {
         pState->Add(std::bind(glEnable, GL_BLEND));
@@ -293,26 +281,26 @@ void Graphics::LinkShaderProgram(const GLuint program)
     CheckProgramStatus(program);
 }
 
-void Graphics::SetRenderTarget(GLWRRenderTarget* target)
+void Graphics::SetRenderTarget(IGLWRRenderTarget* target)
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
+    glBindFramebuffer(GL_FRAMEBUFFER, target->m_id);
 
     m_ctx.screenTexture = target->m_texture->m_id;
     m_ctx.screenSampler = target->m_sampler->m_id;
-    m_ctx.targetFrame = target->m_frame;
+    m_ctx.targetFrame = target->m_id;
 }
 
-void Graphics::SetInputLayout(GLWRInputLayout* pInputLayout)
+void Graphics::SetInputLayout(IGLWRInputLayout* pInputLayout)
 {
     glBindVertexArray(pInputLayout->m_id);
 }
 
-void Graphics::SetVertexShader(GLWRVertexShader* ppVertexShader)
+void Graphics::SetVertexShader(IGLWRVertexShader* ppVertexShader)
 {
     glUseProgramStages(m_ctx.pipeline, GL_VERTEX_SHADER_BIT, ppVertexShader->m_id);
 }
 
-void Graphics::SetFragmentShader(GLWRFragmentShader* ppFragmentShader)
+void Graphics::SetFragmentShader(IGLWRFragmentShader* ppFragmentShader)
 {
     glUseProgramStages(m_ctx.pipeline, GL_FRAGMENT_SHADER_BIT, ppFragmentShader->m_id);
 }
@@ -322,7 +310,7 @@ void Graphics::SetPrimitive(GLenum primitive)
     m_ctx.primitive = primitive;
 }
 
-void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const* buffers, GLsizei const* strides,
+void Graphics::SetVertexBuffers(GLuint first, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
                                 GLintptr const* offsets)
 {
     for (int i = 0; i < numBuffers; i++) {
@@ -330,7 +318,7 @@ void Graphics::SetVertexBuffers(GLuint first, int numBuffers, GLWRBuffer* const*
     }
 }
 
-void Graphics::SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset)
+void Graphics::SetIndexBuffer(IGLWRBuffer const* pBuffer, GLWRFormat format, unsigned int offset)
 {
     auto const attrFormat = Enum::Resolve(format);
 
@@ -342,7 +330,7 @@ void Graphics::SetIndexBuffer(GLWRBuffer const* pBuffer, GLWRFormat format, unsi
 }
 
 void Graphics::SetShaderResources(unsigned int startUnit, unsigned int numTextures,
-                                  GLWRShaderResourceView* const* ppResourceViews)
+                                  IGLWRShaderResourceView* const* ppResourceViews)
 {
     for (unsigned int i = 0; i < numTextures; i++) {
         glActiveTexture(GL_TEXTURE0 + startUnit + i);
@@ -350,7 +338,7 @@ void Graphics::SetShaderResources(unsigned int startUnit, unsigned int numTextur
     }
 }
 
-void Graphics::SetSamplers(unsigned int startUnit, unsigned int numSamplers, GLWRSampler* const* ppSamplers)
+void Graphics::SetSamplers(unsigned int startUnit, unsigned int numSamplers, IGLWRSampler* const* ppSamplers)
 {
     for (unsigned int i = 0; i < numSamplers; i++) {
         glBindSampler(startUnit + i, ppSamplers[i]->m_id);
@@ -362,12 +350,12 @@ void Graphics::SetShaderProgram(GLuint program)
     glUseProgram(program);
 }
 
-void Graphics::SetRasterizerState(GLWRRasterizerState const* state)
+void Graphics::SetRasterizerState(IGLWRRasterizerState const* state)
 {
     state->Execute();
 }
 
-void Graphics::SetBlendState(GLWRBlendState const* state)
+void Graphics::SetBlendState(IGLWRBlendState const* state)
 {
     state->Execute();
 }
@@ -414,14 +402,14 @@ void Graphics::Present()
     glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
 }
 
-void Graphics::SetUniformBuffer(GLuint const bindingIndex, GLWRBuffer const* pBuffer)
+void Graphics::SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer)
 {
     glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, pBuffer->m_id);
 }
 
-void Graphics::ClearRenderTarget(GLWRRenderTarget* target, float const color[4]) const
+void Graphics::ClearRenderTarget(IGLWRRenderTarget* target, float const color[4]) const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, target->m_frame);
+    glBindFramebuffer(GL_FRAMEBUFFER, target->m_id);
     glClearColor(color[0], color[1], color[2], color[3]);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.targetFrame);
@@ -443,7 +431,7 @@ Camera& Graphics::GetCamera()
 }
 
 void Graphics::UpdateBuffer(GLenum target, GLintptr offset, GLsizei byteWidth, GLWRResourceData const* data,
-                            GLWRBuffer* pBuffer)
+                            IGLWRBuffer* pBuffer)
 {
     glBindBuffer(target, pBuffer->m_id);
     glBufferSubData(target, offset, byteWidth, data->mem);
@@ -512,7 +500,7 @@ std::string Graphics::SlurpShaderSource(std::string const& filename)
 }
 
 void Graphics::CreateShaderResourceViewFromFile(Graphics* pContext, char const* filename,
-                                                GLWRShaderResourceView** ppResourceView)
+                                                IGLWRShaderResourceView** ppResourceView)
 {
     int width, height, channels;
     stbi_set_flip_vertically_on_load(0);
@@ -522,7 +510,7 @@ void Graphics::CreateShaderResourceViewFromFile(Graphics* pContext, char const* 
         Logger::error("Failed to open image: %s. %s", filename, stbi_failure_reason());
     }
 
-    GLWRPtr<GLWRTexture2D> texture;
+    GLWRPtr<IGLWRTexture2D> texture;
 
     GLWRTexture2DDesc texDesc;
     texDesc.width = width;

@@ -38,7 +38,7 @@ public:
 
 private:
     WatermarkingProject& m_project;
-    GLWRPtr<GLWRRenderTarget> m_renderTarget;
+    GLWRPtr<IGLWRRenderTarget> m_renderTarget;
     std::unique_ptr<wxGLContext> m_context;
     bool m_isGLLoaded;
     float m_rateMove;
