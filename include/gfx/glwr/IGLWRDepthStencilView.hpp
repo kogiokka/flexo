@@ -13,9 +13,9 @@ private:
     IGLWRDepthStencilView();
     ~IGLWRDepthStencilView() override;
 
-    GLuint m_parent; // framebuffer
-    GLuint m_sampler;
     GLenum m_dimensions;
+    GLuint m_sampler;
+    GLuint m_clearFrame;
 };
 
 #endif

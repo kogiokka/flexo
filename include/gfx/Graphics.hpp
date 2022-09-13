@@ -182,7 +182,7 @@ class Graphics : public AttachableBase
         GLWRPtr<IGLWRBuffer> buffer;
         GLenum screenTexture;
         GLenum screenSampler;
-        GLenum framebuffer;
+        GLenum frame;
         GLWRPtr<IGLWRRasterizerState> state;
     };
 

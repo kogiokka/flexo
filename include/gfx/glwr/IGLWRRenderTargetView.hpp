@@ -15,9 +15,9 @@ private:
     IGLWRRenderTargetView();
     ~IGLWRRenderTargetView() override;
 
-    GLuint m_textureView;
-    GLuint m_sampler;
     GLenum m_dimensions;
+    GLuint m_sampler;
+    GLuint m_clearFrame;
 };
 
 #endif

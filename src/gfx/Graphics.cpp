@@ -62,13 +62,15 @@ Graphics::Graphics(int width, int height)
     GLWRRasterizerDesc rasDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back };
     CreateRasterizerState(&rasDesc, &m_ctx.state);
 
-    glGenFramebuffers(1, &m_ctx.framebuffer); // The framebuffer that will become our render target.
+    glGenFramebuffers(1, &m_ctx.frame); // The framebuffer that will become our render target.
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.frame);
 
     glEnable(GL_DEPTH_TEST);
 }
 
 Graphics::~Graphics()
 {
+    glDeleteFramebuffers(1, &m_ctx.frame);
     glDeleteProgramPipelines(1, &m_ctx.pipeline);
 }
 
@@ -79,7 +81,11 @@ void Graphics::CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTarget
 
     IGLWRRenderTargetView* view = *ppRenderTargetView;
     view->m_dimensions = pDesc->dimensions;
-    glTextureView(view->m_textureView, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+    glTextureView(view->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, view->m_clearFrame);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, view->m_dimensions, view->m_id, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ctx.frame);
 }
 
 void Graphics::CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencilViewDesc const* pDesc,
@@ -90,6 +96,10 @@ void Graphics::CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencil
     IGLWRDepthStencilView* view = *ppDepthStencilView;
     view->m_dimensions = pDesc->dimensions;
     glTextureView(view->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, view->m_clearFrame);
+    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, view->m_dimensions, view->m_id, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ctx.frame);
 }
 
 void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, unsigned int numElements,
@@ -299,23 +309,23 @@ void Graphics::LinkShaderProgram(const GLuint program)
 void Graphics::SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* const* pRenderTargetView,
                                 IGLWRDepthStencilView* pDepthStencilView)
 {
-    // FIXME
-    m_ctx.framebuffer = pRenderTargetView[0]->m_id;
-    m_ctx.screenTexture = pRenderTargetView[0]->m_textureView;
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.frame);
+    m_ctx.screenTexture = pRenderTargetView[0]->m_id;
     m_ctx.screenSampler = pRenderTargetView[0]->m_sampler;
-    pDepthStencilView->m_parent = pRenderTargetView[0]->m_id;
-
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
 
     GLint mipmapLevel = 0;
     // Attach color buffer
+    GLenum* buffers = static_cast<GLenum*>(malloc(numViews * sizeof(GLenum)));
     for (unsigned int i = 0; i < numViews; i++) {
         glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, pRenderTargetView[i]->m_dimensions,
-                               pRenderTargetView[i]->m_textureView, mipmapLevel);
+                               pRenderTargetView[i]->m_id, mipmapLevel);
+        buffers[i] = GL_COLOR_ATTACHMENT0 + i;
     }
     // Attach depth-stencil buffer
     glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, pDepthStencilView->m_dimensions,
                            pDepthStencilView->m_id, mipmapLevel);
+    glDrawBuffers(numViews, buffers);
+    free(buffers);
 
 #ifndef NDEBUG
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -434,7 +444,7 @@ void Graphics::Present()
     Draw(6);
     glEnable(GL_DEPTH_TEST);
 
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.frame);
 }
 
 void Graphics::SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer)
@@ -444,19 +454,22 @@ void Graphics::SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pB
 
 void Graphics::ClearRenderTargetView(IGLWRRenderTargetView* pRenderTargetView, float const color[4]) const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, pRenderTargetView->m_id);
+    glBindFramebuffer(GL_FRAMEBUFFER, pRenderTargetView->m_clearFrame);
     glClearColor(color[0], color[1], color[2], color[3]);
     glClear(GL_COLOR_BUFFER_BIT);
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.framebuffer);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.frame);
 }
 
 void Graphics::ClearDepthStencilView(IGLWRDepthStencilView* pDepthStencilView, GLWRClearFlag flags, float depth,
                                      uint8_t stencil) const
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, pDepthStencilView->m_parent);
+    glBindFramebuffer(GL_FRAMEBUFFER, pDepthStencilView->m_clearFrame);
     glClearDepth(depth);
     glClearStencil(stencil);
     glClear(flags);
+
+    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.frame);
 }
 
 void Graphics::GenerateMips(IGLWRShaderResourceView* pShaderResourceView)
