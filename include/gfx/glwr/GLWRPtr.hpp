@@ -24,7 +24,9 @@ GLWRPtr<T>::GLWRPtr()
 template <typename T>
 GLWRPtr<T>::~GLWRPtr()
 {
-    static_cast<IGLWRBase*>(m_ptr)->Release();
+    if (m_ptr) {
+        static_cast<IGLWRBase*>(m_ptr)->Release();
+    }
 }
 
 template <typename T>
