@@ -70,6 +70,7 @@ PRIVATE
     "src/gfx/glwr/IGLWRSampler.cpp"
     "src/gfx/glwr/IGLWRResource.cpp"
     "src/gfx/glwr/IGLWRTexture2D.cpp"
+    "src/gfx/glwr/IGLWRRenderBuffer.cpp"
     "src/gfx/glwr/IGLWRRenderTargetView.cpp"
     "src/gfx/glwr/IGLWRDepthStencilView.cpp"
     "src/gfx/glwr/IGLWRShaderResourceView.cpp"

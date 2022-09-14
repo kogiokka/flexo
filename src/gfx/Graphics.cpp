@@ -79,12 +79,28 @@ void Graphics::CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTarget
 {
     *ppRenderTargetView = new IGLWRRenderTargetView();
 
-    IGLWRRenderTargetView* view = *ppRenderTargetView;
-    view->m_dimensions = pDesc->dimensions;
-    glTextureView(view->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+    IGLWRRenderTargetView* self = *ppRenderTargetView;
+    self->m_dimensions = pDesc->dimensions;
+    self->m_resourceType = pResource->m_resourceType;
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, view->m_clearFrame);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, view->m_dimensions, view->m_id, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, self->m_clearFrame);
+
+    switch (self->m_resourceType) {
+    case GLWRResourceType_Texture:
+        glTextureView(self->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, self->m_dimensions, self->m_id, 0);
+        break;
+    case GLWRResourceType_RenderBuffer:
+        glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pResource->m_id);
+        // Transferring the ownership.
+        self->m_id = pResource->m_id;
+        // The name zero is reserved by the GL and will be silently ignored.
+        pResource->m_id = 0;
+        break;
+    default:
+        break;
+    };
+
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ctx.frame);
 }
 
@@ -93,12 +109,28 @@ void Graphics::CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencil
 {
     *ppDepthStencilView = new IGLWRDepthStencilView();
 
-    IGLWRDepthStencilView* view = *ppDepthStencilView;
-    view->m_dimensions = pDesc->dimensions;
-    glTextureView(view->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+    IGLWRDepthStencilView* self = *ppDepthStencilView;
+    self->m_dimensions = pDesc->dimensions;
+    self->m_resourceType = pResource->m_resourceType;
 
-    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, view->m_clearFrame);
-    glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, view->m_dimensions, view->m_id, 0);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, self->m_clearFrame);
+
+    switch (self->m_resourceType) {
+    case GLWRResourceType_Texture:
+        glTextureView(self->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, self->m_dimensions, self->m_id, 0);
+        break;
+    case GLWRResourceType_RenderBuffer:
+        glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pResource->m_id);
+        // Transferring the ownership.
+        self->m_id = pResource->m_id;
+        // The name zero is reserved by the GL and will be silently ignored.
+        pResource->m_id = 0;
+        break;
+    default:
+        break;
+    }
+
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, m_ctx.frame);
 }
 
@@ -158,21 +190,34 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
                                IGLWRTexture2D** ppTexture2D)
 {
     *ppTexture2D = new IGLWRTexture2D();
+    IGLWRTexture2D* texture = *ppTexture2D;
+    texture->m_resourceType = GLWRResourceType_Texture;
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, (*ppTexture2D)->m_id); // Bind the new texture to the context so we can modify it.
+    glBindTexture(GL_TEXTURE_2D, texture->m_id); // Bind the new texture to the context so we can modify it.
     glTexStorage2D(GL_TEXTURE_2D, 1, pDesc->internalFormat, pDesc->width, pDesc->height);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pDesc->width, pDesc->height, pDesc->pixelFormat, pDesc->dataType,
                     pInitialData->mem);
+}
+
+void Graphics::CreateRenderBuffer(const GLWRRenderBufferDesc* pDesc, IGLWRRenderBuffer** ppRenderBuffer)
+{
+    *ppRenderBuffer = new IGLWRRenderBuffer();
+    IGLWRRenderBuffer* rbo = *ppRenderBuffer;
+    rbo->m_resourceType = GLWRResourceType_RenderBuffer;
+
+    glBindRenderbuffer(GL_RENDERBUFFER, rbo->m_id);
+    glRenderbufferStorage(GL_RENDERBUFFER, pDesc->internalFormat, pDesc->width, pDesc->height);
 }
 
 void Graphics::CreateShaderResourceView(IGLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,
                                         IGLWRShaderResourceView** ppResourceView)
 {
     *ppResourceView = new IGLWRShaderResourceView();
+    IGLWRShaderResourceView* view = *ppResourceView;
 
-    glTextureView((*ppResourceView)->m_id, pDesc->target, pResource->m_id, pDesc->format, 0, 1, 0, 1);
-    (*ppResourceView)->m_target = pDesc->target;
+    glTextureView(view->m_id, pDesc->target, pResource->m_id, pDesc->format, 0, 1, 0, 1);
+    view->m_target = pDesc->target;
 }
 
 void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, IGLWRSampler** ppSampler)
@@ -263,6 +308,8 @@ void Graphics::SetViewports(unsigned int numViewports, GLWRViewport* viewports)
     float* viewportParams = static_cast<float*>(malloc(numViewports * 4 * sizeof(float)));
     double* depthRangeParams = static_cast<double*>(malloc(numViewports * 2 * sizeof(double)));
 
+    m_ctx.viewports.clear();
+    m_ctx.viewports.resize(numViewports);
     for (unsigned int i = 0; i < numViewports; i++) {
         auto const& v = viewports[i];
         viewportParams[i * 4 + 0] = v.x;
@@ -271,6 +318,7 @@ void Graphics::SetViewports(unsigned int numViewports, GLWRViewport* viewports)
         viewportParams[i * 4 + 3] = v.height;
         depthRangeParams[i * 2 + 0] = v.nearDepth;
         depthRangeParams[i * 2 + 1] = v.farDepth;
+        m_ctx.viewports[i] = v;
     }
 
     glViewportArrayv(0, numViewports, viewportParams);
@@ -313,19 +361,42 @@ void Graphics::SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* co
     m_ctx.screenTexture = pRenderTargetView[0]->m_id;
     m_ctx.screenSampler = pRenderTargetView[0]->m_sampler;
 
-    GLint mipmapLevel = 0;
-    // Attach color buffer
+    GLint const mipmapLevel = 0;
     GLenum* buffers = static_cast<GLenum*>(malloc(numViews * sizeof(GLenum)));
+
+    // Attach color buffers
     for (unsigned int i = 0; i < numViews; i++) {
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + i, pRenderTargetView[i]->m_dimensions,
-                               pRenderTargetView[i]->m_id, mipmapLevel);
-        buffers[i] = GL_COLOR_ATTACHMENT0 + i;
+        GLenum const attachment = GL_COLOR_ATTACHMENT0 + i;
+        buffers[i] = attachment;
+
+        switch (pRenderTargetView[i]->m_resourceType) {
+        case GLWRResourceType_Texture:
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, pRenderTargetView[i]->m_dimensions,
+                                   pRenderTargetView[i]->m_id, mipmapLevel);
+            break;
+        case GLWRResourceType_RenderBuffer:
+            glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, pRenderTargetView[i]->m_id);
+            break;
+        default:
+            break;
+        }
     }
-    // Attach depth-stencil buffer
-    glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, pDepthStencilView->m_dimensions,
-                           pDepthStencilView->m_id, mipmapLevel);
     glDrawBuffers(numViews, buffers);
     free(buffers);
+
+    // Attach depth-stencil buffer
+    switch (pDepthStencilView->m_resourceType) {
+    case GLWRResourceType_Texture:
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, pDepthStencilView->m_dimensions,
+                               pDepthStencilView->m_id, mipmapLevel);
+        break;
+    case GLWRResourceType_RenderBuffer:
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+                                  pDepthStencilView->m_id);
+        break;
+    default:
+        break;
+    }
 
 #ifndef NDEBUG
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
@@ -421,30 +492,37 @@ void Graphics::DrawInstanced(GLsizei vertexCountPerInstance, GLsizei instanceCou
 
 void Graphics::Present()
 {
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    SetPrimitive(GL_TRIANGLES);
-    GLintptr offset = 0;
-    GLsizei stride = 4 * sizeof(float);
-    SetVertexBuffers(0, 1, &m_ctx.buffer, &stride, &offset);
+    // SetPrimitive(GL_TRIANGLES);
+    // GLintptr offset = 0;
+    // GLsizei stride = 4 * sizeof(float);
+    // SetVertexBuffers(0, 1, &m_ctx.buffer, &stride, &offset);
+    //
+    // SetVertexShader(m_ctx.vert.Get());
+    // SetFragmentShader(m_ctx.frag.Get());
+    //
+    // SetInputLayout(m_ctx.inputLayout.Get());
+    //
+    // glActiveTexture(GL_TEXTURE0);
+    // glBindTexture(GL_TEXTURE_2D, m_ctx.screenTexture);
+    // glBindSampler(0, m_ctx.screenSampler);
+    // SetRasterizerState(m_ctx.state.Get());
+    //
+    // glDisable(GL_DEPTH_TEST);
+    // Draw(6);
+    // glEnable(GL_DEPTH_TEST);
 
-    SetVertexShader(m_ctx.vert.Get());
-    SetFragmentShader(m_ctx.frag.Get());
-
-    SetInputLayout(m_ctx.inputLayout.Get());
-
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, m_ctx.screenTexture);
-    glBindSampler(0, m_ctx.screenSampler);
-    SetRasterizerState(m_ctx.state.Get());
-
-    glDisable(GL_DEPTH_TEST);
-    Draw(6);
-    glEnable(GL_DEPTH_TEST);
-
-    glBindFramebuffer(GL_FRAMEBUFFER, m_ctx.frame);
+    glBindFramebuffer(GL_READ_FRAMEBUFFER, m_ctx.frame);
+    for (auto const& view : m_ctx.viewports) {
+        float const x1 = view.x;
+        float const y1 = view.y;
+        float const x2 = view.x + view.width;
+        float const y2 = view.y + view.height;
+        glBlitFramebuffer(x1, y1, x2, y2, x1, y1, x2, y2, GL_COLOR_BUFFER_BIT, GL_NEAREST);
+    }
 }
 
 void Graphics::SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer)

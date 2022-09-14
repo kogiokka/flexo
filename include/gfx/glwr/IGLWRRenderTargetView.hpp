@@ -3,7 +3,6 @@
 
 #include "gfx/glwr/IGLWRBase.hpp"
 #include "gfx/glwr/IGLWRResource.hpp"
-#include "gfx/glwr/IGLWRSampler.hpp"
 
 class Graphics;
 
@@ -18,6 +17,7 @@ private:
     GLenum m_dimensions;
     GLuint m_sampler;
     GLuint m_clearFrame;
+    GLWRResourceType m_resourceType;
 };
 
 #endif

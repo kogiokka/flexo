@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
 #include <glad/glad.h>
 #include <glm/glm.hpp>
@@ -14,6 +15,7 @@
 #include "gfx/glwr/IGLWRDepthStencilView.hpp"
 #include "gfx/glwr/IGLWRFragmentShader.hpp"
 #include "gfx/glwr/IGLWRInputLayout.hpp"
+#include "gfx/glwr/IGLWRRenderBuffer.hpp"
 #include "gfx/glwr/IGLWRRenderTargetView.hpp"
 #include "gfx/glwr/IGLWRResource.hpp"
 #include "gfx/glwr/IGLWRSampler.hpp"
@@ -157,6 +159,12 @@ struct GLWRDepthStencilViewDesc {
     GLenum dimensions;
 };
 
+struct GLWRRenderBufferDesc {
+    GLenum internalFormat;
+    GLsizei width;
+    GLsizei height;
+};
+
 struct GLWRViewport {
     float x;
     float y;
@@ -184,6 +192,7 @@ class Graphics : public AttachableBase
         GLenum screenSampler;
         GLenum frame;
         GLWRPtr<IGLWRRasterizerState> state;
+        std::vector<GLWRViewport> viewports;
     };
 
     struct GLAttribFormat {
@@ -210,6 +219,7 @@ public:
     void CreateVertexShader(char const* source, IGLWRVertexShader** ppVertexShader);
     void CreateFragmentShader(char const* source, IGLWRFragmentShader** ppFragmentShader);
     void CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, IGLWRBuffer** ppBuffer);
+    void CreateRenderBuffer(GLWRRenderBufferDesc const* pDesc, IGLWRRenderBuffer** ppRenderBuffer);
     void CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
                          IGLWRTexture2D** ppTexture2D);
     void CreateShaderResourceView(IGLWRResource* pResource, GLWRShaderResourceViewDesc const* pDesc,

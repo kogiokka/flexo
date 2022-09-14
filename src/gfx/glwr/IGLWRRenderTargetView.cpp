@@ -1,5 +1,5 @@
 #include "gfx/glwr/IGLWRRenderTargetView.hpp"
-#include "common/Logger.hpp"
+#include "gfx/glwr/IGLWRSampler.hpp"
 
 IGLWRRenderTargetView::IGLWRRenderTargetView()
 {
