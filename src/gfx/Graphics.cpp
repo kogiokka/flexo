@@ -439,11 +439,13 @@ void Graphics::SetPrimitive(GLenum primitive)
     m_ctx.primitive = primitive;
 }
 
-void Graphics::SetVertexBuffers(unsigned int startSlot, int numBuffers, IGLWRBuffer* const* buffers,
-                                GLsizei const* strides, GLintptr const* offsets)
+void Graphics::SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers, IGLWRBuffer* const* ppVertexBuffers,
+                                unsigned int const* pStrides, unsigned int const* pOffsets)
 {
-    for (int i = 0; i < numBuffers; i++) {
-        glBindVertexBuffer(startSlot + i, buffers[i]->m_id, offsets[i], strides[i]);
+    for (unsigned int i = 0; i < numBuffers; i++) {
+        GLintptr const offset = static_cast<GLintptr>(pOffsets[i]);
+        GLsizei const stride = static_cast<GLsizei>(pStrides[i]);
+        glBindVertexBuffer(startSlot + i, ppVertexBuffers[i]->m_id, offset, stride);
     }
 }
 

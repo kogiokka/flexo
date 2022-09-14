@@ -238,8 +238,8 @@ public:
     void CreateRasterizerState(GLWRRasterizerDesc const* pDesc, IGLWRRasterizerState** ppState);
     void CreateBlendState(GLWRBlendDesc const* pDesc, IGLWRBlendState** ppState);
     void SetPrimitive(GLenum primitive);
-    void SetVertexBuffers(unsigned int startSlot, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
-                          GLintptr const* offsets);
+    void SetVertexBuffers(unsigned int startSlot, unsigned int numBuffers, IGLWRBuffer* const* ppVertexBuffers,
+                          unsigned int const* pStrides, unsigned int const* pOffsets);
     void SetUniformBuffers(unsigned int startSlot, unsigned int numBuffers, IGLWRBuffer* const* ppUniformBuffers);
     void SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* const* pRenderTargetView,
                           IGLWRDepthStencilView* ppDepthStencilView);

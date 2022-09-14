@@ -14,19 +14,19 @@ namespace Bind
     {
     protected:
         GLWRPtr<IGLWRBuffer> m_buffer;
-        GLuint m_startAttrib;
-        GLsizei m_stride;
-        GLuint m_count;
+        unsigned int m_startAttrib;
+        unsigned int m_stride;
+        unsigned int m_count;
 
     public:
         template <typename T>
-        VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib = 0);
+        VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, unsigned int startAttrib = 0);
         ~VertexBuffer();
         void Bind() override;
         template <typename T>
         void Update(std::vector<T> const& vertices);
-        GLuint GetStartAttrib() const;
-        GLuint GetCount() const;
+        unsigned int GetStartAttrib() const;
+        unsigned int GetCount() const;
 
     protected:
         template <typename T>
@@ -34,7 +34,7 @@ namespace Bind
     };
 
     template <typename T>
-    VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, GLuint startAttrib)
+    VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, unsigned int startAttrib)
         : Bindable(gfx)
         , m_startAttrib(startAttrib)
         , m_stride(sizeof(T))

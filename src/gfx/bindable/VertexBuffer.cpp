@@ -9,16 +9,16 @@ namespace Bind
 
     void VertexBuffer::Bind()
     {
-        const GLintptr offset = 0;
+        unsigned int const offset = 0;
         m_gfx->SetVertexBuffers(m_startAttrib, 1, &m_buffer, &m_stride, &offset);
     }
 
-    GLuint VertexBuffer::GetStartAttrib() const
+    unsigned int VertexBuffer::GetStartAttrib() const
     {
         return m_startAttrib;
     }
 
-    GLuint VertexBuffer::GetCount() const
+    unsigned int VertexBuffer::GetCount() const
     {
         return m_count;
     }
