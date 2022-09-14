@@ -78,7 +78,6 @@ void Graphics::CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTarget
                                       IGLWRRenderTargetView** ppRenderTargetView)
 {
     *ppRenderTargetView = new IGLWRRenderTargetView();
-
     IGLWRRenderTargetView* self = *ppRenderTargetView;
     self->m_type = pDesc->type;
 
@@ -108,7 +107,6 @@ void Graphics::CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencil
                                       IGLWRDepthStencilView** ppDepthStencilView)
 {
     *ppDepthStencilView = new IGLWRDepthStencilView();
-
     IGLWRDepthStencilView* self = *ppDepthStencilView;
     self->m_type = pDesc->type;
 
@@ -138,8 +136,9 @@ void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, u
                                  IGLWRVertexShader const* pProgramWithInputSignature, IGLWRInputLayout** ppInputLayout)
 {
     *ppInputLayout = new IGLWRInputLayout();
+    IGLWRInputLayout* self = *ppInputLayout;
 
-    SetInputLayout(*ppInputLayout);
+    glBindVertexArray(self->m_id);
     for (unsigned int i = 0; i < numElements; i++) {
         auto const& desc = inputElementDesc[i];
         GLint location = glGetAttribLocation(pProgramWithInputSignature->m_id, desc.semanticName);
@@ -156,25 +155,25 @@ void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, u
             glVertexBindingDivisor(desc.inputSlot, desc.instanceDataStepRate);
         }
     }
-    SetInputLayout(m_ctx.inputLayout.Get());
+    glBindVertexArray(m_ctx.inputLayout.Get()->m_id);
 }
 
 void Graphics::CreateVertexShader(char const* source, IGLWRVertexShader** ppVertexShader)
 {
     *ppVertexShader = new IGLWRVertexShader();
+    IGLWRVertexShader* self = *ppVertexShader;
 
-    GLuint const program = (*ppVertexShader)->m_id;
-    AttachShaderStage(program, GL_VERTEX_SHADER, source);
-    CheckProgramStatus(program);
+    AttachShaderStage(self->m_id, GL_VERTEX_SHADER, source);
+    CheckProgramStatus(self->m_id);
 }
 
 void Graphics::CreateFragmentShader(char const* source, IGLWRFragmentShader** ppFragmentShader)
 {
     *ppFragmentShader = new IGLWRFragmentShader();
+    IGLWRFragmentShader* self = *ppFragmentShader;
 
-    GLuint const program = (*ppFragmentShader)->m_id;
-    AttachShaderStage(program, GL_FRAGMENT_SHADER, source);
-    CheckProgramStatus(program);
+    AttachShaderStage(self->m_id, GL_FRAGMENT_SHADER, source);
+    CheckProgramStatus(self->m_id);
 }
 
 void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, IGLWRBuffer** ppBuffer)
@@ -206,11 +205,11 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
                                IGLWRTexture2D** ppTexture2D)
 {
     *ppTexture2D = new IGLWRTexture2D();
-    IGLWRTexture2D* texture = *ppTexture2D;
-    texture->m_type = GLWRResourceType_Texture2D;
+    IGLWRTexture2D* self = *ppTexture2D;
+    self->m_type = GLWRResourceType_Texture2D;
 
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture->m_id); // Bind the new texture to the context so we can modify it.
+    glBindTexture(GL_TEXTURE_2D, self->m_id); // Bind the new texture to the context so we can modify it.
     glTexStorage2D(GL_TEXTURE_2D, 1, pDesc->internalFormat, pDesc->width, pDesc->height);
     glTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, pDesc->width, pDesc->height, pDesc->pixelFormat, pDesc->dataType,
                     pInitialData->mem);
@@ -219,10 +218,10 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
 void Graphics::CreateRenderBuffer(const GLWRRenderBufferDesc* pDesc, IGLWRRenderBuffer** ppRenderBuffer)
 {
     *ppRenderBuffer = new IGLWRRenderBuffer();
-    IGLWRRenderBuffer* rbo = *ppRenderBuffer;
-    rbo->m_type = GLWRResourceType_RenderBuffer;
+    IGLWRRenderBuffer* self = *ppRenderBuffer;
+    self->m_type = GLWRResourceType_RenderBuffer;
 
-    glBindRenderbuffer(GL_RENDERBUFFER, rbo->m_id);
+    glBindRenderbuffer(GL_RENDERBUFFER, self->m_id);
     glRenderbufferStorage(GL_RENDERBUFFER, pDesc->internalFormat, pDesc->width, pDesc->height);
 }
 
@@ -239,36 +238,36 @@ void Graphics::CreateShaderResourceView(IGLWRResource* pResource, GLWRShaderReso
 void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, IGLWRSampler** ppSampler)
 {
     *ppSampler = new IGLWRSampler();
-    GLuint sampler = (*ppSampler)->m_id;
+    IGLWRSampler* self = *ppSampler;
 
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_S, pDesc->coordinateS);
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_T, pDesc->coordinateT);
-    glSamplerParameteri(sampler, GL_TEXTURE_WRAP_R, pDesc->coordinateR);
+    glSamplerParameteri(self->m_id, GL_TEXTURE_WRAP_S, pDesc->coordinateS);
+    glSamplerParameteri(self->m_id, GL_TEXTURE_WRAP_T, pDesc->coordinateT);
+    glSamplerParameteri(self->m_id, GL_TEXTURE_WRAP_R, pDesc->coordinateR);
 
     switch (pDesc->filter) {
     case GLWRFilter_MinMagNearest_NoMip:
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case GLWRFilter_MinMagLinear_NoMip:
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
     case GLWRFilter_MinMagNearest_MipNearest:
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case GLWRFilter_MinMagNearest_MipLinear:
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case GLWRFilter_MinMagLinear_MipNearest:
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
     case GLWRFilter_MinMagLinear_MipLinear:
-        glSamplerParameteri(sampler, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-        glSamplerParameteri(sampler, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+        glSamplerParameteri(self->m_id, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
         break;
     default:
         break;
@@ -278,28 +277,28 @@ void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, IGLWRSampler** ppSamp
 void Graphics::CreateRasterizerState(GLWRRasterizerDesc const* pDesc, IGLWRRasterizerState** ppState)
 {
     *ppState = new IGLWRRasterizerState();
-    IGLWRRasterizerState* pState = *ppState;
+    IGLWRRasterizerState* self = *ppState;
 
     switch (pDesc->cullMode) {
     case GLWRCullMode::GLWRCullMode_Back:
-        pState->Add(std::bind(glEnable, GL_CULL_FACE));
-        pState->Add(std::bind(glCullFace, GL_BACK));
+        self->Add(std::bind(glEnable, GL_CULL_FACE));
+        self->Add(std::bind(glCullFace, GL_BACK));
         break;
     case GLWRCullMode::GLWRCullMode_Front:
-        pState->Add(std::bind(glEnable, GL_CULL_FACE));
-        pState->Add(std::bind(glCullFace, GL_FRONT));
+        self->Add(std::bind(glEnable, GL_CULL_FACE));
+        self->Add(std::bind(glCullFace, GL_FRONT));
         break;
     case GLWRCullMode::GLWRCullMode_None:
-        pState->Add(std::bind(glDisable, GL_CULL_FACE));
+        self->Add(std::bind(glDisable, GL_CULL_FACE));
         break;
     };
 
     switch (pDesc->fillMode) {
     case GLWRFillMode::GLWRFillMode_WireFrame:
-        pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE));
+        self->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE));
         break;
     case GLWRFillMode::GLWRFillMode_Solid:
-        pState->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL));
+        self->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL));
         break;
     }
 }
@@ -307,16 +306,16 @@ void Graphics::CreateRasterizerState(GLWRRasterizerDesc const* pDesc, IGLWRRaste
 void Graphics::CreateBlendState(GLWRBlendDesc const* pDesc, IGLWRBlendState** ppState)
 {
     *ppState = new IGLWRBlendState();
-    IGLWRBlendState* pState = *ppState;
+    IGLWRBlendState* self = *ppState;
 
     if (pDesc->enable) {
-        pState->Add(std::bind(glEnable, GL_BLEND));
+        self->Add(std::bind(glEnable, GL_BLEND));
     } else {
-        pState->Add(std::bind(glDisable, GL_BLEND));
+        self->Add(std::bind(glDisable, GL_BLEND));
     }
 
-    pState->Add(std::bind(glBlendEquationSeparate, pDesc->eqRGB, pDesc->eqAlpha));
-    pState->Add(std::bind(glBlendFuncSeparate, pDesc->srcRGB, pDesc->dstRGB, pDesc->srcAlpha, pDesc->dstAlpha));
+    self->Add(std::bind(glBlendEquationSeparate, pDesc->eqRGB, pDesc->eqAlpha));
+    self->Add(std::bind(glBlendFuncSeparate, pDesc->srcRGB, pDesc->dstRGB, pDesc->srcAlpha, pDesc->dstAlpha));
 }
 
 void Graphics::SetViewports(unsigned int numViewports, GLWRViewport* viewports)
@@ -440,11 +439,11 @@ void Graphics::SetPrimitive(GLenum primitive)
     m_ctx.primitive = primitive;
 }
 
-void Graphics::SetVertexBuffers(GLuint first, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
+void Graphics::SetVertexBuffers(unsigned int startSlot, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
                                 GLintptr const* offsets)
 {
     for (int i = 0; i < numBuffers; i++) {
-        glBindVertexBuffer(first + i, buffers[i]->m_id, offsets[i], strides[i]);
+        glBindVertexBuffer(startSlot + i, buffers[i]->m_id, offsets[i], strides[i]);
     }
 }
 
