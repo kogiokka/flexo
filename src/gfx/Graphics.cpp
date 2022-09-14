@@ -439,11 +439,18 @@ void Graphics::SetPrimitive(GLenum primitive)
     m_ctx.primitive = primitive;
 }
 
-void Graphics::SetVertexBuffers(unsigned int startSlot, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
-                                GLintptr const* offsets)
+void Graphics::SetVertexBuffers(unsigned int startSlot, int numBuffers, IGLWRBuffer* const* buffers,
+                                GLsizei const* strides, GLintptr const* offsets)
 {
     for (int i = 0; i < numBuffers; i++) {
         glBindVertexBuffer(startSlot + i, buffers[i]->m_id, offsets[i], strides[i]);
+    }
+}
+
+void Graphics::SetUniformBuffers(unsigned int startSlot, unsigned int numBuffers, IGLWRBuffer* const* ppUniformBuffers)
+{
+    for (unsigned int i = 0; i < numBuffers; i++) {
+        glBindBufferBase(GL_UNIFORM_BUFFER, startSlot + i, ppUniformBuffers[i]->m_id);
     }
 }
 
@@ -532,11 +539,6 @@ void Graphics::Present()
         float const y2 = view.y + view.height;
         glBlitFramebuffer(x1, y1, x2, y2, x1, y1, x2, y2, GL_COLOR_BUFFER_BIT, GL_NEAREST);
     }
-}
-
-void Graphics::SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer)
-{
-    glBindBufferBase(GL_UNIFORM_BUFFER, bindingIndex, pBuffer->m_id);
 }
 
 void Graphics::ClearRenderTargetView(IGLWRRenderTargetView* pRenderTargetView, float const color[4]) const

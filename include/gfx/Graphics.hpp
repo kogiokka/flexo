@@ -240,6 +240,7 @@ public:
     void SetPrimitive(GLenum primitive);
     void SetVertexBuffers(unsigned int startSlot, int numBuffers, IGLWRBuffer* const* buffers, GLsizei const* strides,
                           GLintptr const* offsets);
+    void SetUniformBuffers(unsigned int startSlot, unsigned int numBuffers, IGLWRBuffer* const* ppUniformBuffers);
     void SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* const* pRenderTargetView,
                           IGLWRDepthStencilView* ppDepthStencilView);
     void SetInputLayout(IGLWRInputLayout* pInputLayout);
@@ -252,7 +253,6 @@ public:
     void SetRasterizerState(IGLWRRasterizerState const* state);
     void SetBlendState(IGLWRBlendState const* state);
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
-    void SetUniformBuffer(GLuint const bindingIndex, IGLWRBuffer const* pBuffer);
 
     void ClearRenderTargetView(IGLWRRenderTargetView* pRenderTargetView, float const color[4]) const;
     void ClearDepthStencilView(IGLWRDepthStencilView* pDepthStencilView, GLWRClearFlag flags, float depth = 1.0f,
