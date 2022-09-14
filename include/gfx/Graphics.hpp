@@ -146,17 +146,17 @@ struct GLWRResourceData {
 
 struct GLWRShaderResourceViewDesc {
     GLenum format;
-    GLenum target;
+    GLWRShaderResourceViewType type;
 };
 
 struct GLWRRenderTargetViewDesc {
     GLenum internalFormat;
-    GLenum dimensions;
+    GLWRRenderTargetViewType type;
 };
 
 struct GLWRDepthStencilViewDesc {
     GLenum internalFormat;
-    GLenum dimensions;
+    GLWRDepthStencilViewType type;
 };
 
 struct GLWRRenderBufferDesc {

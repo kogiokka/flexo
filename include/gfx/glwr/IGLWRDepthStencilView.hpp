@@ -4,6 +4,13 @@
 #include "gfx/glwr/IGLWRBase.hpp"
 #include "gfx/glwr/IGLWRResource.hpp"
 
+typedef enum {
+    GLWRDepthStencilViewType_RenderBuffer,
+    GLWRDepthStencilViewType_Texture1D,
+    GLWRDepthStencilViewType_Texture2D,
+    GLWRDepthStencilViewType_Texture3D,
+} GLWRDepthStencilViewType;
+
 class Graphics;
 
 class IGLWRDepthStencilView : public IGLWRBase
@@ -14,10 +21,9 @@ private:
     IGLWRDepthStencilView();
     ~IGLWRDepthStencilView() override;
 
-    GLenum m_dimensions;
     GLuint m_sampler;
     GLuint m_clearFrame;
-    GLWRResourceType m_resourceType;
+    GLWRDepthStencilViewType m_type;
 };
 
 #endif

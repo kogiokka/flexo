@@ -80,17 +80,17 @@ void Graphics::CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTarget
     *ppRenderTargetView = new IGLWRRenderTargetView();
 
     IGLWRRenderTargetView* self = *ppRenderTargetView;
-    self->m_dimensions = pDesc->dimensions;
-    self->m_resourceType = pResource->m_resourceType;
+    self->m_type = pDesc->type;
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, self->m_clearFrame);
 
-    switch (self->m_resourceType) {
-    case GLWRResourceType_Texture:
-        glTextureView(self->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, self->m_dimensions, self->m_id, 0);
+    // Bind attachments according to the type specified in the description struct.
+    switch (pDesc->type) {
+    case GLWRRenderTargetViewType_Texture2D:
+        glTextureView(self->m_id, GL_TEXTURE_2D, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, self->m_id, 0);
         break;
-    case GLWRResourceType_RenderBuffer:
+    case GLWRRenderTargetViewType_RenderBuffer:
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pResource->m_id);
         // Transferring the ownership.
         self->m_id = pResource->m_id;
@@ -110,17 +110,17 @@ void Graphics::CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencil
     *ppDepthStencilView = new IGLWRDepthStencilView();
 
     IGLWRDepthStencilView* self = *ppDepthStencilView;
-    self->m_dimensions = pDesc->dimensions;
-    self->m_resourceType = pResource->m_resourceType;
+    self->m_type = pDesc->type;
 
     glBindFramebuffer(GL_DRAW_FRAMEBUFFER, self->m_clearFrame);
 
-    switch (self->m_resourceType) {
-    case GLWRResourceType_Texture:
-        glTextureView(self->m_id, pDesc->dimensions, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, self->m_dimensions, self->m_id, 0);
+    // Bind attachments according to the type specified in the description struct.
+    switch (pDesc->type) {
+    case GLWRDepthStencilViewType_Texture2D:
+        glTextureView(self->m_id, GL_TEXTURE_2D, pResource->m_id, pDesc->internalFormat, 0, 1, 0, 1);
+        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, self->m_id, 0);
         break;
-    case GLWRResourceType_RenderBuffer:
+    case GLWRDepthStencilViewType_RenderBuffer:
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pResource->m_id);
         // Transferring the ownership.
         self->m_id = pResource->m_id;
@@ -191,7 +191,7 @@ void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData 
 {
     *ppTexture2D = new IGLWRTexture2D();
     IGLWRTexture2D* texture = *ppTexture2D;
-    texture->m_resourceType = GLWRResourceType_Texture;
+    texture->m_type = GLWRResourceType_Texture2D;
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture->m_id); // Bind the new texture to the context so we can modify it.
@@ -204,7 +204,7 @@ void Graphics::CreateRenderBuffer(const GLWRRenderBufferDesc* pDesc, IGLWRRender
 {
     *ppRenderBuffer = new IGLWRRenderBuffer();
     IGLWRRenderBuffer* rbo = *ppRenderBuffer;
-    rbo->m_resourceType = GLWRResourceType_RenderBuffer;
+    rbo->m_type = GLWRResourceType_RenderBuffer;
 
     glBindRenderbuffer(GL_RENDERBUFFER, rbo->m_id);
     glRenderbufferStorage(GL_RENDERBUFFER, pDesc->internalFormat, pDesc->width, pDesc->height);
@@ -214,10 +214,10 @@ void Graphics::CreateShaderResourceView(IGLWRResource* pResource, GLWRShaderReso
                                         IGLWRShaderResourceView** ppResourceView)
 {
     *ppResourceView = new IGLWRShaderResourceView();
-    IGLWRShaderResourceView* view = *ppResourceView;
+    IGLWRShaderResourceView* self = *ppResourceView;
+    self->m_type = pDesc->type;
 
-    glTextureView(view->m_id, pDesc->target, pResource->m_id, pDesc->format, 0, 1, 0, 1);
-    view->m_target = pDesc->target;
+    glTextureView(self->m_id, pDesc->type, pResource->m_id, pDesc->format, 0, 1, 0, 1);
 }
 
 void Graphics::CreateSampler(GLWRSamplerDesc const* pDesc, IGLWRSampler** ppSampler)
@@ -369,12 +369,11 @@ void Graphics::SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* co
         GLenum const attachment = GL_COLOR_ATTACHMENT0 + i;
         buffers[i] = attachment;
 
-        switch (pRenderTargetView[i]->m_resourceType) {
-        case GLWRResourceType_Texture:
-            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, pRenderTargetView[i]->m_dimensions,
-                                   pRenderTargetView[i]->m_id, mipmapLevel);
+        switch (pRenderTargetView[i]->m_type) {
+        case GLWRRenderTargetViewType_Texture2D:
+            glFramebufferTexture2D(GL_FRAMEBUFFER, attachment, GL_TEXTURE_2D, pRenderTargetView[i]->m_id, mipmapLevel);
             break;
-        case GLWRResourceType_RenderBuffer:
+        case GLWRRenderTargetViewType_RenderBuffer:
             glFramebufferRenderbuffer(GL_FRAMEBUFFER, attachment, GL_RENDERBUFFER, pRenderTargetView[i]->m_id);
             break;
         default:
@@ -385,14 +384,13 @@ void Graphics::SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* co
     free(buffers);
 
     // Attach depth-stencil buffer
-    switch (pDepthStencilView->m_resourceType) {
-    case GLWRResourceType_Texture:
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, pDepthStencilView->m_dimensions,
-                               pDepthStencilView->m_id, mipmapLevel);
+    switch (pDepthStencilView->m_type) {
+    case GLWRDepthStencilViewType_Texture2D:
+        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, pDepthStencilView->m_id,
+                               mipmapLevel);
         break;
-    case GLWRResourceType_RenderBuffer:
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
-                                  pDepthStencilView->m_id);
+    case GLWRDepthStencilViewType_RenderBuffer:
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pDepthStencilView->m_id);
         break;
     default:
         break;
@@ -449,7 +447,7 @@ void Graphics::SetShaderResources(unsigned int startUnit, unsigned int numTextur
 {
     for (unsigned int i = 0; i < numTextures; i++) {
         glActiveTexture(GL_TEXTURE0 + startUnit + i);
-        glBindTexture(ppResourceViews[i]->m_target, ppResourceViews[i]->m_id);
+        glBindTexture(ppResourceViews[i]->m_type, ppResourceViews[i]->m_id);
     }
 }
 
@@ -552,8 +550,8 @@ void Graphics::ClearDepthStencilView(IGLWRDepthStencilView* pDepthStencilView, G
 
 void Graphics::GenerateMips(IGLWRShaderResourceView* pShaderResourceView)
 {
-    glBindTexture(pShaderResourceView->m_target, pShaderResourceView->m_id);
-    glGenerateMipmap(pShaderResourceView->m_target);
+    glBindTexture(pShaderResourceView->m_type, pShaderResourceView->m_id);
+    glGenerateMipmap(pShaderResourceView->m_type);
 }
 
 glm::mat4 Graphics::GetViewProjectionMatrix() const
@@ -665,7 +663,7 @@ void Graphics::CreateShaderResourceViewFromFile(Graphics* pContext, char const* 
 
     GLWRShaderResourceViewDesc viewDesc;
     viewDesc.format = GL_RGBA32F;
-    viewDesc.target = GL_TEXTURE_2D;
+    viewDesc.type = GLWRShaderResourceViewType_Texture2D;
 
     pContext->CreateTexture2D(&texDesc, &resData, &texture);
     pContext->CreateShaderResourceView(texture.Get(), &viewDesc, ppResourceView);

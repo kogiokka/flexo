@@ -3,6 +3,13 @@
 
 #include "gfx/glwr/IGLWRBase.hpp"
 
+typedef enum {
+    GLWRShaderResourceViewType_Buffer,
+    GLWRShaderResourceViewType_Texture1D = GL_TEXTURE_1D,
+    GLWRShaderResourceViewType_Texture2D = GL_TEXTURE_2D,
+    GLWRShaderResourceViewType_Texture3D = GL_TEXTURE_3D,
+} GLWRShaderResourceViewType;
+
 class Graphics;
 
 class IGLWRShaderResourceView : public IGLWRBase
@@ -13,7 +20,7 @@ private:
     IGLWRShaderResourceView();
     ~IGLWRShaderResourceView() override;
 
-    GLenum m_target;
+    GLWRShaderResourceViewType m_type;
 };
 
 #endif

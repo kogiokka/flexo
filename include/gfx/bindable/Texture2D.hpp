@@ -47,7 +47,7 @@ namespace Bind
         m_gfx->CreateTexture2D(&desc, &data, &texture);
 
         GLWRShaderResourceViewDesc viewDesc;
-        viewDesc.target = GL_TEXTURE_2D;
+        viewDesc.type = GLWRShaderResourceViewType_Texture2D;
         viewDesc.format = GL_RGBA32F;
         m_gfx->CreateShaderResourceView(texture.Get(), &viewDesc, &m_resource);
         m_gfx->GenerateMips(m_resource.Get());

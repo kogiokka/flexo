@@ -5,7 +5,9 @@
 
 typedef enum {
     GLWRResourceType_Buffer,
-    GLWRResourceType_Texture,
+    GLWRResourceType_Texture1D,
+    GLWRResourceType_Texture2D,
+    GLWRResourceType_Texture3D,
     GLWRResourceType_RenderBuffer,
 } GLWRResourceType;
 
@@ -19,7 +21,7 @@ protected:
     IGLWRResource();
     virtual ~IGLWRResource() override;
 
-    GLWRResourceType m_resourceType;
+    GLWRResourceType m_type;
 };
 
 #endif

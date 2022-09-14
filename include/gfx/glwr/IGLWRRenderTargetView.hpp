@@ -4,6 +4,13 @@
 #include "gfx/glwr/IGLWRBase.hpp"
 #include "gfx/glwr/IGLWRResource.hpp"
 
+typedef enum {
+    GLWRRenderTargetViewType_RenderBuffer,
+    GLWRRenderTargetViewType_Texture1D,
+    GLWRRenderTargetViewType_Texture2D,
+    GLWRRenderTargetViewType_Texture3D,
+} GLWRRenderTargetViewType;
+
 class Graphics;
 
 class IGLWRRenderTargetView : public IGLWRBase
@@ -14,10 +21,9 @@ private:
     IGLWRRenderTargetView();
     ~IGLWRRenderTargetView() override;
 
-    GLenum m_dimensions;
     GLuint m_sampler;
     GLuint m_clearFrame;
-    GLWRResourceType m_resourceType;
+    GLWRRenderTargetViewType m_type;
 };
 
 #endif
