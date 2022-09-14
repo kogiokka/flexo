@@ -5,6 +5,8 @@
 
 typedef enum {
     GLWRResourceType_Buffer,
+    GLWRResourceType_IndexBuffer,
+    GLWRResourceType_UniformBuffer,
     GLWRResourceType_Texture1D,
     GLWRResourceType_Texture2D,
     GLWRResourceType_Texture3D,

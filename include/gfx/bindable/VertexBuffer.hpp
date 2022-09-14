@@ -1,6 +1,7 @@
 #ifndef VERTEXBUFFER_H
 #define VERTEXBUFFER_H
 
+#include <cstring>
 #include <vector>
 
 #include "Vertex.hpp"
@@ -42,7 +43,7 @@ namespace Bind
         GLWRBufferDesc desc;
         GLWRResourceData data;
 
-        desc.target = GL_ARRAY_BUFFER;
+        desc.type = GLWRResourceType_Buffer;
         desc.usage = GL_DYNAMIC_DRAW;
         desc.byteWidth = sizeof(T) * vertices.size();
         desc.stride = m_stride;
@@ -54,9 +55,10 @@ namespace Bind
     template <typename T>
     void VertexBuffer::Update(std::vector<T> const& vertices)
     {
-        GLWRResourceData data;
-        data.mem = vertices.data();
-        m_gfx->UpdateBuffer(GL_ARRAY_BUFFER, 0, vertices.size() * sizeof(T), &data, m_buffer.Get());
+        GLWRMappedSubresource mem;
+        m_gfx->Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);
+        std::memcpy(mem.data, vertices.data(), vertices.size() * sizeof(T));
+        m_gfx->Unmap(m_buffer.Get());
     }
 }
 

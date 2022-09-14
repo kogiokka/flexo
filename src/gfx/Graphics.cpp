@@ -51,7 +51,7 @@ Graphics::Graphics(int width, int height)
     CreateInputLayout(inputs.data(), inputs.size(), m_ctx.vert.Get(), &m_ctx.inputLayout);
 
     GLWRBufferDesc bufferDesc;
-    bufferDesc.target = GL_ARRAY_BUFFER;
+    bufferDesc.type = GLWRResourceType_Buffer;
     bufferDesc.usage = GL_STATIC_DRAW;
     bufferDesc.byteWidth = 4 * sizeof(float) * 6;
     bufferDesc.stride = 4 * sizeof(float);
@@ -180,10 +180,26 @@ void Graphics::CreateFragmentShader(char const* source, IGLWRFragmentShader** pp
 void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const* initialData, IGLWRBuffer** ppBuffer)
 {
     *ppBuffer = new IGLWRBuffer();
-    IGLWRBuffer& buffer = **ppBuffer;
+    IGLWRBuffer* self = *ppBuffer;
+    self->m_type = pDesc->type;
 
-    glBindBuffer(pDesc->target, buffer.m_id);
-    glBufferData(pDesc->target, pDesc->byteWidth, initialData->mem, pDesc->usage);
+    switch (pDesc->type) {
+    case GLWRResourceType_Buffer:
+        glBindBuffer(GL_ARRAY_BUFFER, self->m_id);
+        glBufferData(GL_ARRAY_BUFFER, pDesc->byteWidth, initialData->mem, pDesc->usage);
+        break;
+    case GLWRResourceType_IndexBuffer:
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, self->m_id);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, pDesc->byteWidth, initialData->mem, pDesc->usage);
+        break;
+    case GLWRResourceType_UniformBuffer:
+        glBindBuffer(GL_UNIFORM_BUFFER, self->m_id);
+        glBufferData(GL_UNIFORM_BUFFER, pDesc->byteWidth, initialData->mem, pDesc->usage);
+        break;
+    default:
+        Logger::error("Graphics::CreateBuffer currently does not support this resource type.");
+        break;
+    }
 }
 
 void Graphics::CreateTexture2D(GLWRTexture2DDesc const* pDesc, GLWRResourceData const* pInitialData,
@@ -390,7 +406,8 @@ void Graphics::SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* co
                                mipmapLevel);
         break;
     case GLWRDepthStencilViewType_RenderBuffer:
-        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pDepthStencilView->m_id);
+        glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER,
+                                  pDepthStencilView->m_id);
         break;
     default:
         break;
@@ -569,11 +586,51 @@ Camera& Graphics::GetCamera()
     return m_camera;
 }
 
-void Graphics::UpdateBuffer(GLenum target, GLintptr offset, GLsizei byteWidth, GLWRResourceData const* data,
-                            IGLWRBuffer* pBuffer)
+void Graphics::Map(IGLWRResource* pResource, GLWRMapPermission permission, GLWRMappedSubresource* pMappedResource)
 {
-    glBindBuffer(target, pBuffer->m_id);
-    glBufferSubData(target, offset, byteWidth, data->mem);
+    GLuint const id = pResource->m_id;
+
+    switch (pResource->m_type) {
+    case GLWRResourceType_Buffer:
+        glBindBuffer(GL_ARRAY_BUFFER, id);
+        pMappedResource->data = glMapBuffer(GL_ARRAY_BUFFER, permission);
+        break;
+    case GLWRResourceType_IndexBuffer:
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+        pMappedResource->data = glMapBuffer(GL_ELEMENT_ARRAY_BUFFER, permission);
+        break;
+    case GLWRResourceType_UniformBuffer:
+        glBindBuffer(GL_UNIFORM_BUFFER, id);
+        pMappedResource->data = glMapBuffer(GL_UNIFORM_BUFFER, permission);
+        break;
+    default:
+        Logger::error("Graphics::Map currently does not support this resource type.");
+        pMappedResource->data = nullptr;
+        break;
+    }
+}
+
+void Graphics::Unmap(IGLWRResource* pResource)
+{
+    GLuint const id = pResource->m_id;
+
+    switch (pResource->m_type) {
+    case GLWRResourceType_Buffer:
+        glBindBuffer(GL_ARRAY_BUFFER, id);
+        glUnmapBuffer(GL_ARRAY_BUFFER);
+        break;
+    case GLWRResourceType_IndexBuffer:
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, id);
+        glUnmapBuffer(GL_ELEMENT_ARRAY_BUFFER);
+        break;
+    case GLWRResourceType_UniformBuffer:
+        glBindBuffer(GL_UNIFORM_BUFFER, id);
+        glUnmapBuffer(GL_UNIFORM_BUFFER);
+        break;
+    default:
+        Logger::error("Graphics::Unmap currently does not support this resource type.");
+        break;
+    }
 }
 
 bool Graphics::IsShaderCompiled(GLuint const shaderObject)

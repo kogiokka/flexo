@@ -2,18 +2,17 @@
 #define I_GLWR_BUFFER_H
 
 #include "gfx/glwr/IGLWRBase.hpp"
+#include "gfx/glwr/IGLWRResource.hpp"
 
 class Graphics;
 
-class IGLWRBuffer : public IGLWRBase
+class IGLWRBuffer : public IGLWRResource
 {
     friend Graphics;
 
 private:
     IGLWRBuffer();
     ~IGLWRBuffer() override;
-
-    GLuint m_id;
 };
 
 #endif

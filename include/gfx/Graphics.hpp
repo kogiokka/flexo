@@ -94,6 +94,12 @@ typedef enum {
     GLWRClearFlag_Stencil = GL_STENCIL_BUFFER_BIT,
 } GLWRClearFlag;
 
+typedef enum {
+    GLWRMapPermission_ReadOnly = GL_READ_ONLY,
+    GLWRMapPermission_WriteOnly = GL_WRITE_ONLY,
+    GLWRMapPermission_ReadWrite = GL_READ_WRITE,
+} GLWRMapPermission;
+
 struct GLWRInputElementDesc {
     GLchar const* semanticName;
     GLWRFormat format;
@@ -104,10 +110,10 @@ struct GLWRInputElementDesc {
 };
 
 struct GLWRBufferDesc {
-    GLenum target;
     GLenum usage;
     GLsizeiptr byteWidth;
     GLsizei stride;
+    GLWRResourceType type;
 };
 
 struct GLWRTexture2DDesc {
@@ -142,6 +148,10 @@ struct GLWRBlendDesc {
 
 struct GLWRResourceData {
     void const* mem;
+};
+
+struct GLWRMappedSubresource {
+    void* data;
 };
 
 struct GLWRShaderResourceViewDesc {
@@ -254,8 +264,8 @@ public:
     glm::vec3 GetCameraPosition() const;
     Camera& GetCamera();
 
-    void UpdateBuffer(GLenum target, GLintptr offset, GLsizei byteWidth, GLWRResourceData const* data,
-                      IGLWRBuffer* pBuffer);
+    void Map(IGLWRResource* pResource, GLWRMapPermission permission, GLWRMappedSubresource* pMappedResource);
+    void Unmap(IGLWRResource* pResource);
 
     void Draw(GLsizei vertexCount);
     void DrawIndexed(GLsizei indexCount);

@@ -9,7 +9,7 @@ namespace Bind
         GLWRBufferDesc desc;
         GLWRResourceData data;
 
-        desc.target = GL_ELEMENT_ARRAY_BUFFER;
+        desc.type = GLWRResourceType_IndexBuffer;
         desc.usage = GL_STATIC_DRAW;
         desc.byteWidth = sizeof(unsigned int) * m_count;
         desc.stride = sizeof(unsigned int);

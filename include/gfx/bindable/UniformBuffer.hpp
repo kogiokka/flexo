@@ -31,7 +31,7 @@ namespace Bind
         GLWRBufferDesc desc;
         GLWRResourceData data;
 
-        desc.target = GL_UNIFORM_BUFFER;
+        desc.type = GLWRResourceType_UniformBuffer;
         desc.usage = GL_STREAM_DRAW;
         desc.byteWidth = sizeof(T);
         desc.stride = sizeof(T);
@@ -48,7 +48,7 @@ namespace Bind
         GLWRBufferDesc desc;
         GLWRResourceData data;
 
-        desc.target = GL_UNIFORM_BUFFER;
+        desc.type = GLWRResourceType_UniformBuffer;
         desc.usage = GL_STREAM_DRAW;
         desc.byteWidth = sizeof(T);
         desc.stride = sizeof(T);
@@ -71,9 +71,10 @@ namespace Bind
     template <typename T>
     void UniformBuffer<T>::Update(T const& uniformBlock)
     {
-        GLWRResourceData data;
-        data.mem = &uniformBlock;
-        m_gfx->UpdateBuffer(GL_UNIFORM_BUFFER, 0, sizeof(T), &data, m_buffer.Get());
+        GLWRMappedSubresource mem;
+        m_gfx->Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);
+        std::memcpy(mem.data, &uniformBlock, sizeof(T));
+        m_gfx->Unmap(m_buffer.Get());
     }
 }
 
