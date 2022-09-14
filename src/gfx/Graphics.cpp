@@ -474,11 +474,6 @@ void Graphics::SetSamplers(unsigned int startUnit, unsigned int numSamplers, IGL
     }
 }
 
-void Graphics::SetShaderProgram(GLuint program)
-{
-    glUseProgram(program);
-}
-
 void Graphics::SetRasterizerState(IGLWRRasterizerState const* state)
 {
     state->Execute();

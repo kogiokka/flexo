@@ -249,7 +249,6 @@ public:
     void SetShaderResources(unsigned int startUnit, unsigned int numTextures,
                             IGLWRShaderResourceView* const* ppResourceViews);
     void SetSamplers(unsigned int startUnit, unsigned int numSamplers, IGLWRSampler* const* ppSamplers);
-    void SetShaderProgram(GLuint program);
     void SetRasterizerState(IGLWRRasterizerState const* state);
     void SetBlendState(IGLWRBlendState const* state);
     void SetViewports(unsigned int numViewports, GLWRViewport* viewports);
