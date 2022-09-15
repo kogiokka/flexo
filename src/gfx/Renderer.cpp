@@ -65,32 +65,3 @@ std::vector<Task>& Renderer::GetTasks()
 {
     return m_tasks;
 }
-
-BoundingBox Renderer::CalculateBoundingBox(std::vector<glm::vec3> positions)
-{
-    const float FLOAT_MAX = std::numeric_limits<float>::max();
-    glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };
-    glm::vec3 max = { -FLOAT_MAX, -FLOAT_MAX, -FLOAT_MAX };
-
-    for (auto const& p : positions) {
-        if (p.x > max.x) {
-            max.x = p.x;
-        }
-        if (p.y > max.y) {
-            max.y = p.y;
-        }
-        if (p.z > max.z) {
-            max.z = p.z;
-        }
-        if (p.x < min.x) {
-            min.x = p.x;
-        }
-        if (p.y < min.y) {
-            min.y = p.y;
-        }
-        if (p.z < min.z) {
-            min.z = p.z;
-        }
-    }
-    return { max, min };
-}

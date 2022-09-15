@@ -25,17 +25,19 @@ WatermarkingProject::WatermarkingProject()
     : m_isLatticeReady(false)
     , m_frame {}
     , m_panel {}
-    , m_dataset(nullptr)
 {
     Bind(EVT_IMPORT_MODEL, &WatermarkingProject::OnMenuImportModel, this);
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
+    Bind(EVT_ADD_PLATE_50_BY_50, &WatermarkingProject::OnMenuAddPlate, this);
+    Bind(EVT_ADD_PLATE_100_BY_100, &WatermarkingProject::OnMenuAddPlate, this);
+    Bind(EVT_ADD_PLATE_200_BY_200, &WatermarkingProject::OnMenuAddPlate, this);
 }
 
 void WatermarkingProject::CreateProject()
 {
-    assert(m_dataset);
+    assert(world.theDataset);
 
-    SelfOrganizingMap::Get(*this).CreateProcedure(*LatticeList::Get(*this).GetCurrent(), m_dataset);
+    SelfOrganizingMap::Get(*this).CreateProcedure(*LatticeList::Get(*this).GetCurrent(), world.theDataset);
 
     world.isWatermarked = false;
 }
@@ -157,11 +159,6 @@ void WatermarkingProject::UpdateLatticeEdges() const
     world.latticeEdges = indices;
 }
 
-void WatermarkingProject::SetDataset(std::shared_ptr<InputData> dataset)
-{
-    m_dataset = dataset;
-}
-
 void WatermarkingProject::SetFrame(wxFrame* frame)
 {
     m_frame = frame;
@@ -226,11 +223,11 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
         world.theModel = std::make_shared<Mesh>(stlImp.ReadFile(path.ToStdString()));
     }
 
-    SetDataset(std::make_shared<InputData>(world.theModel->positions));
+    world.theDataset = std::make_shared<InputData>(world.theModel->positions);
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), *world.theModel));
 
     auto& renderer = Renderer::Get(*this);
-    renderer.SetCameraView(renderer.CalculateBoundingBox(world.theModel->positions));
+    renderer.SetCameraView(world.theDataset->GetBoundingBox());
 }
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
@@ -297,11 +294,38 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
     Logger::info("%lu voxels will be rendered.", pos.size());
 
-    SetDataset(std::make_shared<InputData>(pos));
+    world.theDataset = std::make_shared<InputData>(pos);
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
 
     auto& renderer = Renderer::Get(*this);
-    renderer.SetCameraView(renderer.CalculateBoundingBox(pos));
+    renderer.SetCameraView(world.theDataset->GetBoundingBox());
+}
+
+void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
+{
+    if (!world.theDataset) {
+        wxMessageDialog dialog(&ProjectWindow::Get(*this), "Please import a model from the File menu first.", "Error",
+                               wxCENTER | wxICON_ERROR);
+        dialog.ShowModal();
+        return;
+    }
+
+    int width = event.GetInt();
+    int height = event.GetInt();
+
+    auto box = world.theDataset->GetBoundingBox();
+    float xDiff = (box.max.x - box.min.x) / static_cast<float>(width);
+    float yDiff = (box.max.y - box.min.y) / static_cast<float>(height);
+
+    std::vector<glm::vec3> pos;
+
+    for (int i = 0; i < width; i++) {
+        for (int j = 0; j < height; j++) {
+            pos.emplace_back(box.min.x + i * xDiff, box.min.y + j * yDiff, box.min.z);
+        }
+    }
+
+    world.theDataset->Insert(pos);
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
@@ -316,7 +340,7 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
     Mesh mesh;
 
     // FIXME Better way to get the bounding box
-    BoundingBox bbox = Renderer::Get(*this).CalculateBoundingBox(world.theModel->positions);
+    BoundingBox const bbox = world.theDataset->GetBoundingBox();
 
     if (event.GetId() == EVT_ADD_UV_SPHERE) {
         auto const& [max, min] = bbox;
@@ -408,11 +432,11 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
     }
 
     world.theModel = std::make_shared<Mesh>(mesh);
-    SetDataset(std::make_shared<InputData>(mesh.positions));
+    world.theDataset = std::make_shared<InputData>(mesh.positions);
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), mesh));
 
     auto& renderer = Renderer::Get(*this);
-    renderer.SetCameraView(renderer.CalculateBoundingBox(mesh.positions));
+    renderer.SetCameraView(world.theDataset->GetBoundingBox());
 }
 
 void WatermarkingProject::OnMenuImportModel(wxCommandEvent& event)

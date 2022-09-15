@@ -18,6 +18,11 @@ enum LatticeFlags_ : int {
     LatticeFlags_CyclicY = 1 << 2,
 };
 
+typedef enum {
+    LatticeInitState_Plane,
+    LatticeInitState_Random,
+} LatticeInitState;
+
 struct Lattice {
     int mWidth;
     int mHeight;
@@ -41,7 +46,9 @@ public:
     explicit LatticeList(WatermarkingProject& project);
     LatticeList(LatticeList const&) = delete;
     LatticeList& operator=(LatticeList const&) = delete;
-    void Add(int width, int height, LatticeFlags flags);
+    void Add(int width, int height, LatticeFlags flags,
+             BoundingBox box = { { -100.0f, -100.0f, -100.0f }, { 100.0f, 100.0f, 100.0f } },
+             LatticeInitState initState = LatticeInitState_Random);
     void SetCurrent(unsigned int index);
     std::shared_ptr<Lattice> GetCurrent() const;
 

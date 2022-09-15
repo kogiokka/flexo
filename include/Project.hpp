@@ -29,7 +29,6 @@ public:
     void StopProject();
     void BuildLatticeMesh() const;
     void DoWatermark();
-    void SetDataset(std::shared_ptr<InputData> dataset);
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
@@ -39,6 +38,7 @@ private:
     void UpdateLatticeEdges() const;
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
+    void OnMenuAddPlate(wxCommandEvent& event);
     void OnMenuAddModel(wxCommandEvent& event);
     void OnMenuImportModel(wxCommandEvent& event);
     void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
@@ -47,7 +47,6 @@ private:
     bool m_isLatticeReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-    std::shared_ptr<InputData> m_dataset;
 
     // FIXME This is a temporary solution
     std::vector<std::shared_ptr<DrawableBase>> m_drawables; // Store the shared pointers until the project exits.

@@ -21,7 +21,6 @@ public:
     void Render(Graphics& gfx);
     void Accept(Task task);
     void SetCameraView(BoundingBox const& box);
-    BoundingBox CalculateBoundingBox(std::vector<glm::vec3> positions);
     std::vector<Task>& GetTasks();
 
 private:

@@ -27,14 +27,29 @@ LatticeList::LatticeList(WatermarkingProject& project)
 {
 }
 
-void LatticeList::Add(int width, int height, LatticeFlags flags)
+void LatticeList::Add(int width, int height, LatticeFlags flags, BoundingBox box, LatticeInitState initState)
 {
-    RandomRealNumber<float> rng(-100.0f, 100.0f);
-
     auto lattice = std::make_shared<Lattice>();
-    for (int j = 0; j < height; ++j) {
-        for (int i = 0; i < width; ++i) {
-            lattice->mNeurons.emplace_back(i, j, rng.vector(3));
+
+    if (initState == LatticeInitState_Random) {
+        RandomRealNumber<float> xRng(box.min.x, box.max.x);
+        RandomRealNumber<float> yRng(box.min.y, box.max.y);
+        RandomRealNumber<float> zRng(box.min.z, box.max.z);
+
+        for (int j = 0; j < height; ++j) {
+            for (int i = 0; i < width; ++i) {
+                lattice->mNeurons.emplace_back(i, j,
+                                               std::vector<float> { xRng.scalar(), yRng.scalar(), zRng.scalar() });
+            }
+        }
+    } else if (initState == LatticeInitState_Plane) {
+        float dx = (box.max.x - box.min.x) / static_cast<float>(width);
+        float dy = (box.max.y - box.min.y) / static_cast<float>(height);
+
+        for (int j = 0; j < height; ++j) {
+            for (int i = 0; i < width; ++i) {
+                lattice->mNeurons.emplace_back(i, j, std::vector<float> { i * dx, j * dy, box.max.z });
+            }
         }
     }
 

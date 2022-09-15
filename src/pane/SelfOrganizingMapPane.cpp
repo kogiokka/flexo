@@ -37,6 +37,7 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
     auto* heightText = group->AddInputText("Lattice Height");
     auto* cyclicX = group->AddCheckBoxWithHeading("Cyclic", "X", false);
     auto* cyclicY = group->AddCheckBox("Y", false);
+    auto* initState = group->AddCheckBoxWithHeading("Initialize Method", "Plane", false);
     auto* addBtn = group->AddButton("Add");
 
     wxIntegerValidator<int> validDimen;
@@ -56,7 +57,7 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
         m_project.UpdateLatticeGraphics();
     });
 
-    addBtn->Bind(wxEVT_BUTTON, [this, widthText, heightText, cyclicX, cyclicY, comboBox](wxCommandEvent&) {
+    addBtn->Bind(wxEVT_BUTTON, [this, widthText, heightText, cyclicX, cyclicY, comboBox, initState](wxCommandEvent&) {
         long width;
         long height;
         LatticeFlags flags = LatticeFlags_CyclicNone;
@@ -67,7 +68,11 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
             flags |= LatticeFlags_CyclicY;
         }
         if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
-            LatticeList::Get(m_project).Add(width, height, flags);
+            LatticeInitState state = LatticeInitState_Random;
+            if (initState->IsChecked()) {
+                state = LatticeInitState_Plane;
+            }
+            LatticeList::Get(m_project).Add(width, height, flags, world.theDataset->GetBoundingBox(), state);
             comboBox->Append(wxString::Format("Lattice.00%zu", LatticeList::Get(m_project).size()),
                              wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
         }

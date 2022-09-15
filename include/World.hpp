@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 
+#include "InputData.hpp"
 #include "Lattice.hpp"
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
@@ -21,6 +22,7 @@ struct World {
     Mesh latticeMesh;
     Mesh neurons;
     std::shared_ptr<Mesh> theModel;
+    std::shared_ptr<InputData> theDataset;
     std::vector<unsigned int> latticeEdges;
     glm::vec3 lightPos;
     bool isWatermarked;
