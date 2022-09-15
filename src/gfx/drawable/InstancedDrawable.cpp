@@ -10,7 +10,7 @@ void InstancedDrawable::Bind(Graphics& gfx) const
 {
     if (m_isVisible) {
         for (auto& b : m_binds) {
-            b->Bind();
+            b->Bind(gfx);
         }
         gfx.DrawInstanced(m_instance->GetCount(), m_perInstanceData->GetCount());
     }

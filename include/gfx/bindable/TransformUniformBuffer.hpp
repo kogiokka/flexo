@@ -23,7 +23,7 @@ namespace Bind
 
     public:
         TransformUniformBuffer(Graphics& gfx, glm::mat4 transform);
-        void Bind() override;
+        void Bind(Graphics& gfx) override;
     };
 }
 

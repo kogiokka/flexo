@@ -19,7 +19,7 @@ namespace Bind
     public:
         IndexBuffer(Graphics& gfx, std::vector<unsigned int> const& indices);
         ~IndexBuffer() override;
-        void Bind() override;
+        void Bind(Graphics& gfx) override;
         GLuint GetCount() const;
     };
 }

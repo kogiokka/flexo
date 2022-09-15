@@ -18,7 +18,7 @@ namespace Bind
     public:
         VertexShaderProgram(Graphics& gfx, std::string const& filename);
         ~VertexShaderProgram() override;
-        virtual void Bind() override;
+        virtual void Bind(Graphics& gfx) override;
 
     private:
         GLWRPtr<IGLWRVertexShader> m_program;

@@ -17,7 +17,7 @@ namespace Bind
         InputLayout(Graphics& gfx, std::vector<GLWRInputElementDesc> const& inputElementDesc,
                     VertexShaderProgram* programWithInputSignature);
         ~InputLayout() override;
-        void Bind() override;
+        void Bind(Graphics& gfx) override;
     };
 }
 

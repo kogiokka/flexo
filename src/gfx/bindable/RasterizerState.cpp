@@ -3,17 +3,16 @@
 namespace Bind
 {
     RasterizerState::RasterizerState(Graphics& gfx, GLWRRasterizerDesc const& desc)
-        : Bindable(gfx)
     {
-        m_gfx->CreateRasterizerState(&desc, &m_state);
+        gfx.CreateRasterizerState(&desc, &m_state);
     }
 
     RasterizerState::~RasterizerState()
     {
     }
 
-    void RasterizerState::Bind()
+    void RasterizerState::Bind(Graphics& gfx)
     {
-        m_gfx->SetRasterizerState(m_state.Get());
+        gfx.SetRasterizerState(m_state.Get());
     }
 }

@@ -19,7 +19,7 @@ namespace Bind
         template <typename T>
         Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLuint unit);
         ~Texture2D() override;
-        void Bind() override;
+        void Bind(Graphics& gfx) override;
 
     protected:
         template <typename T>
@@ -28,8 +28,7 @@ namespace Bind
 
     template <typename T>
     Texture2D::Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLuint unit)
-        : Bindable(gfx)
-        , m_unit(unit)
+        : m_unit(unit)
     {
         GLWRTexture2DDesc desc;
         GLWRResourceData data;
@@ -44,13 +43,13 @@ namespace Bind
         data.mem = textureData;
 
         GLWRPtr<IGLWRTexture2D> texture;
-        m_gfx->CreateTexture2D(&desc, &data, &texture);
+        gfx.CreateTexture2D(&desc, &data, &texture);
 
         GLWRShaderResourceViewDesc viewDesc;
         viewDesc.type = GLWRShaderResourceViewType_Texture2D;
         viewDesc.format = GL_RGBA32F;
-        m_gfx->CreateShaderResourceView(texture.Get(), &viewDesc, &m_resource);
-        m_gfx->GenerateMips(m_resource.Get());
+        gfx.CreateShaderResourceView(texture.Get(), &viewDesc, &m_resource);
+        gfx.GenerateMips(m_resource.Get());
     }
 
     template <>

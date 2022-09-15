@@ -11,7 +11,7 @@ namespace Bind
     public:
         Sampler(Graphics& gfx, GLWRSamplerDesc samplerDesc, GLuint textureUnit);
         ~Sampler() override;
-        void Bind() override;
+        void Bind(Graphics& gfx) override;
 
     protected:
         GLuint m_unit;

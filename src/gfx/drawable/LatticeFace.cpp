@@ -89,7 +89,7 @@ void LatticeFace::Update(Graphics& gfx)
                 v.texcoord = world.latticeMesh.textureCoords[i];
                 vertices[i] = v;
             }
-            vb->Update(vertices);
+            vb->Update(gfx, vertices);
         }
     }
 
@@ -98,7 +98,7 @@ void LatticeFace::Update(Graphics& gfx)
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (ub != nullptr) {
-            ub->Update(m_ub);
+            ub->Update(gfx, m_ub);
         }
     }
 }

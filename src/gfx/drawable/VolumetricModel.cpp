@@ -91,7 +91,7 @@ void VolumetricModel::Update(Graphics& gfx)
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
         if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
-            vb->Update(world.theModel->textureCoords);
+            vb->Update(gfx, world.theModel->textureCoords);
         }
     }
 
@@ -100,7 +100,7 @@ void VolumetricModel::Update(Graphics& gfx)
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (ub != nullptr) {
-            ub->Update(m_ub);
+            ub->Update(gfx, m_ub);
         }
     }
 }

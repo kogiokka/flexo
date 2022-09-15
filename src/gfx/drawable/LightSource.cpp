@@ -56,14 +56,14 @@ LightSource::~LightSource()
 {
 }
 
-void LightSource::Update(Graphics&)
+void LightSource::Update(Graphics& gfx)
 {
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
         Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
         if (ub != nullptr) {
-            ub->Update(m_ub);
+            ub->Update(gfx, m_ub);
         }
     }
 }

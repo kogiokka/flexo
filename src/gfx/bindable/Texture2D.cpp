@@ -5,8 +5,7 @@
 namespace Bind
 {
     Texture2D::Texture2D(Graphics& gfx, char const* filename, GLuint unit)
-        : Bindable(gfx)
-        , m_unit(unit)
+        : m_unit(unit)
     {
         Graphics::CreateShaderResourceViewFromFile(&gfx, filename, &m_resource);
     }
@@ -15,9 +14,9 @@ namespace Bind
     {
     }
 
-    void Texture2D::Bind()
+    void Texture2D::Bind(Graphics& gfx)
     {
-        m_gfx->SetShaderResources(m_unit, 1, &m_resource);
+        gfx.SetShaderResources(m_unit, 1, &m_resource);
     }
 
     template <>

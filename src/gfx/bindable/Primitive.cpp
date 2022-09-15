@@ -2,9 +2,8 @@
 
 namespace Bind
 {
-    Primitive::Primitive(Graphics& gfx, GLenum mode)
-        : Bindable(gfx)
-        , m_mode(mode)
+    Primitive::Primitive(Graphics&, GLenum mode)
+        : m_mode(mode)
     {
     }
 
@@ -12,8 +11,8 @@ namespace Bind
     {
     }
 
-    void Primitive::Bind()
+    void Primitive::Bind(Graphics& gfx)
     {
-        m_gfx->SetPrimitive(m_mode);
+        gfx.SetPrimitive(m_mode);
     }
 }

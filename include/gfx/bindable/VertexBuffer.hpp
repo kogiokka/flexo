@@ -22,9 +22,9 @@ namespace Bind
         template <typename T>
         VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, unsigned int startAttrib = 0);
         ~VertexBuffer();
-        void Bind() override;
+        void Bind(Graphics& gfx) override;
         template <typename T>
-        void Update(std::vector<T> const& vertices);
+        void Update(Graphics& gfx, std::vector<T> const& vertices);
         unsigned int GetStartAttrib() const;
         unsigned int GetCount() const;
 
@@ -35,8 +35,7 @@ namespace Bind
 
     template <typename T>
     VertexBuffer::VertexBuffer(Graphics& gfx, std::vector<T> const& vertices, unsigned int startAttrib)
-        : Bindable(gfx)
-        , m_startAttrib(startAttrib)
+        : m_startAttrib(startAttrib)
         , m_stride(sizeof(T))
         , m_count(vertices.size())
     {
@@ -49,16 +48,16 @@ namespace Bind
         desc.stride = m_stride;
         data.mem = vertices.data();
 
-        m_gfx->CreateBuffer(&desc, &data, &m_buffer);
+        gfx.CreateBuffer(&desc, &data, &m_buffer);
     }
 
     template <typename T>
-    void VertexBuffer::Update(std::vector<T> const& vertices)
+    void VertexBuffer::Update(Graphics& gfx, std::vector<T> const& vertices)
     {
         GLWRMappedSubresource mem;
-        m_gfx->Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);
+        gfx.Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);
         std::memcpy(mem.data, vertices.data(), vertices.size() * sizeof(T));
-        m_gfx->Unmap(m_buffer.Get());
+        gfx.Unmap(m_buffer.Get());
     }
 }
 

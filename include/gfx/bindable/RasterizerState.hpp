@@ -18,7 +18,7 @@ namespace Bind
     public:
         RasterizerState(Graphics& gfx, GLWRRasterizerDesc const& desc);
         ~RasterizerState() override;
-        void Bind() override;
+        void Bind(Graphics& gfx) override;
     };
 }
 

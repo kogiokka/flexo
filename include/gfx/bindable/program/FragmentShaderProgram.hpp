@@ -15,7 +15,7 @@ namespace Bind
     public:
         FragmentShaderProgram(Graphics& gfx, std::string const& filename);
         ~FragmentShaderProgram() override;
-        virtual void Bind() override;
+        virtual void Bind(Graphics& gfx) override;
 
     private:
         GLWRPtr<IGLWRFragmentShader> m_program;

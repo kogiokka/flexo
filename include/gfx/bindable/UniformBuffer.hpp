@@ -19,14 +19,13 @@ namespace Bind
         UniformBuffer(Graphics& gfx, GLuint bindingIndex = 0);
         UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex = 0);
         ~UniformBuffer();
-        void Bind() override;
-        void Update(T const& uniformBlock);
+        void Bind(Graphics& gfx) override;
+        void Update(Graphics& gfx, T const& uniformBlock);
     };
 
     template <typename T>
     UniformBuffer<T>::UniformBuffer(Graphics& gfx, GLuint bindingIndex)
-        : Bindable(gfx)
-        , m_bindingIndex(bindingIndex)
+        : m_bindingIndex(bindingIndex)
     {
         GLWRBufferDesc desc;
         GLWRResourceData data;
@@ -37,13 +36,12 @@ namespace Bind
         desc.stride = sizeof(T);
 
         data.mem = nullptr;
-        m_gfx->CreateBuffer(&desc, &data, &m_buffer);
+        gfx.CreateBuffer(&desc, &data, &m_buffer);
     }
 
     template <typename T>
     UniformBuffer<T>::UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex)
-        : Bindable(gfx)
-        , m_bindingIndex(bindingIndex)
+        : m_bindingIndex(bindingIndex)
     {
         GLWRBufferDesc desc;
         GLWRResourceData data;
@@ -54,7 +52,7 @@ namespace Bind
         desc.stride = sizeof(T);
 
         data.mem = &uniformBlock;
-        m_gfx->CreateBuffer(&desc, &data, &m_buffer);
+        gfx.CreateBuffer(&desc, &data, &m_buffer);
     }
 
     template <typename T>
@@ -63,18 +61,18 @@ namespace Bind
     }
 
     template <typename T>
-    void UniformBuffer<T>::Bind()
+    void UniformBuffer<T>::Bind(Graphics& gfx)
     {
-        m_gfx->SetUniformBuffers(m_bindingIndex, 1, &m_buffer);
+        gfx.SetUniformBuffers(m_bindingIndex, 1, &m_buffer);
     }
 
     template <typename T>
-    void UniformBuffer<T>::Update(T const& uniformBlock)
+    void UniformBuffer<T>::Update(Graphics& gfx, T const& uniformBlock)
     {
         GLWRMappedSubresource mem;
-        m_gfx->Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);
+        gfx.Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);
         std::memcpy(mem.data, &uniformBlock, sizeof(T));
-        m_gfx->Unmap(m_buffer.Get());
+        gfx.Unmap(m_buffer.Get());
     }
 }
 

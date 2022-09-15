@@ -9,7 +9,7 @@ void Task::AddBindable(std::shared_ptr<Bind::Bindable> bind)
 void Task::Execute(Graphics& gfx) const
 {
     for (auto const& bind : mBinds) {
-        bind->Bind();
+        bind->Bind(gfx);
     }
 
     mDrawable->Update(gfx);

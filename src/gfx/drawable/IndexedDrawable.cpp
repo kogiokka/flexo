@@ -9,7 +9,7 @@ void IndexedDrawable::Bind(Graphics& gfx) const
 {
     if (m_isVisible) {
         for (auto& b : m_binds) {
-            b->Bind();
+            b->Bind(gfx);
         }
         gfx.DrawIndexed(m_buffer->GetCount());
     }

@@ -3,18 +3,17 @@
 namespace Bind
 {
     Sampler::Sampler(Graphics& gfx, GLWRSamplerDesc samplerDesc, GLuint textureUnit)
-        : Bindable(gfx)
-        , m_unit(textureUnit)
+        : m_unit(textureUnit)
     {
-        m_gfx->CreateSampler(&samplerDesc, &m_sampler);
+        gfx.CreateSampler(&samplerDesc, &m_sampler);
     }
 
     Sampler::~Sampler()
     {
     }
 
-    void Sampler::Bind()
+    void Sampler::Bind(Graphics& gfx)
     {
-        m_gfx->SetSamplers(m_unit, 1, &m_sampler);
+        gfx.SetSamplers(m_unit, 1, &m_sampler);
     }
 }

@@ -3,19 +3,18 @@
 namespace Bind
 {
     VertexShaderProgram::VertexShaderProgram(Graphics& gfx, std::string const& filename)
-        : Bindable(gfx)
     {
 
         std::string source = Graphics::SlurpShaderSource(filename);
-        m_gfx->CreateVertexShader(source.data(), &m_program);
+        gfx.CreateVertexShader(source.data(), &m_program);
     }
 
     VertexShaderProgram::~VertexShaderProgram()
     {
     }
 
-    void VertexShaderProgram::Bind()
+    void VertexShaderProgram::Bind(Graphics& gfx)
     {
-        m_gfx->SetVertexShader(m_program.Get());
+        gfx.SetVertexShader(m_program.Get());
     }
 }
