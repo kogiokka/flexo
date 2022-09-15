@@ -6,14 +6,11 @@
 #include "Project.hpp"
 #include "common/Logger.hpp"
 #include "gfx/Graphics.hpp"
-#include "pane/SceneViewportPane.hpp"
 
 // Register factory: Graphics
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> SharedPtr<Graphics> {
-        auto const& viewport = SceneViewportPane::Get(project);
-        wxSize const size = viewport.GetClientSize() * viewport.GetContentScaleFactor();
-        return std::make_shared<Graphics>(size.x, size.y);
+    [](WatermarkingProject&) -> SharedPtr<Graphics> {
+        return std::make_shared<Graphics>();
     }
 };
 
@@ -27,8 +24,7 @@ Graphics const& Graphics::Get(WatermarkingProject const& project)
     return Get(const_cast<WatermarkingProject&>(project));
 }
 
-Graphics::Graphics(int width, int height)
-    : m_camera(width, height)
+Graphics::Graphics()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind the Default framebuffer
 
@@ -577,6 +573,11 @@ glm::mat4 Graphics::GetViewProjectionMatrix() const
 glm::vec3 Graphics::GetCameraPosition() const
 {
     return m_camera.position;
+}
+
+void Graphics::SetCamera(Camera camera)
+{
+    m_camera = camera;
 }
 
 Camera& Graphics::GetCamera()

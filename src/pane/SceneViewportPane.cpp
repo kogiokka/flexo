@@ -132,6 +132,8 @@ void SceneViewportPane::InitGL()
               << "Graphics:     " << glGetString(GL_RENDERER) << "\n"
               << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
               << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
+
+    gfx.SetCamera(CreateDefaultCamera());
 }
 
 void SceneViewportPane::OnSize(wxSizeEvent&)
@@ -229,8 +231,7 @@ void SceneViewportPane::OnUpdateUI(wxUpdateUIEvent&)
 
 void SceneViewportPane::ResetCamera()
 {
-    wxSize const size = GetClientSize() * GetContentScaleFactor();
-    Graphics::Get(m_project).GetCamera() = Camera(size.x, size.y);
+    Graphics::Get(m_project).SetCamera(CreateDefaultCamera());
 }
 
 // Restrict both phi and theta within 0 and 360 degrees.
@@ -285,4 +286,23 @@ void SceneViewportPane::InitFrame(Graphics& gfx)
     }
 
     gfx.SetRenderTargets(1, &m_rtv, m_dsv.Get());
+}
+
+Camera SceneViewportPane::CreateDefaultCamera() const
+{
+    Camera camera;
+
+    camera.position = { 0.0f, 0.0f, 0.0f };
+    camera.basis = { };
+    camera.worldUp = { 0.0f, 1.0f, 0.0f };
+    camera.center = { 0.0f, 0.0f, 0.0f };
+    camera.coord = { 500.0f, 1.25f, 0.0f };
+    camera.volumeSize = 300.0f;
+    camera.zoom = 1.0f;
+
+    wxSize const size = GetClientSize() * GetContentScaleFactor();
+    camera.aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
+    camera.UpdateViewCoord();
+
+    return camera;
 }

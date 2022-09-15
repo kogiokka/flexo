@@ -1,8 +1,6 @@
 #ifndef CAMERA_H
 #define CAMERA_H
 
-#include <tuple>
-
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -28,8 +26,6 @@ struct Camera {
     float volumeSize;
     float zoom;
 
-    explicit Camera(float aspectRatio);
-    explicit Camera(int width, int height);
     void UpdateViewCoord();
     glm::mat4 ViewProjectionMatrix() const;
     glm::mat4 ViewMatrix() const;

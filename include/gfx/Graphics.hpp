@@ -218,7 +218,7 @@ public:
     static Graphics& Get(WatermarkingProject& project);
     static Graphics const& Get(WatermarkingProject const& project);
 
-    Graphics(int width, int height);
+    Graphics();
     ~Graphics();
     void CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTargetViewDesc const* pDesc,
                                 IGLWRRenderTargetView** ppRenderTargetView);
@@ -261,6 +261,7 @@ public:
 
     glm::mat4 GetViewProjectionMatrix() const;
     glm::vec3 GetCameraPosition() const;
+    void SetCamera(Camera camera);
     Camera& GetCamera();
 
     void Map(IGLWRResource* pResource, GLWRMapPermission permission, GLWRMappedSubresource* pMappedResource);

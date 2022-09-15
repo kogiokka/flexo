@@ -37,6 +37,8 @@ public:
     void ResetCamera();
 
 private:
+    Camera CreateDefaultCamera() const;
+
     WatermarkingProject& m_project;
     GLWRPtr<IGLWRRenderTargetView> m_rtv;
     GLWRPtr<IGLWRDepthStencilView> m_dsv;

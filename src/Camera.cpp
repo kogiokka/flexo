@@ -6,32 +6,6 @@ float static constexpr MATH_PI = 3.14159265f;
 float static constexpr MATH_PI_DIV_4 = MATH_PI * 0.25f;
 float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
 
-Camera::Camera(float aspectRatio)
-    : position {}
-    , worldUp { 0.0f, 1.0f, 0.0f }
-    , center { 0.0f, 0.0f, 0.0f }
-    , basis {}
-    , coord { 500.0f, 1.25f, 0.0f }
-    , aspectRatio(aspectRatio)
-    , volumeSize(300.0f)
-    , zoom(1.0f)
-{
-    UpdateViewCoord();
-}
-
-Camera::Camera(int width, int height)
-    : position {}
-    , worldUp { 0.0f, 1.0f, 0.0f }
-    , center { 0.0f, 0.0f, 0.0f }
-    , basis {}
-    , coord { 500.0f, 0.9f, 0.0f }
-    , aspectRatio(static_cast<float>(width) / static_cast<float>(height))
-    , volumeSize(300.0f)
-    , zoom(1.0f)
-{
-    UpdateViewCoord();
-}
-
 void Camera::UpdateViewCoord()
 {
     using namespace glm;
