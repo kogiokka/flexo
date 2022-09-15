@@ -16,7 +16,7 @@ namespace Bind
 
     void Texture2D::Bind(Graphics& gfx)
     {
-        gfx.SetShaderResources(m_unit, 1, &m_resource);
+        gfx.SetShaderResources(m_unit, 1, m_resource.GetAddressOf());
     }
 
     template <>

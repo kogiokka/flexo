@@ -63,7 +63,7 @@ namespace Bind
     template <typename T>
     void UniformBuffer<T>::Bind(Graphics& gfx)
     {
-        gfx.SetUniformBuffers(m_bindingIndex, 1, &m_buffer);
+        gfx.SetUniformBuffers(m_bindingIndex, 1, m_buffer.GetAddressOf());
     }
 
     template <typename T>

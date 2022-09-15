@@ -14,6 +14,6 @@ namespace Bind
 
     void Sampler::Bind(Graphics& gfx)
     {
-        gfx.SetSamplers(m_unit, 1, &m_sampler);
+        gfx.SetSamplers(m_unit, 1, m_sampler.GetAddressOf());
     }
 }

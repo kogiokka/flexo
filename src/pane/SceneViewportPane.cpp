@@ -285,7 +285,7 @@ void SceneViewportPane::InitFrame(Graphics& gfx)
         buffer->Release();
     }
 
-    gfx.SetRenderTargets(1, &m_rtv, m_dsv.Get());
+    gfx.SetRenderTargets(1, m_rtv.GetAddressOf(), m_dsv.Get());
 }
 
 Camera SceneViewportPane::CreateDefaultCamera() const

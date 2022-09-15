@@ -11,6 +11,7 @@ class GLWRPtr
 public:
     GLWRPtr();
     ~GLWRPtr();
+    T* const* GetAddressOf() const;
     T** operator&();
     T* Get();
 };
@@ -30,8 +31,18 @@ GLWRPtr<T>::~GLWRPtr()
 }
 
 template <typename T>
+T* const* GLWRPtr<T>::GetAddressOf() const
+{
+    return &m_ptr;
+}
+
+template <typename T>
 T** GLWRPtr<T>::operator&()
 {
+    if (m_ptr) {
+        static_cast<IGLWRBase*>(m_ptr)->Release();
+    }
+
     return &m_ptr;
 }
 

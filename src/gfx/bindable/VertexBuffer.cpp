@@ -10,7 +10,7 @@ namespace Bind
     void VertexBuffer::Bind(Graphics& gfx)
     {
         unsigned int const offset = 0;
-        gfx.SetVertexBuffers(m_startAttrib, 1, &m_buffer, &m_stride, &offset);
+        gfx.SetVertexBuffers(m_startAttrib, 1, m_buffer.GetAddressOf(), &m_stride, &offset);
     }
 
     unsigned int VertexBuffer::GetStartAttrib() const
