@@ -30,7 +30,7 @@ bool SelfOrganizingMapPane::IsProjectStopped() const
 
 void SelfOrganizingMapPane::PopulateLatticePanel()
 {
-    auto* group = AddGroup("Lattice", 6);
+    auto* group = AddGroup("Lattice", 7);
 
     auto* comboBox = group->AddBitmapComboBox("Instances");
     auto* widthText = group->AddInputText("Lattice Width");
