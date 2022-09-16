@@ -1,0 +1,21 @@
+# Set the default behavior, in case people don't have core.autocrlf set.
+* text=auto
+
+# Explicitly declare text files you want to always be normalized and converted
+# to native line endings on checkout.
+*.c text
+*.cpp text
+*.h text
+*.hpp text
+
+# GLSL shader extensions
+*.vert text eol=lf
+*.tesc text eol=lf
+*.tese text eol=lf
+*.geom text eol=lf
+*.frag text eol=lf
+*.comp text eol=lf
+
+# Denote all files that are truly binary and should not be modified.
+*.png binary
+*.jpg binary
