@@ -41,6 +41,20 @@ wxCheckBox* ControlsGroup::AddCheckBox(wxString const& label, bool value)
     return AddCheckBoxWithHeading("", label, value);
 }
 
+wxRadioButton* ControlsGroup::AddRadioButtonWithHeading(wxString const& heading, wxString const& label, bool value)
+{
+    wxRadioButton* radiobtn = new wxRadioButton(GetPane(), wxID_ANY, label);
+    radiobtn->SetValue(value);
+    radiobtn->SetFont(m_widgetFont);
+    AppendControl(heading, radiobtn);
+    return radiobtn;
+}
+
+wxRadioButton* ControlsGroup::AddRadioButton(wxString const& label, bool value)
+{
+    return AddRadioButtonWithHeading("", label, value);
+}
+
 wxButton* ControlsGroup::AddButton(wxString const& label)
 {
     wxButton* button = new wxButton(GetPane(), wxID_ANY, label);

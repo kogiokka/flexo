@@ -8,6 +8,7 @@
 #include <wx/control.h>
 #include <wx/event.h>
 #include <wx/font.h>
+#include <wx/radiobut.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
 #include <wx/string.h>
@@ -52,6 +53,8 @@ public:
     wxButton* AddButton(wxString const& label);
     wxCheckBox* AddCheckBoxWithHeading(wxString const& heading, wxString const& label, bool value);
     wxCheckBox* AddCheckBox(wxString const& label, bool value);
+    wxRadioButton* AddRadioButtonWithHeading(wxString const& heading, wxString const& label, bool value);
+    wxRadioButton* AddRadioButton(wxString const& label, bool value);
     wxTextCtrl* AddInputText(wxString const& label, wxString const& value = wxEmptyString);
     wxTextCtrl* AddReadOnlyText(wxString const& label, wxString const& value = wxEmptyString);
     wxSlider* AddSliderFloat(wxString const& label, float value, float minValue, float maxValue);
