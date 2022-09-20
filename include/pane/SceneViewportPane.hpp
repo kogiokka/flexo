@@ -32,6 +32,7 @@ public:
     void OnMouseWheel(wxMouseEvent& event);
     void OnMouseLeftDown(wxMouseEvent& event);
     void OnMouseRightDown(wxMouseEvent& event);
+    void OnMenuScreenshot(wxCommandEvent& event);
     void OnUpdateUI(wxUpdateUIEvent& event);
     void InitGL();
     void ResetCamera();

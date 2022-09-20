@@ -13,6 +13,7 @@ wxDEFINE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_ADD_PLATE_50_BY_50, wxCommandEvent);
 wxDEFINE_EVENT(EVT_ADD_PLATE_100_BY_100, wxCommandEvent);
 wxDEFINE_EVENT(EVT_ADD_PLATE_200_BY_200, wxCommandEvent);
+wxDEFINE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
 enum {
@@ -78,12 +79,16 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     plateMenu->Append(EVT_ADD_PLATE_100_BY_100, "Add 100x100 Plate");
     plateMenu->Append(EVT_ADD_PLATE_200_BY_200, "Add 200x200 Plate");
 
+    auto screenshotMenu = new wxMenu;
+    screenshotMenu->Append(EVT_SCREENSHOT, "Screenshot");
+
     auto menubar = new wxMenuBar;
     menubar->Append(fileMenu, "&File");
     menubar->Append(m_viewMenu, "&View");
     menubar->Append(cameraMenu, "&Camera");
     menubar->Append(modelsMenu, "&Add");
     menubar->Append(plateMenu, "&Plate");
+    menubar->Append(screenshotMenu, "&Screeenshot");
 
     this->SetMenuBar(menubar);
 
@@ -115,6 +120,14 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
             m_project.ProcessEvent(event);
         },
         EVT_ADD_PLATE_200_BY_200);
+
+    Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent&) {
+            wxCommandEvent event(EVT_SCREENSHOT);
+            m_project.ProcessEvent(event);
+        },
+        EVT_SCREENSHOT);
 
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SOM);

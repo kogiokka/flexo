@@ -1,8 +1,12 @@
 #include <cassert>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <ctime>
 #include <fstream>
 #include <iostream>
+
+#include <stb_image_write.h>
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
@@ -66,6 +70,8 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
     m_context = std::make_unique<wxGLContext>(this, nullptr, &attrs);
+
+    m_project.Bind(EVT_SCREENSHOT, &SceneViewportPane::OnMenuScreenshot, this);
 }
 
 SceneViewportPane::~SceneViewportPane()
@@ -224,6 +230,20 @@ void SceneViewportPane::OnMouseMotion(wxMouseEvent& event)
     }
 }
 
+void SceneViewportPane::OnMenuScreenshot(wxCommandEvent&)
+{
+    wxSize const size = GetClientSize() * GetContentScaleFactor();
+    std::vector<uint8_t> image(size.x * size.y * 4);
+
+    glReadPixels(0, 0, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
+
+    std::time_t now = time(0);
+    char buf[80];
+    struct tm timeStruct = *localtime(&now);
+    std::strftime(buf, sizeof(buf), "Screenshot_%Y%m%d_%H%M%S.png", &timeStruct);
+    stbi_write_png(buf, size.x, size.y, 4, image.data(), size.x * 4);
+}
+
 void SceneViewportPane::OnUpdateUI(wxUpdateUIEvent&)
 {
     Refresh();
@@ -293,7 +313,7 @@ Camera SceneViewportPane::CreateDefaultCamera() const
     Camera camera;
 
     camera.position = { 0.0f, 0.0f, 0.0f };
-    camera.basis = { };
+    camera.basis = {};
     camera.worldUp = { 0.0f, 1.0f, 0.0f };
     camera.center = { 0.0f, 0.0f, 0.0f };
     camera.coord = { 500.0f, 1.25f, 0.0f };
