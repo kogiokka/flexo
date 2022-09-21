@@ -3,8 +3,8 @@
 
 #include "gfx/drawable/LightSource.hpp"
 
-#include "Task.hpp"
 #include "World.hpp"
+#include "gfx/Task.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"

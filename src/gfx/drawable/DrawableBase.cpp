@@ -1,7 +1,7 @@
 #include <utility>
 
-#include "Task.hpp"
 #include "gfx/Renderer.hpp"
+#include "gfx/Task.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 
 void DrawableBase::AddTask(Task task)

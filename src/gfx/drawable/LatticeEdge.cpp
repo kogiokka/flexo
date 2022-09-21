@@ -2,9 +2,9 @@
 #include <utility>
 #include <vector>
 
-#include "Task.hpp"
 #include "Vertex.hpp"
 #include "World.hpp"
+#include "gfx/Task.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"

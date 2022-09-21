@@ -7,8 +7,8 @@
 
 #include <glm/glm.hpp>
 
-#include "Task.hpp"
 #include "gfx/Graphics.hpp"
+#include "gfx/Task.hpp"
 #include "gfx/bindable/Bindable.hpp"
 
 class Renderer;

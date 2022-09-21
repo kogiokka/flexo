@@ -74,7 +74,7 @@ PRIVATE
     "src/gfx/glwr/IGLWRRenderTargetView.cpp"
     "src/gfx/glwr/IGLWRDepthStencilView.cpp"
     "src/gfx/glwr/IGLWRShaderResourceView.cpp"
-    "src/Task.cpp"
+    "src/gfx/Task.cpp"
     "src/gfx/bindable/Primitive.cpp"
     "src/gfx/bindable/InputLayout.cpp"
     "src/gfx/bindable/IndexBuffer.cpp"
