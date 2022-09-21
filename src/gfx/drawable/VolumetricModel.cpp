@@ -21,8 +21,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     std::vector<GLWRInputElementDesc> inputs = {
         { "position", GLWRFormat_Float3, 0, offsetof(VertexPN, position), GLWRInputClassification_PerVertex, 0 },
         { "normal", GLWRFormat_Float3, 0, offsetof(VertexPN, normal), GLWRInputClassification_PerVertex, 0 },
-        { "textureCoord", GLWRFormat_Float2, 2, 0, GLWRInputClassification_PerInstance, 1 },
-        { "translation", GLWRFormat_Float3, 3, 0, GLWRInputClassification_PerInstance, 1 },
+        { "textureCoord", GLWRFormat_Float2, 1, 0, GLWRInputClassification_PerInstance, 1 },
+        { "translation", GLWRFormat_Float3, 2, 0, GLWRInputClassification_PerInstance, 1 },
     };
 
     std::vector<VertexPN> vertices;
@@ -56,8 +56,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 2));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 3));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 1));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 2));
 
     Task draw;
     draw.mDrawable = this;
@@ -90,7 +90,7 @@ void VolumetricModel::Update(Graphics& gfx)
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-        if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
+        if ((vb != nullptr) && (vb->GetStartAttrib() == 1)) {
             vb->Update(gfx, world.theModel->textureCoords);
         }
     }
