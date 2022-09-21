@@ -238,10 +238,11 @@ void SceneViewportPane::OnMenuScreenshot(wxCommandEvent&)
     glReadPixels(0, 0, size.x, size.y, GL_RGBA, GL_UNSIGNED_BYTE, image.data());
 
     std::time_t now = time(0);
-    char buf[80];
+    char filename[80];
     struct tm timeStruct = *localtime(&now);
-    std::strftime(buf, sizeof(buf), "Screenshot_%Y%m%d_%H%M%S.png", &timeStruct);
-    stbi_write_png(buf, size.x, size.y, 4, image.data(), size.x * 4);
+    std::strftime(filename, sizeof(filename), "Screenshot_%Y%m%d_%H%M%S.png", &timeStruct);
+    stbi_write_png(filename, size.x, size.y, 4, image.data(), size.x * 4);
+    ProjectWindow::Get(m_project).SetStatusText(wxString::Format("The screenshot was saved as \"%s\"", filename));
 }
 
 void SceneViewportPane::OnUpdateUI(wxUpdateUIEvent&)
