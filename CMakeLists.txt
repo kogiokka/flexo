@@ -50,7 +50,6 @@ PRIVATE
     "src/Camera.cpp"
     "src/Lattice.cpp"
     "src/Mesh.cpp"
-    "src/Node.cpp"
     "src/Util.cpp"
     "src/World.cpp"
     "src/InputData.cpp"

@@ -92,7 +92,7 @@ void SelfOrganizingMap::Train(Lattice& lattice, std::shared_ptr<InputData> datas
         m_rate = m_initialRate * expf(-progress * learningRateDecayCoef);
 
         glm::ivec2 const index = FindBMU(lattice, input);
-        Node const& bmu = neurons[index.x + index.y * width];
+        auto const& bmu = neurons[index.x + index.y * width];
         UpdateNeighborhood(lattice, input, bmu, m_neighborhood);
 
         if (lattice.mFlags & LatticeFlags_CyclicX) {
@@ -120,7 +120,7 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice const& lattice, glm::vec3 const& i
     for (int i = 0; i < lattice.mWidth; i++) {
         for (int j = 0; j < lattice.mHeight; j++) {
             float sum = 0;
-            for (int k = 0; k < lattice.mNeurons.front().Dimension(); k++) {
+            for (int k = 0; k < lattice.mNeurons.front().Dimensions(); k++) {
                 float const diff = input[k] - lattice.mNeurons[i + j * lattice.mWidth][k];
                 sum += (diff * diff);
             }
@@ -133,7 +133,7 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice const& lattice, glm::vec3 const& i
     return idx;
 }
 
-void SelfOrganizingMap::UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node const& bmu, float radius)
+void SelfOrganizingMap::UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node<3> const& bmu, float radius)
 {
     auto& neurons = lattice.mNeurons;
     LatticeFlags const flags = lattice.mFlags;
@@ -165,9 +165,9 @@ void SelfOrganizingMap::UpdateNeighborhood(Lattice& lattice, glm::vec3 input, No
             float const dy = bmu.Y() - y;
             float const distToBmuSqr = dx * dx + dy * dy;
             if (distToBmuSqr < radSqr) {
-                Node& node = neurons[modX + modY * width];
+                auto& node = neurons[modX + modY * width];
                 float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
-                for (int k = 0; k < node.Dimension(); ++k) {
+                for (int k = 0; k < node.Dimensions(); ++k) {
                     node[k] += m_rate * influence * (input[k] - node[k]);
                 }
             }

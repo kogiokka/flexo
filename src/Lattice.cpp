@@ -1,3 +1,4 @@
+#include <array>
 #include <cassert>
 #include <memory>
 #include <utility>
@@ -39,7 +40,7 @@ void LatticeList::Add(int width, int height, LatticeFlags flags, BoundingBox box
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
                 lattice->mNeurons.emplace_back(i, j,
-                                               std::vector<float> { xRng.scalar(), yRng.scalar(), zRng.scalar() });
+                                               std::array<float, 3> { xRng.scalar(), yRng.scalar(), zRng.scalar() });
             }
         }
     } else if (initState == LatticeInitState_Plane) {
@@ -48,7 +49,7 @@ void LatticeList::Add(int width, int height, LatticeFlags flags, BoundingBox box
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                lattice->mNeurons.emplace_back(i, j, std::vector<float> { i * dx, j * dy, box.max.z });
+                lattice->mNeurons.emplace_back(i, j, std::array<float, 3> { i * dx, j * dy, box.max.z });
             }
         }
     }

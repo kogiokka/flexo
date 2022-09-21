@@ -27,7 +27,7 @@ struct Lattice {
     int mWidth;
     int mHeight;
     LatticeFlags mFlags;
-    std::vector<Node> mNeurons;
+    std::vector<Node<3>> mNeurons;
 };
 
 class WatermarkingProject;
