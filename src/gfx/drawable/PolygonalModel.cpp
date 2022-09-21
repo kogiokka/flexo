@@ -54,8 +54,8 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(
-        gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_None }));
+    draw.AddBindable(
+        std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
 
     AddTask(draw);
 }

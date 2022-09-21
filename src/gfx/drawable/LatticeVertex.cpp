@@ -58,8 +58,8 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     draw.AddBindable(
         std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(
-        gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back }));
+    draw.AddBindable(
+        std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
 
     AddTask(draw);
 }
