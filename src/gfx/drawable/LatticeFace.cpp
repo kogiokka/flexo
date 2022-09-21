@@ -62,8 +62,8 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, "res/images/mandala.png", 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
-    draw.AddBindable(std::make_shared<Bind::RasterizerState>(
-        gfx, GLWRRasterizerDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_None }));
+    draw.AddBindable(
+        std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
 
     AddTask(draw);
 }

@@ -55,7 +55,7 @@ Graphics::Graphics()
     quadVertsData.mem = quadVerts;
     CreateBuffer(&bufferDesc, &quadVertsData, &m_ctx.buffer);
 
-    GLWRRasterizerDesc rasDesc { GLWRFillMode::GLWRFillMode_Solid, GLWRCullMode::GLWRCullMode_Back };
+    GLWRRasterizerDesc rasDesc { GLWRFillMode_Solid, GLWRCullMode_Back };
     CreateRasterizerState(&rasDesc, &m_ctx.state);
 
     glGenFramebuffers(1, &m_ctx.frame); // The framebuffer that will become our render target.
@@ -276,24 +276,24 @@ void Graphics::CreateRasterizerState(GLWRRasterizerDesc const* pDesc, IGLWRRaste
     IGLWRRasterizerState* self = *ppState;
 
     switch (pDesc->cullMode) {
-    case GLWRCullMode::GLWRCullMode_Back:
+    case GLWRCullMode_Back:
         self->Add(std::bind(glEnable, GL_CULL_FACE));
         self->Add(std::bind(glCullFace, GL_BACK));
         break;
-    case GLWRCullMode::GLWRCullMode_Front:
+    case GLWRCullMode_Front:
         self->Add(std::bind(glEnable, GL_CULL_FACE));
         self->Add(std::bind(glCullFace, GL_FRONT));
         break;
-    case GLWRCullMode::GLWRCullMode_None:
+    case GLWRCullMode_None:
         self->Add(std::bind(glDisable, GL_CULL_FACE));
         break;
     };
 
     switch (pDesc->fillMode) {
-    case GLWRFillMode::GLWRFillMode_WireFrame:
+    case GLWRFillMode_WireFrame:
         self->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_LINE));
         break;
-    case GLWRFillMode::GLWRFillMode_Solid:
+    case GLWRFillMode_Solid:
         self->Add(std::bind(glPolygonMode, GL_FRONT_AND_BACK, GL_FILL));
         break;
     }

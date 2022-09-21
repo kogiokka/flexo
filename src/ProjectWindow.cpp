@@ -1,5 +1,6 @@
 #include <filesystem>
 
+#include <wx/artprov.h>
 #include <wx/aui/framemanager.h>
 #include <wx/filedlg.h>
 #include <wx/menu.h>
@@ -79,8 +80,10 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     plateMenu->Append(EVT_ADD_PLATE_100_BY_100, "Add 100x100 Plate");
     plateMenu->Append(EVT_ADD_PLATE_200_BY_200, "Add 200x200 Plate");
 
-    auto screenshotMenu = new wxMenu;
-    screenshotMenu->Append(EVT_SCREENSHOT, "Screenshot");
+    auto* screenshotMenu = new wxMenu;
+    auto* itemScreenshotViewport = new wxMenuItem(screenshotMenu, EVT_SCREENSHOT, "Screenshot 3D Viewport", "");
+    itemScreenshotViewport->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE));
+    screenshotMenu->Append(itemScreenshotViewport);
 
     auto menubar = new wxMenuBar;
     menubar->Append(fileMenu, "&File");
