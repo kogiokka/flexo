@@ -93,7 +93,7 @@ private:
      * @param bmu     The Best Matching Unit
      * @param radius  Neighborhood radius
      */
-    void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node<3> const& bmu, float radius);
+    void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node<3, 2> const& bmu, float radius);
 
     WatermarkingProject& m_project;
 };

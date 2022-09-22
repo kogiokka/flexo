@@ -3,89 +3,58 @@
 
 #include <array>
 
-template <int S>
-class Node
-{
-    int m_x;
-    int m_y;
-    std::array<float, S> m_weights;
+template <int InDim, int OutDim>
+struct Node {
+    std::array<float, InDim> mWeights;
+    std::array<float, OutDim> mCoordinates;
 
-public:
-    Node(int x, int y, std::array<float, S> initWeights);
+    Node(std::array<float, InDim> weights, std::array<float, OutDim> coordinates);
     Node(Node const& other);
-    int X() const;
-    int Y() const;
     Node& operator=(Node const& other);
-    float& operator[](int index);
-    float operator[](int index) const;
-    int Dimensions() const;
-    std::array<float, S>& Weights();
-    std::array<float, S> const& Weights() const;
+
+    float X() const;
+    float Y() const;
+    float Z() const;
 };
 
-template <int S>
-Node<S>::Node(int x, int y, std::array<float, S> initWeights)
-    : m_x(x)
-    , m_y(y)
+template <int InDim, int OutDim>
+Node<InDim, OutDim>::Node(std::array<float, InDim> weights, std::array<float, OutDim> coordinates)
+    : mWeights(weights)
+    , mCoordinates(coordinates)
 {
-    m_weights = initWeights;
 }
 
-template <int S>
-Node<S>::Node(Node const& other)
+template <int InDim, int OutDim>
+Node<InDim, OutDim>::Node(Node const& other)
 {
-    m_x = other.m_x;
-    m_y = other.m_y;
-    m_weights = other.m_weights;
+    mWeights = other.mWeights;
+    mCoordinates = other.mCoordinates;
 }
 
-template <int S>
-Node<S>& Node<S>::operator=(Node<S> const& other)
+template <int InDim, int OutDim>
+Node<InDim, OutDim>& Node<InDim, OutDim>::operator=(Node<InDim, OutDim> const& other)
 {
-    m_weights = other.m_weights;
+    mWeights = other.mWeights;
+    mCoordinates = other.mCoordinates;
     return *this;
 }
 
-template <int S>
-int Node<S>::X() const
+template <int InDim, int OutDim>
+float Node<InDim, OutDim>::X() const
 {
-    return m_x;
+    return mCoordinates[0];
 }
 
-template <int S>
-int Node<S>::Y() const
+template <int InDim, int OutDim>
+float Node<InDim, OutDim>::Y() const
 {
-    return m_y;
+    return mCoordinates[1];
 }
 
-template <int S>
-float& Node<S>::operator[](int index)
+template <int InDim, int OutDim>
+float Node<InDim, OutDim>::Z() const
 {
-    return m_weights[index];
-}
-
-template <int S>
-float Node<S>::operator[](int index) const
-{
-    return m_weights[index];
-}
-
-template <int S>
-int Node<S>::Dimensions() const
-{
-    return S;
-}
-
-template <int S>
-std::array<float, S>& Node<S>::Weights()
-{
-    return m_weights;
-}
-
-template <int S>
-std::array<float, S> const& Node<S>::Weights() const
-{
-    return m_weights;
+    return mCoordinates[2];
 }
 
 #endif

@@ -30,6 +30,7 @@ LatticeList::LatticeList(WatermarkingProject& project)
 
 void LatticeList::Add(int width, int height, LatticeFlags flags, BoundingBox box, LatticeInitState initState)
 {
+    using std::array;
     auto lattice = std::make_shared<Lattice>();
 
     if (initState == LatticeInitState_Random) {
@@ -39,8 +40,8 @@ void LatticeList::Add(int width, int height, LatticeFlags flags, BoundingBox box
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                lattice->mNeurons.emplace_back(i, j,
-                                               std::array<float, 3> { xRng.scalar(), yRng.scalar(), zRng.scalar() });
+                lattice->mNeurons.emplace_back(array<float, 3> { xRng.scalar(), yRng.scalar(), zRng.scalar() },
+                                               array<float, 2> { static_cast<float>(i), static_cast<float>(j) });
             }
         }
     } else if (initState == LatticeInitState_Plane) {
@@ -49,7 +50,8 @@ void LatticeList::Add(int width, int height, LatticeFlags flags, BoundingBox box
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                lattice->mNeurons.emplace_back(i, j, std::array<float, 3> { i * dx, j * dy, box.max.z });
+                lattice->mNeurons.emplace_back(array<float, 3> { i * dx, j * dy, box.max.z },
+                                               array<float, 2> { static_cast<float>(i), static_cast<float>(j) });
             }
         }
     }
