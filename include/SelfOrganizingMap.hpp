@@ -37,7 +37,17 @@ public:
     ~SelfOrganizingMap();
     SelfOrganizingMap(SelfOrganizingMap const&) = delete;
     SelfOrganizingMap& operator=(SelfOrganizingMap const&) = delete;
+
+    /**
+     * Setup SOM thraining
+     *
+     * Set the hyperparameters for SOM and create the worker thread for training.
+     *
+     * @param lattice Lattice we are training
+     * @param dataset Dataset as the input space of SOM
+     */
     void CreateProcedure(Lattice& lattice, std::shared_ptr<InputData> dataset);
+
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
@@ -53,8 +63,36 @@ public:
     float GetLearningRate() const;
 
 private:
+    /**
+     * Main procedure for SOM training
+     *
+     * @param lattice Lattice we are training
+     * @param dataset Dataset as the input space of SOM
+     */
     void Train(Lattice& lattice, std::shared_ptr<InputData> dataset);
+
+    /**
+     * Find the Best Matching Unit
+     *
+     * Walk through the nodes and calculate the distance between the input vector and their weight vectors.
+     * The node having the smallest distance to the input vector is the BMU.
+     *
+     * @param lattice Lattice we are training
+     * @param input   Input vector
+     */
     glm::ivec2 FindBMU(Lattice const& lattice, glm::vec3 const& input) const;
+
+    /**
+     * Update the neighborhood of the BMU
+     *
+     * Walk through the nodes and find the nodes within BMU's neighborhood.
+     * The node having the smallest distance to the input vector is the BMU.
+     *
+     * @param lattice Lattice we are training.
+     * @param input   Input vector
+     * @param bmu     The Best Matching Unit
+     * @param radius  Neighborhood radius
+     */
     void UpdateNeighborhood(Lattice& lattice, glm::vec3 input, Node<3> const& bmu, float radius);
 
     WatermarkingProject& m_project;
