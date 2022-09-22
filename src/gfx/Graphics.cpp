@@ -89,7 +89,7 @@ void Graphics::CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTarget
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, pResource->m_id);
         // Transferring the ownership.
         self->m_id = pResource->m_id;
-        // The name zero is reserved by the GL and will be silently ignored.
+        // The name zero is reserved by the GL and will be silently ignored by glDelete*.
         pResource->m_id = 0;
         break;
     default:
@@ -118,7 +118,7 @@ void Graphics::CreateDepthStencilView(IGLWRResource* pResource, GLWRDepthStencil
         glFramebufferRenderbuffer(GL_DRAW_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_RENDERBUFFER, pResource->m_id);
         // Transferring the ownership.
         self->m_id = pResource->m_id;
-        // The name zero is reserved by the GL and will be silently ignored.
+        // The name zero is reserved by the GL and will be silently ignored by glDelete*.
         pResource->m_id = 0;
         break;
     default:
