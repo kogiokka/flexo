@@ -13,8 +13,6 @@ class Node
 public:
     Node(int x, int y, std::array<float, S> initWeights);
     Node(Node const& other);
-    int& X();
-    int& Y();
     int X() const;
     int Y() const;
     Node& operator=(Node const& other);
@@ -46,18 +44,6 @@ Node<S>& Node<S>::operator=(Node<S> const& other)
 {
     m_weights = other.m_weights;
     return *this;
-}
-
-template <int S>
-int& Node<S>::X()
-{
-    return m_x;
-}
-
-template <int S>
-int& Node<S>::Y()
-{
-    return m_y;
 }
 
 template <int S>
