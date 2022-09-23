@@ -52,7 +52,6 @@ PRIVATE
     "src/Mesh.cpp"
     "src/Util.cpp"
     "src/World.cpp"
-    "src/InputData.cpp"
     "src/VolumeData.cpp"
     "src/common/Logger.cpp"
     "src/assetlib/BaseImporter.cpp"

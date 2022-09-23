@@ -49,7 +49,7 @@ public:
      * @param dataset Dataset as the input space of SOM
      */
     template <int InDim, int OutDim>
-    void CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData> dataset);
+    void CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset);
 
     void ToggleTraining();
     bool IsDone() const;
@@ -73,7 +73,7 @@ private:
      * @param dataset Dataset as the input space of SOM
      */
     template <int InDim, int OutDim>
-    void Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData> dataset);
+    void Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset);
 
     /**
      * Find the Best Matching Unit
@@ -85,7 +85,7 @@ private:
      * @param input   Input vector
      */
     template <int InDim, int OutDim>
-    glm::ivec2 FindBMU(Lattice<InDim, OutDim> const& lattice, glm::vec3 const& input) const;
+    glm::ivec2 FindBMU(Lattice<InDim, OutDim> const& lattice, Vec<InDim> const& input) const;
 
     /**
      * Update the neighborhood of the BMU
@@ -99,14 +99,14 @@ private:
      * @param radius  Neighborhood radius
      */
     template <int InDim, int OutDim>
-    void UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, glm::vec3 input, Node<InDim, OutDim> const& bmu,
-                            float radius);
+    void UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<InDim> input,
+                            Node<InDim, OutDim> const& bmu, float radius);
 
     WatermarkingProject& m_project;
 };
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData> dataset)
+void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset)
 {
     {
         StopWorker();
@@ -123,14 +123,15 @@ void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::sh
     m_rate = m_initialRate;
     m_neighborhood = m_initialNeighborhood;
 
-    void (SelfOrganizingMap::*Train)(Lattice<InDim, OutDim>&, std::shared_ptr<InputData>) = &SelfOrganizingMap::Train;
+    void (SelfOrganizingMap::*Train)(Lattice<InDim, OutDim>&, std::shared_ptr<InputData<InDim>>)
+        = &SelfOrganizingMap::Train;
     m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
 
     Logger::info("Training worker created");
 }
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData> dataset)
+void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset)
 {
     auto& neurons = lattice.mNeurons;
     int const width = lattice.mWidth;
@@ -143,7 +144,7 @@ void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<I
             break;
         }
 
-        glm::vec3 const input = dataset->GetInput();
+        Vec<InDim> const input = dataset->GetInput();
         float const progress = static_cast<float>(m_iterations);
 
         float const remains = static_cast<float>(m_maxIterations - m_iterations);
@@ -176,7 +177,8 @@ void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<I
 }
 
 template <int InDim, int OutDim>
-glm::ivec2 SelfOrganizingMap::FindBMU(Lattice<InDim, OutDim> const& lattice, glm::vec3 const& input) const
+glm::ivec2 SelfOrganizingMap::FindBMU(Lattice<InDim, OutDim> const& lattice,
+                                      Vec<InDim> const& input) const
 {
     glm::ivec2 idx;
     float distMin = std::numeric_limits<float>::max();
@@ -197,7 +199,7 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice<InDim, OutDim> const& lattice, glm
 }
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, glm::vec3 input,
+void SelfOrganizingMap::UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<InDim> input,
                                            Node<InDim, OutDim> const& bmu, float radius)
 {
     auto& neurons = lattice.mNeurons;

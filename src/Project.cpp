@@ -225,7 +225,7 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
         world.theModel = std::make_shared<Mesh>(stlImp.ReadFile(path.ToStdString()));
     }
 
-    world.theDataset = std::make_shared<InputData>(world.theModel->positions);
+    world.theDataset = std::make_shared<InputData<3>>(world.theModel->positions);
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), *world.theModel));
 
     auto& renderer = Renderer::Get(*this);
@@ -296,7 +296,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
     Logger::info("%lu voxels will be rendered.", pos.size());
 
-    world.theDataset = std::make_shared<InputData>(pos);
+    world.theDataset = std::make_shared<InputData<3>>(pos);
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
 
     auto& renderer = Renderer::Get(*this);
@@ -434,7 +434,7 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
     }
 
     world.theModel = std::make_shared<Mesh>(mesh);
-    world.theDataset = std::make_shared<InputData>(mesh.positions);
+    world.theDataset = std::make_shared<InputData<3>>(mesh.positions);
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), mesh));
 
     auto& renderer = Renderer::Get(*this);
