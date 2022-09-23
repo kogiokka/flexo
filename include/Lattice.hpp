@@ -47,8 +47,8 @@ public:
     LatticeList(LatticeList const&) = delete;
     LatticeList& operator=(LatticeList const&) = delete;
     void Add(int width, int height, LatticeFlags flags,
-             BoundingBox box = { { -100.0f, -100.0f, -100.0f }, { 100.0f, 100.0f, 100.0f } },
-             LatticeInitState initState = LatticeInitState_Random);
+             LatticeInitState initState = LatticeInitState_Random,
+             BoundingBox box = { { -100.0f, -100.0f, -100.0f }, { 100.0f, 100.0f, 100.0f } });
     void SetCurrent(unsigned int index);
     std::shared_ptr<Lattice> GetCurrent() const;
 

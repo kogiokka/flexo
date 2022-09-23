@@ -28,7 +28,7 @@ LatticeList::LatticeList(WatermarkingProject& project)
 {
 }
 
-void LatticeList::Add(int width, int height, LatticeFlags flags, BoundingBox box, LatticeInitState initState)
+void LatticeList::Add(int width, int height, LatticeFlags flags, LatticeInitState initState, BoundingBox box)
 {
     using std::array;
     auto lattice = std::make_shared<Lattice>();

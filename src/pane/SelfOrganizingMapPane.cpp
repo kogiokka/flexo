@@ -58,26 +58,31 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
         m_project.UpdateLatticeGraphics();
     });
 
-    addBtn->Bind(wxEVT_BUTTON, [this, widthText, heightText, cyclicX, cyclicY, comboBox, initStatePlane](wxCommandEvent&) {
-        long width;
-        long height;
-        LatticeFlags flags = LatticeFlags_CyclicNone;
-        if (cyclicX->GetValue()) {
-            flags |= LatticeFlags_CyclicX;
-        }
-        if (cyclicY->GetValue()) {
-            flags |= LatticeFlags_CyclicY;
-        }
-        if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
-            LatticeInitState state = LatticeInitState_Random;
-            if (initStatePlane->GetValue()) {
-                state = LatticeInitState_Plane;
+    addBtn->Bind(
+        wxEVT_BUTTON, [this, widthText, heightText, cyclicX, cyclicY, comboBox, initStatePlane](wxCommandEvent&) {
+            long width;
+            long height;
+            LatticeFlags flags = LatticeFlags_CyclicNone;
+            if (cyclicX->GetValue()) {
+                flags |= LatticeFlags_CyclicX;
             }
-            LatticeList::Get(m_project).Add(width, height, flags, world.theDataset->GetBoundingBox(), state);
-            comboBox->Append(wxString::Format("Lattice.00%zu", LatticeList::Get(m_project).size()),
-                             wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
-        }
-    });
+            if (cyclicY->GetValue()) {
+                flags |= LatticeFlags_CyclicY;
+            }
+            if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
+                LatticeInitState state = LatticeInitState_Random;
+                if (initStatePlane->GetValue()) {
+                    state = LatticeInitState_Plane;
+                }
+                if (world.theDataset) {
+                    LatticeList::Get(m_project).Add(width, height, flags, state, world.theDataset->GetBoundingBox());
+                } else {
+                    LatticeList::Get(m_project).Add(width, height, flags, state);
+                }
+                comboBox->Append(wxString::Format("Lattice.00%zu", LatticeList::Get(m_project).size()),
+                                 wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
+            }
+        });
 
     group->Bind(wxEVT_UPDATE_UI,
                 [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
