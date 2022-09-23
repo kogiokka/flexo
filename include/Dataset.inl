@@ -1,14 +1,14 @@
-#include "InputData.hpp"
+#include "Dataset.hpp"
 
 template <int InDim>
-InputData<InDim>::InputData()
+Dataset<InDim>::Dataset()
     : m_pos()
     , m_rng()
 {
 }
 
 template <int InDim>
-InputData<InDim>::InputData(std::vector<glm::vec3> const& positions)
+Dataset<InDim>::Dataset(std::vector<glm::vec3> const& positions)
     : m_pos()
     , m_rng()
 {
@@ -25,7 +25,7 @@ InputData<InDim>::InputData(std::vector<glm::vec3> const& positions)
 }
 
 template <int InDim>
-InputData<InDim>::InputData(std::vector<Vec<InDim>> const& positions)
+Dataset<InDim>::Dataset(std::vector<Vec<InDim>> const& positions)
     : m_pos(positions)
     , m_rng()
 {
@@ -34,7 +34,7 @@ InputData<InDim>::InputData(std::vector<Vec<InDim>> const& positions)
 }
 
 template <int InDim>
-void InputData<InDim>::Insert(std::vector<glm::vec3> const& positions)
+void Dataset<InDim>::Insert(std::vector<glm::vec3> const& positions)
 {
     std::vector<Vec<InDim>> data;
     data.reserve(positions.size());
@@ -48,7 +48,7 @@ void InputData<InDim>::Insert(std::vector<glm::vec3> const& positions)
 }
 
 template <int InDim>
-void InputData<InDim>::Insert(std::vector<Vec<InDim>> const& positions)
+void Dataset<InDim>::Insert(std::vector<Vec<InDim>> const& positions)
 {
     m_pos.insert(m_pos.end(), positions.begin(), positions.end());
     m_rng.setRange(0, m_pos.size() - 1);
@@ -56,25 +56,25 @@ void InputData<InDim>::Insert(std::vector<Vec<InDim>> const& positions)
 }
 
 template <int InDim>
-std::vector<Vec<InDim>> const& InputData<InDim>::GetData() const
+std::vector<Vec<InDim>> const& Dataset<InDim>::GetData() const
 {
     return m_pos;
 }
 
 template <int InDim>
-Vec<InDim> const& InputData<InDim>::GetInput()
+Vec<InDim> const& Dataset<InDim>::GetInput()
 {
     return m_pos[m_rng.scalar()];
 }
 
 template <int InDim>
-BoundingBox const& InputData<InDim>::GetBoundingBox() const
+BoundingBox const& Dataset<InDim>::GetBoundingBox() const
 {
     return m_box;
 }
 
 template <int InDim>
-void InputData<InDim>::CalculateBoundingBox()
+void Dataset<InDim>::CalculateBoundingBox()
 {
     const float FLOAT_MAX = std::numeric_limits<float>::max();
     glm::vec3 min = { FLOAT_MAX, FLOAT_MAX, FLOAT_MAX };

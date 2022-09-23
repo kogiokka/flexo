@@ -25,12 +25,12 @@ private:
 };
 
 template <int InDim>
-class InputData
+class Dataset
 {
 public:
-    InputData();
-    InputData(std::vector<glm::vec3> const& positions);
-    InputData(std::vector<Vec<InDim>> const& positions);
+    Dataset();
+    Dataset(std::vector<glm::vec3> const& positions);
+    Dataset(std::vector<Vec<InDim>> const& positions);
     void Insert(std::vector<glm::vec3> const& positions);
     void Insert(std::vector<Vec<InDim>> const& positions);
     std::vector<Vec<InDim>> const& GetData() const;
@@ -45,5 +45,5 @@ private:
     void CalculateBoundingBox();
 };
 
-#include "InputData.inl"
+#include "Dataset.inl"
 #endif

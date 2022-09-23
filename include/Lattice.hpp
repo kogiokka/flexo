@@ -7,7 +7,7 @@
 #include <wx/event.h>
 
 #include "Attachable.hpp"
-#include "InputData.hpp"
+#include "Dataset.hpp"
 #include "Node.hpp"
 
 using LatticeFlags = int;

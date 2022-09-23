@@ -10,7 +10,7 @@
 #include <wx/event.h>
 
 #include "Attachable.hpp"
-#include "InputData.hpp"
+#include "Dataset.hpp"
 #include "Lattice.hpp"
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"
@@ -49,7 +49,7 @@ public:
      * @param dataset Dataset as the input space of SOM
      */
     template <int InDim, int OutDim>
-    void CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset);
+    void CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset);
 
     void ToggleTraining();
     bool IsDone() const;
@@ -73,7 +73,7 @@ private:
      * @param dataset Dataset as the input space of SOM
      */
     template <int InDim, int OutDim>
-    void Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset);
+    void Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset);
 
     /**
      * Find the Best Matching Unit
@@ -106,7 +106,7 @@ private:
 };
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset)
+void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset)
 {
     {
         StopWorker();
@@ -123,7 +123,7 @@ void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::sh
     m_rate = m_initialRate;
     m_neighborhood = m_initialNeighborhood;
 
-    void (SelfOrganizingMap::*Train)(Lattice<InDim, OutDim>&, std::shared_ptr<InputData<InDim>>)
+    void (SelfOrganizingMap::*Train)(Lattice<InDim, OutDim>&, std::shared_ptr<Dataset<InDim>>)
         = &SelfOrganizingMap::Train;
     m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
 
@@ -131,7 +131,7 @@ void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::sh
 }
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<InputData<InDim>> dataset)
+void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset)
 {
     auto& neurons = lattice.mNeurons;
     int const width = lattice.mWidth;
