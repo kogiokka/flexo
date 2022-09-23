@@ -8,6 +8,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "SelfOrganizingMap.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"

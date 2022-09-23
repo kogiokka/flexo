@@ -2,6 +2,7 @@
 
 #include "Mesh.hpp"
 #include "ProjectWindow.hpp"
+#include "SelfOrganizingMap.hpp"
 #include "WatermarkingApp.hpp"
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"

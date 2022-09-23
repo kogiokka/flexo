@@ -9,10 +9,6 @@
 #include <wx/weakref.h>
 
 #include "Attachable.hpp"
-#include "InputData.hpp"
-#include "Lattice.hpp"
-#include "ProjectSettings.hpp"
-#include "SelfOrganizingMap.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
