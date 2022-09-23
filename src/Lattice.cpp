@@ -31,7 +31,7 @@ LatticeList::LatticeList(WatermarkingProject& project)
 void LatticeList::Add(int width, int height, LatticeFlags flags, LatticeInitState initState, BoundingBox box)
 {
     using std::array;
-    auto lattice = std::make_shared<Lattice>();
+    auto lattice = std::make_shared<Lattice<3, 2>>();
 
     if (initState == LatticeInitState_Random) {
         RandomRealNumber<float> xRng(box.min.x, box.max.x);
@@ -71,7 +71,7 @@ void LatticeList::SetCurrent(unsigned int index)
     m_curr = operator[](index);
 }
 
-std::shared_ptr<Lattice> LatticeList::GetCurrent() const
+std::shared_ptr<Lattice<3, 2>> LatticeList::GetCurrent() const
 {
     return m_curr;
 }

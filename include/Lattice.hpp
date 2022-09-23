@@ -23,15 +23,16 @@ typedef enum {
     LatticeInitState_Random,
 } LatticeInitState;
 
+template <int InDim, int OutDim>
 struct Lattice {
     int mWidth;
     int mHeight;
     LatticeFlags mFlags;
-    std::vector<Node<3, 2>> mNeurons;
+    std::vector<Node<InDim, OutDim>> mNeurons;
 };
 
 class WatermarkingProject;
-using ListOfLattice = std::vector<std::shared_ptr<Lattice>>;
+using ListOfLattice = std::vector<std::shared_ptr<Lattice<3, 2>>>;
 
 class LatticeList final : public AttachableBase, public ListOfLattice
 {
@@ -46,15 +47,14 @@ public:
     explicit LatticeList(WatermarkingProject& project);
     LatticeList(LatticeList const&) = delete;
     LatticeList& operator=(LatticeList const&) = delete;
-    void Add(int width, int height, LatticeFlags flags,
-             LatticeInitState initState = LatticeInitState_Random,
+    void Add(int width, int height, LatticeFlags flags, LatticeInitState initState = LatticeInitState_Random,
              BoundingBox box = { { -100.0f, -100.0f, -100.0f }, { 100.0f, 100.0f, 100.0f } });
     void SetCurrent(unsigned int index);
-    std::shared_ptr<Lattice> GetCurrent() const;
+    std::shared_ptr<Lattice<3, 2>> GetCurrent() const;
 
 private:
     WatermarkingProject& m_project;
-    std::shared_ptr<Lattice> m_curr;
+    std::shared_ptr<Lattice<3, 2>> m_curr;
 };
 
 #endif

@@ -56,7 +56,7 @@ void WatermarkingProject::BuildLatticeMesh() const
     if (!m_isLatticeReady)
         return;
 
-    Lattice const& lattice = *LatticeList::Get(*this).GetCurrent();
+    Lattice<3, 2> const& lattice = *LatticeList::Get(*this).GetCurrent();
     Mesh mesh;
 
     std::vector<glm::vec3> positions;
