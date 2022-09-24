@@ -1,14 +1,14 @@
 #ifndef NODE_H
 #define NODE_H
 
-#include <array>
+#include "Vec.hpp"
 
 template <int InDim, int OutDim>
 struct Node {
-    std::array<float, InDim> mWeights;
-    std::array<float, OutDim> mCoordinates;
+    Vec<InDim> weights;
+    Vec<OutDim> coords;
 
-    Node(std::array<float, InDim> weights, std::array<float, OutDim> coordinates);
+    Node(Vec<InDim> weights, Vec<OutDim> coordinates);
     Node(Node const& other);
     Node& operator=(Node const& other);
 
@@ -18,43 +18,43 @@ struct Node {
 };
 
 template <int InDim, int OutDim>
-Node<InDim, OutDim>::Node(std::array<float, InDim> weights, std::array<float, OutDim> coordinates)
-    : mWeights(weights)
-    , mCoordinates(coordinates)
+Node<InDim, OutDim>::Node(Vec<InDim> weights, Vec<OutDim> coordinates)
+    : weights(weights)
+    , coords(coordinates)
 {
 }
 
 template <int InDim, int OutDim>
 Node<InDim, OutDim>::Node(Node const& other)
 {
-    mWeights = other.mWeights;
-    mCoordinates = other.mCoordinates;
+    weights = other.weights;
+    coords = other.coords;
 }
 
 template <int InDim, int OutDim>
 Node<InDim, OutDim>& Node<InDim, OutDim>::operator=(Node<InDim, OutDim> const& other)
 {
-    mWeights = other.mWeights;
-    mCoordinates = other.mCoordinates;
+    weights = other.weights;
+    coords = other.coords;
     return *this;
 }
 
 template <int InDim, int OutDim>
 float Node<InDim, OutDim>::X() const
 {
-    return mCoordinates[0];
+    return coords[0];
 }
 
 template <int InDim, int OutDim>
 float Node<InDim, OutDim>::Y() const
 {
-    return mCoordinates[1];
+    return coords[1];
 }
 
 template <int InDim, int OutDim>
 float Node<InDim, OutDim>::Z() const
 {
-    return mCoordinates[2];
+    return coords[2];
 }
 
 #endif

@@ -40,8 +40,8 @@ void LatticeList::Add(int width, int height, LatticeFlags flags, LatticeInitStat
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                lattice->mNeurons.emplace_back(array<float, 3> { xRng.scalar(), yRng.scalar(), zRng.scalar() },
-                                               array<float, 2> { static_cast<float>(i), static_cast<float>(j) });
+                lattice->mNeurons.emplace_back(Vec3f { xRng.scalar(), yRng.scalar(), zRng.scalar() },
+                                               Vec2f { static_cast<float>(i), static_cast<float>(j) });
             }
         }
     } else if (initState == LatticeInitState_Plane) {
@@ -50,8 +50,8 @@ void LatticeList::Add(int width, int height, LatticeFlags flags, LatticeInitStat
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                lattice->mNeurons.emplace_back(array<float, 3> { i * dx, j * dy, box.max.z },
-                                               array<float, 2> { static_cast<float>(i), static_cast<float>(j) });
+                lattice->mNeurons.emplace_back(Vec3f { i * dx, j * dy, box.max.z },
+                                               Vec2f { static_cast<float>(i), static_cast<float>(j) });
             }
         }
     }

@@ -66,7 +66,7 @@ void WatermarkingProject::BuildLatticeMesh() const
     auto const& neurons = lattice.mNeurons;
     positions.reserve(neurons.size());
     for (auto const& n : neurons) {
-        auto const& w = n.mWeights;
+        auto const& w = n.weights;
         positions.emplace_back(w[0], w[1], w[2]);
     }
 
