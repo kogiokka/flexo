@@ -174,13 +174,10 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice<InDim, OutDim> const& lattice, Vec
     float distMin = std::numeric_limits<float>::max();
     for (int i = 0; i < lattice.mWidth; i++) {
         for (int j = 0; j < lattice.mHeight; j++) {
-            float sum = 0;
-            for (int k = 0; k < lattice.mNeurons.front().weights.Dimension(); k++) {
-                float const diff = input[k] - lattice.mNeurons[i + j * lattice.mWidth].weights[k];
-                sum += (diff * diff);
-            }
-            if (distMin > sum) {
-                distMin = sum;
+            Vec<InDim> const diff = input - lattice.mNeurons[i + j * lattice.mWidth].weights;
+            float const diffLen = diff * diff;
+            if (distMin > diffLen) {
+                distMin = diffLen;
                 idx = { i, j };
             }
         }
@@ -226,13 +223,11 @@ void SelfOrganizingMap::UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<
                 auto& node = neurons[modX + modY * width];
                 Vec<OutDim> const bmuCoord = bmu.coords;
                 Vec<OutDim> const nodeCoord(static_cast<float>(x), static_cast<float>(y));
-                for (int k = 0; k < node.weights.Dimension(); ++k) {
-                    node.weights[k]
-                        += learnRate(m_t) * neighborhood(m_t, bmuCoord, nodeCoord) * (input[k] - node.weights[k]);
-                }
+                node.weights += learnRate(m_t) * neighborhood(m_t, bmuCoord, nodeCoord) * (input - node.weights);
             }
         }
     }
 }
 
 #endif
+
