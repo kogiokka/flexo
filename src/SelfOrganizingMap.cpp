@@ -31,11 +31,8 @@ SelfOrganizingMap::SelfOrganizingMap(WatermarkingProject& project)
 {
     auto const& settings = ProjectSettings::Get(m_project);
 
-    m_maxIterations = settings.GetMaxIterations();
-    m_initialRate = settings.GetLearningRate();
-    m_iterations = 0;
-    m_neighborhood = 0.0f;
-    m_rate = m_initialRate;
+    m_tmax = settings.GetMaxIterations();
+    m_t = 0;
 
     m_project.Bind(EVT_PROJECT_SETTINGS_CHANGED, &SelfOrganizingMap::OnProjectSettingsChanged, this);
 }
@@ -77,39 +74,37 @@ void SelfOrganizingMap::OnProjectSettingsChanged(wxCommandEvent&)
 
 void SelfOrganizingMap::SetMaxIterations(int numIterations)
 {
-    m_maxIterations = numIterations;
+    m_tmax = numIterations;
 }
 
 void SelfOrganizingMap::SetLearningRate(float rate)
 {
-    m_initialRate = rate;
-    m_rate = rate;
+    m_learnRate = LearningRate(rate, m_tmax);
 }
 
 void SelfOrganizingMap::SetInitialNeighborhood(float radius)
 {
-    m_initialNeighborhood = radius;
-    m_neighborhood = radius;
+    m_neighborhood = Neighborhood(NeighborhoodRadius(radius, m_tmax));
 }
 
 int SelfOrganizingMap::GetIterations() const
 {
-    return m_iterations;
+    return m_t;
 }
 
 float SelfOrganizingMap::GetNeighborhood() const
 {
-    return m_neighborhood;
+    return m_neighborhood.radius(m_t);
 }
 
 float SelfOrganizingMap::GetInitialNeighborhood() const
 {
-    return m_initialNeighborhood;
+    return m_neighborhood.radius.init;
 }
 
 float SelfOrganizingMap::GetLearningRate() const
 {
-    return m_rate;
+    return m_learnRate(m_t);
 }
 
 void SelfOrganizingMap::StopWorker()

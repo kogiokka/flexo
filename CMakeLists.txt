@@ -95,6 +95,8 @@ PRIVATE
     "src/gfx/drawable/LatticeEdge.cpp"
     "src/gfx/drawable/LatticeFace.cpp"
 
+    "src/LearningRate.cpp"
+    "src/Neighborhood.cpp"
     "src/SelfOrganizingMap.cpp"
 )
 

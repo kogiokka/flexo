@@ -1,28 +1,12 @@
 #ifndef INCLUDE_DATA_H
 #define INCLUDE_DATA_H
 
-#include <array>
 #include <glm/glm.hpp>
 #include <vector>
 
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
-
-template <int Dim>
-struct Vec {
-    template <typename... T>
-    explicit Vec(T... args)
-        : mData { args... }
-    {
-    }
-    float operator[](int index) const
-    {
-        return mData[index];
-    }
-
-private:
-    std::array<float, Dim> mData;
-};
+#include "Vec.hpp"
 
 template <int InDim>
 class Dataset

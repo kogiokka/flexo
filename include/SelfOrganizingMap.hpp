@@ -12,7 +12,11 @@
 #include "Attachable.hpp"
 #include "Dataset.hpp"
 #include "Lattice.hpp"
+#include "LearningRate.hpp"
+#include "Neighborhood.hpp"
+#include "Node.hpp"
 #include "ProjectSettings.hpp"
+#include "Vec.hpp"
 #include "common/Logger.hpp"
 
 class WatermarkingProject;
@@ -21,12 +25,10 @@ class SelfOrganizingMap : public AttachableBase
 {
     bool m_isDone;
     bool m_isTraining;
-    int m_maxIterations;
-    int m_iterations;
-    float m_initialRate;
-    float m_rate;
-    float m_initialNeighborhood;
-    float m_neighborhood;
+    int m_tmax;
+    int m_t;
+    LearningRate m_learnRate;
+    Neighborhood m_neighborhood;
 
     std::thread m_worker;
     std::mutex m_mut;
@@ -99,8 +101,8 @@ private:
      * @param radius  Neighborhood radius
      */
     template <int InDim, int OutDim>
-    void UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<InDim> input,
-                            Node<InDim, OutDim> const& bmu, float radius);
+    void UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<InDim> input, Node<InDim, OutDim> const& bmu,
+                            LearningRate learnRate, Neighborhood neighborhood);
 
     WatermarkingProject& m_project;
 };
@@ -116,12 +118,10 @@ void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::sh
 
     auto const& settings = ProjectSettings::Get(m_project);
 
-    m_maxIterations = settings.GetMaxIterations();
-    m_initialRate = settings.GetLearningRate();
-    m_initialNeighborhood = settings.GetNeighborhood();
-    m_iterations = 0;
-    m_rate = m_initialRate;
-    m_neighborhood = m_initialNeighborhood;
+    m_t = 0;
+    m_tmax = settings.GetMaxIterations();
+    m_learnRate = LearningRate(ProjectSettings::Get(m_project).GetLearningRate(), m_tmax);
+    m_neighborhood = Neighborhood(NeighborhoodRadius(settings.GetNeighborhood(), m_tmax));
 
     void (SelfOrganizingMap::*Train)(Lattice<InDim, OutDim>&, std::shared_ptr<Dataset<InDim>>)
         = &SelfOrganizingMap::Train;
@@ -137,7 +137,7 @@ void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<D
     int const width = lattice.mWidth;
     int const height = lattice.mHeight;
 
-    while (m_iterations < m_maxIterations) {
+    while (m_t < m_tmax) {
         std::unique_lock lk(m_mut);
         m_cv.wait(lk, [this] { return m_isTraining || m_isDone; });
         if (m_isDone) {
@@ -145,18 +145,9 @@ void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<D
         }
 
         Vec<InDim> const input = dataset->GetInput();
-        float const progress = static_cast<float>(m_iterations);
-
-        float const remains = static_cast<float>(m_maxIterations - m_iterations);
-        float const learningRateDecayCoef = 1.0f / remains;
-        float const neighborhoodDecayCoef = logf(m_initialNeighborhood) / remains;
-
-        m_neighborhood = m_initialNeighborhood * expf(-progress * neighborhoodDecayCoef);
-        m_rate = m_initialRate * expf(-progress * learningRateDecayCoef);
-
         glm::ivec2 const index = FindBMU(lattice, input);
         auto const& bmu = neurons[index.x + index.y * width];
-        UpdateNeighborhood(lattice, input, bmu, m_neighborhood);
+        UpdateNeighborhood(lattice, input, bmu, m_learnRate, m_neighborhood);
 
         if (lattice.mFlags & LatticeFlags_CyclicX) {
             for (int y = 0; y < height; y++) {
@@ -170,15 +161,14 @@ void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<D
             }
         }
 
-        ++m_iterations;
+        ++m_t;
     }
 
     m_isDone = true;
 }
 
 template <int InDim, int OutDim>
-glm::ivec2 SelfOrganizingMap::FindBMU(Lattice<InDim, OutDim> const& lattice,
-                                      Vec<InDim> const& input) const
+glm::ivec2 SelfOrganizingMap::FindBMU(Lattice<InDim, OutDim> const& lattice, Vec<InDim> const& input) const
 {
     glm::ivec2 idx;
     float distMin = std::numeric_limits<float>::max();
@@ -200,14 +190,15 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Lattice<InDim, OutDim> const& lattice,
 
 template <int InDim, int OutDim>
 void SelfOrganizingMap::UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<InDim> input,
-                                           Node<InDim, OutDim> const& bmu, float radius)
+                                           Node<InDim, OutDim> const& bmu, LearningRate learnRate,
+                                           Neighborhood neighborhood)
 {
     auto& neurons = lattice.mNeurons;
     LatticeFlags const flags = lattice.mFlags;
     int const width = lattice.mWidth;
     int const height = lattice.mHeight;
 
-    int const rad = static_cast<int>(radius);
+    int const rad = static_cast<int>(neighborhood.radius(m_t));
     int const radSqr = rad * rad;
 
     int w = width - 1;
@@ -233,9 +224,11 @@ void SelfOrganizingMap::UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<
             float const distToBmuSqr = dx * dx + dy * dy;
             if (distToBmuSqr < radSqr) {
                 auto& node = neurons[modX + modY * width];
-                float const influence = expf(-distToBmuSqr / (2.0f * radSqr));
+                Vec<OutDim> const bmuCoord(bmu.X(), bmu.Y());
+                Vec<OutDim> const nodeCoord(static_cast<float>(x), static_cast<float>(y));
                 for (unsigned int k = 0; k < node.mWeights.size(); ++k) {
-                    node.mWeights[k] += m_rate * influence * (input[k] - node.mWeights[k]);
+                    node.mWeights[k]
+                        += learnRate(m_t) * neighborhood(m_t, bmuCoord, nodeCoord) * (input[k] - node.mWeights[k]);
                 }
             }
         }
