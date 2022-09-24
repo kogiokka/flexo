@@ -20,7 +20,6 @@ public:
     Renderer(WatermarkingProject& project);
     void Render(Graphics& gfx);
     void Accept(Task task);
-    void SetCameraView(BoundingBox const& box);
     std::vector<Task>& GetTasks();
 
 private:

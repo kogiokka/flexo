@@ -39,6 +39,7 @@ public:
 
 private:
     Camera CreateDefaultCamera() const;
+    float cameraZoomStep(float zoom) const;
 
     WatermarkingProject& m_project;
     GLWRPtr<IGLWRRenderTargetView> m_rtv;

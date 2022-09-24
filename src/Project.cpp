@@ -227,9 +227,6 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
 
     world.theDataset = std::make_shared<Dataset<3>>(world.theModel->positions);
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), *world.theModel));
-
-    auto& renderer = Renderer::Get(*this);
-    renderer.SetCameraView(world.theDataset->GetBoundingBox());
 }
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
@@ -298,9 +295,6 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
-
-    auto& renderer = Renderer::Get(*this);
-    renderer.SetCameraView(world.theDataset->GetBoundingBox());
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
@@ -436,9 +430,6 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
     world.theModel = std::make_shared<Mesh>(mesh);
     world.theDataset = std::make_shared<Dataset<3>>(mesh.positions);
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), mesh));
-
-    auto& renderer = Renderer::Get(*this);
-    renderer.SetCameraView(world.theDataset->GetBoundingBox());
 }
 
 void WatermarkingProject::OnMenuImportModel(wxCommandEvent& event)

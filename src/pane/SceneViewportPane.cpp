@@ -172,19 +172,15 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
 
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
 {
-    int direction = event.GetWheelRotation() / 120;
+    int const direction = -1 * event.GetWheelRotation() / 120;
     float& zoom = Graphics::Get(m_project).GetCamera().zoom;
-    float const tmp_zoom = zoom + direction * -0.02f;
-    constexpr float min = 0.01f;
-    constexpr float max = 10.0f;
+    float const tmp = zoom + direction * cameraZoomStep(zoom);
 
-    if (tmp_zoom < min) {
-        zoom = min;
-    } else if (tmp_zoom >= max) {
-        zoom = max;
-    } else {
-        zoom = tmp_zoom;
+    if (tmp <= 0.001f || tmp >= 20.0f) {
+        return;
     }
+
+    zoom = tmp;
 }
 
 void SceneViewportPane::OnMouseLeftDown(wxMouseEvent& event)
@@ -326,4 +322,21 @@ Camera SceneViewportPane::CreateDefaultCamera() const
     camera.UpdateViewCoord();
 
     return camera;
+}
+
+float SceneViewportPane::cameraZoomStep(float zoom) const
+{
+    if (zoom <= 0.025f) {
+        return 0.001f;
+    } else if (zoom <= 0.05f) {
+        return 0.002f;
+    } else if (zoom <= 0.2f) {
+        return 0.01f;
+    } else if (zoom <= 1.0f) {
+        return 0.05f;
+    } else if (zoom <= 5.0f) {
+        return 0.25f;
+    } else {
+        return 0.3f;
+    }
 }
