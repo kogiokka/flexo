@@ -26,6 +26,10 @@ public:
     SceneViewportPane(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
                       wxSize const& size, WatermarkingProject& project);
     ~SceneViewportPane();
+    void InitGL();
+    void ResetCamera();
+
+private:
     void OnPaint(wxPaintEvent& event);
     void OnSize(wxSizeEvent& event);
     void OnMouseMotion(wxMouseEvent& event);
@@ -34,26 +38,21 @@ public:
     void OnMouseRightDown(wxMouseEvent& event);
     void OnMenuScreenshot(wxCommandEvent& event);
     void OnUpdateUI(wxUpdateUIEvent& event);
-    void InitGL();
-    void ResetCamera();
-
-private:
     Camera CreateDefaultCamera() const;
-    float cameraZoomStep(float zoom) const;
+    float CameraZoomStep(float zoom) const;
+    inline float RoundGuard(float radian);
+    void InitFrame(Graphics& gfx);
 
-    WatermarkingProject& m_project;
-    GLWRPtr<IGLWRRenderTargetView> m_rtv;
-    GLWRPtr<IGLWRDepthStencilView> m_dsv;
-    std::unique_ptr<wxGLContext> m_context;
     bool m_isGLLoaded;
     float m_rateMove;
     float m_rateRotate;
     int m_dirHorizontal;
     std::tuple<int, int, float, float> m_originRotate;
     std::tuple<float, float, glm::vec3> m_originTranslate;
-
-    inline float RoundGuard(float radian);
-    void InitFrame(Graphics& gfx);
+    GLWRPtr<IGLWRRenderTargetView> m_rtv;
+    GLWRPtr<IGLWRDepthStencilView> m_dsv;
+    std::unique_ptr<wxGLContext> m_context;
+    WatermarkingProject& m_project;
 
     wxDECLARE_EVENT_TABLE();
 };

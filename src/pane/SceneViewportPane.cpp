@@ -60,12 +60,12 @@ SceneViewportPane const& SceneViewportPane::Get(WatermarkingProject const& proje
 SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id,
                                      wxPoint const& pos, wxSize const& size, WatermarkingProject& project)
     : wxGLCanvas(parent, dispAttrs, id, pos, size)
-    , m_project(project)
-    , m_context(nullptr)
     , m_isGLLoaded(false)
     , m_rateMove(0.4f)
     , m_rateRotate(0.005f)
     , m_dirHorizontal(1)
+    , m_context(nullptr)
+    , m_project(project)
 {
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
@@ -142,6 +142,11 @@ void SceneViewportPane::InitGL()
     gfx.SetCamera(CreateDefaultCamera());
 }
 
+void SceneViewportPane::ResetCamera()
+{
+    Graphics::Get(m_project).SetCamera(CreateDefaultCamera());
+}
+
 void SceneViewportPane::OnSize(wxSizeEvent&)
 {
     assert(m_context.get() != nullptr);
@@ -174,7 +179,7 @@ void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
 {
     int const direction = -1 * event.GetWheelRotation() / 120;
     float& zoom = Graphics::Get(m_project).GetCamera().zoom;
-    float const tmp = zoom + direction * cameraZoomStep(zoom);
+    float const tmp = zoom + direction * CameraZoomStep(zoom);
 
     if (tmp <= 0.001f || tmp >= 20.0f) {
         return;
@@ -246,9 +251,40 @@ void SceneViewportPane::OnUpdateUI(wxUpdateUIEvent&)
     Refresh();
 }
 
-void SceneViewportPane::ResetCamera()
+Camera SceneViewportPane::CreateDefaultCamera() const
 {
-    Graphics::Get(m_project).SetCamera(CreateDefaultCamera());
+    Camera camera;
+
+    camera.position = { 0.0f, 0.0f, 0.0f };
+    camera.basis = {};
+    camera.worldUp = { 0.0f, 1.0f, 0.0f };
+    camera.center = { 0.0f, 0.0f, 0.0f };
+    camera.coord = { 500.0f, 1.25f, 0.0f };
+    camera.volumeSize = 300.0f;
+    camera.zoom = 1.0f;
+
+    wxSize const size = GetClientSize() * GetContentScaleFactor();
+    camera.aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
+    camera.UpdateViewCoord();
+
+    return camera;
+}
+
+float SceneViewportPane::CameraZoomStep(float zoom) const
+{
+    if (zoom <= 0.025f) {
+        return 0.001f;
+    } else if (zoom <= 0.05f) {
+        return 0.002f;
+    } else if (zoom <= 0.2f) {
+        return 0.01f;
+    } else if (zoom <= 1.0f) {
+        return 0.05f;
+    } else if (zoom <= 5.0f) {
+        return 0.25f;
+    } else {
+        return 0.3f;
+    }
 }
 
 // Restrict both phi and theta within 0 and 360 degrees.
@@ -303,40 +339,4 @@ void SceneViewportPane::InitFrame(Graphics& gfx)
     }
 
     gfx.SetRenderTargets(1, m_rtv.GetAddressOf(), m_dsv.Get());
-}
-
-Camera SceneViewportPane::CreateDefaultCamera() const
-{
-    Camera camera;
-
-    camera.position = { 0.0f, 0.0f, 0.0f };
-    camera.basis = {};
-    camera.worldUp = { 0.0f, 1.0f, 0.0f };
-    camera.center = { 0.0f, 0.0f, 0.0f };
-    camera.coord = { 500.0f, 1.25f, 0.0f };
-    camera.volumeSize = 300.0f;
-    camera.zoom = 1.0f;
-
-    wxSize const size = GetClientSize() * GetContentScaleFactor();
-    camera.aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
-    camera.UpdateViewCoord();
-
-    return camera;
-}
-
-float SceneViewportPane::cameraZoomStep(float zoom) const
-{
-    if (zoom <= 0.025f) {
-        return 0.001f;
-    } else if (zoom <= 0.05f) {
-        return 0.002f;
-    } else if (zoom <= 0.2f) {
-        return 0.01f;
-    } else if (zoom <= 1.0f) {
-        return 0.05f;
-    } else if (zoom <= 5.0f) {
-        return 0.25f;
-    } else {
-        return 0.3f;
-    }
 }
