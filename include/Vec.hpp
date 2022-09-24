@@ -6,81 +6,32 @@
 template <int Dim, typename T = float>
 struct Vec {
     template <typename... I>
-    explicit Vec(I... args)
-        : mData { args... }
-    {
-    }
+    explicit Vec(I... args);
+    float& operator[](int index);
+    float const& operator[](int index) const;
+    int Dimension() const;
 
-    float& operator[](int index)
-    {
-        return mData[index];
-    }
-
-    float const& operator[](int index) const
-    {
-        return mData[index];
-    }
-
-    int Dimension() const
-    {
-        return Dim;
-    }
-
-    Vec<Dim, T> operator-(Vec<Dim, T> const& other) const
-    {
-        Vec<Dim, T> vec;
-        for (int d = 0; d < Dim; d++) {
-            vec[d] = mData[d] - other[d];
-        }
-        return vec;
-    }
-
-    Vec<Dim, T>& operator+=(Vec<Dim, T> const& other)
-    {
-        for (int d = 0; d < Dim; d++) {
-            mData[d] += other[d];
-        }
-        return *this;
-    }
+    Vec<Dim, T> operator-(Vec<Dim, T> const& other) const;
+    Vec<Dim, T>& operator+=(Vec<Dim, T> const& other);
 
 private:
     std::array<T, Dim> mData;
 };
 
 template <int Dim, typename T = float>
-Vec<Dim, T> operator*(Vec<Dim, T> const& v, T const& scalar)
-{
-    Vec<Dim, T> vec;
-    for (int d = 0; d < Dim; d++) {
-        vec[d] = scalar * v[d];
-    }
-    return vec;
-}
+Vec<Dim, T> operator*(Vec<Dim, T> const& v, T const& scalar);
 
 template <int Dim, typename T = float>
-Vec<Dim, T> operator*(T const& scalar, Vec<Dim, T> const& v)
-{
-    Vec<Dim, T> vec;
-    for (int d = 0; d < Dim; d++) {
-        vec[d] = scalar * v[d];
-    }
-    return vec;
-}
+Vec<Dim, T> operator*(T const& scalar, Vec<Dim, T> const& v);
 
 /**
  * Dot product
  */
 template <int Dim, typename T = float>
-float operator*(Vec<Dim, T> const& v1, Vec<Dim, T> const& v2)
-{
-    T product = 0;
-    for (int d = 0; d < Dim; d++) {
-        product += v1[d] * v2[d];
-    }
-    return product;
-}
+float operator*(Vec<Dim, T> const& v1, Vec<Dim, T> const& v2);
 
 using Vec3f = Vec<3>;
 using Vec2f = Vec<2>;
 
+#include "Vec.inl"
 #endif
