@@ -71,7 +71,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
     draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, 0));
-    draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, "res/images/mandala.png", 1));
+    draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, world.imagePath.c_str(), 1));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 1));
 

@@ -10,6 +10,8 @@
 #include "common/Logger.hpp"
 #include "pane/SceneViewportPane.hpp"
 
+wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
+wxDEFINE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_ADD_PLATE_50_BY_50, wxCommandEvent);
 wxDEFINE_EVENT(EVT_ADD_PLATE_100_BY_100, wxCommandEvent);
@@ -60,7 +62,12 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     m_mgr.SetManagedWindow(m_mainPage);
 
     auto fileMenu = new wxMenu;
-    fileMenu->Append(wxID_OPEN, "Import model");
+    auto* openModelItem = new wxMenuItem(fileMenu, EVT_OPEN_MODEL, "Open model", "");
+    auto* openImageItem = new wxMenuItem(fileMenu, EVT_OPEN_IMAGE, "Open image", "");
+    openModelItem->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN));
+    openImageItem->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN));
+    fileMenu->Append(openModelItem);
+    fileMenu->Append(openImageItem);
     fileMenu->Append(wxID_EXIT, "Exit");
 
     m_viewMenu = new wxMenu();
@@ -95,7 +102,8 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     this->SetMenuBar(menubar);
 
-    Bind(wxEVT_MENU, &ProjectWindow::OnOpenFile, this, wxID_OPEN);
+    Bind(wxEVT_MENU, &ProjectWindow::OnOpenModelFile, this, EVT_OPEN_MODEL);
+    Bind(wxEVT_MENU, &ProjectWindow::OnOpenImageFile, this, EVT_OPEN_IMAGE);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_ADD_UV_SPHERE);
@@ -162,7 +170,7 @@ WatermarkingProject const& ProjectWindow::GetProject() const
     return m_project;
 }
 
-void ProjectWindow::OnOpenFile(wxCommandEvent&)
+void ProjectWindow::OnOpenModelFile(wxCommandEvent&)
 {
     namespace fs = std::filesystem;
     static wxString defaultDir = "";
@@ -184,6 +192,26 @@ void ProjectWindow::OnOpenFile(wxCommandEvent&)
     defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
 
     wxCommandEvent event(EVT_IMPORT_MODEL);
+    event.SetString(filepath);
+    m_project.ProcessEvent(event);
+}
+
+void ProjectWindow::OnOpenImageFile(wxCommandEvent&)
+{
+    namespace fs = std::filesystem;
+    static wxString defaultDir = "";
+    wxFileDialog dialog(this, "Open Image", defaultDir, "", "PNG Image|*.png", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    dialog.CenterOnParent();
+
+    wxBusyCursor wait;
+    if (dialog.ShowModal() == wxID_CANCEL) {
+        defaultDir = fs::path(dialog.GetPath().ToStdString()).parent_path().string();
+        return;
+    }
+    wxString const filepath = dialog.GetPath();
+    defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
+
+    wxCommandEvent event(EVT_OPEN_IMAGE);
     event.SetString(filepath);
     m_project.ProcessEvent(event);
 }

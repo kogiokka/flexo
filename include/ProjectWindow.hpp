@@ -10,6 +10,8 @@
 
 class WatermarkingProject;
 
+wxDECLARE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
+wxDECLARE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
 wxDECLARE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDECLARE_EVENT(EVT_ADD_PLATE_50_BY_50, wxCommandEvent);
 wxDECLARE_EVENT(EVT_ADD_PLATE_100_BY_100, wxCommandEvent);
@@ -40,7 +42,8 @@ private:
     wxMenu* m_viewMenu;
     wxAuiManager m_mgr;
 
-    void OnOpenFile(wxCommandEvent& event);
+    void OnOpenModelFile(wxCommandEvent& event);
+    void OnOpenImageFile(wxCommandEvent& event);
     void OnExit(wxCommandEvent&);
     void OnMenuCameraReset(wxCommandEvent& event);
     void OnMenuGenerateModelDome(wxCommandEvent& event);

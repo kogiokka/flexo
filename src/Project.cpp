@@ -32,6 +32,7 @@ WatermarkingProject::WatermarkingProject()
     Bind(EVT_ADD_PLATE_50_BY_50, &WatermarkingProject::OnMenuAddPlate, this);
     Bind(EVT_ADD_PLATE_100_BY_100, &WatermarkingProject::OnMenuAddPlate, this);
     Bind(EVT_ADD_PLATE_200_BY_200, &WatermarkingProject::OnMenuAddPlate, this);
+    Bind(EVT_OPEN_IMAGE, [](wxCommandEvent& event) { world.imagePath = event.GetString().ToStdString(); });
 }
 
 void WatermarkingProject::CreateProject()

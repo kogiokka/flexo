@@ -3,6 +3,7 @@
 
 #include <glm/glm.hpp>
 #include <memory>
+#include <string>
 #include <vector>
 
 #include "Dataset.hpp"
@@ -26,6 +27,7 @@ struct World {
     std::vector<unsigned int> latticeEdges;
     glm::vec3 lightPos;
     bool isWatermarked;
+    std::string imagePath;
 };
 
 extern World world;
