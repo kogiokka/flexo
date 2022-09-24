@@ -3,10 +3,10 @@
 
 #include <array>
 
-template <int Dim>
+template <int Dim, typename T = float>
 struct Vec {
-    template <typename... T>
-    explicit Vec(T... args)
+    template <typename... I>
+    explicit Vec(I... args)
         : mData { args... }
     {
     }
@@ -16,7 +16,7 @@ struct Vec {
     }
 
 private:
-    std::array<float, Dim> mData;
+    std::array<T, Dim> mData;
 };
 
 #endif
