@@ -41,13 +41,11 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     m_ub.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
     m_ub.vert.light.diffusion = glm::vec3(0.8f, 0.8f, 0.8f);
     m_ub.vert.light.specular = glm::vec3(0.8f, 0.8f, 0.8f);
-    m_ub.vert.material.ambient = glm::vec3(0.3f, 0.3f, 0.3f);
-    m_ub.vert.material.diffusion = glm::vec3(0.6f, 0.6f, 0.6f);
+    m_ub.vert.material.ambient = glm::vec3(0.0f, 0.3f, 0.0f);
+    m_ub.vert.material.diffusion = glm::vec3(0.0f, 0.6f, 0.0f);
     m_ub.vert.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.vert.material.shininess = 256.0f;
     m_ub.vert.isWatermarked = false;
-
-    float color[4] = { 0.0f, 1.0f, 0.0f, 1.0f };
 
     GLWRSamplerDesc samplerDesc;
     samplerDesc.coordinateS = GLWRTextureCoordinatesMode_Wrap;
@@ -72,7 +70,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
     draw.AddBindable(Bind::TextureManager::Resolve(gfx, world.imagePath.c_str(), 0));
-    draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, color, 1, 1, 1));
+    draw.AddBindable(Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 1));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 1));
 
@@ -121,4 +119,3 @@ std::string VolumetricModel::GetName() const
 {
     return "Volumetric Model";
 }
-
