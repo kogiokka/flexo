@@ -83,6 +83,17 @@ VolumetricModel::~VolumetricModel()
 {
 }
 
+// FIXME
+void VolumetricModel::ChangeTexture(Graphics& gfx, char const* filename)
+{
+    bool (*const FindTexture)(std::shared_ptr<Bind::Bindable>&)
+        = [](std::shared_ptr<Bind::Bindable>& bind) { return (dynamic_cast<Bind::Texture2D*>(bind.get()) != nullptr); };
+
+    auto& taskBinds = m_tasks.front().mBinds;
+    taskBinds.erase(std::remove_if(taskBinds.begin(), taskBinds.end(), FindTexture), taskBinds.end());
+    m_tasks.front().AddBindable(Bind::TextureManager::Resolve(gfx, filename, 0));
+}
+
 void VolumetricModel::Update(Graphics& gfx)
 {
     m_ub.vert.viewPos = gfx.GetCameraPosition();
@@ -110,3 +121,4 @@ std::string VolumetricModel::GetName() const
 {
     return "Volumetric Model";
 }
+

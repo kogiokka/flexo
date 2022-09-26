@@ -32,7 +32,31 @@ WatermarkingProject::WatermarkingProject()
     Bind(EVT_ADD_PLATE_50_BY_50, &WatermarkingProject::OnMenuAddPlate, this);
     Bind(EVT_ADD_PLATE_100_BY_100, &WatermarkingProject::OnMenuAddPlate, this);
     Bind(EVT_ADD_PLATE_200_BY_200, &WatermarkingProject::OnMenuAddPlate, this);
-    Bind(EVT_OPEN_IMAGE, [](wxCommandEvent& event) { world.imagePath = event.GetString().ToStdString(); });
+
+    // FIXME
+    Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
+        world.imagePath = event.GetString().ToStdString();
+
+        auto& gfx = Graphics::Get(*this);
+        std::string const filename = event.GetString().ToStdString();
+        for (auto it = m_drawables.begin(); it != m_drawables.end(); it++) {
+            {
+                LatticeFace* face = dynamic_cast<LatticeFace*>(it->get());
+                if (face != nullptr) {
+                    face->ChangeTexture(gfx, filename.c_str());
+                }
+            }
+            {
+                VolumetricModel* model = dynamic_cast<VolumetricModel*>(it->get());
+                if (model != nullptr) {
+                    model->ChangeTexture(gfx, filename.c_str());
+                }
+            }
+        }
+
+        UpdateLatticeGraphics();
+        SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+    });
 }
 
 void WatermarkingProject::CreateProject()

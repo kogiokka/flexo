@@ -38,6 +38,7 @@ class LatticeFace : public Drawable
 public:
     LatticeFace(Graphics& gfx, Mesh const& mesh);
     ~LatticeFace() override;
+    void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
     std::string GetName() const override;
 };
