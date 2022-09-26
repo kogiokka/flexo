@@ -19,6 +19,11 @@ namespace Bind
         gfx.SetShaderResources(m_unit, 1, m_resource.GetAddressOf());
     }
 
+    std::string Texture2D::GenerateUID(char const* filename, GLuint unit)
+    {
+        return std::string(filename) + std::to_string(unit);
+    }
+
     template <>
     void Texture2D::DetermineDataType<float>(GLWRTexture2DDesc& desc) const
     {

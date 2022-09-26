@@ -4,6 +4,7 @@
 #include "gfx/Graphics.hpp"
 #include "gfx/bindable/Bindable.hpp"
 
+#include <string>
 #include <vector>
 
 namespace Bind
@@ -20,6 +21,7 @@ namespace Bind
         Texture2D(Graphics& gfx, T const* textureData, int width, int height, GLuint unit);
         ~Texture2D() override;
         void Bind(Graphics& gfx) override;
+        static std::string GenerateUID(char const* filename, GLuint unit);
 
     protected:
         template <typename T>

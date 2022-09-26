@@ -7,6 +7,7 @@
 #include "gfx/bindable/RasterizerState.hpp"
 #include "gfx/bindable/Sampler.hpp"
 #include "gfx/bindable/Texture2D.hpp"
+#include "gfx/bindable/TextureManager.hpp"
 #include "gfx/bindable/TransformUniformBuffer.hpp"
 #include "gfx/bindable/UniformBuffer.hpp"
 #include "gfx/bindable/VertexBuffer.hpp"
@@ -60,7 +61,7 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
-    draw.AddBindable(std::make_shared<Bind::Texture2D>(gfx, world.imagePath.c_str(), 0));
+    draw.AddBindable(Bind::TextureManager::Resolve(gfx, world.imagePath.c_str(), 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));

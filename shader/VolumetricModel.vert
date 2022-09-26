@@ -35,8 +35,8 @@ in vec3 normal;
 in vec2 textureCoord;
 in vec3 translation;
 
-layout (binding = 0) uniform sampler2D voxelColor;
-layout (binding = 1) uniform sampler2D voxelPattern;
+layout (binding = 0) uniform sampler2D voxelPattern;
+layout (binding = 1) uniform sampler2D voxelColor;
 
 out VertOut {
     vec4 color;
