@@ -362,7 +362,13 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
         }
     }
 
+    auto& positions = world.theModel->positions;
+    auto& texcoord = world.theModel->textureCoords;
+    positions.insert(positions.end(), pos.begin(), pos.end());
+    texcoord = std::vector<glm::vec2>(positions.size(), glm::vec2(0.0f, 0.0f));
+
     world.theDataset->Insert(pos);
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
