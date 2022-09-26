@@ -44,5 +44,5 @@ glm::vec3 Camera::CartesianCoord(float phi, float theta) const
     float const sinTheta = sinf(theta);
     float const cosTheta = cosf(theta);
 
-    return glm::vec3 { sinTheta * cosPhi, cosTheta, -sinTheta * sinPhi };
+    return glm::vec3 { sinTheta * cosPhi, sinTheta * sinPhi, cosTheta };
 }
