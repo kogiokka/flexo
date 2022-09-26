@@ -156,6 +156,7 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
         return;
 
     wxSize const size = GetClientSize() * GetContentScaleFactor();
+
     Graphics::Get(m_project).GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
 
     SetCurrent(*m_context);
@@ -173,6 +174,7 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
     v.farDepth = 1.0;
 
     gfx.SetViewports(1, &v);
+    ProjectWindow::Get(m_project).SetStatusText(wxString::Format("Viewport size: %dx%d", size.x, size.y));
 }
 
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
