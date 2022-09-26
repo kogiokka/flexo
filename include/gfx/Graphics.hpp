@@ -119,6 +119,7 @@ struct GLWRBufferDesc {
 struct GLWRTexture2DDesc {
     GLsizei width;
     GLsizei height;
+    GLsizei samples = 1;
     GLenum internalFormat;
     GLenum pixelFormat;
     GLenum dataType;
@@ -170,9 +171,10 @@ struct GLWRDepthStencilViewDesc {
 };
 
 struct GLWRRenderBufferDesc {
-    GLenum internalFormat;
     GLsizei width;
     GLsizei height;
+    GLsizei samples = 1;
+    GLenum internalFormat;
 };
 
 struct GLWRViewport {

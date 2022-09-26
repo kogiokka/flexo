@@ -317,11 +317,12 @@ void SceneViewportPane::InitFrame(Graphics& gfx)
         texDesc.dataType = GL_UNSIGNED_BYTE;
         texDesc.width = size.x;
         texDesc.height = size.y;
+        texDesc.samples = 4;
         initData.mem = nullptr;
         gfx.CreateTexture2D(&texDesc, &initData, &texture);
 
         GLWRRenderTargetViewDesc viewDesc;
-        viewDesc.type = GLWRRenderTargetViewType_Texture2D;
+        viewDesc.type = GLWRRenderTargetViewType_Texture2D_MS;
         viewDesc.internalFormat = GL_RGB32F;
         gfx.CreateRenderTargetView(texture, &viewDesc, &m_rtv);
         texture->Release();
@@ -329,13 +330,14 @@ void SceneViewportPane::InitFrame(Graphics& gfx)
     {
         IGLWRRenderBuffer* buffer = nullptr;
         GLWRRenderBufferDesc desc;
+        desc.samples = 4;
         desc.internalFormat = GL_DEPTH_STENCIL;
         desc.width = size.x;
         desc.height = size.y;
         gfx.CreateRenderBuffer(&desc, &buffer);
 
         GLWRDepthStencilViewDesc viewDesc;
-        viewDesc.type = GLWRDepthStencilViewType_RenderBuffer;
+        viewDesc.type = GLWRDepthStencilViewType_RenderBuffer_MS;
         viewDesc.internalFormat = GL_DEPTH24_STENCIL8;
         gfx.CreateDepthStencilView(buffer, &viewDesc, &m_dsv);
         buffer->Release();

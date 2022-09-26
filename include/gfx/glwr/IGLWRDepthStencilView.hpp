@@ -6,8 +6,10 @@
 
 typedef enum {
     GLWRDepthStencilViewType_RenderBuffer,
+    GLWRDepthStencilViewType_RenderBuffer_MS,
     GLWRDepthStencilViewType_Texture1D,
     GLWRDepthStencilViewType_Texture2D,
+    GLWRDepthStencilViewType_Texture2D_MS,
     GLWRDepthStencilViewType_Texture3D,
 } GLWRDepthStencilViewType;
 

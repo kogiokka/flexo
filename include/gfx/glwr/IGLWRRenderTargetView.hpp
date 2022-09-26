@@ -6,8 +6,10 @@
 
 typedef enum {
     GLWRRenderTargetViewType_RenderBuffer,
+    GLWRRenderTargetViewType_RenderBuffer_MS,
     GLWRRenderTargetViewType_Texture1D,
     GLWRRenderTargetViewType_Texture2D,
+    GLWRRenderTargetViewType_Texture2D_MS,
     GLWRRenderTargetViewType_Texture3D,
 } GLWRRenderTargetViewType;
 
