@@ -20,7 +20,7 @@ public:
     Renderer(WatermarkingProject& project);
     void Render(Graphics& gfx);
     void Accept(Task task);
-    std::vector<Task>& GetTasks();
+    void Clear();
 
 private:
     std::vector<Task> m_tasks;

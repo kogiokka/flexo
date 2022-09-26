@@ -7,7 +7,7 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "World.hpp"
-#include "gfx/Renderer.hpp"
+#include "gfx/DrawList.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 
@@ -41,8 +41,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent&) {
         m_sceneTree->DeleteAllItems();
         // Each drawable has only one task currently
-        for (auto const& task : Renderer::Get(m_project).GetTasks()) {
-            auto drawable = task.mDrawable;
+        for (auto const& drawable : DrawList::Get(m_project)) {
             auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetName());
             m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
         }
@@ -51,8 +50,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CHECKED, [this](wxTreeListEvent& event) {
         wxTreeListItem const item = event.GetItem();
         wxString const text = m_sceneTree->GetItemText(item);
-        for (auto const& task : Renderer::Get(m_project).GetTasks()) {
-            auto drawable = task.mDrawable;
+        for (auto const& drawable : DrawList::Get(m_project)) {
             if (text == drawable->GetName()) {
                 switch (m_sceneTree->GetCheckedState(item)) {
                 case wxCHK_CHECKED:

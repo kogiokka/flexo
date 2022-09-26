@@ -60,6 +60,7 @@ PRIVATE
 
     "src/gfx/Graphics.cpp"
     "src/gfx/Renderer.cpp"
+    "src/gfx/DrawList.cpp"
     "src/gfx/glwr/IGLWRState.cpp"
     "src/gfx/glwr/IGLWRBuffer.cpp"
     "src/gfx/glwr/IGLWRInputLayout.cpp"

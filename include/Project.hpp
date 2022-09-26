@@ -38,14 +38,10 @@ private:
     void OnMenuAddModel(wxCommandEvent& event);
     void OnMenuImportModel(wxCommandEvent& event);
     void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
-    void SetLatticeDrawables(std::vector<std::shared_ptr<DrawableBase>>& drawables);
 
     bool m_isLatticeReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-
-    // FIXME This is a temporary solution
-    std::vector<std::shared_ptr<DrawableBase>> m_drawables; // Store the shared pointers until the project exits.
 };
 
 #endif

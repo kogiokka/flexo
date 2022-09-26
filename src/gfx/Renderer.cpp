@@ -39,7 +39,7 @@ void Renderer::Accept(Task task)
     m_tasks.push_back(task);
 }
 
-std::vector<Task>& Renderer::GetTasks()
+void Renderer::Clear()
 {
-    return m_tasks;
+    m_tasks.clear();
 }

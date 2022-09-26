@@ -13,6 +13,7 @@
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
+#include "gfx/DrawList.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/drawable/LatticeEdge.hpp"
@@ -39,7 +40,8 @@ WatermarkingProject::WatermarkingProject()
 
         auto& gfx = Graphics::Get(*this);
         std::string const filename = event.GetString().ToStdString();
-        for (auto it = m_drawables.begin(); it != m_drawables.end(); it++) {
+        auto& drawables = DrawList::Get(*this);
+        for (auto it = drawables.begin(); it != drawables.end(); it++) {
             {
                 LatticeFace* face = dynamic_cast<LatticeFace*>(it->get());
                 if (face != nullptr) {
@@ -54,8 +56,12 @@ WatermarkingProject::WatermarkingProject()
             }
         }
 
-        UpdateLatticeGraphics();
-        SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+        auto& drawlist = DrawList::Get(*this);
+        drawlist.Remove<VolumetricModel>();
+        drawlist.Remove<LatticeFace>();
+        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+        drawlist.Add(std::make_shared<LatticeFace>(gfx, world.latticeMesh));
+        drawlist.Submit(Renderer::Get(*this));
     });
 }
 
@@ -237,7 +243,15 @@ void WatermarkingProject::UpdateLatticeGraphics()
     drawables.push_back(std::make_shared<LatticeVertex>(gfx, world.uvsphere, world.neurons));
     drawables.push_back(std::make_shared<LatticeEdge>(gfx, world.neurons, world.latticeEdges));
     drawables.push_back(std::make_shared<LatticeFace>(gfx, world.latticeMesh));
-    SetLatticeDrawables(drawables);
+
+    auto& drawlist = DrawList::Get(*this);
+    drawlist.Remove<LatticeVertex>();
+    drawlist.Remove<LatticeEdge>();
+    drawlist.Remove<LatticeFace>();
+    for (auto& d : drawables) {
+        drawlist.Add(d);
+    }
+    drawlist.Submit(Renderer::Get(*this));
 }
 
 void WatermarkingProject::ImportPolygonalModel(wxString const& path)
@@ -251,6 +265,7 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
     }
 
     world.theDataset = std::make_shared<Dataset<3>>(world.theModel->positions);
+
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), *world.theModel));
 }
 
@@ -319,6 +334,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     Logger::info("%lu voxels will be rendered.", pos.size());
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
+
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
 }
 
@@ -454,6 +470,7 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
 
     world.theModel = std::make_shared<Mesh>(mesh);
     world.theDataset = std::make_shared<Dataset<3>>(mesh.positions);
+
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), mesh));
 }
 
@@ -469,40 +486,9 @@ void WatermarkingProject::OnMenuImportModel(wxCommandEvent& event)
 
 void WatermarkingProject::SetModelDrawable(std::shared_ptr<DrawableBase> drawable)
 {
-    auto& renderer = Renderer::Get(*this);
-    auto& tasks = renderer.GetTasks();
-    bool (*const FindTask)(Task&) = [](Task& task) {
-        auto* dptr = task.mDrawable;
-        return (dynamic_cast<PolygonalModel*>(dptr) || dynamic_cast<VolumetricModel*>(dptr));
-    };
-    bool (*const FindDrawable)(std::shared_ptr<DrawableBase>&) = [](std::shared_ptr<DrawableBase>& drawable) {
-        auto* dptr = drawable.get();
-        return (dynamic_cast<PolygonalModel*>(dptr) || dynamic_cast<VolumetricModel*>(dptr));
-    };
-
-    tasks.erase(std::remove_if(tasks.begin(), tasks.end(), FindTask), tasks.end());
-    m_drawables.erase(std::remove_if(m_drawables.begin(), m_drawables.end(), FindDrawable), m_drawables.end());
-    drawable->Submit(renderer);
-    m_drawables.push_back(drawable);
-}
-
-void WatermarkingProject::SetLatticeDrawables(std::vector<std::shared_ptr<DrawableBase>>& drawables)
-{
-    auto& renderer = Renderer::Get(*this);
-    auto& tasks = renderer.GetTasks();
-    bool (*const FindTask)(Task&) = [](Task& task) {
-        auto* dptr = task.mDrawable;
-        return (dynamic_cast<LatticeVertex*>(dptr) || dynamic_cast<LatticeEdge*>(dptr)
-                || dynamic_cast<LatticeFace*>(dptr));
-    };
-    bool (*const FindDrawable)(std::shared_ptr<DrawableBase>&) = [](std::shared_ptr<DrawableBase>& drawable) {
-        auto* dptr = drawable.get();
-        return (dynamic_cast<LatticeVertex*>(dptr) || dynamic_cast<LatticeEdge*>(dptr)
-                || dynamic_cast<LatticeFace*>(dptr));
-    };
-
-    tasks.erase(std::remove_if(tasks.begin(), tasks.end(), FindTask), tasks.end());
-    m_drawables.erase(std::remove_if(m_drawables.begin(), m_drawables.end(), FindDrawable), m_drawables.end());
-    std::for_each(drawables.begin(), drawables.end(), [&renderer](auto& d) { d->Submit(renderer); });
-    m_drawables.insert(m_drawables.end(), drawables.begin(), drawables.end());
+    auto& drawlist = DrawList::Get(*this);
+    drawlist.Remove<VolumetricModel>();
+    drawlist.Remove<PolygonalModel>();
+    drawlist.Add(drawable);
+    drawlist.Submit(Renderer::Get(*this));
 }
