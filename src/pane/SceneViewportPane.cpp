@@ -242,6 +242,7 @@ void SceneViewportPane::OnMenuScreenshot(wxCommandEvent&)
     char filename[80];
     struct tm timeStruct = *localtime(&now);
     std::strftime(filename, sizeof(filename), "Screenshot_%Y%m%d_%H%M%S.png", &timeStruct);
+    stbi_flip_vertically_on_write(1);
     stbi_write_png(filename, size.x, size.y, 4, image.data(), size.x * 4);
     ProjectWindow::Get(m_project).SetStatusText(wxString::Format("The screenshot was saved as \"%s\"", filename));
 }
