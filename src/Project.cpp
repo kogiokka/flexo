@@ -69,7 +69,7 @@ void WatermarkingProject::CreateProject()
 {
     assert(world.theDataset);
 
-    SelfOrganizingMap::Get(*this).CreateProcedure(*LatticeList::Get(*this).GetCurrent(), world.theDataset);
+    SelfOrganizingMap::Get(*this).CreateProcedure(world.theLattice, world.theDataset);
 
     world.isWatermarked = false;
 }
@@ -88,7 +88,7 @@ void WatermarkingProject::BuildLatticeMesh() const
     if (!m_isLatticeReady)
         return;
 
-    Lattice<3, 2> const& lattice = *LatticeList::Get(*this).GetCurrent();
+    Lattice<3, 2> const& lattice = *world.theLattice;
     Mesh mesh;
 
     std::vector<glm::vec3> positions;
@@ -173,9 +173,9 @@ void WatermarkingProject::UpdateLatticeEdges() const
 {
     std::vector<unsigned int> indices;
 
-    auto lattice = LatticeList::Get(*this).GetCurrent();
-    int const width = lattice->mWidth;
-    int const height = lattice->mHeight;
+    auto const& lattice = *world.theLattice;
+    int const width = lattice.mWidth;
+    int const height = lattice.mHeight;
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);

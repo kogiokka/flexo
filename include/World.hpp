@@ -24,6 +24,7 @@ struct World {
     Mesh neurons;
     std::shared_ptr<Mesh> theModel;
     std::shared_ptr<Dataset<3>> theDataset;
+    std::shared_ptr<Lattice<3, 2>> theLattice;
     std::vector<unsigned int> latticeEdges;
     glm::vec3 lightPos;
     bool isWatermarked;

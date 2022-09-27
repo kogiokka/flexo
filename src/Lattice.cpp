@@ -24,7 +24,6 @@ LatticeList const& LatticeList::Get(WatermarkingProject const& project)
 
 LatticeList::LatticeList(WatermarkingProject& project)
     : m_project(project)
-    , m_curr(nullptr)
 {
 }
 
@@ -61,17 +60,4 @@ void LatticeList::Add(int width, int height, LatticeFlags flags, LatticeInitStat
     lattice->mFlags = flags;
 
     emplace_back(std::move(lattice));
-}
-
-void LatticeList::SetCurrent(unsigned int index)
-{
-    if (index >= size()) {
-        return;
-    }
-    m_curr = operator[](index);
-}
-
-std::shared_ptr<Lattice<3, 2>> LatticeList::GetCurrent() const
-{
-    return m_curr;
 }

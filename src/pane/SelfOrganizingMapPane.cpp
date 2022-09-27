@@ -47,8 +47,8 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
     heightText->SetValidator(validDimen);
 
     comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
-        LatticeList::Get(m_project).SetCurrent(event.GetSelection());
-        auto lattice = LatticeList::Get(m_project).GetCurrent();
+        auto lattice = LatticeList::Get(m_project)[event.GetSelection()];
+        world.theLattice = lattice;
         int const width = lattice->mWidth;
         int const height = lattice->mHeight;
         float const diagLen = sqrt(width * width + height * height);
@@ -180,7 +180,7 @@ void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
         return;
     }
 
-    if (!LatticeList::Get(m_project).GetCurrent()) {
+    if (!world.theLattice) {
         wxMessageDialog dialog(this, "Please create and select a lattice first!", "Error", wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
         return;

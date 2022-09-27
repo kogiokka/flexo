@@ -49,12 +49,9 @@ public:
     LatticeList& operator=(LatticeList const&) = delete;
     void Add(int width, int height, LatticeFlags flags, LatticeInitState initState = LatticeInitState_Random,
              BoundingBox box = { { -100.0f, -100.0f, -100.0f }, { 100.0f, 100.0f, 100.0f } });
-    void SetCurrent(unsigned int index);
-    std::shared_ptr<Lattice<3, 2>> GetCurrent() const;
 
 private:
     WatermarkingProject& m_project;
-    std::shared_ptr<Lattice<3, 2>> m_curr;
 };
 
 #endif

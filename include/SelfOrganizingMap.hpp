@@ -51,7 +51,7 @@ public:
      * @param dataset Dataset as the input space of SOM
      */
     template <int InDim, int OutDim>
-    void CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset);
+    void CreateProcedure(std::shared_ptr<Lattice<InDim, OutDim>>& lattice, std::shared_ptr<Dataset<InDim>> dataset);
 
     void ToggleTraining();
     bool IsDone() const;
@@ -75,7 +75,7 @@ private:
      * @param dataset Dataset as the input space of SOM
      */
     template <int InDim, int OutDim>
-    void Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset);
+    void Train(std::shared_ptr<Lattice<InDim, OutDim>> lattice, std::shared_ptr<Dataset<InDim>> dataset);
 
     /**
      * Find the Best Matching Unit
@@ -108,7 +108,8 @@ private:
 };
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset)
+void SelfOrganizingMap::CreateProcedure(std::shared_ptr<Lattice<InDim, OutDim>>& lattice,
+                                        std::shared_ptr<Dataset<InDim>> dataset)
 {
     {
         StopWorker();
@@ -123,19 +124,19 @@ void SelfOrganizingMap::CreateProcedure(Lattice<InDim, OutDim>& lattice, std::sh
     m_learnRate = LearningRate(ProjectSettings::Get(m_project).GetLearningRate(), m_tmax);
     m_neighborhood = Neighborhood(NeighborhoodRadius(settings.GetNeighborhood(), m_tmax));
 
-    void (SelfOrganizingMap::*Train)(Lattice<InDim, OutDim>&, std::shared_ptr<Dataset<InDim>>)
+    void (SelfOrganizingMap::*Train)(std::shared_ptr<Lattice<InDim, OutDim>>, std::shared_ptr<Dataset<InDim>>)
         = &SelfOrganizingMap::Train;
-    m_worker = std::thread(Train, std::ref(*this), std::ref(lattice), dataset);
+    m_worker = std::thread(Train, std::ref(*this), lattice, dataset);
 
     Logger::info("Training worker created");
 }
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<Dataset<InDim>> dataset)
+void SelfOrganizingMap::Train(std::shared_ptr<Lattice<InDim, OutDim>> lattice, std::shared_ptr<Dataset<InDim>> dataset)
 {
-    auto& neurons = lattice.mNeurons;
-    int const width = lattice.mWidth;
-    int const height = lattice.mHeight;
+    auto& neurons = lattice->mNeurons;
+    int const width = lattice->mWidth;
+    int const height = lattice->mHeight;
 
     while (m_t < m_tmax) {
         std::unique_lock lk(m_mut);
@@ -145,17 +146,17 @@ void SelfOrganizingMap::Train(Lattice<InDim, OutDim>& lattice, std::shared_ptr<D
         }
 
         Vec<InDim> const input = dataset->GetInput();
-        glm::ivec2 const index = FindBMU(lattice, input);
+        glm::ivec2 const index = FindBMU(*lattice, input);
         auto const& bmu = neurons[index.x + index.y * width];
-        UpdateNeighborhood(lattice, input, bmu, m_learnRate, m_neighborhood);
+        UpdateNeighborhood(*lattice, input, bmu, m_learnRate, m_neighborhood);
 
-        if (lattice.mFlags & LatticeFlags_CyclicX) {
+        if (lattice->mFlags & LatticeFlags_CyclicX) {
             for (int y = 0; y < height; y++) {
                 neurons[y * width + width - 1] = neurons[y * width + 0];
             }
         }
 
-        if (lattice.mFlags & LatticeFlags_CyclicY) {
+        if (lattice->mFlags & LatticeFlags_CyclicY) {
             for (int x = 0; x < width; x++) {
                 neurons[(height - 1) * width + x] = neurons[0 * width + x];
             }
@@ -230,4 +231,3 @@ void SelfOrganizingMap::UpdateNeighborhood(Lattice<InDim, OutDim>& lattice, Vec<
 }
 
 #endif
-
