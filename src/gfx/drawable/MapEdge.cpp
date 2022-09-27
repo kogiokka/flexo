@@ -14,9 +14,9 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
-#include "gfx/drawable/LatticeEdge.hpp"
+#include "gfx/drawable/MapEdge.hpp"
 
-LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices)
+MapEdge::MapEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices)
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
@@ -36,9 +36,9 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned i
     Task draw;
     draw.mDrawable = this;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeEdge.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/MapEdge.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeEdge.frag"));
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/MapEdge.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
@@ -48,11 +48,11 @@ LatticeEdge::LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned i
     AddTask(draw);
 }
 
-LatticeEdge::~LatticeEdge()
+MapEdge::~MapEdge()
 {
 }
 
-void LatticeEdge::Update(Graphics& gfx)
+void MapEdge::Update(Graphics& gfx)
 {
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
@@ -71,7 +71,7 @@ void LatticeEdge::Update(Graphics& gfx)
     }
 }
 
-std::string LatticeEdge::GetName() const
+std::string MapEdge::GetName() const
 {
-    return "Lattice Edge";
+    return "Map Edge";
 }

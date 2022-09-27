@@ -1,5 +1,5 @@
-#ifndef LATTICE_EDGE_H
-#define LATTICE_EDGE_H
+#ifndef MAP_EDGE_H
+#define MAP_EDGE_H
 
 #include <vector>
 
@@ -10,7 +10,7 @@
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/drawable/IndexedDrawable.hpp"
 
-class LatticeEdge : public IndexedDrawable
+class MapEdge : public IndexedDrawable
 {
     struct UniformBlock {
         struct Frag {
@@ -23,8 +23,8 @@ class LatticeEdge : public IndexedDrawable
     UniformBlock m_ub;
 
 public:
-    LatticeEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices);
-    ~LatticeEdge() override;
+    MapEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices);
+    ~MapEdge() override;
     void Update(Graphics& gfx) override;
     std::string GetName() const override;
 };

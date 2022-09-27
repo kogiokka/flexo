@@ -1,4 +1,4 @@
-#include "gfx/drawable/LatticeFace.hpp"
+#include "gfx/drawable/MapFace.hpp"
 #include "Vertex.hpp"
 #include "World.hpp"
 #include "gfx/Task.hpp"
@@ -14,7 +14,7 @@
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 
-LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
+MapFace::MapFace(Graphics& gfx, Mesh const& mesh)
 {
     std::vector<GLWRInputElementDesc> inputs = {
         { "position", GLWRFormat_Float3, 0, offsetof(VertexPNT, position), GLWRInputClassification_PerVertex, 0 },
@@ -55,9 +55,9 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     Task draw;
     draw.mDrawable = this;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeFace.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/MapFace.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeFace.frag"));
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/MapFace.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
@@ -69,12 +69,12 @@ LatticeFace::LatticeFace(Graphics& gfx, Mesh const& mesh)
     AddTask(draw);
 }
 
-LatticeFace::~LatticeFace()
+MapFace::~MapFace()
 {
 }
 
 // FIXME
-void LatticeFace::ChangeTexture(Graphics& gfx, char const* filename)
+void MapFace::ChangeTexture(Graphics& gfx, char const* filename)
 {
     bool (*const FindTexture)(std::shared_ptr<Bind::Bindable>&)
         = [](std::shared_ptr<Bind::Bindable>& bind) { return (dynamic_cast<Bind::Texture2D*>(bind.get()) != nullptr); };
@@ -84,7 +84,7 @@ void LatticeFace::ChangeTexture(Graphics& gfx, char const* filename)
     m_tasks.front().AddBindable(Bind::TextureManager::Resolve(gfx, filename, 0));
 }
 
-void LatticeFace::Update(Graphics& gfx)
+void MapFace::Update(Graphics& gfx)
 {
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
@@ -93,12 +93,12 @@ void LatticeFace::Update(Graphics& gfx)
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
         if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
             std::vector<VertexPNT> vertices;
-            vertices.resize(world.latticeMesh.positions.size());
-            for (unsigned int i = 0; i < world.latticeMesh.positions.size(); i++) {
+            vertices.resize(world.mapMesh.positions.size());
+            for (unsigned int i = 0; i < world.mapMesh.positions.size(); i++) {
                 VertexPNT v;
-                v.position = world.latticeMesh.positions[i];
-                v.normal = world.latticeMesh.normals[i];
-                v.texcoord = world.latticeMesh.textureCoords[i];
+                v.position = world.mapMesh.positions[i];
+                v.normal = world.mapMesh.normals[i];
+                v.texcoord = world.mapMesh.textureCoords[i];
                 vertices[i] = v;
             }
             vb->Update(gfx, vertices);
@@ -115,7 +115,7 @@ void LatticeFace::Update(Graphics& gfx)
     }
 }
 
-std::string LatticeFace::GetName() const
+std::string MapFace::GetName() const
 {
-    return "Lattice Face";
+    return "Map Face";
 }

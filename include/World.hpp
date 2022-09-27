@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "Dataset.hpp"
-#include "Lattice.hpp"
+#include "Map.hpp"
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
 #include "VolumeData.hpp"
@@ -20,12 +20,12 @@ struct World {
 
     Mesh uvsphere;
     Mesh cube;
-    Mesh latticeMesh;
+    Mesh mapMesh;
     Mesh neurons;
     std::shared_ptr<Mesh> theModel;
     std::shared_ptr<Dataset<3>> theDataset;
-    std::shared_ptr<Lattice<3, 2>> theLattice;
-    std::vector<unsigned int> latticeEdges;
+    std::shared_ptr<Map<3, 2>> theMap;
+    std::vector<unsigned int> mapEdges;
     glm::vec3 lightPos;
     bool isWatermarked;
     std::string imagePath;

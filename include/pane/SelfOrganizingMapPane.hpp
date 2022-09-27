@@ -7,7 +7,7 @@
 #include <wx/slider.h>
 #include <wx/stattext.h>
 
-#include "Lattice.hpp"
+#include "Map.hpp"
 #include "pane/ControlsPaneBase.hpp"
 
 class SelfOrganizingMapPane : public ControlsPaneBase
@@ -23,7 +23,7 @@ public:
     bool IsProjectStopped() const;
 
 private:
-    void PopulateLatticePanel();
+    void PopulateMapPanel();
     void PopulateParametersPanel();
     void PopulateDisplayPanel();
     void PopulateControlPanel();

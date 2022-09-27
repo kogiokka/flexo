@@ -12,9 +12,9 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
-#include "gfx/drawable/LatticeVertex.hpp"
+#include "gfx/drawable/MapVertex.hpp"
 
-LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
+MapVertex::MapVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
@@ -51,9 +51,9 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     Task draw;
     draw.mDrawable = this;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/LatticeVertex.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/MapVertex.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/LatticeVertex.frag"));
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/MapVertex.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(
         std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f)));
@@ -64,11 +64,11 @@ LatticeVertex::LatticeVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const
     AddTask(draw);
 }
 
-LatticeVertex::~LatticeVertex()
+MapVertex::~MapVertex()
 {
 }
 
-void LatticeVertex::Update(Graphics& gfx)
+void MapVertex::Update(Graphics& gfx)
 {
     m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
@@ -91,7 +91,7 @@ void LatticeVertex::Update(Graphics& gfx)
     }
 }
 
-std::string LatticeVertex::GetName() const
+std::string MapVertex::GetName() const
 {
-    return "Lattice Vertex";
+    return "Map Vertex";
 }

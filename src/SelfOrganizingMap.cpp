@@ -1,5 +1,5 @@
 #include "SelfOrganizingMap.hpp"
-#include "Lattice.hpp"
+#include "Map.hpp"
 #include "Project.hpp"
 #include "ProjectSettings.hpp"
 #include "common/Logger.hpp"

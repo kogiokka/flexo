@@ -89,7 +89,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearRenderTargetView(m_rtv.Get(), bgColor);
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
-    m_project.BuildLatticeMesh();
+    m_project.BuildMapMesh();
     Renderer::Get(m_project).Render(gfx);
 
     gfx.Present();

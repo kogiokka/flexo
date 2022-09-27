@@ -48,7 +48,7 @@ PRIVATE
     "src/pane/SceneViewportPane.cpp"
 
     "src/Camera.cpp"
-    "src/Lattice.cpp"
+    "src/Map.cpp"
     "src/Mesh.cpp"
     "src/Util.cpp"
     "src/World.cpp"
@@ -92,9 +92,9 @@ PRIVATE
     "src/gfx/drawable/PolygonalModel.cpp"
     "src/gfx/drawable/VolumetricModel.cpp"
     "src/gfx/drawable/LightSource.cpp"
-    "src/gfx/drawable/LatticeVertex.cpp"
-    "src/gfx/drawable/LatticeEdge.cpp"
-    "src/gfx/drawable/LatticeFace.cpp"
+    "src/gfx/drawable/MapVertex.cpp"
+    "src/gfx/drawable/MapEdge.cpp"
+    "src/gfx/drawable/MapFace.cpp"
 
     "src/LearningRate.cpp"
     "src/Neighborhood.cpp"

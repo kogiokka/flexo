@@ -23,15 +23,15 @@ public:
     WatermarkingProject();
     void CreateProject();
     void StopProject();
-    void BuildLatticeMesh() const;
+    void BuildMapMesh() const;
     void DoWatermark();
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
-    void UpdateLatticeGraphics();
+    void UpdateMapGraphics();
 
 private:
-    void UpdateLatticeEdges() const;
+    void UpdateMapEdges() const;
     void ImportPolygonalModel(wxString const& path);
     void ImportVolumetricModel(wxString const& path);
     void OnMenuAddPlate(wxCommandEvent& event);
@@ -39,7 +39,7 @@ private:
     void OnMenuImportModel(wxCommandEvent& event);
     void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
 
-    bool m_isLatticeReady;
+    bool m_isMapReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
 };

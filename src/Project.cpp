@@ -16,15 +16,15 @@
 #include "gfx/DrawList.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
-#include "gfx/drawable/LatticeEdge.hpp"
-#include "gfx/drawable/LatticeFace.hpp"
-#include "gfx/drawable/LatticeVertex.hpp"
+#include "gfx/drawable/MapEdge.hpp"
+#include "gfx/drawable/MapFace.hpp"
+#include "gfx/drawable/MapVertex.hpp"
 #include "gfx/drawable/LightSource.hpp"
 #include "gfx/drawable/PolygonalModel.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
 
 WatermarkingProject::WatermarkingProject()
-    : m_isLatticeReady(false)
+    : m_isMapReady(false)
     , m_frame {}
     , m_panel {}
 {
@@ -43,7 +43,7 @@ WatermarkingProject::WatermarkingProject()
         auto& drawables = DrawList::Get(*this);
         for (auto it = drawables.begin(); it != drawables.end(); it++) {
             {
-                LatticeFace* face = dynamic_cast<LatticeFace*>(it->get());
+                MapFace* face = dynamic_cast<MapFace*>(it->get());
                 if (face != nullptr) {
                     face->ChangeTexture(gfx, filename.c_str());
                 }
@@ -58,9 +58,9 @@ WatermarkingProject::WatermarkingProject()
 
         auto& drawlist = DrawList::Get(*this);
         drawlist.Remove<VolumetricModel>();
-        drawlist.Remove<LatticeFace>();
+        drawlist.Remove<MapFace>();
         drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
-        drawlist.Add(std::make_shared<LatticeFace>(gfx, world.latticeMesh));
+        drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
 }
@@ -69,7 +69,7 @@ void WatermarkingProject::CreateProject()
 {
     assert(world.theDataset);
 
-    SelfOrganizingMap::Get(*this).CreateProcedure(world.theLattice, world.theDataset);
+    SelfOrganizingMap::Get(*this).CreateProcedure(world.theMap, world.theDataset);
 
     world.isWatermarked = false;
 }
@@ -83,26 +83,26 @@ void WatermarkingProject::StopProject()
     som.StopWorker();
 }
 
-void WatermarkingProject::BuildLatticeMesh() const
+void WatermarkingProject::BuildMapMesh() const
 {
-    if (!m_isLatticeReady)
+    if (!m_isMapReady)
         return;
 
-    Lattice<3, 2> const& lattice = *world.theLattice;
+    Map<3, 2> const& map = *world.theMap;
     Mesh mesh;
 
     std::vector<glm::vec3> positions;
 
     // Positions
-    auto const& neurons = lattice.mNeurons;
+    auto const& neurons = map.mNeurons;
     positions.reserve(neurons.size());
     for (auto const& n : neurons) {
         auto const& w = n.weights;
         positions.emplace_back(w[0], w[1], w[2]);
     }
 
-    int const width = lattice.mWidth;
-    int const height = lattice.mHeight;
+    int const width = map.mWidth;
+    int const height = map.mHeight;
     // float const divisor = 1.1f; // FIXME
 
     float const w = static_cast<float>(width - 1);
@@ -163,19 +163,19 @@ void WatermarkingProject::BuildLatticeMesh() const
     }
 
     world.neurons.positions = positions;
-    world.latticeMesh = mesh;
+    world.mapMesh = mesh;
 
     // FIXME?
-    UpdateLatticeEdges();
+    UpdateMapEdges();
 }
 
-void WatermarkingProject::UpdateLatticeEdges() const
+void WatermarkingProject::UpdateMapEdges() const
 {
     std::vector<unsigned int> indices;
 
-    auto const& lattice = *world.theLattice;
-    int const width = lattice.mWidth;
-    int const height = lattice.mHeight;
+    auto const& map = *world.theMap;
+    int const width = map.mWidth;
+    int const height = map.mHeight;
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);
@@ -189,7 +189,7 @@ void WatermarkingProject::UpdateLatticeEdges() const
         }
     }
 
-    world.latticeEdges = indices;
+    world.mapEdges = indices;
 }
 
 void WatermarkingProject::SetFrame(wxFrame* frame)
@@ -216,14 +216,14 @@ void WatermarkingProject::DoWatermark()
     textureCoords.reserve(world.theModel->textureCoords.size());
 
     for (glm::vec3 const& vp : world.theModel->positions) {
-        glm::vec2 coord = world.latticeMesh.textureCoords.front();
-        float minDist = glm::distance(vp, world.latticeMesh.positions.front());
+        glm::vec2 coord = world.mapMesh.textureCoords.front();
+        float minDist = glm::distance(vp, world.mapMesh.positions.front());
         // TODO: Deal with the duplicate calculations
-        for (unsigned int i = 1; i < world.latticeMesh.positions.size(); i++) {
-            auto dist = glm::distance(vp, world.latticeMesh.positions[i]);
+        for (unsigned int i = 1; i < world.mapMesh.positions.size(); i++) {
+            auto dist = glm::distance(vp, world.mapMesh.positions[i]);
             if (dist < minDist) {
                 minDist = dist;
-                coord = world.latticeMesh.textureCoords[i];
+                coord = world.mapMesh.textureCoords[i];
             }
         }
         textureCoords.push_back(coord);
@@ -232,22 +232,22 @@ void WatermarkingProject::DoWatermark()
     world.isWatermarked = true;
 }
 
-void WatermarkingProject::UpdateLatticeGraphics()
+void WatermarkingProject::UpdateMapGraphics()
 {
     // TODO: Better solution
-    m_isLatticeReady = true;
-    BuildLatticeMesh();
+    m_isMapReady = true;
+    BuildMapMesh();
 
     std::vector<std::shared_ptr<DrawableBase>> drawables;
     auto& gfx = Graphics::Get(*this);
-    drawables.push_back(std::make_shared<LatticeVertex>(gfx, world.uvsphere, world.neurons));
-    drawables.push_back(std::make_shared<LatticeEdge>(gfx, world.neurons, world.latticeEdges));
-    drawables.push_back(std::make_shared<LatticeFace>(gfx, world.latticeMesh));
+    drawables.push_back(std::make_shared<MapVertex>(gfx, world.uvsphere, world.neurons));
+    drawables.push_back(std::make_shared<MapEdge>(gfx, world.neurons, world.mapEdges));
+    drawables.push_back(std::make_shared<MapFace>(gfx, world.mapMesh));
 
     auto& drawlist = DrawList::Get(*this);
-    drawlist.Remove<LatticeVertex>();
-    drawlist.Remove<LatticeEdge>();
-    drawlist.Remove<LatticeFace>();
+    drawlist.Remove<MapVertex>();
+    drawlist.Remove<MapEdge>();
+    drawlist.Remove<MapFace>();
     for (auto& d : drawables) {
         drawlist.Add(d);
     }

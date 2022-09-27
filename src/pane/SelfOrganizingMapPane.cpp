@@ -15,7 +15,7 @@
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
-    PopulateLatticePanel();
+    PopulateMapPanel();
     PopulateParametersPanel();
     PopulateDisplayPanel();
     PopulateControlPanel();
@@ -28,13 +28,13 @@ bool SelfOrganizingMapPane::IsProjectStopped() const
     return m_isStopped;
 }
 
-void SelfOrganizingMapPane::PopulateLatticePanel()
+void SelfOrganizingMapPane::PopulateMapPanel()
 {
-    auto* group = AddGroup("Lattice", 8);
+    auto* group = AddGroup("Map", 8);
 
     auto* comboBox = group->AddBitmapComboBox("Instances");
-    auto* widthText = group->AddInputText("Lattice Width");
-    auto* heightText = group->AddInputText("Lattice Height");
+    auto* widthText = group->AddInputText("Map Width");
+    auto* heightText = group->AddInputText("Map Height");
     auto* cyclicX = group->AddCheckBoxWithHeading("Cyclic", "X", false);
     auto* cyclicY = group->AddCheckBox("Y", false);
     auto* initStatePlane = group->AddRadioButtonWithHeading("Initialize Method", "Plane", true);
@@ -47,39 +47,39 @@ void SelfOrganizingMapPane::PopulateLatticePanel()
     heightText->SetValidator(validDimen);
 
     comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
-        auto lattice = LatticeList::Get(m_project)[event.GetSelection()];
-        world.theLattice = lattice;
-        int const width = lattice->mWidth;
-        int const height = lattice->mHeight;
+        auto map = MapList::Get(m_project)[event.GetSelection()];
+        world.theMap = map;
+        int const width = map->mWidth;
+        int const height = map->mHeight;
         float const diagLen = sqrt(width * width + height * height);
         float const radius = 0.5f * diagLen;
         ProjectSettings::Get(m_project).SetNeighborhood(radius);
         SetupNeighborhoodRadiusSlider(diagLen, radius);
-        m_project.UpdateLatticeGraphics();
+        m_project.UpdateMapGraphics();
     });
 
     addBtn->Bind(
         wxEVT_BUTTON, [this, widthText, heightText, cyclicX, cyclicY, comboBox, initStatePlane](wxCommandEvent&) {
             long width;
             long height;
-            LatticeFlags flags = LatticeFlags_CyclicNone;
+            MapFlags flags = MapFlags_CyclicNone;
             if (cyclicX->GetValue()) {
-                flags |= LatticeFlags_CyclicX;
+                flags |= MapFlags_CyclicX;
             }
             if (cyclicY->GetValue()) {
-                flags |= LatticeFlags_CyclicY;
+                flags |= MapFlags_CyclicY;
             }
             if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
-                LatticeInitState state = LatticeInitState_Random;
+                MapInitState state = MapInitState_Random;
                 if (initStatePlane->GetValue()) {
-                    state = LatticeInitState_Plane;
+                    state = MapInitState_Plane;
                 }
                 if (world.theDataset) {
-                    LatticeList::Get(m_project).Add(width, height, flags, state, world.theDataset->GetBoundingBox());
+                    MapList::Get(m_project).Add(width, height, flags, state, world.theDataset->GetBoundingBox());
                 } else {
-                    LatticeList::Get(m_project).Add(width, height, flags, state);
+                    MapList::Get(m_project).Add(width, height, flags, state);
                 }
-                comboBox->Append(wxString::Format("Lattice.00%zu", LatticeList::Get(m_project).size()),
+                comboBox->Append(wxString::Format("Map.00%zu", MapList::Get(m_project).size()),
                                  wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
             }
         });
@@ -180,8 +180,8 @@ void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
         return;
     }
 
-    if (!world.theLattice) {
-        wxMessageDialog dialog(this, "Please create and select a lattice first!", "Error", wxCENTER | wxICON_ERROR);
+    if (!world.theMap) {
+        wxMessageDialog dialog(this, "Please create and select a map first!", "Error", wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
         return;
     }
