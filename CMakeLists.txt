@@ -10,12 +10,13 @@ find_package(wxWidgets 3.1 COMPONENTS base gl core aui REQUIRED)
 find_package(glm REQUIRED)
 include(${wxWidgets_USE_FILE})
 
+add_executable(som-demo)
+add_subdirectory("external/librvl")
+
 set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external/")
 include("cmake/BuildGLAD.cmake")
 include("cmake/BuildStbImage.cmake")
 include("cmake/BuildTomlPlusPlus.cmake")
-
-add_executable(som-demo)
 
 set_target_properties(som-demo
     PROPERTIES
@@ -52,7 +53,6 @@ PRIVATE
     "src/Mesh.cpp"
     "src/Util.cpp"
     "src/World.cpp"
-    "src/VolumeData.cpp"
     "src/common/Logger.cpp"
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
@@ -107,6 +107,7 @@ PRIVATE
 )
 
 target_link_libraries(som-demo PRIVATE
+    rvl::rvl
     glad
     stb_image
     tomlplusplus

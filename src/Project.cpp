@@ -6,6 +6,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+extern "C" {
+#include <rvl.h>
+}
+
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
@@ -271,23 +275,31 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
-    VolumeData data;
+    RVL* rvl = rvl_create_reader(path.c_str());
+    rvl_read_rvl(rvl);
+
+    RVLByte* data;
+    RVLSize size;
+    int rx, ry, rz;
+    RVLValueFormat format = rvl_get_value_format(rvl);
+    RVLValueBitDepth bitdepth = rvl_get_value_bit_depth(rvl);
+    rvl_get_resolution(rvl, &rx, &ry, &rz);
+    rvl_get_data_buffer(rvl, &data, &size);
+
+    if (format != RVLValueFormat_Unsigned || bitdepth != RVLValueBitDepth_8) {
+        std::cerr << "Wrong RVL format: " << path << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
 
     world.theModel = std::make_shared<Mesh>();
     auto& pos = world.theModel->positions;
     auto& texcoord = world.theModel->textureCoords;
 
-    if (!data.read(path.ToStdString())) {
-        Logger::error(R"(Failed to read volumetric model: "%s")", path.ToStdString().c_str());
-        return;
-    }
-
     const int model = 255;
-    auto reso = data.resolution();
-    for (int x = 0; x < reso.x; x++) {
-        for (int y = 0; y < reso.y; y++) {
-            for (int z = 0; z < reso.z; z++) {
-                if (data.value(x, y, z) == model) {
+    for (int x = 0; x < rx; x++) {
+        for (int y = 0; y < ry; y++) {
+            for (int z = 0; z < rz; z++) {
+                if (data[x + y * rx + z * rx * ry] == model) {
                     pos.push_back(glm::vec3 { x, y, z });
                 }
             }
@@ -298,6 +310,8 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     Logger::info("%lu voxels will be rendered.", pos.size());
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
+
+    rvl_destroy(&rvl);
 
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
 }
@@ -447,7 +461,7 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
 void WatermarkingProject::OnMenuImportModel(wxCommandEvent& event)
 {
     wxString const filepath = event.GetString();
-    if (filepath.EndsWith(".toml")) {
+    if (filepath.EndsWith(".rvl")) {
         ImportVolumetricModel(filepath);
     } else {
         ImportPolygonalModel(filepath);

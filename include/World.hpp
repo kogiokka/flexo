@@ -10,7 +10,6 @@
 #include "Map.hpp"
 #include "Mesh.hpp"
 #include "RandomIntNumber.hpp"
-#include "VolumeData.hpp"
 
 struct World {
     World();

@@ -7,4 +7,6 @@ imgui.ini
 models/*
 !models/default
 
+external/*/downloads
+
 tf_record.txt

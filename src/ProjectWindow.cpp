@@ -176,7 +176,7 @@ void ProjectWindow::OnOpenModelFile(wxCommandEvent&)
     static wxString defaultDir = "";
 
     wxFileDialog dialog(this, "Import Input Dataset", defaultDir, "",
-                        "Volumetric models|*.toml|Polygonal models (*stl,*.obj)|*stl;*.obj",
+                        "Volumetric models|*.rvl|Polygonal models (*stl,*.obj)|*stl;*.obj",
                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     dialog.CenterOnParent();
 
