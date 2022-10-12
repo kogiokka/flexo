@@ -6,9 +6,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-extern "C" {
 #include <rvl.h>
-}
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"

@@ -88,59 +88,69 @@ typedef uint8_t RVLEndian;
 #define RVLGridUnit_Meter 0
 #define RVLGridUnit_Kilometer 3
 
-RVL *rvl_create_writer (const char *filename);
-RVL *rvl_create_reader (const char *filename);
-void rvl_destroy (RVL **self);
+// Prevent name-mangling for librvl functions from C++ compiler.
+#ifdef __cplusplus
+extern "C"
+{
+#endif
 
-// Write the entire rvl file
-void rvl_write_rvl (RVL *self);
+  RVL *rvl_create_writer (const char *filename);
+  RVL *rvl_create_reader (const char *filename);
+  void rvl_destroy (RVL **self);
 
-// Read the entire rvl file
-void rvl_read_rvl (RVL *self);
+  // Write the entire rvl file
+  void rvl_write_rvl (RVL *self);
 
-// Read the information without the actual volumetric data
-// Use rvl_get_* to retrieve information.
-void rvl_read_info (RVL *self);
+  // Read the entire rvl file
+  void rvl_read_rvl (RVL *self);
 
-// Read the entire volumetric data into a 1D buffer. The data allocation and
-// deallocation is managed by the user.
-void rvl_read_data_buffer (RVL *self, RVLByte **data);
+  // Read the information without the actual volumetric data
+  // Use rvl_get_* to retrieve information.
+  void rvl_read_info (RVL *self);
 
-void rvl_set_grid_type (RVL *self, RVLGridType gridType);
-void rvl_set_grid_unit (RVL *self, RVLGridUnit gridUnit);
-void rvl_set_value_format (RVL *self, RVLValueFormat format);
-void rvl_set_value_dimension (RVL *self, RVLValueDimen dimen);
-void rvl_set_value_bit_depth (RVL *self, RVLValueBitDepth bitDepth);
-void rvl_set_endian (RVL *self, RVLEndian endian);
+  // Read the entire volumetric data into a 1D buffer. The data allocation and
+  // deallocation is managed by the user.
+  void rvl_read_data_buffer (RVL *self, RVLByte **data);
 
-void rvl_set_resolution (RVL *self, int x, int y, int z);
-void rvl_set_voxel_size (RVL *self, float x, float y, float z);
-void rvl_set_position (RVL *self, float x, float y, float z);
+  void rvl_set_grid_type (RVL *self, RVLGridType gridType);
+  void rvl_set_grid_unit (RVL *self, RVLGridUnit gridUnit);
+  void rvl_set_value_format (RVL *self, RVLValueFormat format);
+  void rvl_set_value_dimension (RVL *self, RVLValueDimen dimen);
+  void rvl_set_value_bit_depth (RVL *self, RVLValueBitDepth bitDepth);
+  void rvl_set_endian (RVL *self, RVLEndian endian);
 
-RVLGridType rvl_get_grid_type (RVL *self);
-RVLGridUnit rvl_get_grid_unit (RVL *self);
-RVLValueDimen rvl_get_value_dimension (RVL *self);
-RVLValueFormat rvl_get_value_format (RVL *self);
-RVLValueBitDepth rvl_get_value_bit_depth (RVL *self);
-RVLEndian rvl_get_endian (RVL *self);
+  void rvl_set_resolution (RVL *self, int x, int y, int z);
+  void rvl_set_voxel_size (RVL *self, float x, float y, float z);
+  void rvl_set_position (RVL *self, float x, float y, float z);
 
-void rvl_get_resolution (RVL *self, int *x, int *y, int *z);
-void rvl_get_voxel_size (RVL *self, float *x, float *y, float *z);
-void rvl_get_position (RVL *self, float *x, float *y, float *z);
+  RVLGridType rvl_get_grid_type (RVL *self);
+  RVLGridUnit rvl_get_grid_unit (RVL *self);
+  RVLValueDimen rvl_get_value_dimension (RVL *self);
+  RVLValueFormat rvl_get_value_format (RVL *self);
+  RVLValueBitDepth rvl_get_value_bit_depth (RVL *self);
+  RVLEndian rvl_get_endian (RVL *self);
 
-RVLSize rvl_get_value_byte_count (RVL *self);
+  void rvl_get_resolution (RVL *self, int *x, int *y, int *z);
+  void rvl_get_voxel_size (RVL *self, float *x, float *y, float *z);
+  void rvl_get_position (RVL *self, float *x, float *y, float *z);
 
-RVLText *rvl_text_create_array (int num);
-void rvl_text_destroy_array (RVLText **self);
-void rvl_set_text (RVL *self, RVLText **text, int numText);
-void rvl_get_text (RVL *self, RVLText **text, int *numText);
-void rvl_text_set (RVLText *textArr, int index, char *key, char *value);
-void rvl_text_get (RVLText *textArr, int index, const char **key,
-                   const char **value);
+  RVLSize rvl_get_value_byte_count (RVL *self);
 
-void rvl_alloc_data_buffer (RVL *self, RVLByte **buffer, RVLSize *size);
-void rvl_dealloc_data_buffer (RVL *self, RVLByte **buffer);
-void rvl_set_data_buffer (RVL *self, RVLConstByte *buffer, RVLSize size);
-void rvl_get_data_buffer (RVL *self, RVLByte **buffer, RVLSize *size);
+  RVLText *rvl_text_create_array (int num);
+  void rvl_text_destroy_array (RVLText **self);
+  void rvl_set_text (RVL *self, RVLText **text, int numText);
+  void rvl_get_text (RVL *self, RVLText **text, int *numText);
+  void rvl_text_set (RVLText *textArr, int index, char *key, char *value);
+  void rvl_text_get (RVLText *textArr, int index, const char **key,
+                     const char **value);
+
+  void rvl_alloc_data_buffer (RVL *self, RVLByte **buffer, RVLSize *size);
+  void rvl_dealloc_data_buffer (RVL *self, RVLByte **buffer);
+  void rvl_set_data_buffer (RVL *self, RVLConstByte *buffer, RVLSize size);
+  void rvl_get_data_buffer (RVL *self, RVLByte **buffer, RVLSize *size);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
