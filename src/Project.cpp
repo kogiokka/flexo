@@ -16,10 +16,10 @@
 #include "gfx/DrawList.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
+#include "gfx/drawable/LightSource.hpp"
 #include "gfx/drawable/MapEdge.hpp"
 #include "gfx/drawable/MapFace.hpp"
 #include "gfx/drawable/MapVertex.hpp"
-#include "gfx/drawable/LightSource.hpp"
 #include "gfx/drawable/PolygonalModel.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
 
@@ -282,49 +282,13 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
         return;
     }
 
-    const int model = 252;
-    const int isovalue = 0;
+    const int model = 255;
     auto reso = data.resolution();
     for (int x = 0; x < reso.x; x++) {
         for (int y = 0; y < reso.y; y++) {
             for (int z = 0; z < reso.z; z++) {
-                if (data.value(x, y, z) >= model) {
-                    if (x + 1 < reso.x) {
-                        if (data.value(x + 1, y, z) <= isovalue) {
-                            pos.push_back(glm::vec3 { x, y, z });
-                            continue;
-                        }
-                    }
-                    if (x - 1 >= 0) {
-                        if (data.value(x - 1, y, z) <= isovalue) {
-                            pos.push_back(glm::vec3 { x, y, z });
-                            continue;
-                        }
-                    }
-                    if (y + 1 < reso.y) {
-                        if (data.value(x, y + 1, z) <= isovalue) {
-                            pos.push_back(glm::vec3 { x, y, z });
-                            continue;
-                        }
-                    }
-                    if (y - 1 >= 0) {
-                        if (data.value(x, y - 1, z) <= isovalue) {
-                            pos.push_back(glm::vec3 { x, y, z });
-                            continue;
-                        }
-                    }
-                    if (z + 1 < reso.z) {
-                        if (data.value(x, y, z + 1) <= isovalue) {
-                            pos.push_back(glm::vec3 { x, y, z });
-                            continue;
-                        }
-                    }
-                    if (z - 1 >= 0) {
-                        if (data.value(x, y, z - 1) <= isovalue) {
-                            pos.push_back(glm::vec3 { x, y, z });
-                            continue;
-                        }
-                    }
+                if (data.value(x, y, z) == model) {
+                    pos.push_back(glm::vec3 { x, y, z });
                 }
             }
         }
