@@ -5,7 +5,7 @@
 
 struct RVLText
 {
-  char key[80];
+  char  key[80];
   char *value;
 };
 

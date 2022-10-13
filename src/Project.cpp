@@ -279,12 +279,11 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     RVLByte* data;
     RVLSize size;
     int rx, ry, rz;
-    RVLValueFormat format = rvl_get_value_format(rvl);
-    RVLValueBitDepth bitdepth = rvl_get_value_bit_depth(rvl);
+    RVLPrimitive format = rvl_get_primitive(rvl);
     rvl_get_resolution(rvl, &rx, &ry, &rz);
     rvl_get_data_buffer(rvl, &data, &size);
 
-    if (format != RVLValueFormat_Unsigned || bitdepth != RVLValueBitDepth_8) {
+    if (format != RVLPrimitive_u8) {
         std::cerr << "Wrong RVL format: " << path << std::endl;
         std::exit(EXIT_FAILURE);
     }

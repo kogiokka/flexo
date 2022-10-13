@@ -1,1 +1,4 @@
 BasedOnStyle: GNU
+AlignConsecutiveMacros: true
+AlignConsecutiveDeclarations: true
+AlignConsecutiveAssignments: true

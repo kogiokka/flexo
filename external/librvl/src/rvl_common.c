@@ -70,12 +70,12 @@ rvl_dealloc (RVL *self, RVLByte **ptr)
 RVL *
 rvl_create (const char *filename, RVLIoState ioState)
 {
-  RVL *self = (RVL *)malloc (sizeof (RVL));
+  RVL *self        = (RVL *)malloc (sizeof (RVL));
   self->version[0] = RVL_VERSION_MAJOR;
   self->version[1] = RVL_VERSION_MINOR;
-  self->ioState = ioState;
-  self->text = NULL;
-  self->numText = 0;
+  self->ioState    = ioState;
+  self->text       = NULL;
+  self->numText    = 0;
 
   switch (ioState)
     {
@@ -93,12 +93,12 @@ rvl_create (const char *filename, RVLIoState ioState)
 void
 rvl_alloc_data_buffer (RVL *self, RVLByte **buffer, RVLSize *size)
 {
-  const u32 *res = self->resolution;
-  const u32 numVoxel = res[0] * res[1] * res[2];
-  const RVLSize bufferSize = numVoxel * rvl_get_value_byte_count (self);
+  const u32    *res        = self->resolution;
+  const u32     numVoxel   = res[0] * res[1] * res[2];
+  const RVLSize bufferSize = numVoxel * rvl_get_primitive_byte_count (self);
 
   *buffer = rvl_alloc (self, bufferSize);
-  *size = bufferSize;
+  *size   = bufferSize;
 }
 
 void

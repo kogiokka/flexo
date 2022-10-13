@@ -31,7 +31,7 @@ rvl_text_set (RVLText *textArr, int index, char *key, char *value)
 {
   RVLText *text = &textArr[index];
 
-  size_t keySize = strlen (key);
+  size_t keySize   = strlen (key);
   size_t valueSize = strlen (value);
 
   if (keySize >= 80)
@@ -62,6 +62,6 @@ void
 rvl_text_get (RVLText *textArr, int index, const char **key,
               const char **value)
 {
-  *key = textArr[index].key;
+  *key   = textArr[index].key;
   *value = textArr[index].value;
 }

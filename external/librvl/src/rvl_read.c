@@ -20,10 +20,8 @@ rvl_read_rvl (RVL *self)
       rvl_read_chunk_header (self, &size, &code);
 #ifndef NDEBUG
       char *ch = (char *)&code;
-      printf ("# Reading header\n"
-              "    size: %d\n"
-              "    code: %c%c%c%c\n",
-              size, ch[0], ch[1], ch[2], ch[3]);
+      printf ("[librvl] Reading chunk header: size %d, code: %c%c%c%c\n", size,
+              ch[0], ch[1], ch[2], ch[3]);
 #endif
 
       switch (code)

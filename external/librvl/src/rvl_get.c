@@ -11,25 +11,13 @@ rvl_get_grid_unit (RVL *self)
 RVLGridType
 rvl_get_grid_type (RVL *self)
 {
-  return self->gridUnit;
+  return self->gridType;
 }
 
-RVLValueDimen
-rvl_get_value_dimension (RVL *self)
+RVLPrimitive
+rvl_get_primitive (RVL *self)
 {
-  return self->valueDimen;
-}
-
-RVLValueFormat
-rvl_get_value_format (RVL *self)
-{
-  return self->valueFormat;
-}
-
-RVLValueBitDepth
-rvl_get_value_bit_depth (RVL *self)
-{
-  return self->valueBitDepth;
+  return self->primitive;
 }
 
 RVLEndian
@@ -66,55 +54,105 @@ void
 rvl_get_data_buffer (RVL *self, RVLByte **buffer, RVLSize *size)
 {
   *buffer = self->data.rbuf;
-  *size = self->data.size;
+  *size   = self->data.size;
 }
 
 void
 rvl_get_text (RVL *self, RVLText **text, int *numText)
 {
-  *text = self->text;
+  *text    = self->text;
   *numText = self->numText;
 }
 
 RVLSize
-rvl_get_value_byte_count (RVL *self)
+rvl_get_primitive_byte_count (RVL *self)
 {
-  RVLSize count = 1;
-
-  switch (self->valueBitDepth)
+  switch (self->primitive)
     {
-    case RVLValueBitDepth_8:
-      count *= 1;
-      break;
-    case RVLValueBitDepth_16:
-      count *= 2;
-      break;
-    case RVLValueBitDepth_32:
-      count *= 3;
-      break;
-    case RVLValueBitDepth_64:
-      count *= 4;
-      break;
-    case RVLValueBitDepth_128:
-      count *= 5;
-      break;
+    case RVLPrimitive_f8:
+    case RVLPrimitive_u8:
+    case RVLPrimitive_i8:
+      return 1;
+    case RVLPrimitive_u16:
+    case RVLPrimitive_i16:
+    case RVLPrimitive_f16:
+      return 2;
+    case RVLPrimitive_u32:
+    case RVLPrimitive_i32:
+    case RVLPrimitive_f32:
+      return 4;
+    case RVLPrimitive_u64:
+    case RVLPrimitive_i64:
+    case RVLPrimitive_f64:
+      return 8;
+    case RVLPrimitive_u128:
+    case RVLPrimitive_i128:
+    case RVLPrimitive_f128:
+      return 16;
+      // ----------------------- Vec2
+    case RVLPrimitive_vec2f8:
+    case RVLPrimitive_vec2u8:
+    case RVLPrimitive_vec2i8:
+      return 1 * 2;
+    case RVLPrimitive_vec2u16:
+    case RVLPrimitive_vec2i16:
+    case RVLPrimitive_vec2f16:
+      return 2 * 2;
+    case RVLPrimitive_vec2u32:
+    case RVLPrimitive_vec2i32:
+    case RVLPrimitive_vec2f32:
+      return 4 * 2;
+    case RVLPrimitive_vec2u64:
+    case RVLPrimitive_vec2i64:
+    case RVLPrimitive_vec2f64:
+      return 8 * 2;
+    case RVLPrimitive_vec2u128:
+    case RVLPrimitive_vec2i128:
+    case RVLPrimitive_vec2f128:
+      return 16 * 2;
+      // ----------------------- Vec3
+    case RVLPrimitive_vec3u8:
+    case RVLPrimitive_vec3i8:
+    case RVLPrimitive_vec3f8:
+      return 1 * 3;
+    case RVLPrimitive_vec3u16:
+    case RVLPrimitive_vec3i16:
+    case RVLPrimitive_vec3f16:
+      return 2 * 3;
+    case RVLPrimitive_vec3u32:
+    case RVLPrimitive_vec3i32:
+    case RVLPrimitive_vec3f32:
+      return 4 * 3;
+    case RVLPrimitive_vec3u64:
+    case RVLPrimitive_vec3i64:
+    case RVLPrimitive_vec3f64:
+      return 8 * 3;
+    case RVLPrimitive_vec3u128:
+    case RVLPrimitive_vec3i128:
+    case RVLPrimitive_vec3f128:
+      return 16 * 3;
+      // ----------------------- Vec4
+    case RVLPrimitive_vec4u8:
+    case RVLPrimitive_vec4i8:
+    case RVLPrimitive_vec4f8:
+      return 1 * 4;
+    case RVLPrimitive_vec4u16:
+    case RVLPrimitive_vec4i16:
+    case RVLPrimitive_vec4f16:
+      return 2 * 4;
+    case RVLPrimitive_vec4u32:
+    case RVLPrimitive_vec4i32:
+    case RVLPrimitive_vec4f32:
+      return 4 * 4;
+    case RVLPrimitive_vec4u64:
+    case RVLPrimitive_vec4i64:
+    case RVLPrimitive_vec4f64:
+      return 8 * 4;
+    case RVLPrimitive_vec4u128:
+    case RVLPrimitive_vec4i128:
+    case RVLPrimitive_vec4f128:
+      return 16 * 4;
+    default:
+      return 0;
     }
-
-  switch (self->valueDimen)
-    {
-    case RVLValueDimen_Scalar:
-      count *= 1;
-      break;
-    case RVLValueDimen_Vec2:
-      count *= 2;
-      break;
-    case RVLValueDimen_Vec3:
-      count *= 3;
-      break;
-    case RVLValueDimen_Vec4:
-      count *= 4;
-      break;
-    }
-
-  return count;
 }

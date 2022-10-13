@@ -6,8 +6,9 @@
 
 #include "../rvl.h"
 
-typedef float f32;
-typedef uint8_t u8;
+typedef float    f32;
+typedef uint8_t  u8;
+typedef uint16_t u16;
 typedef uint32_t u32;
 
 typedef void (*RVLWriteFn) (RVL *, RVLConstByte *, RVLSize);
@@ -16,8 +17,8 @@ typedef void (*RVLReadFn) (RVL *, RVLByte *, RVLSize);
 typedef struct
 {
   RVLConstByte *wbuf; // Non-owning pointer
-  RVLByte *rbuf;
-  RVLSize size;
+  RVLByte      *rbuf;
+  RVLSize       size;
 } RVLData;
 
 /**
@@ -49,35 +50,33 @@ typedef enum
 
 struct RVL
 {
-  FILE *io;
+  FILE      *io;
   RVLWriteFn writeData;
-  RVLReadFn readData;
+  RVLReadFn  readData;
 
-  u8 version[2]; // major, minor
+  u8         version[2]; // major, minor
   RVLIoState ioState;
 
   /* VHDR chunk */
-  RVLGridType gridType;
-  RVLGridUnit gridUnit;
-  RVLValueFormat valueFormat;
-  RVLValueBitDepth valueBitDepth;
-  RVLValueDimen valueDimen;
-  RVLEndian endian;
-  u32 resolution[3];
-  f32 voxelSize[3];
-  f32 position[3];
+  RVLGridType  gridType;
+  RVLGridUnit  gridUnit;
+  RVLPrimitive primitive;
+  RVLEndian    endian;
+  u32          resolution[3];
+  f32          voxelSize[3];
+  f32          position[3];
 
   /* TEXT chunk */
   RVLText *text;
-  int numText;
+  int      numText;
 
   /* DATA chunk */
   RVLData data;
 };
 
 RVLText *rvl_text_create_array (int num);
-void rvl_text_destroy_array (RVLText **self);
+void     rvl_text_destroy_array (RVLText **self);
 RVLByte *rvl_alloc (RVL *self, RVLSize size);
-void rvl_dealloc (RVL *self, RVLByte **ptr);
+void     rvl_dealloc (RVL *self, RVLByte **ptr);
 
 #endif
