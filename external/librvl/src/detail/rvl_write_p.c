@@ -1,8 +1,10 @@
-#include <lz4.h>
-#include <lz4hc.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <log.h>
+#include <lz4.h>
+#include <lz4hc.h>
 
 #include "detail/rvl_write_p.h"
 
@@ -11,36 +13,63 @@
 void
 rvl_write_VHDR_chunk (RVL *self)
 {
-  u32 byteSize = 44;
-  u8 *buf      = calloc (1, byteSize);
+  RVLSize size = 18;
+  u8     *buf  = calloc (1, size);
 
   memcpy (&buf[0], self->version, 2);
-  buf[2] = self->gridType;
-  buf[3] = self->gridUnit;
-  memcpy (&buf[4], &self->primitive, 2);
-  buf[6] = self->endian;
-  buf[7] = 0; // padding
-  memcpy (&buf[8], &self->resolution[0], 12);
-  memcpy (&buf[20], &self->voxelSize[0], 12);
-  memcpy (&buf[32], &self->position[0], 12);
+  memcpy (&buf[2], &self->resolution[0], 12);
+  memcpy (&buf[14], &self->primitive, 2);
+  buf[16] = self->endian;
+  buf[17] = 0; // padding
 
-  rvl_write_chunk_header (self, RVLChunkCode_VHDR, byteSize);
-  rvl_write_chunk_payload (self, buf, byteSize);
+  rvl_write_chunk_header (self, RVLChunkCode_VHDR, size);
+  rvl_write_chunk_payload (self, buf, size);
+  rvl_write_chunk_end (self);
+}
+
+void
+rvl_write_GRID_chunk (RVL *self)
+{
+  RVLSize  wbufSize = 14 + self->grid.vxDimBufSize;
+  RVLByte *wbuf     = (RVLByte *)malloc (wbufSize);
+
+  // Grid info
+  wbuf[0] = self->grid.type;
+  wbuf[1] = self->grid.unit;
+  memcpy (&wbuf[2], self->grid.position, 12);
+  memcpy (&wbuf[14], self->grid.vxDimBuf, self->grid.vxDimBufSize);
+
+  rvl_write_chunk_header (self, RVLChunkCode_GRID, wbufSize);
+  rvl_write_chunk_payload (self, wbuf, wbufSize);
   rvl_write_chunk_end (self);
 }
 
 void
 rvl_write_DATA_chunk (RVL *self)
 {
-  char     *compressedBuf = (char *)malloc (self->data.size);
-  const int compressedSize
-      = LZ4_compress_HC ((char *)self->data.wbuf, compressedBuf,
-                         self->data.size, self->data.size, LZ4HC_CLEVEL_MIN);
+  RVLSize wbufSize = self->data.size;
+  char   *wbuf     = (char *)malloc (wbufSize);
 
-  rvl_write_chunk_header (self, RVLChunkCode_DATA, compressedSize);
-  rvl_write_chunk_payload (self, (RVLConstByte *)compressedBuf,
-                           compressedSize);
+  int         srcSize = self->data.size;
+  const char *src     = (char *)self->data.wbuf;
+
+  int compSize
+      = LZ4_compress_HC (src, wbuf, srcSize, wbufSize, LZ4HC_CLEVEL_MIN);
+
+  // When the compressed size is greater than the uncompressed one.
+  if (compSize == 0)
+    {
+      wbufSize = LZ4_compressBound (self->data.size);
+      wbuf     = realloc (wbuf, wbufSize);
+      compSize = LZ4_compress_HC (src, wbuf, self->data.size, wbufSize,
+                                  LZ4HC_CLEVEL_MIN);
+    }
+
+  rvl_write_chunk_header (self, RVLChunkCode_DATA, compSize);
+  rvl_write_chunk_payload (self, (RVLConstByte *)wbuf, compSize);
   rvl_write_chunk_end (self);
+
+  free (wbuf);
 }
 
 // Strip off the null terminator at the end of the value string.
@@ -116,10 +145,8 @@ rvl_write_data (RVL *self, RVLConstByte *data, RVLSize size)
 {
   if (self->writeData == NULL)
     {
-      fprintf (
-          stderr,
-          "[ERROR] The write data function is NULL. Might be due to wrong "
-          "read/write instance of RVL_t.\n");
+      log_fatal ("[librvl write] The write function is NULL. Please check if "
+                 "the RVL instance is a writer.");
       exit (EXIT_FAILURE);
     }
 
@@ -131,7 +158,7 @@ rvl_write_data_default (RVL *self, RVLConstByte *data, RVLSize size)
 {
   if (self->io == NULL)
     {
-      fprintf (stderr, "[ERROR] RVL_t is not initialized!");
+      log_fatal ("[librvl write] RVL is not initialized.");
       exit (EXIT_FAILURE);
     }
 
@@ -139,7 +166,7 @@ rvl_write_data_default (RVL *self, RVLConstByte *data, RVLSize size)
 
   if (count != size)
     {
-      fprintf (stderr, "[ERROR] Write error occured!");
+      log_fatal ("[librvl write] fwrite failure.");
       exit (EXIT_FAILURE);
     }
 }

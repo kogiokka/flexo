@@ -1,5 +1,8 @@
+#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <log.h>
 
 #include "rvl.h"
 
@@ -40,7 +43,8 @@ rvl_destroy (RVL **self)
 
   // Dealloc read buffer. Writer buffer pointer is non-owning so the user is
   // responsible for calling this dealloc function.
-  rvl_dealloc_data_buffer (ptr, &ptr->data.rbuf);
+  rvl_dealloc (ptr, &ptr->data.rbuf);
+  rvl_dealloc (ptr, &ptr->grid.vxDimBuf);
 
   fclose (ptr->io);
   free (ptr);
@@ -48,19 +52,31 @@ rvl_destroy (RVL **self)
   *self = NULL;
 }
 
-RVLByte *
-rvl_alloc (RVL *self, RVLSize size)
+void
+rvl_alloc (RVL *self, RVLByte **ptr, RVLSize size)
 {
-  if (self == NULL)
-    return NULL;
+  assert (self != NULL || ptr != NULL);
 
-  return (RVLByte *)malloc (size);
+  if (*ptr != NULL)
+    {
+      free (*ptr);
+    }
+
+  *ptr = (RVLByte *)calloc (1, size);
+
+  if (*ptr == NULL)
+    {
+      log_fatal ("[librvl alloc] Memory allocation failure.\n");
+      exit (EXIT_FAILURE);
+    }
 }
 
 void
 rvl_dealloc (RVL *self, RVLByte **ptr)
 {
-  if (self == NULL || ptr == NULL || *ptr == NULL)
+  assert (self != NULL || ptr != NULL);
+
+  if (*ptr == NULL)
     return;
 
   free (*ptr);
@@ -70,7 +86,7 @@ rvl_dealloc (RVL *self, RVLByte **ptr)
 RVL *
 rvl_create (const char *filename, RVLIoState ioState)
 {
-  RVL *self        = (RVL *)malloc (sizeof (RVL));
+  RVL *self        = (RVL *)calloc (1, sizeof (RVL));
   self->version[0] = RVL_VERSION_MAJOR;
   self->version[1] = RVL_VERSION_MINOR;
   self->ioState    = ioState;
@@ -87,22 +103,11 @@ rvl_create (const char *filename, RVLIoState ioState)
       break;
     }
 
+  log_set_level(LOG_INFO);
+
+#ifndef NDEBUG
+  log_set_level(LOG_TRACE);
+#endif
+
   return self;
-}
-
-void
-rvl_alloc_data_buffer (RVL *self, RVLByte **buffer, RVLSize *size)
-{
-  const u32    *res        = self->resolution;
-  const u32     numVoxel   = res[0] * res[1] * res[2];
-  const RVLSize bufferSize = numVoxel * rvl_get_primitive_byte_count (self);
-
-  *buffer = rvl_alloc (self, bufferSize);
-  *size   = bufferSize;
-}
-
-void
-rvl_dealloc_data_buffer (RVL *self, RVLByte **buffer)
-{
-  rvl_dealloc (self, buffer);
 }

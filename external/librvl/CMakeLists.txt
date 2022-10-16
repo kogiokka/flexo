@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22 FATAL_ERROR)
 
 project("rvl"
     DESCRIPTION "The Regular VoLumetric format reference library"
-    VERSION 0.1.0
+    VERSION 0.2.1
     LANGUAGES C)
 
 option(RVL_BUILD_TEST "Build the unit tests for librvl" ON)
@@ -15,6 +15,7 @@ include(FetchContent)
 
 include("cmake/FetchLZ4.cmake")
 include("cmake/PackageSource.cmake")
+add_subdirectory("external/")
 
 set_target_properties(rvl PROPERTIES
     C_STANDARD 99
@@ -48,7 +49,7 @@ add_dependencies(rvl rvl-copy-public-header)
 
 set(RVL_PUBLIC_HEADERS_EXPORT_DIR "${CMAKE_CURRENT_BINARY_DIR}/include")
 target_include_directories(rvl INTERFACE "${RVL_PUBLIC_HEADERS_EXPORT_DIR}")
-target_link_libraries(rvl PRIVATE lz4_static)
+target_link_libraries(rvl PRIVATE lz4_static log.c)
 
 install(TARGETS rvl
     EXPORT rvlTargets

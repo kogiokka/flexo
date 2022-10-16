@@ -8,6 +8,7 @@ void rvl_write_chunk_payload (RVL *self, RVLConstByte *data, RVLSize size);
 void rvl_write_chunk_end (RVL *self);
 
 void rvl_write_VHDR_chunk (RVL *self);
+void rvl_write_GRID_chunk (RVL *self);
 void rvl_write_DATA_chunk (RVL *self);
 void rvl_write_TEXT_chunk (RVL *self, const RVLText *textArr, int numText);
 void rvl_write_VEND_chunk (RVL *self);

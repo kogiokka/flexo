@@ -1,6 +1,9 @@
+#include <assert.h>
 #include <stddef.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include <log.h>
 
 #include "detail/rvl_p.h"
 #include "detail/rvl_text_p.h"
@@ -15,10 +18,10 @@ rvl_text_create_array (int num)
 void
 rvl_text_destroy_array (RVLText **self)
 {
+  assert (self != NULL);
+
   if (*self == NULL)
-    {
-      return;
-    }
+    return;
 
   free ((*self)->value);
   free (*self);
@@ -36,18 +39,14 @@ rvl_text_set (RVLText *textArr, int index, char *key, char *value)
 
   if (keySize >= 80)
     {
-      fprintf (stderr,
-               "[WARNING] Key length exceeds the maximum limit and will "
-               "be truncated:\n \"%s\"\n",
-               key);
+      log_warn ("[librvl text] Key length exceeds the maximum limit and "
+                "will be truncated:\n \"%s\"");
       keySize = 79;
     }
   if (valueSize > sizeof (RVLSize) - (keySize + 1))
     {
-      fprintf (stderr,
-               "[WARNING] Value length exceeds the maximum limit and will "
-               "be truncated:\n \"%s\"\n",
-               value);
+      log_warn ("[librvl text] Value length exceeds the maximum limit and "
+                "will be truncated:\n \"%s\"");
       valueSize = sizeof (RVLSize) - (keySize + 1);
     }
 
