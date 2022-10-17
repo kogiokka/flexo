@@ -21,6 +21,8 @@ struct World {
     Mesh cube;
     Mesh mapMesh;
     Mesh neurons;
+
+    float vxDim[3];
     std::shared_ptr<Mesh> theModel;
     std::shared_ptr<Dataset<3>> theDataset;
     std::shared_ptr<Map<3, 2>> theMap;

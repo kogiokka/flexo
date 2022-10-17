@@ -276,13 +276,24 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     RVL* rvl = rvl_create_reader(path.c_str());
     rvl_read_rvl(rvl);
 
-    RVLByte* data;
     int rx, ry, rz;
-    RVLPrimitive format = rvl_get_primitive(rvl);
+
     rvl_get_resolution(rvl, &rx, &ry, &rz);
+
+    RVLByte* data;
     rvl_get_data_buffer(rvl, &data);
 
-    if (format != RVLPrimitive_u8) {
+    if (rvl_get_grid_type(rvl) == RVLGridType_Cartesian) {
+        float dim;
+        rvl_get_voxel_dims_1f(rvl, &dim);
+        world.vxDim[0] = dim;
+        world.vxDim[1] = dim;
+        world.vxDim[2] = dim;
+    } else if (rvl_get_grid_type(rvl) == RVLGridType_Regular) {
+        rvl_get_voxel_dims_3f(rvl, &world.vxDim[0], &world.vxDim[1], &world.vxDim[2]);
+    }
+
+    if (rvl_get_primitive(rvl) != RVLPrimitive_u8) {
         std::cerr << "Wrong RVL format: " << path << std::endl;
         std::exit(EXIT_FAILURE);
     }
@@ -296,7 +307,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
         for (int y = 0; y < ry; y++) {
             for (int z = 0; z < rz; z++) {
                 if (data[x + y * rx + z * rx * ry] == model) {
-                    pos.push_back(glm::vec3 { x, y, z });
+                    pos.push_back(glm::vec3 { x * world.vxDim[0], y * world.vxDim[1], z * world.vxDim[2] });
                 }
             }
         }
