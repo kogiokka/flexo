@@ -56,7 +56,7 @@ rvl_test_read_regular_grid ()
   float        dx, dy, dz;
   float        px, py, pz;
   rvl_get_resolution (rvl, &x, &y, &z);
-  rvl_get_voxel_dims (rvl, &dx, &dy, &dz);
+  rvl_get_voxel_dims_3f (rvl, &dx, &dy, &dz);
   rvl_get_grid_position (rvl, &px, &py, &pz);
 
   char sep[81];
@@ -243,15 +243,14 @@ rvl_test_partially_read ()
 void
 init_regular_grid (RVL *rvl)
 {
-  rvl_set_grid_type (rvl, RVLGridType_Cartesian);
+  rvl_set_grid_type (rvl, RVLGridType_Regular);
   rvl_set_grid_unit (rvl, RVLGridUnit_NA);
 
   rvl_set_primitive (rvl, RVLPrimitive_vec2u8);
   rvl_set_endian (rvl, RVLEndian_Little);
   rvl_set_resolution (rvl, 2, 2, 2);
   rvl_set_grid_position (rvl, 3.0f, 2.0f, 1.0f);
-
-  rvl_set_voxel_dims (rvl, 0.1f, 0.2f, 0.3f);
+  rvl_set_voxel_dims_3f (rvl, 0.1f, 0.2f, 0.3f);
 }
 
 void

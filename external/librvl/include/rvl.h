@@ -36,12 +36,31 @@
  * GRID Chunk
  * ++++++++++
  *
- * +00 1B    grid type
- * +01 1B    grid unit
- * +02 12B   position of the lower corner of the grid
- * +14 [voxel size(s) in x-direction]
- * +xx [voxel size(s) in y-direction]
- * +xx [voxel size(s) in z-direction]
+ * +00   1B   grid type
+ * +01   1B   grid unit
+ * +02  12B   position of the lower corner of the grid
+ * +14   nB   voxel dimensions
+ *
+ * Each grid type has its own voxel dimensions configuration.
+ *
+ * Cartesian Grid
+ * --------------
+ *
+ * +14   4B   one value for x, y, and z.
+ *
+ *
+ * Regular Grid
+ * ------------
+ *
+ * +14  12B   three values for x, y, and z, respectively.
+ *
+ *
+ * Rectilinear Grid
+ * ----------------
+ *
+ * +14 [voxel dimensions in x-direction]
+ * +xx [voxel dimensions in y-direction]
+ * +xx [voxel dimensions in z-direction]
  *
  */
 
@@ -51,7 +70,7 @@
 #include <stdint.h>
 
 #define RVL_VERSION_MAJOR 0
-#define RVL_VERSION_MINOR 2
+#define RVL_VERSION_MINOR 3
 
 typedef struct RVL     RVL;
 typedef struct RVLText RVLText;
@@ -188,16 +207,37 @@ extern "C"
   void        rvl_set_grid_type (RVL *self, RVLGridType gridType);
   void        rvl_set_grid_unit (RVL *self, RVLGridUnit gridUnit);
   void        rvl_set_grid_position (RVL *self, float x, float y, float z);
-  void        rvl_set_voxel_dims (RVL *self, float x, float y, float z);
-  void        rvl_set_voxel_dims_v (RVL *self, int n, const float *dimensions);
   RVLGridType rvl_get_grid_type (RVL *self);
   RVLGridUnit rvl_get_grid_unit (RVL *self);
   void        rvl_get_grid_position (RVL *self, float *x, float *y, float *z);
-  void        rvl_get_voxel_dims (RVL *self, float *x, float *y, float *z);
-  void        rvl_get_voxel_dims_v (RVL *self, const float **dimensions);
+
+  // Set voxel dimensions for the Cartesian grid type.
+  void rvl_set_voxel_dims_1f (RVL *self, float x);
+
+  // Set voxel dimensions for the regular grid type.
+  void rvl_set_voxel_dims_3f (RVL *self, float x, float y, float z);
+
+  // Set voxel dimensions for the rectilinear grid type.
+  void rvl_set_voxel_dims_v (RVL *self, int n, const float *dimensions);
+
+  // Get voxel dimensions for the Cartesian grid type.
+  void rvl_get_voxel_dims_1f (RVL *self, float *x);
+
+  // Get voxel dimensions for the regular grid type.
+  void rvl_get_voxel_dims_3f (RVL *self, float *x, float *y, float *z);
+
+  // Get voxel dimensions for the rectilinear grid type.
+  void rvl_get_voxel_dims_v (RVL *self, const float **dimensions);
 
   /* DATA chunk functions */
+
+  // Set the data buffer to be written by the RVL writer. The RVL instance does
+  // not own the pointer; the user should allocate the memory before writing
+  // and deallocate the memory after writing.
   void rvl_set_data_buffer (RVL *self, RVLSize size, RVLConstByte *buffer);
+
+  // Get the data buffer from the RVL reader. The RVL instance owns the
+  // pointer, and users should not free the memory themselves.
   void rvl_get_data_buffer (RVL *self, RVLByte **buffer);
 
   /* TEXT chunk functions */
@@ -209,7 +249,12 @@ extern "C"
   void     rvl_text_get (RVLText *textArr, int index, const char **key,
                          const char **value);
 
-  /* Helpers */
+  /**
+   * Helpers
+   *
+   * These helper functions retrieve RVL information. Please make sure the
+   * instance has been fully configured before using them.
+   */
   RVLSize rvl_get_primitive_nbytes (RVL *self);
   RVLSize rvl_get_data_nbytes (RVL *self);
 

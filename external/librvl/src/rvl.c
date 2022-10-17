@@ -1,4 +1,5 @@
 #include <assert.h>
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -7,8 +8,6 @@
 #include "rvl.h"
 
 #include "detail/rvl_p.h"
-#include "detail/rvl_read_p.h"
-#include "detail/rvl_write_p.h"
 
 // .RVL FORMAT\0
 RVLByte RVL_FILE_SIG[RVL_FILE_SIG_SIZE] = {
@@ -22,7 +21,7 @@ rvl_create_writer (const char *filename)
 {
   RVL *rvl = rvl_create (filename, RVLIoState_Write);
   memset (&rvl->data, 0, sizeof (RVLData));
-  rvl->writeData = rvl_write_data_default;
+  rvl->writeFn = rvl_fwrite_default;
   return rvl;
 }
 
@@ -31,7 +30,7 @@ rvl_create_reader (const char *filename)
 {
   RVL *rvl = rvl_create (filename, RVLIoState_Read);
   memset (&rvl->data, 0, sizeof (RVLData));
-  rvl->readData = rvl_read_data_default;
+  rvl->readFn = rvl_fread_default;
   return rvl;
 }
 
@@ -86,6 +85,13 @@ rvl_dealloc (RVL *self, RVLByte **ptr)
 RVL *
 rvl_create (const char *filename, RVLIoState ioState)
 {
+
+  log_set_level (LOG_INFO);
+
+#ifndef NDEBUG
+  log_set_level (LOG_TRACE);
+#endif
+
   RVL *self        = (RVL *)calloc (1, sizeof (RVL));
   self->version[0] = RVL_VERSION_MAJOR;
   self->version[1] = RVL_VERSION_MINOR;
@@ -103,11 +109,10 @@ rvl_create (const char *filename, RVLIoState ioState)
       break;
     }
 
-  log_set_level(LOG_INFO);
-
-#ifndef NDEBUG
-  log_set_level(LOG_TRACE);
-#endif
+  if (self->io == NULL)
+    {
+      log_error ("[rvl io] %s", strerror (errno));
+    }
 
   return self;
 }
