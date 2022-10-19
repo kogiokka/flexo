@@ -61,7 +61,7 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
                                      wxPoint const& pos, wxSize const& size, WatermarkingProject& project)
     : wxGLCanvas(parent, dispAttrs, id, pos, size)
     , m_isGLLoaded(false)
-    , m_rateMove(0.4f)
+    , m_rateMove(0.005f)
     , m_rateRotate(0.005f)
     , m_dirHorizontal(1)
     , m_context(nullptr)
@@ -263,7 +263,7 @@ Camera SceneViewportPane::CreateDefaultCamera() const
     camera.worldUp = { 0.0f, 1.0f, 0.0f };
     camera.center = { 0.0f, 0.0f, 0.0f };
     camera.coord = { 500.0f, 1.25f, 0.0f };
-    camera.volumeSize = 300.0f;
+    camera.volumeSize = 10.0f;
     camera.zoom = 1.0f;
 
     wxSize const size = GetClientSize() * GetContentScaleFactor();
