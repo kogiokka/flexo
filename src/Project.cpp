@@ -1,6 +1,7 @@
 #include <algorithm>
 #include <cmath>
 #include <cstdlib>
+#include <limits>
 
 #include <wx/msgdlg.h>
 
@@ -221,24 +222,66 @@ void WatermarkingProject::DoWatermark()
     assert(world.theModel);
 
     // Update the texture coordinates of the Volumetric Model.
-    std::vector<glm::vec2> textureCoords;
-    textureCoords.reserve(world.theModel->textureCoords.size());
+    std::vector<glm::vec2> texcrd;
 
-    for (glm::vec3 const& vp : world.theModel->positions) {
-        glm::vec2 coord = world.mapMesh.textureCoords.front();
-        float minDist = glm::distance(vp, world.mapMesh.positions.front());
-        // TODO: Deal with the duplicate calculations
-        for (unsigned int i = 1; i < world.mapMesh.positions.size(); i++) {
-            auto dist = glm::distance(vp, world.mapMesh.positions[i]);
-            if (dist < minDist) {
-                minDist = dist;
-                coord = world.mapMesh.textureCoords[i];
+    int x, y, z;
+    float dx, dy, dz;
+    RVLByte* data;
+    rvl_get_resolution(m_rvl, &x, &y, &z);
+    rvl_get_data_buffer(m_rvl, &data);
+    if (rvl_get_grid_type(m_rvl) == RVLGridType_Cartesian) {
+        float dim;
+        rvl_get_voxel_dims_1f(m_rvl, &dim);
+        dx = dim;
+        dy = dim;
+        dz = dim;
+    } else if (rvl_get_grid_type(m_rvl) == RVLGridType_Regular) {
+        rvl_get_voxel_dims_3f(m_rvl, &dx, &dy, &dz);
+    }
+
+    const RVLByte model = 255;
+    for (int i = 0; i < z; i++) {
+        for (int j = 0; j < y; j++) {
+            for (int k = 0; k < x; k++) {
+                int index = k + j * x + i * x * y;
+                if (data[index] != model)
+                    continue;
+
+                glm::vec3 vxpos(k * dx, j * dy, i * dz);
+                glm::vec2 coord;
+                float minDist = std::numeric_limits<float>::max();
+
+                // TODO: Deal with the duplicate calculations
+                for (unsigned int i = 1; i < world.mapMesh.positions.size(); i++) {
+                    auto dist = glm::distance(vxpos, world.mapMesh.positions[i]);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        coord = world.mapMesh.textureCoords[i];
+                    }
+                }
+                for (int n = 0; n < world.numVxVerts[index]; n++) {
+                    texcrd.emplace_back(coord);
+                }
             }
         }
-        textureCoords.push_back(coord);
     }
-    world.theModel->textureCoords = textureCoords;
+
     world.isWatermarked = true;
+
+    // Update the drawlist and the renderer
+    auto& drawlist = DrawList::Get(*this);
+    for (auto const& d : drawlist) {
+        VolumetricModel* ptr = dynamic_cast<VolumetricModel*>(d.get());
+        if (ptr != nullptr) {
+            for (auto it = ptr->m_binds.begin(); it != ptr->m_binds.end(); it++) {
+                Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
+                if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
+                    vb->Update(Graphics::Get(*this), texcrd);
+                }
+            }
+        }
+    }
+    drawlist.Submit(Renderer::Get(*this));
 }
 
 void WatermarkingProject::UpdateMapGraphics()
@@ -308,7 +351,6 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     world.theModel = std::make_shared<Mesh>();
 
     auto& pos = world.theModel->positions;
-    auto& texcoord = world.theModel->textureCoords;
 
     const RVLByte model = 255;
     for (int i = 0; i < z; i++) {
@@ -322,7 +364,6 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
         }
     }
 
-    texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
     Logger::info("%lu voxels will be rendered.", pos.size());
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);

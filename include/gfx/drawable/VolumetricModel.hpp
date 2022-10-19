@@ -15,6 +15,8 @@
 
 class VolumetricModel : public Drawable
 {
+    friend WatermarkingProject;
+
     struct UniformBlock {
         struct Vert {
             struct Light {

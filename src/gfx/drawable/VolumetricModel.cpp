@@ -17,9 +17,6 @@
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
 
-// ================================================================================
-#include <iostream>
-
 static STLImporter STLI;
 
 struct Cube {
@@ -116,13 +113,6 @@ void VolumetricModel::Update(Graphics& gfx)
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.isWatermarked = world.isWatermarked;
 
-    // for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-    //     Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-    //     if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
-    //         vb->Update(gfx, world.theModel->textureCoords);
-    //     }
-    // }
-
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
@@ -157,6 +147,8 @@ void VolumetricModel::CreateMesh(RVL& rvl)
         rvl_get_voxel_dims_3f(&rvl, &dims.x, &dims.y, &dims.z);
     }
 
+    world.numVxVerts.resize(x * y * z);
+
     const RVLByte model = 255;
     const RVLByte air = 0;
     for (int i = 0; i < z; i++) {
@@ -167,21 +159,27 @@ void VolumetricModel::CreateMesh(RVL& rvl)
                 if (data[index] == model) {
                     if ((k + 1 == x) || data[index + 1] == air) {
                         AddFace(VOXEL.face.xp, offset, dims);
+                        world.numVxVerts[index] += 6;
                     }
                     if ((j + 1 == y) || (data[index + x] == air)) {
                         AddFace(VOXEL.face.yp, offset, dims);
+                        world.numVxVerts[index] += 6;
                     }
                     if ((i + 1 == z) || (data[index + x * y] == air)) {
                         AddFace(VOXEL.face.zp, offset, dims);
+                        world.numVxVerts[index] += 6;
                     }
                     if ((k == 0) || (data[index - 1] == air)) {
                         AddFace(VOXEL.face.xn, offset, dims);
+                        world.numVxVerts[index] += 6;
                     }
                     if ((j == 0) || (data[index - x] == air)) {
                         AddFace(VOXEL.face.yn, offset, dims);
+                        world.numVxVerts[index] += 6;
                     }
                     if ((i == 0) || (data[index - x * y] == air)) {
                         AddFace(VOXEL.face.zn, offset, dims);
+                        world.numVxVerts[index] += 6;
                     }
                 }
             }
@@ -189,6 +187,7 @@ void VolumetricModel::CreateMesh(RVL& rvl)
     }
 
     m_mesh.textureCoords = std::vector<glm::vec2>(m_mesh.positions.size(), glm::vec2(0.0f, 0.0f));
+    world.theModel->textureCoords = m_mesh.textureCoords;
 }
 
 void VolumetricModel::AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale)
