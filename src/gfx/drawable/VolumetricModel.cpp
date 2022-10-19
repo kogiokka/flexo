@@ -60,8 +60,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, RVL& rvl)
     m_ub.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
     m_ub.vert.light.diffusion = glm::vec3(0.8f, 0.8f, 0.8f);
     m_ub.vert.light.specular = glm::vec3(0.8f, 0.8f, 0.8f);
-    m_ub.vert.material.ambient = glm::vec3(0.0f, 0.3f, 0.0f);
-    m_ub.vert.material.diffusion = glm::vec3(0.0f, 0.6f, 0.0f);
+    m_ub.vert.material.ambient = glm::vec3(0.3f, 0.3f, 0.3f);
+    m_ub.vert.material.diffusion = glm::vec3(0.6f, 0.6f, 0.6f);
     m_ub.vert.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.vert.material.shininess = 256.0f;
     m_ub.vert.isWatermarked = false;
