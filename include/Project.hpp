@@ -45,8 +45,6 @@ private:
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
     RVL* m_rvl;
-    glm::ivec3 m_res;
-    RVLByte* m_vxModel;
 };
 
 #endif

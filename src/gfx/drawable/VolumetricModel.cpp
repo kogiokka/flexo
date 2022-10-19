@@ -20,10 +20,30 @@
 // ================================================================================
 #include <iostream>
 
-VolumetricModel::VolumetricModel(Graphics& gfx, glm::ivec3 resolution, uint8_t const* data)
+static STLImporter STLI;
+
+struct Cube {
+    struct {
+        Mesh xp;
+        Mesh xn;
+        Mesh yp;
+        Mesh yn;
+        Mesh zp;
+        Mesh zn;
+    } face;
+};
+
+static Cube const VOXEL = { {
+    STLI.ReadFile("res/models/voxel/cube-x-pos.stl"),
+    STLI.ReadFile("res/models/voxel/cube-x-neg.stl"),
+    STLI.ReadFile("res/models/voxel/cube-y-pos.stl"),
+    STLI.ReadFile("res/models/voxel/cube-y-neg.stl"),
+    STLI.ReadFile("res/models/voxel/cube-z-pos.stl"),
+    STLI.ReadFile("res/models/voxel/cube-z-neg.stl"),
+} };
+
+VolumetricModel::VolumetricModel(Graphics& gfx, RVL& rvl)
     : m_ub {}
-    , m_resolution(resolution)
-    , m_data(data)
 {
     std::vector<GLWRInputElementDesc> inputs = {
         { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
@@ -31,10 +51,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, glm::ivec3 resolution, uint8_t c
         { "textureCoord", GLWRFormat_Float2, 2, 0, GLWRInputClassification_PerVertex, 0 },
     };
 
-    Mesh const mesh = CreateMesh();
-    std::cout << "Mesh positions: " << mesh.positions.size() << std::endl;
-    std::cout << "Mesh normal : " << mesh.normals.size() << std::endl;
-    std::cout << "Mesh texture coordinates: " << mesh.textureCoords.size() << std::endl;
+    CreateMesh(rvl);
 
     m_isVisible = true;
 
@@ -56,19 +73,18 @@ VolumetricModel::VolumetricModel(Graphics& gfx, glm::ivec3 resolution, uint8_t c
     samplerDesc.filter = GLWRFilter_MinMagNearest_NoMip;
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.positions, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.normals, 1));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.textureCoords, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.positions, 0));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.normals, 1));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.textureCoords, 2));
 
     Task draw;
     draw.mDrawable = this;
 
-    glm::vec3 vxScale(world.vxDim[0], world.vxDim[1], world.vxDim[2]);
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert");
     draw.AddBindable(vs);
     draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
-    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), vxScale)));
+    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
@@ -76,7 +92,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, glm::ivec3 resolution, uint8_t c
     draw.AddBindable(Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 1));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 1));
-
     AddTask(draw);
 }
 
@@ -118,87 +133,68 @@ void VolumetricModel::Update(Graphics& gfx)
     }
 }
 
-Mesh VolumetricModel::CreateMesh()
+std::string VolumetricModel::GetName() const
 {
-    int x = m_resolution[0];
-    int y = m_resolution[1];
-    int z = m_resolution[2];
+    return "Volumetric Model";
+}
 
-    Mesh mesh;
-    static STLImporter stlimp;
-    static Mesh const xpos = stlimp.ReadFile("res/models/voxel/cube-x-pos.stl");
-    static Mesh const ypos = stlimp.ReadFile("res/models/voxel/cube-y-pos.stl");
-    static Mesh const zpos = stlimp.ReadFile("res/models/voxel/cube-z-pos.stl");
-    static Mesh const xneg = stlimp.ReadFile("res/models/voxel/cube-x-neg.stl");
-    static Mesh const yneg = stlimp.ReadFile("res/models/voxel/cube-y-neg.stl");
-    static Mesh const zneg = stlimp.ReadFile("res/models/voxel/cube-z-neg.stl");
+void VolumetricModel::CreateMesh(RVL& rvl)
+{
+    int x, y, z;
+    RVLByte* data;
+    glm::vec3 dims;
 
+    rvl_get_resolution(&rvl, &x, &y, &z);
+    rvl_get_data_buffer(&rvl, &data);
+
+    if (rvl_get_grid_type(&rvl) == RVLGridType_Cartesian) {
+        float d;
+        rvl_get_voxel_dims_1f(&rvl, &d);
+        dims.x = d;
+        dims.y = d;
+        dims.z = d;
+    } else if (rvl_get_grid_type(&rvl) == RVLGridType_Regular) {
+        rvl_get_voxel_dims_3f(&rvl, &dims.x, &dims.y, &dims.z);
+    }
+
+    const RVLByte model = 255;
+    const RVLByte air = 0;
     for (int i = 0; i < z; i++) {
         for (int j = 0; j < y; j++) {
             for (int k = 0; k < x; k++) {
-                uint8_t value = m_data[k + j * x + i * x * y];
-                if (value == 0)
-                    continue;
-
-                Mesh face;
-                if (value & VoxelExposedDir_X_Pos) {
-                    face = xpos;
-                    for (auto& p : face.positions) {
-                        p += glm::vec3(k, j, i);
+                int index = k + j * x + i * x * y;
+                glm::vec3 offset { k, j, i };
+                if (data[index] == model) {
+                    if ((k + 1 == x) || data[index + 1] == air) {
+                        AddFace(VOXEL.face.xp, offset, dims);
                     }
-                    mesh.positions.insert(mesh.positions.end(), face.positions.begin(), face.positions.end());
-                    mesh.normals.insert(mesh.normals.end(), xpos.normals.begin(), xpos.normals.end());
-                }
-                if (value & VoxelExposedDir_Y_Pos) {
-                    face = ypos;
-                    for (auto& p : face.positions) {
-                        p += glm::vec3(k, j, i);
+                    if ((j + 1 == y) || (data[index + x] == air)) {
+                        AddFace(VOXEL.face.yp, offset, dims);
                     }
-                    mesh.positions.insert(mesh.positions.end(), face.positions.begin(), face.positions.end());
-                    mesh.normals.insert(mesh.normals.end(), ypos.normals.begin(), ypos.normals.end());
-                }
-                if (value & VoxelExposedDir_Z_Pos) {
-                    face = zpos;
-                    for (auto& p : face.positions) {
-                        p += glm::vec3(k, j, i);
+                    if ((i + 1 == z) || (data[index + x * y] == air)) {
+                        AddFace(VOXEL.face.zp, offset, dims);
                     }
-                    mesh.positions.insert(mesh.positions.end(), face.positions.begin(), face.positions.end());
-                    mesh.normals.insert(mesh.normals.end(), zpos.normals.begin(), zpos.normals.end());
-                }
-                if (value & VoxelExposedDir_X_Neg) {
-                    face = xneg;
-                    for (auto& p : face.positions) {
-                        p += glm::vec3(k, j, i);
+                    if ((k == 0) || (data[index - 1] == air)) {
+                        AddFace(VOXEL.face.xn, offset, dims);
                     }
-                    mesh.positions.insert(mesh.positions.end(), face.positions.begin(), face.positions.end());
-                    mesh.normals.insert(mesh.normals.end(), xneg.normals.begin(), xneg.normals.end());
-                }
-                if (value & VoxelExposedDir_Y_Neg) {
-                    face = yneg;
-                    for (auto& p : face.positions) {
-                        p += glm::vec3(k, j, i);
+                    if ((j == 0) || (data[index - x] == air)) {
+                        AddFace(VOXEL.face.yn, offset, dims);
                     }
-                    mesh.positions.insert(mesh.positions.end(), face.positions.begin(), face.positions.end());
-                    mesh.normals.insert(mesh.normals.end(), yneg.normals.begin(), yneg.normals.end());
-                }
-                if (value & VoxelExposedDir_Z_Neg) {
-                    face = zneg;
-                    for (auto& p : face.positions) {
-                        p += glm::vec3(k, j, i);
+                    if ((i == 0) || (data[index - x * y] == air)) {
+                        AddFace(VOXEL.face.zn, offset, dims);
                     }
-                    mesh.positions.insert(mesh.positions.end(), face.positions.begin(), face.positions.end());
-                    mesh.normals.insert(mesh.normals.end(), zneg.normals.begin(), zneg.normals.end());
                 }
             }
         }
     }
 
-    mesh.textureCoords = std::vector<glm::vec2>(mesh.positions.size(), glm::vec2(0.0f, 0.0f));
-
-    return mesh;
+    m_mesh.textureCoords = std::vector<glm::vec2>(m_mesh.positions.size(), glm::vec2(0.0f, 0.0f));
 }
 
-std::string VolumetricModel::GetName() const
+void VolumetricModel::AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale)
 {
-    return "Volumetric Model";
+    for (auto const& pos : face.positions) {
+        m_mesh.positions.emplace_back((pos + offset) * scale);
+    }
+    m_mesh.normals.insert(m_mesh.normals.end(), face.normals.begin(), face.normals.end());
 }

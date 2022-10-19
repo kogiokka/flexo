@@ -63,7 +63,7 @@ WatermarkingProject::WatermarkingProject()
         drawlist.Remove<VolumetricModel>();
         drawlist.Remove<MapFace>();
 
-        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_res, m_vxModel));
+        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
         drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
@@ -72,7 +72,6 @@ WatermarkingProject::WatermarkingProject()
 WatermarkingProject::~WatermarkingProject()
 {
     rvl_destroy(&m_rvl);
-    free(m_vxModel);
 }
 
 void WatermarkingProject::CreateProject()
@@ -282,23 +281,23 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
     m_rvl = rvl_create_reader(path.c_str());
-    rvl_read_rvl(m_rvl);
 
-    rvl_get_resolution(m_rvl, &m_res.x, &m_res.y, &m_res.z);
-
+    int x, y, z;
+    float dx, dy, dz;
     RVLByte* data;
-    rvl_get_data_buffer(m_rvl, &data);
 
-    m_vxModel = static_cast<RVLByte*>(calloc(1, rvl_get_data_nbytes(m_rvl)));
+    rvl_read_rvl(m_rvl);
+    rvl_get_resolution(m_rvl, &x, &y, &z);
+    rvl_get_data_buffer(m_rvl, &data);
 
     if (rvl_get_grid_type(m_rvl) == RVLGridType_Cartesian) {
         float dim;
         rvl_get_voxel_dims_1f(m_rvl, &dim);
-        world.vxDim[0] = dim;
-        world.vxDim[1] = dim;
-        world.vxDim[2] = dim;
+        dx = dim;
+        dy = dim;
+        dz = dim;
     } else if (rvl_get_grid_type(m_rvl) == RVLGridType_Regular) {
-        rvl_get_voxel_dims_3f(m_rvl, &world.vxDim[0], &world.vxDim[1], &world.vxDim[2]);
+        rvl_get_voxel_dims_3f(m_rvl, &dx, &dy, &dz);
     }
 
     if (rvl_get_primitive(m_rvl) != RVLPrimitive_u8) {
@@ -312,37 +311,12 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     auto& texcoord = world.theModel->textureCoords;
 
     const RVLByte model = 255;
-    const RVLByte air = 0;
-    for (int i = 0; i < m_res.z; i++) {
-        for (int j = 0; j < m_res.y; j++) {
-            for (int k = 0; k < m_res.x; k++) {
-                int index = k + j * m_res.x + i * m_res.x * m_res.y;
+    for (int i = 0; i < z; i++) {
+        for (int j = 0; j < y; j++) {
+            for (int k = 0; k < x; k++) {
+                int index = k + j * x + i * x * y;
                 if (data[index] == model) {
-                    pos.push_back(glm::vec3 { k * world.vxDim[0], j * world.vxDim[1], i * world.vxDim[2] });
-
-                    if ((k + 1 == m_res.x) || data[index + 1] == air) {
-                        m_vxModel[index] |= VoxelExposedDir_X_Pos;
-                    }
-
-                    if ((j + 1 == m_res.y) || (data[index + m_res.x] == air)) {
-                        m_vxModel[index] |= VoxelExposedDir_Y_Pos;
-                    }
-
-                    if ((i + 1 == m_res.z) || (data[index + m_res.x * m_res.y] == air)) {
-                        m_vxModel[index] |= VoxelExposedDir_Z_Pos;
-                    }
-
-                    if ((k == 0) || (data[index - 1] == air)) {
-                        m_vxModel[index] |= VoxelExposedDir_X_Neg;
-                    }
-
-                    if ((j == 0) || (data[index - m_res.x] == air)) {
-                        m_vxModel[index] |= VoxelExposedDir_Y_Neg;
-                    }
-
-                    if ((i == 0) || (data[index - m_res.x * m_res.y] == air)) {
-                        m_vxModel[index] |= VoxelExposedDir_Z_Neg;
-                    }
+                    pos.push_back(glm::vec3 { k * dx, j * dy, i * dz });
                 }
             }
         }
@@ -353,7 +327,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_res, m_vxModel));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
@@ -387,7 +361,7 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
 
     world.theDataset->Insert(pos);
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_res, m_vxModel));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)

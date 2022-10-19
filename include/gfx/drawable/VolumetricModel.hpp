@@ -4,21 +4,14 @@
 #include <cstdint>
 #include <memory>
 
+#include <rvl.h>
+
 #include <glm/glm.hpp>
 
 #include "Mesh.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/drawable/InstancedDrawable.hpp"
-
-enum VoxelExposedDir : unsigned char {
-    VoxelExposedDir_X_Pos = 1 << 1,
-    VoxelExposedDir_Y_Pos = 1 << 2,
-    VoxelExposedDir_Z_Pos = 1 << 3,
-    VoxelExposedDir_X_Neg = 1 << 4,
-    VoxelExposedDir_Y_Neg = 1 << 5,
-    VoxelExposedDir_Z_Neg = 1 << 6,
-};
 
 class VolumetricModel : public Drawable
 {
@@ -49,18 +42,17 @@ class VolumetricModel : public Drawable
     UniformBlock m_ub;
 
 public:
-    VolumetricModel(Graphics& gfx, glm::ivec3 resolution, uint8_t const* data);
+    VolumetricModel(Graphics& gfx, RVL& rvl);
     ~VolumetricModel() override;
     void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
     std::string GetName() const override;
 
 private:
-    Mesh CreateMesh();
+    Mesh m_mesh;
 
-    glm::ivec3 m_resolution;
-    glm::vec3 m_vxDims;
-    uint8_t const* m_data;
+    void CreateMesh(RVL& rvl);
+    void AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale);
 };
 
 #endif
