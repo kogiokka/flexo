@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
 
 #include <wx/msgdlg.h>
 
@@ -61,10 +62,17 @@ WatermarkingProject::WatermarkingProject()
         auto& drawlist = DrawList::Get(*this);
         drawlist.Remove<VolumetricModel>();
         drawlist.Remove<MapFace>();
-        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+
+        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_res, m_vxModel));
         drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
+}
+
+WatermarkingProject::~WatermarkingProject()
+{
+    rvl_destroy(&m_rvl);
+    free(m_vxModel);
 }
 
 void WatermarkingProject::CreateProject()
@@ -273,41 +281,68 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
-    RVL* rvl = rvl_create_reader(path.c_str());
-    rvl_read_rvl(rvl);
+    m_rvl = rvl_create_reader(path.c_str());
+    rvl_read_rvl(m_rvl);
 
-    int rx, ry, rz;
-
-    rvl_get_resolution(rvl, &rx, &ry, &rz);
+    rvl_get_resolution(m_rvl, &m_res.x, &m_res.y, &m_res.z);
 
     RVLByte* data;
-    rvl_get_data_buffer(rvl, &data);
+    rvl_get_data_buffer(m_rvl, &data);
 
-    if (rvl_get_grid_type(rvl) == RVLGridType_Cartesian) {
+    m_vxModel = static_cast<RVLByte*>(calloc(1, rvl_get_data_nbytes(m_rvl)));
+
+    if (rvl_get_grid_type(m_rvl) == RVLGridType_Cartesian) {
         float dim;
-        rvl_get_voxel_dims_1f(rvl, &dim);
+        rvl_get_voxel_dims_1f(m_rvl, &dim);
         world.vxDim[0] = dim;
         world.vxDim[1] = dim;
         world.vxDim[2] = dim;
-    } else if (rvl_get_grid_type(rvl) == RVLGridType_Regular) {
-        rvl_get_voxel_dims_3f(rvl, &world.vxDim[0], &world.vxDim[1], &world.vxDim[2]);
+    } else if (rvl_get_grid_type(m_rvl) == RVLGridType_Regular) {
+        rvl_get_voxel_dims_3f(m_rvl, &world.vxDim[0], &world.vxDim[1], &world.vxDim[2]);
     }
 
-    if (rvl_get_primitive(rvl) != RVLPrimitive_u8) {
+    if (rvl_get_primitive(m_rvl) != RVLPrimitive_u8) {
         std::cerr << "Wrong RVL format: " << path << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
     world.theModel = std::make_shared<Mesh>();
+
     auto& pos = world.theModel->positions;
     auto& texcoord = world.theModel->textureCoords;
 
-    const int model = 255;
-    for (int x = 0; x < rx; x++) {
-        for (int y = 0; y < ry; y++) {
-            for (int z = 0; z < rz; z++) {
-                if (data[x + y * rx + z * rx * ry] == model) {
-                    pos.push_back(glm::vec3 { x * world.vxDim[0], y * world.vxDim[1], z * world.vxDim[2] });
+    const RVLByte model = 255;
+    const RVLByte air = 0;
+    for (int i = 0; i < m_res.z; i++) {
+        for (int j = 0; j < m_res.y; j++) {
+            for (int k = 0; k < m_res.x; k++) {
+                int index = k + j * m_res.x + i * m_res.x * m_res.y;
+                if (data[index] == model) {
+                    pos.push_back(glm::vec3 { k * world.vxDim[0], j * world.vxDim[1], i * world.vxDim[2] });
+
+                    if ((k + 1 == m_res.x) || data[index + 1] == air) {
+                        m_vxModel[index] |= VoxelExposedDir_X_Pos;
+                    }
+
+                    if ((j + 1 == m_res.y) || (data[index + m_res.x] == air)) {
+                        m_vxModel[index] |= VoxelExposedDir_Y_Pos;
+                    }
+
+                    if ((i + 1 == m_res.z) || (data[index + m_res.x * m_res.y] == air)) {
+                        m_vxModel[index] |= VoxelExposedDir_Z_Pos;
+                    }
+
+                    if ((k == 0) || (data[index - 1] == air)) {
+                        m_vxModel[index] |= VoxelExposedDir_X_Neg;
+                    }
+
+                    if ((j == 0) || (data[index - m_res.x] == air)) {
+                        m_vxModel[index] |= VoxelExposedDir_Y_Neg;
+                    }
+
+                    if ((i == 0) || (data[index - m_res.x * m_res.y] == air)) {
+                        m_vxModel[index] |= VoxelExposedDir_Z_Neg;
+                    }
                 }
             }
         }
@@ -318,9 +353,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
 
-    rvl_destroy(&rvl);
-
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_res, m_vxModel));
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
@@ -353,7 +386,8 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
     texcoord = std::vector<glm::vec2>(positions.size(), glm::vec2(0.0f, 0.0f));
 
     world.theDataset->Insert(pos);
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_res, m_vxModel));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)

@@ -4,6 +4,7 @@
 #include <memory>
 #include <vector>
 
+#include <rvl.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/weakref.h>
@@ -21,6 +22,7 @@ public:
     using AttachedWindows = ::AttacheProjectWindows;
 
     WatermarkingProject();
+    ~WatermarkingProject();
     void CreateProject();
     void StopProject();
     void BuildMapMesh() const;
@@ -42,6 +44,9 @@ private:
     bool m_isMapReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
+    RVL* m_rvl;
+    glm::ivec3 m_res;
+    RVLByte* m_vxModel;
 };
 
 #endif
