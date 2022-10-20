@@ -241,6 +241,13 @@ rvl_test_partially_read ()
 }
 
 void
+rvl_test_uninitialized_rvl ()
+{
+  RVL *rvl = NULL;
+  rvl_destroy (&rvl);
+}
+
+void
 init_regular_grid (RVL *rvl)
 {
   rvl_set_grid_type (rvl, RVLGridType_Regular);

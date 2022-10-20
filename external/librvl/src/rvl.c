@@ -37,6 +37,9 @@ rvl_create_reader (const char *filename)
 void
 rvl_destroy (RVL **self)
 {
+  if (*self == NULL)
+    return;
+
   RVL *ptr = *self;
   rvl_text_destroy_array (&ptr->text);
 

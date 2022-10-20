@@ -48,10 +48,12 @@ rvl_set_grid_position (RVL *self, float x, float y, float z)
 void
 rvl_set_voxel_dims_1f (RVL *self, float x)
 {
-  RVLSize size = 1 * sizeof (f32);
+  RVLSize size = 3 * sizeof (f32);
 
   rvl_alloc (self, &self->grid.vxDimBuf, size);
-  memcpy (self->grid.vxDimBuf, &x, size);
+
+  f32 arr[3] = { x, x, x };
+  memcpy (self->grid.vxDimBuf, arr, size);
   self->grid.vxDimBufSize = size;
 }
 
@@ -61,6 +63,7 @@ rvl_set_voxel_dims_3f (RVL *self, float x, float y, float z)
   RVLSize size = 3 * sizeof (f32);
 
   rvl_alloc (self, &self->grid.vxDimBuf, size);
+
   f32 arr[3] = { x, y, z };
   memcpy (self->grid.vxDimBuf, arr, size);
   self->grid.vxDimBufSize = size;

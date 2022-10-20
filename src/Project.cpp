@@ -31,6 +31,7 @@ WatermarkingProject::WatermarkingProject()
     : m_isMapReady(false)
     , m_frame {}
     , m_panel {}
+    , m_rvl(nullptr)
 {
     Bind(EVT_IMPORT_MODEL, &WatermarkingProject::OnMenuImportModel, this);
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);

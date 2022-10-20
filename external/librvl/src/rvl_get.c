@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <log.h>
 
 #include "rvl.h"
@@ -39,9 +41,7 @@ rvl_get_resolution (RVL *self, int *x, int *y, int *z)
 void
 rvl_get_voxel_dims_1f (RVL *self, float *x)
 {
-  const float *buf = (const float *)self->grid.vxDimBuf;
-
-  *x = buf[0];
+  *x = ((float *)self->grid.vxDimBuf)[0];
 }
 
 void

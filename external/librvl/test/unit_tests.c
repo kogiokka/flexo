@@ -6,6 +6,7 @@ void rvl_test_read_regular_grid ();
 void rvl_test_write_rectilinear_grid ();
 void rvl_test_read_rectilinear_grid ();
 void rvl_test_partially_read ();
+void rvl_test_uninitialized_rvl ();
 
 int
 main (int argc, char *argv[])
@@ -29,6 +30,10 @@ main (int argc, char *argv[])
   else if (strcmp (argv[1], "5") == 0)
     {
       rvl_test_partially_read ();
+    }
+  else if (strcmp (argv[1], "6") == 0)
+    {
+      rvl_test_uninitialized_rvl ();
     }
 
   return 0;
