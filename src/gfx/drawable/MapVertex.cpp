@@ -56,7 +56,7 @@ MapVertex::MapVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perIns
     draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/MapVertex.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(
-        std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.2f)));
+        std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), glm::vec3(1.0f) * 0.02f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));

@@ -3,6 +3,7 @@
 
 #include "Vertex.hpp"
 #include "World.hpp"
+#include "assetlib/STL/STLImporter.hpp"
 #include "gfx/Task.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
@@ -16,23 +17,38 @@
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
 
-VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
+static STLImporter STLI;
+
+struct Cube {
+    struct {
+        Mesh xp;
+        Mesh xn;
+        Mesh yp;
+        Mesh yn;
+        Mesh zp;
+        Mesh zn;
+    } face;
+};
+
+static Cube const VOXEL = { {
+    STLI.ReadFile("res/models/voxel/cube-x-pos.stl"),
+    STLI.ReadFile("res/models/voxel/cube-x-neg.stl"),
+    STLI.ReadFile("res/models/voxel/cube-y-pos.stl"),
+    STLI.ReadFile("res/models/voxel/cube-y-neg.stl"),
+    STLI.ReadFile("res/models/voxel/cube-z-pos.stl"),
+    STLI.ReadFile("res/models/voxel/cube-z-neg.stl"),
+} };
+
+VolumetricModel::VolumetricModel(Graphics& gfx, RVL& rvl)
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, offsetof(VertexPN, position), GLWRInputClassification_PerVertex, 0 },
-        { "normal", GLWRFormat_Float3, 0, offsetof(VertexPN, normal), GLWRInputClassification_PerVertex, 0 },
-        { "textureCoord", GLWRFormat_Float2, 1, 0, GLWRInputClassification_PerInstance, 1 },
-        { "translation", GLWRFormat_Float3, 2, 0, GLWRInputClassification_PerInstance, 1 },
+        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 1, 0, GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 2, 0, GLWRInputClassification_PerVertex, 0 },
     };
 
-    std::vector<VertexPN> vertices;
-    for (unsigned int i = 0; i < instanceMesh.positions.size(); i++) {
-        VertexPN v;
-        v.position = instanceMesh.positions[i];
-        v.normal = instanceMesh.normals[i];
-        vertices.push_back(v);
-    }
+    CreateMesh(rvl);
 
     m_isVisible = true;
 
@@ -41,8 +57,8 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     m_ub.vert.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
     m_ub.vert.light.diffusion = glm::vec3(0.8f, 0.8f, 0.8f);
     m_ub.vert.light.specular = glm::vec3(0.8f, 0.8f, 0.8f);
-    m_ub.vert.material.ambient = glm::vec3(0.0f, 0.3f, 0.0f);
-    m_ub.vert.material.diffusion = glm::vec3(0.0f, 0.6f, 0.0f);
+    m_ub.vert.material.ambient = glm::vec3(0.3f, 0.3f, 0.3f);
+    m_ub.vert.material.diffusion = glm::vec3(0.6f, 0.6f, 0.6f);
     m_ub.vert.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.vert.material.shininess = 256.0f;
     m_ub.vert.isWatermarked = false;
@@ -54,19 +70,18 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     samplerDesc.filter = GLWRFilter_MinMagNearest_NoMip;
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.textureCoords, 1));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.positions, 0));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.normals, 1));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.textureCoords, 2));
 
     Task draw;
     draw.mDrawable = this;
 
-    glm::vec3 vxScale(world.vxDim[0], world.vxDim[1], world.vxDim[2]);
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/VolumetricModel.vert");
     draw.AddBindable(vs);
     draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/VolumetricModel.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
-    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::scale(glm::mat4(1.0f), vxScale)));
+    draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
@@ -74,7 +89,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh c
     draw.AddBindable(Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 1));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 1));
-
     AddTask(draw);
 }
 
@@ -99,13 +113,6 @@ void VolumetricModel::Update(Graphics& gfx)
     m_ub.vert.light.position = gfx.GetCameraPosition();
     m_ub.vert.isWatermarked = world.isWatermarked;
 
-    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-        if ((vb != nullptr) && (vb->GetStartAttrib() == 1)) {
-            vb->Update(gfx, world.theModel->textureCoords);
-        }
-    }
-
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
@@ -119,4 +126,74 @@ void VolumetricModel::Update(Graphics& gfx)
 std::string VolumetricModel::GetName() const
 {
     return "Volumetric Model";
+}
+
+void VolumetricModel::CreateMesh(RVL& rvl)
+{
+    int x, y, z;
+    RVLByte* data;
+    glm::vec3 dims;
+
+    rvl_get_resolution(&rvl, &x, &y, &z);
+    rvl_get_data_buffer(&rvl, &data);
+
+    if (rvl_get_grid_type(&rvl) == RVLGridType_Cartesian) {
+        float d;
+        rvl_get_voxel_dims_1f(&rvl, &d);
+        dims.x = d;
+        dims.y = d;
+        dims.z = d;
+    } else if (rvl_get_grid_type(&rvl) == RVLGridType_Regular) {
+        rvl_get_voxel_dims_3f(&rvl, &dims.x, &dims.y, &dims.z);
+    }
+
+    world.numVxVerts.resize(x * y * z);
+
+    const RVLByte model = 255;
+    const RVLByte air = 0;
+    for (int i = 0; i < z; i++) {
+        for (int j = 0; j < y; j++) {
+            for (int k = 0; k < x; k++) {
+                int index = k + j * x + i * x * y;
+                glm::vec3 offset { k, j, i };
+                if (data[index] == model) {
+                    if ((k + 1 == x) || data[index + 1] == air) {
+                        AddFace(VOXEL.face.xp, offset, dims);
+                        world.numVxVerts[index] += 6;
+                    }
+                    if ((j + 1 == y) || (data[index + x] == air)) {
+                        AddFace(VOXEL.face.yp, offset, dims);
+                        world.numVxVerts[index] += 6;
+                    }
+                    if ((i + 1 == z) || (data[index + x * y] == air)) {
+                        AddFace(VOXEL.face.zp, offset, dims);
+                        world.numVxVerts[index] += 6;
+                    }
+                    if ((k == 0) || (data[index - 1] == air)) {
+                        AddFace(VOXEL.face.xn, offset, dims);
+                        world.numVxVerts[index] += 6;
+                    }
+                    if ((j == 0) || (data[index - x] == air)) {
+                        AddFace(VOXEL.face.yn, offset, dims);
+                        world.numVxVerts[index] += 6;
+                    }
+                    if ((i == 0) || (data[index - x * y] == air)) {
+                        AddFace(VOXEL.face.zn, offset, dims);
+                        world.numVxVerts[index] += 6;
+                    }
+                }
+            }
+        }
+    }
+
+    m_mesh.textureCoords = std::vector<glm::vec2>(m_mesh.positions.size(), glm::vec2(0.0f, 0.0f));
+    world.theModel->textureCoords = m_mesh.textureCoords;
+}
+
+void VolumetricModel::AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale)
+{
+    for (auto const& pos : face.positions) {
+        m_mesh.positions.emplace_back((pos + offset) * scale);
+    }
+    m_mesh.normals.insert(m_mesh.normals.end(), face.normals.begin(), face.normals.end());
 }

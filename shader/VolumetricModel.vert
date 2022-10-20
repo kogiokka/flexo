@@ -33,7 +33,6 @@ layout(std140, binding = 1) uniform UniformBuffer {
 in vec3 position;
 in vec3 normal;
 in vec2 textureCoord;
-in vec3 translation;
 
 layout (binding = 0) uniform sampler2D voxelPattern;
 layout (binding = 1) uniform sampler2D voxelColor;
@@ -62,6 +61,6 @@ void main()
         outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelColor, textureCoord);
     }
 
-    gl_Position = mx.viewProj * (vec4(translation, 0.0) + mx.model * vec4(position, 1.0));
+    gl_Position = mx.viewProj * mx.model * vec4(position, 1.0);
 }
 

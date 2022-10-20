@@ -1,7 +1,10 @@
 #ifndef VOLUMETRIC_MODEL_H
 #define VOLUMETRIC_MODEL_H
 
+#include <cstdint>
 #include <memory>
+
+#include <rvl.h>
 
 #include <glm/glm.hpp>
 
@@ -10,8 +13,10 @@
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/drawable/InstancedDrawable.hpp"
 
-class VolumetricModel : public InstancedDrawable
+class VolumetricModel : public Drawable
 {
+    friend WatermarkingProject;
+
     struct UniformBlock {
         struct Vert {
             struct Light {
@@ -39,11 +44,17 @@ class VolumetricModel : public InstancedDrawable
     UniformBlock m_ub;
 
 public:
-    VolumetricModel(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
+    VolumetricModel(Graphics& gfx, RVL& rvl);
     ~VolumetricModel() override;
     void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
     std::string GetName() const override;
+
+private:
+    Mesh m_mesh;
+
+    void CreateMesh(RVL& rvl);
+    void AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale);
 };
 
 #endif

@@ -1,5 +1,7 @@
 #include <algorithm>
 #include <cmath>
+#include <cstdlib>
+#include <limits>
 
 #include <wx/msgdlg.h>
 
@@ -61,10 +63,16 @@ WatermarkingProject::WatermarkingProject()
         auto& drawlist = DrawList::Get(*this);
         drawlist.Remove<VolumetricModel>();
         drawlist.Remove<MapFace>();
-        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+
+        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
         drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
+}
+
+WatermarkingProject::~WatermarkingProject()
+{
+    rvl_destroy(&m_rvl);
 }
 
 void WatermarkingProject::CreateProject()
@@ -138,10 +146,10 @@ void WatermarkingProject::BuildMapMesh() const
             // t2 = glm::vec2((x + 1) / divisor, y / divisor);
             // t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
             // t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-            t1 = glm::vec2(x / w, y / h);
-            t2 = glm::vec2((x + 1) / w, y / h);
-            t3 = glm::vec2((x + 1) / w, (y + 1) / h);
-            t4 = glm::vec2(x / w, (y + 1) / h);
+            t1 = map.mTexureCoord[x + y * width];
+            t2 = map.mTexureCoord[x + 1 + y * width];
+            t3 = map.mTexureCoord[x + 1 + (y + 1) * width];
+            t4 = map.mTexureCoord[x + (y + 1) * width];
 
             mesh.positions.push_back(p1);
             mesh.positions.push_back(p2);
@@ -214,24 +222,67 @@ void WatermarkingProject::DoWatermark()
     assert(world.theModel);
 
     // Update the texture coordinates of the Volumetric Model.
-    std::vector<glm::vec2> textureCoords;
-    textureCoords.reserve(world.theModel->textureCoords.size());
+    std::vector<glm::vec2> texcrd;
 
-    for (glm::vec3 const& vp : world.theModel->positions) {
-        glm::vec2 coord = world.mapMesh.textureCoords.front();
-        float minDist = glm::distance(vp, world.mapMesh.positions.front());
-        // TODO: Deal with the duplicate calculations
-        for (unsigned int i = 1; i < world.mapMesh.positions.size(); i++) {
-            auto dist = glm::distance(vp, world.mapMesh.positions[i]);
-            if (dist < minDist) {
-                minDist = dist;
-                coord = world.mapMesh.textureCoords[i];
+    int x, y, z;
+    float dx, dy, dz;
+    RVLByte* data;
+    rvl_get_resolution(m_rvl, &x, &y, &z);
+    rvl_get_data_buffer(m_rvl, &data);
+    if (rvl_get_grid_type(m_rvl) == RVLGridType_Cartesian) {
+        float dim;
+        rvl_get_voxel_dims_1f(m_rvl, &dim);
+        dx = dim;
+        dy = dim;
+        dz = dim;
+    } else if (rvl_get_grid_type(m_rvl) == RVLGridType_Regular) {
+        rvl_get_voxel_dims_3f(m_rvl, &dx, &dy, &dz);
+    }
+
+    const RVLByte model = 255;
+    for (int i = 0; i < z; i++) {
+        for (int j = 0; j < y; j++) {
+            for (int k = 0; k < x; k++) {
+                int index = k + j * x + i * x * y;
+                if (data[index] != model)
+                    continue;
+
+                glm::vec2 coord;
+                float minDist = std::numeric_limits<float>::max();
+                glm::vec3 vxPos(k * dx, j * dy, i * dz);
+
+                for (unsigned int n = 0; n < world.theMap->mNeurons.size(); n++) {
+                    auto const& node = world.theMap->mNeurons[n];
+                    glm::vec3 nodePos(node.weights[0], node.weights[1], node.weights[2]);
+                    float const dist = glm::distance(vxPos, nodePos);
+                    if (dist < minDist) {
+                        minDist = dist;
+                        coord = world.theMap->mTexureCoord[n];
+                    }
+                }
+                for (int n = 0; n < world.numVxVerts[index]; n++) {
+                    texcrd.emplace_back(coord);
+                }
             }
         }
-        textureCoords.push_back(coord);
     }
-    world.theModel->textureCoords = textureCoords;
+
     world.isWatermarked = true;
+
+    // Update the drawlist and the renderer
+    auto& drawlist = DrawList::Get(*this);
+    for (auto const& d : drawlist) {
+        VolumetricModel* ptr = dynamic_cast<VolumetricModel*>(d.get());
+        if (ptr != nullptr) {
+            for (auto it = ptr->m_binds.begin(); it != ptr->m_binds.end(); it++) {
+                Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
+                if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
+                    vb->Update(Graphics::Get(*this), texcrd);
+                }
+            }
+        }
+    }
+    drawlist.Submit(Renderer::Get(*this));
 }
 
 void WatermarkingProject::UpdateMapGraphics()
@@ -273,54 +324,52 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
-    RVL* rvl = rvl_create_reader(path.c_str());
-    rvl_read_rvl(rvl);
+    m_rvl = rvl_create_reader(path.c_str());
 
-    int rx, ry, rz;
-
-    rvl_get_resolution(rvl, &rx, &ry, &rz);
-
+    int x, y, z;
+    float dx, dy, dz;
     RVLByte* data;
-    rvl_get_data_buffer(rvl, &data);
 
-    if (rvl_get_grid_type(rvl) == RVLGridType_Cartesian) {
+    rvl_read_rvl(m_rvl);
+    rvl_get_resolution(m_rvl, &x, &y, &z);
+    rvl_get_data_buffer(m_rvl, &data);
+
+    if (rvl_get_grid_type(m_rvl) == RVLGridType_Cartesian) {
         float dim;
-        rvl_get_voxel_dims_1f(rvl, &dim);
-        world.vxDim[0] = dim;
-        world.vxDim[1] = dim;
-        world.vxDim[2] = dim;
-    } else if (rvl_get_grid_type(rvl) == RVLGridType_Regular) {
-        rvl_get_voxel_dims_3f(rvl, &world.vxDim[0], &world.vxDim[1], &world.vxDim[2]);
+        rvl_get_voxel_dims_1f(m_rvl, &dim);
+        dx = dim;
+        dy = dim;
+        dz = dim;
+    } else if (rvl_get_grid_type(m_rvl) == RVLGridType_Regular) {
+        rvl_get_voxel_dims_3f(m_rvl, &dx, &dy, &dz);
     }
 
-    if (rvl_get_primitive(rvl) != RVLPrimitive_u8) {
+    if (rvl_get_primitive(m_rvl) != RVLPrimitive_u8) {
         std::cerr << "Wrong RVL format: " << path << std::endl;
         std::exit(EXIT_FAILURE);
     }
 
     world.theModel = std::make_shared<Mesh>();
-    auto& pos = world.theModel->positions;
-    auto& texcoord = world.theModel->textureCoords;
 
-    const int model = 255;
-    for (int x = 0; x < rx; x++) {
-        for (int y = 0; y < ry; y++) {
-            for (int z = 0; z < rz; z++) {
-                if (data[x + y * rx + z * rx * ry] == model) {
-                    pos.push_back(glm::vec3 { x * world.vxDim[0], y * world.vxDim[1], z * world.vxDim[2] });
+    auto& pos = world.theModel->positions;
+
+    const RVLByte model = 255;
+    for (int i = 0; i < z; i++) {
+        for (int j = 0; j < y; j++) {
+            for (int k = 0; k < x; k++) {
+                int index = k + j * x + i * x * y;
+                if (data[index] == model) {
+                    pos.push_back(glm::vec3 { k * dx, j * dy, i * dz });
                 }
             }
         }
     }
 
-    texcoord = std::vector<glm::vec2>(pos.size(), glm::vec2(0.0f, 0.0f));
     Logger::info("%lu voxels will be rendered.", pos.size());
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
 
-    rvl_destroy(&rvl);
-
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
@@ -353,7 +402,8 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
     texcoord = std::vector<glm::vec2>(positions.size(), glm::vec2(0.0f, 0.0f));
 
     world.theDataset->Insert(pos);
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), world.cube, *world.theModel));
+
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)

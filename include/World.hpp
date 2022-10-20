@@ -22,11 +22,11 @@ struct World {
     Mesh mapMesh;
     Mesh neurons;
 
-    float vxDim[3];
     std::shared_ptr<Mesh> theModel;
     std::shared_ptr<Dataset<3>> theDataset;
     std::shared_ptr<Map<3, 2>> theMap;
     std::vector<unsigned int> mapEdges;
+    std::vector<int> numVxVerts;
     glm::vec3 lightPos;
     bool isWatermarked;
     std::string imagePath;
