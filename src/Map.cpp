@@ -40,7 +40,7 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
                 map->mNeurons.emplace_back(Vec3f { xRng.scalar(), yRng.scalar(), zRng.scalar() },
-                                               Vec2f { static_cast<float>(i), static_cast<float>(j) });
+                                           Vec2f { static_cast<float>(i), static_cast<float>(j) });
             }
         }
     } else if (initState == MapInitState_Plane) {
@@ -50,7 +50,7 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
                 map->mNeurons.emplace_back(Vec3f { i * dx, j * dy, box.max.z },
-                                               Vec2f { static_cast<float>(i), static_cast<float>(j) });
+                                           Vec2f { static_cast<float>(i), static_cast<float>(j) });
             }
         }
     }
@@ -58,6 +58,15 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
     map->mWidth = width;
     map->mHeight = height;
     map->mFlags = flags;
+
+    float const w = static_cast<float>(width - 1);
+    float const h = static_cast<float>(height - 1);
+
+    for (int y = 0; y < height; y++) {
+        for (int x = 0; x < width; x++) {
+            map->mTexureCoord.emplace_back(x / w, y / h);
+        }
+    }
 
     emplace_back(std::move(map));
 }

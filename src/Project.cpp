@@ -146,10 +146,10 @@ void WatermarkingProject::BuildMapMesh() const
             // t2 = glm::vec2((x + 1) / divisor, y / divisor);
             // t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
             // t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-            t1 = glm::vec2(x / w, y / h);
-            t2 = glm::vec2((x + 1) / w, y / h);
-            t3 = glm::vec2((x + 1) / w, (y + 1) / h);
-            t4 = glm::vec2(x / w, (y + 1) / h);
+            t1 = map.mTexureCoord[x + y * width];
+            t2 = map.mTexureCoord[x + 1 + y * width];
+            t3 = map.mTexureCoord[x + 1 + (y + 1) * width];
+            t4 = map.mTexureCoord[x + (y + 1) * width];
 
             mesh.positions.push_back(p1);
             mesh.positions.push_back(p2);
@@ -247,16 +247,17 @@ void WatermarkingProject::DoWatermark()
                 if (data[index] != model)
                     continue;
 
-                glm::vec3 vxpos(k * dx, j * dy, i * dz);
                 glm::vec2 coord;
                 float minDist = std::numeric_limits<float>::max();
+                glm::vec3 vxPos(k * dx, j * dy, i * dz);
 
-                // TODO: Deal with the duplicate calculations
-                for (unsigned int i = 1; i < world.mapMesh.positions.size(); i++) {
-                    auto dist = glm::distance(vxpos, world.mapMesh.positions[i]);
+                for (unsigned int n = 0; n < world.theMap->mNeurons.size(); n++) {
+                    auto const& node = world.theMap->mNeurons[n];
+                    glm::vec3 nodePos(node.weights[0], node.weights[1], node.weights[2]);
+                    float const dist = glm::distance(vxPos, nodePos);
                     if (dist < minDist) {
                         minDist = dist;
-                        coord = world.mapMesh.textureCoords[i];
+                        coord = world.theMap->mTexureCoord[n];
                     }
                 }
                 for (int n = 0; n < world.numVxVerts[index]; n++) {
