@@ -70,14 +70,24 @@ rvl_write_VHDR_chunk (RVL *self)
 void
 rvl_write_GRID_chunk (RVL *self)
 {
-  RVLSize  wbufSize = 14 + self->grid.vxDimBufSize;
+  RVLSize  offset   = 14;
+  RVLSize  wbufSize = offset + self->grid.dimBufSz;
   RVLByte *wbuf     = (RVLByte *)malloc (wbufSize);
 
   // Grid info
   wbuf[0] = self->grid.type;
   wbuf[1] = self->grid.unit;
   memcpy (&wbuf[2], self->grid.position, 12);
-  memcpy (&wbuf[14], self->grid.vxDimBuf, self->grid.vxDimBufSize);
+
+  RVLSize szdx = self->grid.ndx * sizeof (f32);
+  RVLSize szdy = self->grid.ndy * sizeof (f32);
+  RVLSize szdz = self->grid.ndz * sizeof (f32);
+
+  memcpy (&wbuf[offset], self->grid.dx, szdx);
+  offset += szdx;
+  memcpy (&wbuf[offset], self->grid.dy, szdy);
+  offset += szdy;
+  memcpy (&wbuf[offset], self->grid.dz, szdz);
 
   rvl_write_chunk_header (self, RVLChunkCode_GRID, wbufSize);
   rvl_write_chunk_payload (self, wbuf, wbufSize);
@@ -231,26 +241,16 @@ check_data (RVL *self)
 void
 check_grid (RVL *self)
 {
-  if (self->grid.vxDimBufSize <= 0)
+  if (self->grid.ndx <= 0 || self->grid.ndy <= 0 || self->grid.ndz <= 0)
     {
       log_fatal ("[librvl write] Missing voxel dimensions.");
       exit (EXIT_FAILURE);
     }
 
-  u32 numDim = (self->grid.vxDimBufSize) / sizeof (f32);
   switch (self->grid.type)
     {
-    case RVLGridType_Cartesian:
-      if (numDim != 1)
-        {
-          log_fatal ("[librvl write] Number of voxel dimensions is not valid "
-                     "for Cartesian grid.");
-          exit (EXIT_FAILURE);
-        }
-
-      break;
     case RVLGridType_Regular:
-      if (numDim != 3)
+      if (self->grid.ndx != 1 || self->grid.ndy != 1 || self->grid.ndz != 1)
         {
           log_fatal ("[librvl write] Number of voxel dimensions is not valid "
                      "for regular grid.");
@@ -260,7 +260,8 @@ check_grid (RVL *self)
     case RVLGridType_Rectilinear:
       {
         u32 *r = self->resolution;
-        if (numDim != (r[0] + r[1] + r[2]))
+        if (self->grid.ndx != r[0] || self->grid.ndy != r[1]
+            || self->grid.ndz != r[2])
           {
             log_fatal (
                 "[librvl write] Number of voxel dimensions do not match "

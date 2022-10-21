@@ -39,25 +39,23 @@ rvl_get_resolution (RVL *self, int *x, int *y, int *z)
 }
 
 void
-rvl_get_voxel_dims_1f (RVL *self, float *x)
+rvl_get_voxel_dims (RVL *self, float *dx, float *dy, float *dz)
 {
-  *x = ((float *)self->grid.vxDimBuf)[0];
+  *dx = ((float *)self->grid.dx)[0];
+  *dy = ((float *)self->grid.dy)[0];
+  *dz = ((float *)self->grid.dz)[0];
 }
 
 void
-rvl_get_voxel_dims_3f (RVL *self, float *x, float *y, float *z)
+rvl_get_voxel_dims_v (RVL *self, int *ndx, int *ndy, int *ndz,
+                      const float **dx, const float **dy, const float **dz)
 {
-  const float *buf = (const float *)self->grid.vxDimBuf;
-
-  *x = buf[0];
-  *y = buf[1];
-  *z = buf[2];
-}
-
-void
-rvl_get_voxel_dims_v (RVL *self, const float **dimensions)
-{
-  *dimensions = (const float *)self->grid.vxDimBuf;
+  *ndx = self->grid.ndx;
+  *ndy = self->grid.ndy;
+  *ndz = self->grid.ndz;
+  *dx  = (const float *)self->grid.dx;
+  *dy  = (const float *)self->grid.dy;
+  *dz  = (const float *)self->grid.dz;
 }
 
 void

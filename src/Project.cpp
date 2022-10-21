@@ -230,15 +230,7 @@ void WatermarkingProject::DoWatermark()
     RVLByte* data;
     rvl_get_resolution(m_rvl, &x, &y, &z);
     rvl_get_data_buffer(m_rvl, &data);
-    if (rvl_get_grid_type(m_rvl) == RVLGridType_Cartesian) {
-        float dim;
-        rvl_get_voxel_dims_1f(m_rvl, &dim);
-        dx = dim;
-        dy = dim;
-        dz = dim;
-    } else if (rvl_get_grid_type(m_rvl) == RVLGridType_Regular) {
-        rvl_get_voxel_dims_3f(m_rvl, &dx, &dy, &dz);
-    }
+    rvl_get_voxel_dims(m_rvl, &dx, &dy, &dz);
 
     const RVLByte model = 255;
     for (int i = 0; i < z; i++) {
@@ -334,16 +326,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     rvl_read_rvl(m_rvl);
     rvl_get_resolution(m_rvl, &x, &y, &z);
     rvl_get_data_buffer(m_rvl, &data);
-
-    if (rvl_get_grid_type(m_rvl) == RVLGridType_Cartesian) {
-        float dim;
-        rvl_get_voxel_dims_1f(m_rvl, &dim);
-        dx = dim;
-        dy = dim;
-        dz = dim;
-    } else if (rvl_get_grid_type(m_rvl) == RVLGridType_Regular) {
-        rvl_get_voxel_dims_3f(m_rvl, &dx, &dy, &dz);
-    }
+    rvl_get_voxel_dims(m_rvl, &dx, &dy, &dz);
 
     if (rvl_get_primitive(m_rvl) != RVLPrimitive_u8) {
         std::cerr << "Wrong RVL format: " << path << std::endl;

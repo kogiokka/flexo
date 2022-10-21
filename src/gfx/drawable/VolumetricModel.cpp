@@ -136,16 +136,7 @@ void VolumetricModel::CreateMesh(RVL& rvl)
 
     rvl_get_resolution(&rvl, &x, &y, &z);
     rvl_get_data_buffer(&rvl, &data);
-
-    if (rvl_get_grid_type(&rvl) == RVLGridType_Cartesian) {
-        float d;
-        rvl_get_voxel_dims_1f(&rvl, &d);
-        dims.x = d;
-        dims.y = d;
-        dims.z = d;
-    } else if (rvl_get_grid_type(&rvl) == RVLGridType_Regular) {
-        rvl_get_voxel_dims_3f(&rvl, &dims.x, &dims.y, &dims.z);
-    }
+    rvl_get_voxel_dims(&rvl, &dims.x, &dims.y, &dims.z);
 
     world.numVxVerts.resize(x * y * z);
 

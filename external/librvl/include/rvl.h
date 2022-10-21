@@ -41,19 +41,13 @@
  * +02  12B   position of the lower corner of the grid
  * +14   nB   voxel dimensions
  *
+ *
  * Each grid type has its own voxel dimensions configuration.
- *
- * Cartesian Grid
- * --------------
- *
- * +14   4B   one value for x, y, and z.
- *
  *
  * Regular Grid
  * ------------
  *
  * +14  12B   three values for x, y, and z, respectively.
- *
  *
  * Rectilinear Grid
  * ----------------
@@ -70,7 +64,7 @@
 #include <stdint.h>
 
 #define RVL_VERSION_MAJOR 0
-#define RVL_VERSION_MINOR 3
+#define RVL_VERSION_MINOR 4
 
 typedef struct RVL     RVL;
 typedef struct RVLText RVLText;
@@ -160,9 +154,8 @@ typedef uint8_t  RVLCompressionType;
 #define RVLEndian_Big    0
 #define RVLEndian_Little 1
 
-#define RVLGridType_Cartesian   0
-#define RVLGridType_Regular     1
-#define RVLGridType_Rectilinear 2
+#define RVLGridType_Regular     0
+#define RVLGridType_Rectilinear 1
 
 // -128 - N/A or unknown, n - 1.0e+n meter
 #define RVLGridUnit_NA         -128
@@ -211,23 +204,14 @@ extern "C"
   RVLGridUnit rvl_get_grid_unit (RVL *self);
   void        rvl_get_grid_position (RVL *self, float *x, float *y, float *z);
 
-  // Set voxel dimensions for Cartesian grid type.
-  void rvl_set_voxel_dims_1f (RVL *self, float x);
+  void rvl_set_voxel_dims (RVL *self, float dx, float dy, float dz);
+  void rvl_get_voxel_dims (RVL *self, float *dx, float *dy, float *dz);
 
-  // Set voxel dimensions for Regular grid type.
-  void rvl_set_voxel_dims_3f (RVL *self, float x, float y, float z);
-
-  // Set voxel dimensions for Rectilinear grid type.
-  void rvl_set_voxel_dims_v (RVL *self, int n, const float *dimensions);
-
-  // Get voxel dimensions for Cartesian grid type.
-  void rvl_get_voxel_dims_1f (RVL *self, float *x);
-
-  // Get voxel dimensions for Cartesian or Regular grid type.
-  void rvl_get_voxel_dims_3f (RVL *self, float *x, float *y, float *z);
-
-  // Get voxel dimensions for Rectilinear grid type.
-  void rvl_get_voxel_dims_v (RVL *self, const float **dimensions);
+  void rvl_set_voxel_dims_v (RVL *self, int ndx, int ndy, int ndz, float *dx,
+                             float *dy, float *dz);
+  void rvl_get_voxel_dims_v (RVL *self, int *ndx, int *ndy, int *ndz,
+                             const float **dx, const float **dy,
+                             const float **dz);
 
   /* DATA chunk functions */
 

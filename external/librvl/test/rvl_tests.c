@@ -56,7 +56,7 @@ rvl_test_read_regular_grid ()
   float        dx, dy, dz;
   float        px, py, pz;
   rvl_get_resolution (rvl, &x, &y, &z);
-  rvl_get_voxel_dims_3f (rvl, &dx, &dy, &dz);
+  rvl_get_voxel_dims (rvl, &dx, &dy, &dz);
   rvl_get_grid_position (rvl, &px, &py, &pz);
 
   char sep[81];
@@ -140,10 +140,11 @@ rvl_test_read_rectilinear_grid ()
   RVLPrimitive format   = rvl_get_primitive (rvl);
   RVLEndian    endian   = rvl_get_endian (rvl);
   int          x, y, z;
-  const float *vsize;
+  int          ndx, ndy, ndz;
+  const float *dx, *dy, *dz;
   float        px, py, pz;
   rvl_get_resolution (rvl, &x, &y, &z);
-  rvl_get_voxel_dims_v (rvl, &vsize);
+  rvl_get_voxel_dims_v (rvl, &ndx, &ndy, &ndz, &dx, &dy, &dz);
   rvl_get_grid_position (rvl, &px, &py, &pz);
 
   char sep[81];
@@ -154,17 +155,23 @@ rvl_test_read_rectilinear_grid ()
   fprintf (stdout, "Data format: 0x%.4x\n", format);
   fprintf (stdout, "Endian - %d\n", endian);
   fprintf (stdout, "Voxel Dim -\n");
-  for (int i = 0; i < x; i++)
+
+  if (ndx <= 0 || ndy <= 0 || ndx <= 0)
     {
-      fprintf (stdout, "    x%d: %.3f\n", i, vsize[i]);
+      exit (EXIT_FAILURE);
     }
-  for (int i = 0; i < y; i++)
+
+  for (int i = 0; i < ndx; i++)
     {
-      fprintf (stdout, "    y%d: %.3f\n", i, vsize[i + x]);
+      fprintf (stdout, "    x%d: %.3f\n", i, dx[i]);
     }
-  for (int i = 0; i < z; i++)
+  for (int i = 0; i < ndy; i++)
     {
-      fprintf (stdout, "    z%d: %.3f\n", i, vsize[i + x + y]);
+      fprintf (stdout, "    y%d: %.3f\n", i, dy[i]);
+    }
+  for (int i = 0; i < ndz; i++)
+    {
+      fprintf (stdout, "    z%d: %.3f\n", i, dz[i]);
     }
   fprintf (stdout, "Position - x: %.3f, y: %.3f, z: %.3f\n", px, py, pz);
   fprintf (stdout, "%s\n", sep);
@@ -198,20 +205,20 @@ rvl_test_partially_read ()
   // Read VHDR, GRID and TEXT
   rvl_read_info (rvl);
 
-  int          x, y, z;
-  const float *vsize;
-  float        px, py, pz;
-  RVLText     *textArr;
-  int          numText;
-  const char  *key   = NULL;
-  const char  *value = NULL;
+  int         x, y, z;
+  float       dx, dy, dz;
+  float       px, py, pz;
+  RVLText    *textArr;
+  int         numText;
+  const char *key   = NULL;
+  const char *value = NULL;
 
   RVLGridType  gridType = rvl_get_grid_type (rvl);
   RVLGridUnit  unit     = rvl_get_grid_unit (rvl);
   RVLPrimitive format   = rvl_get_primitive (rvl);
   RVLEndian    endian   = rvl_get_endian (rvl);
   rvl_get_resolution (rvl, &x, &y, &z);
-  rvl_get_voxel_dims_v (rvl, &vsize);
+  rvl_get_voxel_dims (rvl, &dx, &dy, &dz);
   rvl_get_grid_position (rvl, &px, &py, &pz);
   rvl_get_text (rvl, &textArr, &numText);
 
@@ -223,8 +230,7 @@ rvl_test_partially_read ()
   fprintf (stdout, "Grid - type: %d, unit: %d\n", gridType, unit);
   fprintf (stdout, "Data format: 0x%.4x\n", format);
   fprintf (stdout, "Endian - %d\n", endian);
-  fprintf (stdout, "Voxel Dim - x: %.3f, y: %.3f, z: %.3f\n", vsize[0],
-           vsize[1], vsize[2]);
+  fprintf (stdout, "Voxel Dim - x: %.3f, y: %.3f, z: %.3f\n", dx, dy, dz);
   for (int i = 0; i < numText; i++)
     {
       rvl_text_get (textArr, i, &key, &value);
@@ -257,7 +263,7 @@ init_regular_grid (RVL *rvl)
   rvl_set_endian (rvl, RVLEndian_Little);
   rvl_set_resolution (rvl, 2, 2, 2);
   rvl_set_grid_position (rvl, 3.0f, 2.0f, 1.0f);
-  rvl_set_voxel_dims_3f (rvl, 0.1f, 0.2f, 0.3f);
+  rvl_set_voxel_dims (rvl, 0.1f, 0.2f, 0.3f);
 }
 
 void
@@ -271,15 +277,21 @@ init_rectilinear_grid (RVL *rvl)
   rvl_set_resolution (rvl, 6, 6, 3);
   rvl_set_grid_position (rvl, 1.0f, 2.0f, 3.0f);
 
-  int   numDim = 6 + 6 + 3;
-  float dims[numDim];
+  float dx[6];
+  float dy[6];
+  float dz[3];
 
-  for (int i = 0; i < numDim; i++)
+  for (int i = 0; i < 6; i++)
     {
-      dims[i] = i * 2.0f;
+      dx[i] = i * 2.0f;
+      dy[i] = i * 0.4f;
+      if (i < 3)
+        {
+          dz[i] = i * 3.0f;
+        }
     }
 
-  rvl_set_voxel_dims_v (rvl, numDim, dims);
+  rvl_set_voxel_dims_v (rvl, 6, 6, 3, dx, dy, dz);
 }
 
 void

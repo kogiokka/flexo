@@ -46,7 +46,7 @@ write_rvl (RVL *rvl)
   rvl_set_grid_unit (rvl, RVLGridUnit_NA);
   rvl_set_grid_position (rvl, 0.0f, 0.0f, 0.0f);
   rvl_set_resolution (rvl, rx, ry, rz);
-  rvl_set_voxel_dims_3f (rvl, 0.1f, 0.2f, 0.1f);
+  rvl_set_voxel_dims (rvl, 0.1f, 0.2f, 0.1f);
   rvl_set_primitive (rvl, RVLPrimitive_i32);
   rvl_set_endian (rvl, RVLEndian_Little);
 
@@ -79,7 +79,7 @@ read_rvl (RVL *rvl)
   float        dx, dy, dz;
   float        px, py, pz;
   rvl_get_resolution (rvl, &x, &y, &z);
-  rvl_get_voxel_dims_3f (rvl, &dx, &dy, &dz);
+  rvl_get_voxel_dims (rvl, &dx, &dy, &dz);
   rvl_get_grid_position (rvl, &px, &py, &pz);
 
   char sep[81];

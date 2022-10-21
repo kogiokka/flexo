@@ -46,37 +46,47 @@ rvl_set_grid_position (RVL *self, float x, float y, float z)
 }
 
 void
-rvl_set_voxel_dims_1f (RVL *self, float x)
+rvl_set_voxel_dims (RVL *self, float dx, float dy, float dz)
 {
-  RVLSize size = 3 * sizeof (f32);
+  RVLSize size = 1 * sizeof (f32);
 
-  rvl_alloc (self, &self->grid.vxDimBuf, size);
+  self->grid.dimBufSz = 3 * size;
+  self->grid.dimBuf = (RVLByte *)malloc (self->grid.dimBufSz);
 
-  f32 arr[3] = { x, x, x };
-  memcpy (self->grid.vxDimBuf, arr, size);
-  self->grid.vxDimBufSize = size;
+  self->grid.ndx = 1;
+  self->grid.ndy = 1;
+  self->grid.ndz = 1;
+  self->grid.dx  = (f32 *)(self->grid.dimBuf);
+  self->grid.dy  = (f32 *)(self->grid.dimBuf + size);
+  self->grid.dz  = (f32 *)(self->grid.dimBuf + (2 * size));
+
+  ((f32 *)self->grid.dx)[0] = dx;
+  ((f32 *)self->grid.dy)[0] = dy;
+  ((f32 *)self->grid.dz)[0] = dz;
 }
 
 void
-rvl_set_voxel_dims_3f (RVL *self, float x, float y, float z)
+rvl_set_voxel_dims_v (RVL *self, int ndx, int ndy, int ndz, float *dx,
+                      float *dy, float *dz)
 {
-  RVLSize size = 3 * sizeof (f32);
+  RVLSize sizef32 = sizeof (f32);
+  RVLSize szdx    = ndx * sizeof (f32);
+  RVLSize szdy    = ndy * sizeof (f32);
+  RVLSize szdz    = ndz * sizeof (f32);
 
-  rvl_alloc (self, &self->grid.vxDimBuf, size);
+  self->grid.dimBufSz = (ndx + ndy + ndz) * sizef32;
+  self->grid.dimBuf = (RVLByte *)malloc (self->grid.dimBufSz);
 
-  f32 arr[3] = { x, y, z };
-  memcpy (self->grid.vxDimBuf, arr, size);
-  self->grid.vxDimBufSize = size;
-}
+  self->grid.ndx = ndx;
+  self->grid.ndy = ndy;
+  self->grid.ndz = ndz;
+  self->grid.dx  = (f32 *)(self->grid.dimBuf);
+  self->grid.dy  = (f32 *)(self->grid.dimBuf + szdx);
+  self->grid.dz  = (f32 *)(self->grid.dimBuf + szdx + szdy);
 
-void
-rvl_set_voxel_dims_v (RVL *self, int n, const float *dimensions)
-{
-  RVLSize size = n * sizeof (f32);
-
-  rvl_alloc (self, &self->grid.vxDimBuf, size);
-  memcpy (self->grid.vxDimBuf, dimensions, size);
-  self->grid.vxDimBufSize = size;
+  memcpy (self->grid.dx, dx, szdx);
+  memcpy (self->grid.dy, dy, szdy);
+  memcpy (self->grid.dz, dz, szdz);
 }
 
 void
