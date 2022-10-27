@@ -3,18 +3,18 @@ set(CPACK_PACKAGE_NAME "librvl")
 # Files to be ignored
 set(SOURCE_IGNORE
     # Build directory
-    "[Bb]uild"
-    "[Oo]ut"
+    "[Bb]uild/"
+    "[Oo]ut/"
 
     # Downloads
-    "[Dd]ownloads"
+    "[Dd]ownloads/"
 
     # IDE-generated files
-    ".vs"
+    ".vs/"
     ".*.kdev4"
     ".kdev4/"
-    ".vscode"
-    ".idea"
+    ".vscode/"
+    ".idea/"
 
     # Files specific to version control.
     ".fslckout"

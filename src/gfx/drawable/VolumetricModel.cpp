@@ -131,17 +131,20 @@ std::string VolumetricModel::GetName() const
 void VolumetricModel::CreateMesh(RVL& rvl)
 {
     int x, y, z;
-    RVLByte* data;
+    const unsigned char* data;
+    const void* buf;
     glm::vec3 dims;
 
-    rvl_get_resolution(&rvl, &x, &y, &z);
-    rvl_get_data_buffer(&rvl, &data);
+    RVLenum primitive, endian;
+    rvl_get_volumetric_format(&rvl, &x, &y, &z, &primitive, &endian);
+    rvl_get_data_buffer(&rvl, &buf);
     rvl_get_voxel_dims(&rvl, &dims.x, &dims.y, &dims.z);
 
     world.numVxVerts.resize(x * y * z);
 
-    const RVLByte model = 255;
-    const RVLByte air = 0;
+    data = static_cast<const unsigned char*>(buf);
+    const unsigned char model = 255;
+    const unsigned char air = 0;
     for (int i = 0; i < z; i++) {
         for (int j = 0; j < y; j++) {
             for (int k = 0; k < x; k++) {

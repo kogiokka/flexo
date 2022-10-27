@@ -227,12 +227,15 @@ void WatermarkingProject::DoWatermark()
 
     int x, y, z;
     float dx, dy, dz;
-    RVLByte* data;
-    rvl_get_resolution(m_rvl, &x, &y, &z);
-    rvl_get_data_buffer(m_rvl, &data);
+    const void* buf;
+    const unsigned char* data;
+    RVLenum primitive, endian;
+    rvl_get_volumetric_format(m_rvl, &x, &y, &z, &primitive, &endian);
+    rvl_get_data_buffer(m_rvl, &buf);
     rvl_get_voxel_dims(m_rvl, &dx, &dy, &dz);
 
-    const RVLByte model = 255;
+    data = static_cast<const unsigned char*>(buf);
+    const unsigned char model = 255;
     for (int i = 0; i < z; i++) {
         for (int j = 0; j < y; j++) {
             for (int k = 0; k < x; k++) {
@@ -317,18 +320,21 @@ void WatermarkingProject::ImportPolygonalModel(wxString const& path)
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
-    m_rvl = rvl_create_reader(path.c_str());
+    m_rvl = rvl_create_reader();
+    rvl_set_file(m_rvl, path.c_str());
 
     int x, y, z;
     float dx, dy, dz;
-    RVLByte* data;
+    const void * buf;
 
     rvl_read_rvl(m_rvl);
-    rvl_get_resolution(m_rvl, &x, &y, &z);
-    rvl_get_data_buffer(m_rvl, &data);
+
+    RVLenum primitive, endian;
+    rvl_get_volumetric_format(m_rvl, &x, &y, &z, &primitive, &endian);
+    rvl_get_data_buffer(m_rvl, &buf);
     rvl_get_voxel_dims(m_rvl, &dx, &dy, &dz);
 
-    if (rvl_get_primitive(m_rvl) != RVLPrimitive_u8) {
+    if (primitive != RVL_PRIMITIVE_U8) {
         std::cerr << "Wrong RVL format: " << path << std::endl;
         std::exit(EXIT_FAILURE);
     }
@@ -337,7 +343,8 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     auto& pos = world.theModel->positions;
 
-    const RVLByte model = 255;
+    const unsigned char* data = static_cast<const unsigned char*>(buf);
+    const unsigned char model = 255;
     for (int i = 0; i < z; i++) {
         for (int j = 0; j < y; j++) {
             for (int k = 0; k < x; k++) {

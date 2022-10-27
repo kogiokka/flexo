@@ -5,37 +5,35 @@
 #include "rvl.h"
 
 #include "detail/rvl_p.h"
+#include "detail/rvl_text_p.h"
 
-RVLGridUnit
+void
+rvl_get_volumetric_format (RVL *self, int *nx, int *ny, int *nz,
+                           RVLenum *primitive, RVLenum *endian)
+{
+  *nx        = self->resolution[0];
+  *ny        = self->resolution[1];
+  *nz        = self->resolution[2];
+  *primitive = self->primitive;
+  *endian    = self->endian;
+}
+
+RVLenum
+rvl_get_compression (RVL *self)
+{
+  return self->compress;
+}
+
+RVLenum
 rvl_get_grid_unit (RVL *self)
 {
   return self->grid.unit;
 }
 
-RVLGridType
+RVLenum
 rvl_get_grid_type (RVL *self)
 {
   return self->grid.type;
-}
-
-RVLPrimitive
-rvl_get_primitive (RVL *self)
-{
-  return self->primitive;
-}
-
-RVLEndian
-rvl_get_endian (RVL *self)
-{
-  return self->endian;
-}
-
-void
-rvl_get_resolution (RVL *self, int *x, int *y, int *z)
-{
-  *x = self->resolution[0];
-  *y = self->resolution[1];
-  *z = self->resolution[2];
 }
 
 void
@@ -67,27 +65,38 @@ rvl_get_grid_position (RVL *self, float *x, float *y, float *z)
 }
 
 void
-rvl_get_data_buffer (RVL *self, RVLByte **buffer)
+rvl_get_data_buffer (RVL *self, const void **buffer)
 {
-  *buffer = self->data.rbuf;
+  *buffer = (unsigned char *)self->data.rbuf;
 }
 
 void
-rvl_get_text (RVL *self, RVLText **text, int *numText)
+rvl_get_text (RVL *self, RVLenum tag, const char **value)
 {
-  *text    = self->text;
-  *numText = self->numText;
+  RVLText *cur = self->text;
+  while (cur != NULL)
+    {
+      if (cur->tag == tag)
+        {
+          log_trace ("[librvl get] Get TEXT: %.4X, %s", cur->tag, cur->value);
+          *value = cur->value;
+          return;
+        }
+      cur = cur->next;
+    }
+
+  *value = "";
 }
 
-RVLSize
+unsigned int
 rvl_get_primitive_nbytes (RVL *self)
 {
-  RVLByte *p = (RVLByte *)&self->primitive;
+  BYTE *p = (BYTE *)&self->primitive;
 
   u8 dimen = p[1];
   u8 bytes = (1 << (p[0] & 0x0f)) / 8;
 
-  RVLSize nbytes = dimen * bytes;
+  u32 nbytes = dimen * bytes;
 
   if (nbytes <= 0)
     {
@@ -97,12 +106,12 @@ rvl_get_primitive_nbytes (RVL *self)
   return nbytes;
 }
 
-RVLSize
+unsigned int
 rvl_get_data_nbytes (RVL *self)
 {
   const u32 *res = self->resolution;
 
-  if (res[0] <= 0 || res[1] <= 0 | res[2] <= 0)
+  if (res[0] <= 0 || res[1] <= 0 || res[2] <= 0)
     {
       log_error ("[librvl get] Invalid resolution: %d, %d, %d", res[0], res[1],
                  res[2]);

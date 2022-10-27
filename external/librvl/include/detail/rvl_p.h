@@ -1,24 +1,41 @@
 #ifndef RVL_P_H
 #define RVL_P_H
 
+#ifndef RVL_H_INTERNAL
+#error Never include this file directly. Use <rvl.h> instead.
+#endif
+
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 
 #include "../rvl.h"
 
+typedef uint8_t  BYTE;
+typedef uint32_t u32;
 typedef float    f32;
 typedef uint8_t  u8;
 typedef uint16_t u16;
-typedef uint32_t u32;
 
-typedef void (*RVLWriteFn) (RVL *, RVLConstByte *, RVLSize);
-typedef void (*RVLReadFn) (RVL *, RVLByte *, RVLSize);
+/* Part of VFMT */
+typedef uint16_t RVLPrimitive;
+typedef uint8_t  RVLEndian;
+typedef uint8_t  RVLCompress;
+
+/* Part of GRID */
+typedef uint8_t RVLGridType;
+typedef int8_t  RVLGridUnit;
+
+typedef struct RVLText RVLText;
+
+typedef void (*RVLWriteFn) (RVL *, const BYTE *, u32);
+typedef void (*RVLReadFn) (RVL *, BYTE *, u32);
 
 typedef struct
 {
-  RVLConstByte *wbuf; // Non-owning pointer
-  RVLByte      *rbuf;
-  RVLSize       size;
+  const BYTE *wbuf; // Non-owning pointer
+  BYTE       *rbuf;
+  u32         size;
 } RVLData;
 
 typedef struct
@@ -32,8 +49,8 @@ typedef struct
    *
    * The buffer pointer is owned by RVL struct.
    */
-  RVLByte *dimBuf;
-  RVLSize  dimBufSz;
+  BYTE *dimBuf;
+  u32   dimBufSz;
 
   f32 *dx, *dy, *dz;
   u32  ndx, ndy, ndz;
@@ -52,16 +69,15 @@ typedef struct
 
 typedef uint32_t RVLChunkCode;
 
-#define RVLChunkCode_VHDR CHUNK_CODE (86, 72, 68, 82)
-#define RVLChunkCode_GRID CHUNK_CODE (71, 82, 73, 68)
-#define RVLChunkCode_DATA CHUNK_CODE (68, 65, 84, 65)
-#define RVLChunkCode_VEND CHUNK_CODE (86, 69, 78, 68)
-
-#define RVLChunkCode_TEXT CHUNK_CODE (84, 69, 88, 84)
+#define RVL_CHUNK_CODE_VFMT CHUNK_CODE (86, 70, 77, 84)
+#define RVL_CHUNK_CODE_GRID CHUNK_CODE (71, 82, 73, 68)
+#define RVL_CHUNK_CODE_DATA CHUNK_CODE (68, 65, 84, 65)
+#define RVL_CHUNK_CODE_TEXT CHUNK_CODE (84, 69, 88, 84)
+#define RVL_CHUNK_CODE_VEND CHUNK_CODE (86, 69, 78, 68)
 
 // RVL File Signature: .RVL FORMAT\0
 #define RVL_FILE_SIG_SIZE 12
-extern RVLByte RVL_FILE_SIG[RVL_FILE_SIG_SIZE];
+extern BYTE RVL_FILE_SIG[RVL_FILE_SIG_SIZE];
 
 typedef enum
 {
@@ -71,16 +87,18 @@ typedef enum
 
 struct RVL
 {
+  bool       isOwningIo;
   FILE      *io;
   RVLIoState ioState;
   RVLWriteFn writeFn;
   RVLReadFn  readFn;
 
-  /* VHDR chunk */
+  /* VFMT chunk */
   u8           version[2]; // major, minor
   u32          resolution[3];
   RVLPrimitive primitive;
   RVLEndian    endian;
+  RVLCompress  compress;
 
   /* GRID chunk */
   RVLGrid grid;
@@ -90,14 +108,11 @@ struct RVL
 
   /* TEXT chunk */
   RVLText *text;
-  int      numText;
 };
 
-RVLText *rvl_text_create_array (int num);
-void     rvl_text_destroy_array (RVLText **self);
-void     rvl_alloc (RVL *self, RVLByte **ptr, RVLSize size);
-void     rvl_dealloc (RVL *self, RVLByte **ptr);
-void     rvl_fwrite_default (RVL *self, RVLConstByte *data, RVLSize size);
-void     rvl_fread_default (RVL *self, RVLByte *data, RVLSize size);
+void rvl_alloc (RVL *self, BYTE **ptr, u32 size);
+void rvl_dealloc (RVL *self, BYTE **ptr);
+void rvl_fwrite_default (RVL *self, const BYTE *data, u32 size);
+void rvl_fread_default (RVL *self, BYTE *data, u32 size);
 
 #endif

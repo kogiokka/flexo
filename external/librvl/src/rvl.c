@@ -1,5 +1,4 @@
 #include <assert.h>
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -8,28 +7,27 @@
 #include "rvl.h"
 
 #include "detail/rvl_p.h"
+#include "detail/rvl_text_p.h"
 
 // .RVL FORMAT\0
-RVLByte RVL_FILE_SIG[RVL_FILE_SIG_SIZE] = {
+BYTE RVL_FILE_SIG[RVL_FILE_SIG_SIZE] = {
   131, 82, 86, 76, 32, 70, 79, 82, 77, 65, 84, 0,
 };
 
-static RVL *rvl_create (const char *filename, RVLIoState ioState);
+static RVL *rvl_create (RVLIoState ioState);
 
 RVL *
-rvl_create_writer (const char *filename)
+rvl_create_writer (void)
 {
-  RVL *rvl = rvl_create (filename, RVLIoState_Write);
-  memset (&rvl->data, 0, sizeof (RVLData));
+  RVL *rvl = rvl_create (RVLIoState_Write);
   rvl->writeFn = rvl_fwrite_default;
   return rvl;
 }
 
 RVL *
-rvl_create_reader (const char *filename)
+rvl_create_reader (void)
 {
-  RVL *rvl = rvl_create (filename, RVLIoState_Read);
-  memset (&rvl->data, 0, sizeof (RVLData));
+  RVL *rvl = rvl_create (RVLIoState_Read);
   rvl->readFn = rvl_fread_default;
   return rvl;
 }
@@ -41,21 +39,36 @@ rvl_destroy (RVL **self)
     return;
 
   RVL *ptr = *self;
-  rvl_text_destroy_array (&ptr->text);
 
   // Dealloc read buffer. Writer buffer pointer is non-owning so the user is
   // responsible for calling this dealloc function.
   rvl_dealloc (ptr, &ptr->data.rbuf);
   rvl_dealloc (ptr, &ptr->grid.dimBuf);
 
-  fclose (ptr->io);
+  if (ptr->text != NULL)
+    {
+      RVLText *cur = ptr->text;
+      while (cur->next != NULL)
+        {
+          RVLText *tmp = cur;
+          cur          = cur->next;
+          free (tmp->value);
+          free (tmp);
+        }
+    }
+
+  if (ptr->io != NULL)
+    {
+      fclose (ptr->io);
+    }
+
   free (ptr);
 
   *self = NULL;
 }
 
 void
-rvl_alloc (RVL *self, RVLByte **ptr, RVLSize size)
+rvl_alloc (RVL *self, BYTE **ptr, u32 size)
 {
   assert (self != NULL || ptr != NULL);
 
@@ -64,7 +77,7 @@ rvl_alloc (RVL *self, RVLByte **ptr, RVLSize size)
       free (*ptr);
     }
 
-  *ptr = (RVLByte *)calloc (1, size);
+  *ptr = (BYTE *)calloc (1, size);
 
   if (*ptr == NULL)
     {
@@ -74,7 +87,7 @@ rvl_alloc (RVL *self, RVLByte **ptr, RVLSize size)
 }
 
 void
-rvl_dealloc (RVL *self, RVLByte **ptr)
+rvl_dealloc (RVL *self, BYTE **ptr)
 {
   assert (self != NULL || ptr != NULL);
 
@@ -86,7 +99,7 @@ rvl_dealloc (RVL *self, RVLByte **ptr)
 }
 
 RVL *
-rvl_create (const char *filename, RVLIoState ioState)
+rvl_create (RVLIoState ioState)
 {
 
   log_set_level (LOG_INFO);
@@ -100,22 +113,14 @@ rvl_create (const char *filename, RVLIoState ioState)
   self->version[1] = RVL_VERSION_MINOR;
   self->ioState    = ioState;
   self->text       = NULL;
-  self->numText    = 0;
 
-  switch (ioState)
-    {
-    case RVLIoState_Read:
-      self->io = fopen (filename, "rb");
-      break;
-    case RVLIoState_Write:
-      self->io = fopen (filename, "wb");
-      break;
-    }
-
-  if (self->io == NULL)
-    {
-      log_error ("[rvl io] %s", strerror (errno));
-    }
+  // Explicitly set the default values of the optional settings.
+  self->compress         = RVL_COMPRESSION_LZMA;
+  self->grid.unit        = RVL_UNIT_NA;
+  self->grid.position[0] = 0.0f;
+  self->grid.position[1] = 0.0f;
+  self->grid.position[2] = 0.0f;
 
   return self;
 }
+

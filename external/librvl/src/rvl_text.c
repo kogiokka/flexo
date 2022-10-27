@@ -9,58 +9,30 @@
 #include "detail/rvl_text_p.h"
 
 RVLText *
-rvl_text_create_array (int num)
+rvl_text_create ()
 {
-  RVLText *textarr = (RVLText *)calloc (1, sizeof (RVLText) * num);
-  return textarr;
+  RVLText *self = (RVLText *)calloc (1, sizeof (RVLText));
+  return self;
 }
 
 void
-rvl_text_destroy_array (RVLText **self)
+rvl_text_destroy (RVLText **self)
 {
-  assert (self != NULL);
-
-  if (*self == NULL)
+  if (self == NULL)
     return;
 
-  free ((*self)->value);
   free (*self);
   *self = NULL;
 }
 
-// key and value must be null-terminated.
 void
-rvl_text_set (RVLText *textArr, int index, char *key, char *value)
+rvl_text_set_field (RVLText *self, RVLenum tag, const char *value)
 {
-  RVLText *text = &textArr[index];
+  self->tag = tag;
 
-  size_t keySize   = strlen (key);
-  size_t valueSize = strlen (value);
-
-  if (keySize >= 80)
-    {
-      log_warn ("[librvl text] Key length exceeds the maximum limit and "
-                "will be truncated:\n \"%s\"");
-      keySize = 79;
-    }
-  if (valueSize > sizeof (RVLSize) - (keySize + 1))
-    {
-      log_warn ("[librvl text] Value length exceeds the maximum limit and "
-                "will be truncated:\n \"%s\"");
-      valueSize = sizeof (RVLSize) - (keySize + 1);
-    }
-
-  memcpy (text->key, key, keySize);
-  text->key[keySize] = '\0';
-
-  text->value = (char *)malloc (valueSize + 1);
-  strcpy (text->value, value);
-}
-
-void
-rvl_text_get (RVLText *textArr, int index, const char **key,
-              const char **value)
-{
-  *key   = textArr[index].key;
-  *value = textArr[index].value;
+  u32 size    = strlen (value) + 1; // including '\0'
+  self->value = (char *)malloc (size);
+  memcpy (self->value, value, size);
+  log_trace ("[librvl text] Creating text: 0x%.4X, %s.", self->tag,
+             self->value);
 }

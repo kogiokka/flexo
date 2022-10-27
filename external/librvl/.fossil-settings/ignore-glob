@@ -4,5 +4,3 @@
 .kdev4/
 *.kdev4
 
-# Downloaded Libraries
-downloads/

@@ -1,30 +1,29 @@
+#include <stdbool.h>
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include <log.h>
-#include <lz4.h>
-#include <lz4hc.h>
 
 #include "rvl.h"
 
 #include "detail/rvl_p.h"
+
+#include "detail/rvl_compress_p.h"
 #include "detail/rvl_text_p.h"
 
-static void rvl_write_chunk_header (RVL *self, RVLChunkCode code,
-                                    RVLSize size);
-static void rvl_write_chunk_payload (RVL *self, RVLConstByte *data,
-                                     RVLSize size);
+static void rvl_write_chunk_header (RVL *self, RVLChunkCode code, u32 size);
+static void rvl_write_chunk_payload (RVL *self, const BYTE *data, u32 size);
 static void rvl_write_chunk_end (RVL *self);
 
-static void rvl_write_VHDR_chunk (RVL *self);
+static void rvl_write_VFMT_chunk (RVL *self);
 static void rvl_write_GRID_chunk (RVL *self);
 static void rvl_write_DATA_chunk (RVL *self);
-static void rvl_write_TEXT_chunk (RVL *self, const RVLText *textArr,
-                                  int numText);
+static void rvl_write_TEXT_chunk (RVL *self, const RVLText *textList);
 static void rvl_write_VEND_chunk (RVL *self);
 
 static void rvl_write_file_sig (RVL *self);
-static void rvl_fwrite (RVL *self, RVLConstByte *data, RVLSize size);
+static void rvl_fwrite (RVL *self, const BYTE *data, u32 size);
 
 static void check_grid (RVL *self);
 static void check_data (RVL *self);
@@ -38,31 +37,35 @@ rvl_write_rvl (RVL *self)
   rvl_write_file_sig (self);
 
   // Required chunks
-  rvl_write_VHDR_chunk (self);
+  rvl_write_VFMT_chunk (self);
   rvl_write_GRID_chunk (self);
   rvl_write_DATA_chunk (self);
 
   if (self->text != NULL)
     {
-      rvl_write_TEXT_chunk (self, self->text, self->numText);
+      rvl_write_TEXT_chunk (self, self->text);
     }
 
   rvl_write_VEND_chunk (self);
 }
 
 void
-rvl_write_VHDR_chunk (RVL *self)
+rvl_write_VFMT_chunk (RVL *self)
 {
-  RVLSize size = 18;
-  u8     *buf  = calloc (1, size);
+  u32 size = 18;
+  u8 *buf  = calloc (1, size);
+
+  RVLPrimitive primitive = self->primitive;
+  RVLEndian    endian    = self->endian;
+  RVLCompress  compress  = self->compress;
 
   memcpy (&buf[0], self->version, 2);
   memcpy (&buf[2], &self->resolution[0], 12);
-  memcpy (&buf[14], &self->primitive, 2);
-  buf[16] = self->endian;
-  buf[17] = 0; // padding
+  memcpy (&buf[14], &primitive, 2);
+  memcpy (&buf[16], &endian, 1);
+  memcpy (&buf[17], &compress, 1);
 
-  rvl_write_chunk_header (self, RVLChunkCode_VHDR, size);
+  rvl_write_chunk_header (self, RVL_CHUNK_CODE_VFMT, size);
   rvl_write_chunk_payload (self, buf, size);
   rvl_write_chunk_end (self);
 }
@@ -70,18 +73,21 @@ rvl_write_VHDR_chunk (RVL *self)
 void
 rvl_write_GRID_chunk (RVL *self)
 {
-  RVLSize  offset   = 14;
-  RVLSize  wbufSize = offset + self->grid.dimBufSz;
-  RVLByte *wbuf     = (RVLByte *)malloc (wbufSize);
+  u32   offset   = 14;
+  u32   wbufSize = offset + self->grid.dimBufSz;
+  BYTE *wbuf     = (BYTE *)malloc (wbufSize);
+
+  RVLGridType type = self->grid.type;
+  RVLGridUnit unit = self->grid.unit;
 
   // Grid info
-  wbuf[0] = self->grid.type;
-  wbuf[1] = self->grid.unit;
+  wbuf[0] = type;
+  wbuf[1] = unit;
   memcpy (&wbuf[2], self->grid.position, 12);
 
-  RVLSize szdx = self->grid.ndx * sizeof (f32);
-  RVLSize szdy = self->grid.ndy * sizeof (f32);
-  RVLSize szdz = self->grid.ndz * sizeof (f32);
+  u32 szdx = self->grid.ndx * sizeof (f32);
+  u32 szdy = self->grid.ndy * sizeof (f32);
+  u32 szdz = self->grid.ndz * sizeof (f32);
 
   memcpy (&wbuf[offset], self->grid.dx, szdx);
   offset += szdx;
@@ -89,7 +95,7 @@ rvl_write_GRID_chunk (RVL *self)
   offset += szdy;
   memcpy (&wbuf[offset], self->grid.dz, szdz);
 
-  rvl_write_chunk_header (self, RVLChunkCode_GRID, wbufSize);
+  rvl_write_chunk_header (self, RVL_CHUNK_CODE_GRID, wbufSize);
   rvl_write_chunk_payload (self, wbuf, wbufSize);
   rvl_write_chunk_end (self);
 }
@@ -97,26 +103,20 @@ rvl_write_GRID_chunk (RVL *self)
 void
 rvl_write_DATA_chunk (RVL *self)
 {
-  RVLSize wbufSize = self->data.size;
-  char   *wbuf     = (char *)malloc (wbufSize);
+  u32   wbufSize = self->data.size;
+  BYTE *wbuf     = (BYTE *)malloc (wbufSize);
 
-  int         srcSize = self->data.size;
-  const char *src     = (char *)self->data.wbuf;
-
-  int compSize
-      = LZ4_compress_HC (src, wbuf, srcSize, wbufSize, LZ4HC_CLEVEL_MIN);
-
-  // When the compressed size is greater than the uncompressed one.
-  if (compSize == 0)
+  if (self->compress == RVL_COMPRESSION_LZ4)
     {
-      wbufSize = LZ4_compressBound (self->data.size);
-      wbuf     = realloc (wbuf, wbufSize);
-      compSize = LZ4_compress_HC (src, wbuf, self->data.size, wbufSize,
-                                  LZ4HC_CLEVEL_MIN);
+      rvl_compress_lz4 (self, &wbuf, &wbufSize);
+    }
+  else if (self->compress == RVL_COMPRESSION_LZMA)
+    {
+      rvl_compress_lzma (self, &wbuf, &wbufSize);
     }
 
-  rvl_write_chunk_header (self, RVLChunkCode_DATA, compSize);
-  rvl_write_chunk_payload (self, (RVLConstByte *)wbuf, compSize);
+  rvl_write_chunk_header (self, RVL_CHUNK_CODE_DATA, wbufSize);
+  rvl_write_chunk_payload (self, (const BYTE *)wbuf, wbufSize);
   rvl_write_chunk_end (self);
 
   free (wbuf);
@@ -124,40 +124,38 @@ rvl_write_DATA_chunk (RVL *self)
 
 // Strip off the null terminator at the end of the value string.
 void
-rvl_write_TEXT_chunk (RVL *self, const RVLText *textArr, int numText)
+rvl_write_TEXT_chunk (RVL *self, const RVLText *textList)
 {
-  for (int i = 0; i < numText; i++)
+  const RVLText *cur = textList;
+  while (cur != NULL)
     {
-      const RVLText *const text      = &textArr[i];
-      const RVLSize        keySize   = strlen (text->key);
-      const RVLSize        valueSize = strlen (text->value);
+      const RVLText *const text      = cur;
+      const u32            valueSize = strlen (text->value);
 
-      rvl_write_chunk_header (self, RVLChunkCode_TEXT,
-                              keySize + valueSize + 1);
-
-      // Include the null terminator
-      rvl_write_chunk_payload (self, (RVLConstByte *)text->key, keySize + 1);
+      rvl_write_chunk_header (self, RVL_CHUNK_CODE_TEXT, valueSize + 1);
+      rvl_write_chunk_payload (self, (const BYTE *)&cur->tag, 1);
 
       if (valueSize != 0)
         {
-          rvl_write_chunk_payload (self, (RVLConstByte *)text->value,
-                                   valueSize);
+          rvl_write_chunk_payload (self, (const BYTE *)text->value, valueSize);
         }
 
       rvl_write_chunk_end (self);
+
+      cur = cur->next;
     }
 }
 
 void
 rvl_write_VEND_chunk (RVL *self)
 {
-  rvl_write_chunk_header (self, RVLChunkCode_VEND, 0);
+  rvl_write_chunk_header (self, RVL_CHUNK_CODE_VEND, 0);
   rvl_write_chunk_payload (self, NULL, 0);
   rvl_write_chunk_end (self);
 }
 
 void
-rvl_write_chunk_header (RVL *self, RVLChunkCode code, RVLSize size)
+rvl_write_chunk_header (RVL *self, RVLChunkCode code, u32 size)
 {
   u8 buf[8];
 
@@ -170,7 +168,7 @@ rvl_write_chunk_header (RVL *self, RVLChunkCode code, RVLSize size)
 }
 
 void
-rvl_write_chunk_payload (RVL *self, RVLConstByte *data, RVLSize size)
+rvl_write_chunk_payload (RVL *self, const BYTE *data, u32 size)
 {
   if (data != NULL && size > 0)
     {
@@ -191,7 +189,7 @@ rvl_write_file_sig (RVL *self)
 }
 
 void
-rvl_fwrite (RVL *self, RVLConstByte *data, RVLSize size)
+rvl_fwrite (RVL *self, const BYTE *data, u32 size)
 {
   if (self->writeFn == NULL)
     {
@@ -204,7 +202,7 @@ rvl_fwrite (RVL *self, RVLConstByte *data, RVLSize size)
 }
 
 void
-rvl_fwrite_default (RVL *self, RVLConstByte *data, RVLSize size)
+rvl_fwrite_default (RVL *self, const BYTE *data, u32 size)
 {
   if (self->io == NULL)
     {
@@ -249,7 +247,7 @@ check_grid (RVL *self)
 
   switch (self->grid.type)
     {
-    case RVLGridType_Regular:
+    case RVL_GRID_REGULAR:
       if (self->grid.ndx != 1 || self->grid.ndy != 1 || self->grid.ndz != 1)
         {
           log_fatal ("[librvl write] Number of voxel dimensions is not valid "
@@ -257,7 +255,7 @@ check_grid (RVL *self)
           exit (EXIT_FAILURE);
         }
       break;
-    case RVLGridType_Rectilinear:
+    case RVL_GRID_RECTILINEAR:
       {
         u32 *r = self->resolution;
         if (self->grid.ndx != r[0] || self->grid.ndy != r[1]
