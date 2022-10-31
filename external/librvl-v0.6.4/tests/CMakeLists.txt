@@ -1,9 +1,19 @@
+if(NOT BUILD_TESTING)
+  return()
+endif()
+
 add_executable(unit_tests)
 
 target_sources(unit_tests PRIVATE
   unit_tests.c
   rvl_tests.c
 )
+
+if ((CMAKE_C_COMPILER_ID STREQUAL "GNU" AND NOT MINGW) OR
+    CMAKE_C_COMPILER_ID STREQUAL "Clang")
+    target_compile_options(unit_tests PRIVATE -fsanitize=address)
+    target_link_options(unit_tests PRIVATE -fsanitize=address)
+endif()
 
 target_link_libraries(unit_tests PRIVATE rvl::rvl)
 

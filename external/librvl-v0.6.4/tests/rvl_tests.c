@@ -59,6 +59,7 @@ rvl_test_read_regular_grid ()
   RVLenum compress = rvl_get_compression (rvl);
 
   char sep[81];
+  sep[80] = '\0';
   memset (sep, '-', 80);
   fprintf (stdout, "%s\n", sep);
   fprintf (stdout, "Width: %d, Length: %d, Height: %d\n", x, y, z);
@@ -143,6 +144,7 @@ rvl_test_read_rectilinear_grid ()
   RVLenum compress = rvl_get_compression (rvl);
 
   char sep[81];
+  sep[80] = '\0';
   memset (sep, '-', 80);
   fprintf (stdout, "%s\n", sep);
   fprintf (stdout, "Width: %d, Length: %d, Height: %d\n", x, y, z);
@@ -220,6 +222,7 @@ rvl_test_partially_read ()
 
   // Print RVL information
   char sep[81];
+  sep[80] = '\0';
   memset (sep, '-', 80);
   fprintf (stdout, "%s\n", sep);
   fprintf (stdout, "Width: %d, Length: %d, Height: %d\n", x, y, z);
@@ -336,3 +339,4 @@ print_data_buffer (int x, int y, int z, const void *buffer, int primSize)
       fprintf (stdout, "\n");
     }
 }
+

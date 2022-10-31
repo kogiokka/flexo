@@ -1,4 +1,4 @@
 @PACKAGE_INIT@
-set_and_check(LIBRVL_LIB_DIR "@PACKAGE_LIB_INSTALL_DIR@")
+set_and_check(LIBRVL_LIB_DIR "@PACKAGE_rvl_INSTALL_LIBDIR@")
 include("${LIBRVL_LIB_DIR}/cmake/librvlTargets.cmake")
 check_required_components(rvl)

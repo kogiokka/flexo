@@ -11,7 +11,7 @@ find_package(glm REQUIRED)
 include(${wxWidgets_USE_FILE})
 
 add_executable(som-demo)
-add_subdirectory("external/librvl")
+add_subdirectory("external/librvl-v0.6.4")
 
 set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external/")
 include("cmake/BuildGLAD.cmake")

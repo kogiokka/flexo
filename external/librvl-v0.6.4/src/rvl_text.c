@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <log.h>
-
+#include "detail/rvl_log_p.h"
 #include "detail/rvl_p.h"
 #include "detail/rvl_text_p.h"
 
@@ -33,6 +32,5 @@ rvl_text_set_field (RVLText *self, RVLenum tag, const char *value)
   u32 size    = strlen (value) + 1; // including '\0'
   self->value = (char *)malloc (size);
   memcpy (self->value, value, size);
-  log_trace ("[librvl text] Creating text: 0x%.4X, %s.", self->tag,
-             self->value);
+  rvl_log_debug ("Creating text: 0x%.4X, %s.", self->tag, self->value);
 }
