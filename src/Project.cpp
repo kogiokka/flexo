@@ -82,6 +82,11 @@ void WatermarkingProject::CreateProject()
 
     SelfOrganizingMap::Get(*this).CreateProcedure(world.theMap, world.theDataset);
 
+    auto& drawlist = DrawList::Get(*this);
+    auto& gfx = Graphics::Get(*this);
+    drawlist.Add(std::make_shared<LightSource>(gfx, world.uvsphere));
+    drawlist.Submit(Renderer::Get(*this));
+
     world.isWatermarked = false;
 }
 
