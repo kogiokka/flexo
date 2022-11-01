@@ -39,7 +39,7 @@ static Cube const VOXEL = { {
     STLI.ReadFile("res/models/voxel/cube-z-neg.stl"),
 } };
 
-VolumetricModel::VolumetricModel(Graphics& gfx, RVL& rvl)
+VolumetricModel::VolumetricModel(Graphics& gfx, VolumetricModelData& model)
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
@@ -48,7 +48,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, RVL& rvl)
         { "textureCoord", GLWRFormat_Float2, 2, 0, GLWRInputClassification_PerVertex, 0 },
     };
 
-    CreateMesh(rvl);
+    CreateMesh(model);
 
     m_isVisible = true;
 
@@ -128,38 +128,31 @@ std::string VolumetricModel::GetName() const
     return "Volumetric Model";
 }
 
-void VolumetricModel::CreateMesh(RVL& rvl)
+void VolumetricModel::CreateMesh(VolumetricModelData& model)
 {
-    int x, y, z;
-    const unsigned char* data;
-    const void* buf;
-    glm::vec3 dims;
+    glm::ivec3 n = model.GetResolution();
+    glm::vec3 dims = model.GetVoxelDims();
+    const unsigned char* data = model.GetBuffer();
 
-    RVLenum primitive, endian;
-    rvl_get_volumetric_format(&rvl, &x, &y, &z, &primitive, &endian);
-    rvl_get_data_buffer(&rvl, &buf);
-    rvl_get_voxel_dims(&rvl, &dims.x, &dims.y, &dims.z);
+    world.numVxVerts.resize(n.x * n.y * n.z);
 
-    world.numVxVerts.resize(x * y * z);
-
-    data = static_cast<const unsigned char*>(buf);
-    const unsigned char model = 255;
+    const unsigned char modelValue = 255;
     const unsigned char air = 0;
-    for (int i = 0; i < z; i++) {
-        for (int j = 0; j < y; j++) {
-            for (int k = 0; k < x; k++) {
-                int index = k + j * x + i * x * y;
+    for (int i = 0; i < n.z; i++) {
+        for (int j = 0; j < n.y; j++) {
+            for (int k = 0; k < n.x; k++) {
+                int index = k + j * n.x + i * n.x * n.y;
                 glm::vec3 offset { k, j, i };
-                if (data[index] == model) {
-                    if ((k + 1 == x) || data[index + 1] == air) {
+                if (data[index] == modelValue) {
+                    if ((k + 1 == n.x) || data[index + 1] == air) {
                         AddFace(VOXEL.face.xp, offset, dims);
                         world.numVxVerts[index] += 6;
                     }
-                    if ((j + 1 == y) || (data[index + x] == air)) {
+                    if ((j + 1 == n.y) || (data[index + n.x] == air)) {
                         AddFace(VOXEL.face.yp, offset, dims);
                         world.numVxVerts[index] += 6;
                     }
-                    if ((i + 1 == z) || (data[index + x * y] == air)) {
+                    if ((i + 1 == n.z) || (data[index + n.x * n.y] == air)) {
                         AddFace(VOXEL.face.zp, offset, dims);
                         world.numVxVerts[index] += 6;
                     }
@@ -167,11 +160,11 @@ void VolumetricModel::CreateMesh(RVL& rvl)
                         AddFace(VOXEL.face.xn, offset, dims);
                         world.numVxVerts[index] += 6;
                     }
-                    if ((j == 0) || (data[index - x] == air)) {
+                    if ((j == 0) || (data[index - n.x] == air)) {
                         AddFace(VOXEL.face.yn, offset, dims);
                         world.numVxVerts[index] += 6;
                     }
-                    if ((i == 0) || (data[index - x * y] == air)) {
+                    if ((i == 0) || (data[index - n.x * n.y] == air)) {
                         AddFace(VOXEL.face.zn, offset, dims);
                         world.numVxVerts[index] += 6;
                     }

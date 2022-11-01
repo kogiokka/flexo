@@ -4,13 +4,13 @@
 #include <memory>
 #include <vector>
 
-#include <rvl.h>
 #include <wx/event.h>
 #include <wx/frame.h>
 #include <wx/weakref.h>
 
 #include "Attachable.hpp"
 #include "Mesh.hpp"
+#include "VolumetricModelData.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
@@ -44,7 +44,7 @@ private:
     bool m_isMapReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-    RVL* m_rvl;
+    VolumetricModelData m_model;
 };
 
 #endif

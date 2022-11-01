@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 
 #include "Mesh.hpp"
+#include "VolumetricModelData.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/drawable/InstancedDrawable.hpp"
@@ -44,7 +45,7 @@ class VolumetricModel : public Drawable
     UniformBlock m_ub;
 
 public:
-    VolumetricModel(Graphics& gfx, RVL& rvl);
+    VolumetricModel(Graphics& gfx, VolumetricModelData& model);
     ~VolumetricModel() override;
     void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
@@ -53,7 +54,7 @@ public:
 private:
     Mesh m_mesh;
 
-    void CreateMesh(RVL& rvl);
+    void CreateMesh(VolumetricModelData& model);
     void AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale);
 };
 

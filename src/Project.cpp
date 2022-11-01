@@ -8,8 +8,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include <rvl.h>
-
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
@@ -29,7 +27,6 @@ WatermarkingProject::WatermarkingProject()
     : m_isMapReady(false)
     , m_frame {}
     , m_panel {}
-    , m_rvl(nullptr)
 {
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
     Bind(EVT_ADD_PLATE_50_BY_50, &WatermarkingProject::OnMenuAddPlate, this);
@@ -62,7 +59,7 @@ WatermarkingProject::WatermarkingProject()
         drawlist.Remove<VolumetricModel>();
         drawlist.Remove<MapFace>();
 
-        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
+        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model));
         drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
@@ -70,7 +67,6 @@ WatermarkingProject::WatermarkingProject()
 
 WatermarkingProject::~WatermarkingProject()
 {
-    rvl_destroy(&m_rvl);
 }
 
 void WatermarkingProject::CreateProject()
@@ -227,27 +223,21 @@ void WatermarkingProject::DoWatermark()
     // Update the texture coordinates of the Volumetric Model.
     std::vector<glm::vec2> texcrd;
 
-    int x, y, z;
-    float dx, dy, dz;
-    const void* buf;
-    const unsigned char* data;
-    RVLenum primitive, endian;
-    rvl_get_volumetric_format(m_rvl, &x, &y, &z, &primitive, &endian);
-    rvl_get_data_buffer(m_rvl, &buf);
-    rvl_get_voxel_dims(m_rvl, &dx, &dy, &dz);
+    glm::ivec3 n = m_model.GetResolution();
+    glm::vec3 d = m_model.GetVoxelDims();
+    const unsigned char* data = m_model.GetBuffer();
 
-    data = static_cast<const unsigned char*>(buf);
     const unsigned char model = 255;
-    for (int i = 0; i < z; i++) {
-        for (int j = 0; j < y; j++) {
-            for (int k = 0; k < x; k++) {
-                int index = k + j * x + i * x * y;
+    for (int i = 0; i < n.z; i++) {
+        for (int j = 0; j < n.y; j++) {
+            for (int k = 0; k < n.x; k++) {
+                int index = k + j * n.x + i * n.x * n.y;
                 if (data[index] != model)
                     continue;
 
                 glm::vec2 coord;
                 float minDist = std::numeric_limits<float>::max();
-                glm::vec3 vxPos(k * dx, j * dy, i * dz);
+                glm::vec3 vxPos(k * d.x, j * d.y, i * d.z);
 
                 for (unsigned int n = 0; n < world.theMap->mNeurons.size(); n++) {
                     auto const& node = world.theMap->mNeurons[n];
@@ -307,37 +297,22 @@ void WatermarkingProject::UpdateMapGraphics()
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
-    m_rvl = rvl_create_reader();
-    rvl_set_file(m_rvl, path.c_str());
-
-    int x, y, z;
-    float dx, dy, dz;
-    const void* buf;
-
-    rvl_read_rvl(m_rvl);
-
-    RVLenum primitive, endian;
-    rvl_get_volumetric_format(m_rvl, &x, &y, &z, &primitive, &endian);
-    rvl_get_data_buffer(m_rvl, &buf);
-    rvl_get_voxel_dims(m_rvl, &dx, &dy, &dz);
-
-    if (primitive != RVL_PRIMITIVE_U8) {
-        std::cerr << "Wrong RVL format: " << path << std::endl;
-        std::exit(EXIT_FAILURE);
-    }
+    m_model.Read(path.ToStdString().c_str());
 
     world.theModel = std::make_shared<Mesh>();
-
     auto& pos = world.theModel->positions;
 
-    const unsigned char* data = static_cast<const unsigned char*>(buf);
+    glm::ivec3 n = m_model.GetResolution();
+    glm::vec3 d = m_model.GetVoxelDims();
+    const unsigned char* data = m_model.GetBuffer();
+
     const unsigned char model = 255;
-    for (int i = 0; i < z; i++) {
-        for (int j = 0; j < y; j++) {
-            for (int k = 0; k < x; k++) {
-                int index = k + j * x + i * x * y;
+    for (int i = 0; i < n.z; i++) {
+        for (int j = 0; j < n.y; j++) {
+            for (int k = 0; k < n.x; k++) {
+                int index = k + j * n.x + i * n.x * n.y;
                 if (data[index] == model) {
-                    pos.push_back(glm::vec3 { k * dx, j * dy, i * dz });
+                    pos.push_back(glm::vec3 { k * d.x, j * d.y, i * d.z });
                 }
             }
         }
@@ -347,7 +322,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model));
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
@@ -381,7 +356,7 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
 
     world.theDataset->Insert(pos);
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), *m_rvl));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
