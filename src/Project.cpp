@@ -14,8 +14,6 @@
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
-#include "assetlib/OBJ/OBJImporter.hpp"
-#include "assetlib/STL/STLImporter.hpp"
 #include "common/Logger.hpp"
 #include "gfx/DrawList.hpp"
 #include "gfx/Graphics.hpp"
@@ -33,7 +31,6 @@ WatermarkingProject::WatermarkingProject()
     , m_panel {}
     , m_rvl(nullptr)
 {
-    Bind(EVT_IMPORT_MODEL, &WatermarkingProject::OnMenuImportModel, this);
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
     Bind(EVT_ADD_PLATE_50_BY_50, &WatermarkingProject::OnMenuAddPlate, this);
     Bind(EVT_ADD_PLATE_100_BY_100, &WatermarkingProject::OnMenuAddPlate, this);
@@ -308,21 +305,6 @@ void WatermarkingProject::UpdateMapGraphics()
     drawlist.Submit(Renderer::Get(*this));
 }
 
-void WatermarkingProject::ImportPolygonalModel(wxString const& path)
-{
-    if (path.EndsWith(".obj")) {
-        OBJImporter objImp;
-        world.theModel = std::make_shared<Mesh>(objImp.ReadFile(path.ToStdString()));
-    } else if (path.EndsWith(".stl")) {
-        STLImporter stlImp;
-        world.theModel = std::make_shared<Mesh>(stlImp.ReadFile(path.ToStdString()));
-    }
-
-    world.theDataset = std::make_shared<Dataset<3>>(world.theModel->positions);
-
-    SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), *world.theModel));
-}
-
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
     m_rvl = rvl_create_reader();
@@ -330,7 +312,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     int x, y, z;
     float dx, dy, dz;
-    const void * buf;
+    const void* buf;
 
     rvl_read_rvl(m_rvl);
 
@@ -509,16 +491,6 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
     world.theDataset = std::make_shared<Dataset<3>>(mesh.positions);
 
     SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), mesh));
-}
-
-void WatermarkingProject::OnMenuImportModel(wxCommandEvent& event)
-{
-    wxString const filepath = event.GetString();
-    if (filepath.EndsWith(".rvl")) {
-        ImportVolumetricModel(filepath);
-    } else {
-        ImportPolygonalModel(filepath);
-    }
 }
 
 void WatermarkingProject::SetModelDrawable(std::shared_ptr<DrawableBase> drawable)

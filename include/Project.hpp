@@ -31,14 +31,12 @@ public:
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
     void UpdateMapGraphics();
+    void ImportVolumetricModel(wxString const& path);
 
 private:
     void UpdateMapEdges() const;
-    void ImportPolygonalModel(wxString const& path);
-    void ImportVolumetricModel(wxString const& path);
     void OnMenuAddPlate(wxCommandEvent& event);
     void OnMenuAddModel(wxCommandEvent& event);
-    void OnMenuImportModel(wxCommandEvent& event);
     void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
 
     bool m_isMapReady;

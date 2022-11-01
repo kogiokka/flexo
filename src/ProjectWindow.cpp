@@ -175,8 +175,7 @@ void ProjectWindow::OnOpenModelFile(wxCommandEvent&)
     namespace fs = std::filesystem;
     static wxString defaultDir = "";
 
-    wxFileDialog dialog(this, "Import Input Dataset", defaultDir, "",
-                        "Volumetric models|*.rvl|Polygonal models (*stl,*.obj)|*stl;*.obj",
+    wxFileDialog dialog(this, "Import Input Dataset", defaultDir, "", "Volumetric model (.rvl)|*.rvl",
                         wxFD_OPEN | wxFD_FILE_MUST_EXIST);
     dialog.CenterOnParent();
 
@@ -191,9 +190,7 @@ void ProjectWindow::OnOpenModelFile(wxCommandEvent&)
     wxString const filepath = dialog.GetPath();
     defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
 
-    wxCommandEvent event(EVT_IMPORT_MODEL);
-    event.SetString(filepath);
-    m_project.ProcessEvent(event);
+    m_project.ImportVolumetricModel(filepath);
 }
 
 void ProjectWindow::OnOpenImageFile(wxCommandEvent&)
