@@ -10,6 +10,7 @@
 #include <wx/weakref.h>
 
 #include "Attachable.hpp"
+#include "Mesh.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
@@ -38,6 +39,7 @@ private:
     void OnMenuAddPlate(wxCommandEvent& event);
     void OnMenuAddModel(wxCommandEvent& event);
     void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
+    Mesh CreateUVSphereModel(float radius, int numSegments, int numRings, glm::vec3 center);
 
     bool m_isMapReady;
     wxWeakRef<wxFrame> m_frame;
