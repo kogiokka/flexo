@@ -6,7 +6,8 @@ project("SOM Demo"
 )
 
 find_package(OpenGL REQUIRED)
-find_package(glm REQUIRED)
+
+find_package(glm QUIET)
 
 add_executable(som-demo)
 add_subdirectory("external/librvl-v0.6.4")
@@ -15,6 +16,11 @@ set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
 
 include(FetchContent)
 include("cmake/FetchWx.cmake")
+
+if (NOT glm_FOUND)
+    include("cmake/FetchGLM.cmake")
+endif()
+
 include("cmake/BuildGLAD.cmake")
 include("cmake/BuildStbImage.cmake")
 include("cmake/BuildTomlPlusPlus.cmake")
