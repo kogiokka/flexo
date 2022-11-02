@@ -6,24 +6,9 @@ project("SOM Demo"
 )
 
 find_package(OpenGL REQUIRED)
-
-find_package(glm QUIET)
+include("cmake/ExternalProjects.cmake")
 
 add_executable(som-demo)
-add_subdirectory("external/librvl-v0.6.4")
-
-set(EXTERNAL_DIR "${CMAKE_SOURCE_DIR}/external")
-
-include(FetchContent)
-include("cmake/FetchWx.cmake")
-
-if (NOT glm_FOUND)
-    include("cmake/FetchGLM.cmake")
-endif()
-
-include("cmake/BuildGLAD.cmake")
-include("cmake/BuildStbImage.cmake")
-include("cmake/BuildTomlPlusPlus.cmake")
 
 set_target_properties(som-demo
     PROPERTIES
@@ -121,10 +106,7 @@ target_link_libraries(som-demo PRIVATE
     tomlplusplus
     glm::glm
     OpenGL::GL
-    wx::base
-    wx::core
-    wx::gl
-    wx::aui
+    ${wxWidgets_LIBRARIES}
     ${CMAKE_DL_LIBS}
 )
 
