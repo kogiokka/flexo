@@ -32,7 +32,7 @@ void VolumetricModelData::Read(std::string const filename)
     }
 
     rvl_get_voxel_dims(m_rvl, &dims.x, &dims.y, &dims.z);
-    rvl_get_grid_position(m_rvl, &orig.x, &orig.y, &orig.z);
+    rvl_get_grid_origin(m_rvl, &orig.x, &orig.y, &orig.z);
 
     m_resolution = res;
     m_vxDims = dims;
@@ -41,9 +41,7 @@ void VolumetricModelData::Read(std::string const filename)
 
 unsigned char const* VolumetricModelData::GetBuffer()
 {
-    void const* buf;
-    rvl_get_data_buffer(m_rvl, &buf);
-
+    void const* buf = rvl_get_voxels(m_rvl);
     return static_cast<unsigned char const*>(buf);
 }
 

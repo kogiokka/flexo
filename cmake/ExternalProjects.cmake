@@ -21,7 +21,7 @@ else()
     set(wxWidgets_LIBRARIES wx::base wx::core wx::gl wx::aui)
 endif()
 
-add_subdirectory("${EXTERNAL_DIR}/librvl-v0.6.4")
+add_subdirectory("${EXTERNAL_DIR}/librvl-v0.7.0")
 include("cmake/BuildGLAD.cmake")
 include("cmake/BuildStbImage.cmake")
 include("cmake/BuildTomlPlusPlus.cmake")

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 project("RVL example")
 
-find_package(librvl 0.6 REQUIRED)
+find_package(librvl 0.7 REQUIRED)
 
 add_executable(example)
 

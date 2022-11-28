@@ -13,6 +13,7 @@
        +00 4B chunk size (N bytes)
        +04 4B chunk code
        +08 NB chunk payload
+       +xx 4B CRC32
 
    There are 5 types of chunk: VFMT, GRID, DATA, TEXT, VEND. A valid RVL file
    must contain a VFMT chunk, a GRID chunk, one or more DATA chunks, and a VEND
@@ -90,7 +91,7 @@
 #include <stdio.h>
 
 #define RVL_VERSION_MAJOR 0
-#define RVL_VERSION_MINOR 6
+#define RVL_VERSION_MINOR 7
 
 /* RVL struct types */
 typedef struct RVL RVL;
@@ -174,16 +175,16 @@ typedef unsigned int RVLenum;
 #define RVL_UNIT_MILIMETER 0X02
 #define RVL_UNIT_KILOMETER 0X03
 
-#define RVL_COMPRESSION_LZMA 0x00
-#define RVL_COMPRESSION_LZ4  0x01
+#define RVL_COMPRESSION_LZMA2 0x00
+#define RVL_COMPRESSION_LZ4   0x01
 
-#define RVL_TAG_TITLE         0x0D01
-#define RVL_TAG_DESCRIPTION   0x0D02
-#define RVL_TAG_AUTHOR        0x0D03
-#define RVL_TAG_COPYRIGHT     0x0D04
-#define RVL_TAG_LICENSE       0x0D05
-#define RVL_TAG_SOURCE        0x0D06
-#define RVL_TAG_CREATION_TIME 0x0D07
+#define RVL_TEXT_TITLE         0x0D01
+#define RVL_TEXT_DESCRIPTION   0x0D02
+#define RVL_TEXT_AUTHOR        0x0D03
+#define RVL_TEXT_COPYRIGHT     0x0D04
+#define RVL_TEXT_LICENSE       0x0D05
+#define RVL_TEXT_SOURCE        0x0D06
+#define RVL_TEXT_CREATION_TIME 0x0D07
 
 // Prevent name-mangling for librvl functions from C++ compiler.
 #ifdef __cplusplus
@@ -201,6 +202,14 @@ extern "C"
 #  endif
 #else
 #  define RVLLIB_API
+#endif
+
+#ifdef __cplusplus
+#  define RVL_DEPRECATED(reason) [[deprecated(reason)]]
+#elif defined(__GNUC__) || defined(__clang__)
+#  define RVL_DEPRECATED(reason)  __attribute__ ((deprecated (reason)))
+#elif defined(_WIN32)
+#  define RVL_DEPRECATED(reason) __declspec(deprecated(reason))
 #endif
 
 RVLLIB_API RVL *rvl_create_writer (void);
@@ -222,59 +231,59 @@ RVLLIB_API void rvl_read_info (RVL *self);
 
 // Read the entire volumetric data into the buffer. The buffer allocation and
 // deallocation is managed by the user.
-RVLLIB_API void rvl_read_data_buffer (RVL *self, void **buffer);
+RVLLIB_API void rvl_read_voxels_to (RVL *self, void *buffer);
 
 /* VFMT chunk functions */
-RVLLIB_API void    rvl_set_volumetric_format (RVL *self, int nx, int ny, int nz,
-                                   RVLenum primitive, RVLenum endian);
-RVLLIB_API void    rvl_get_volumetric_format (RVL *self, int *nx, int *ny, int *nz,
-                                   RVLenum *primitive, RVLenum *endian);
+RVLLIB_API void rvl_set_volumetric_format (RVL *self, int nx, int ny, int nz,
+                                           RVLenum primitive, RVLenum endian);
+RVLLIB_API void rvl_get_volumetric_format (RVL *self, int *nx, int *ny, int *nz,
+                                           RVLenum *primitive, RVLenum *endian);
+
 RVLLIB_API void    rvl_set_compression (RVL *self, RVLenum compression);
 RVLLIB_API RVLenum rvl_get_compression (RVL *self);
+
+// Get the byte size of the primitive type.
+RVLLIB_API unsigned int rvl_sizeof (RVLenum primitive);
+
 
 /* GRID chunk functions */
 RVLLIB_API void rvl_set_regular_grid (RVL *self, float dx, float dy, float dz);
 RVLLIB_API void rvl_set_rectilinear_grid (RVL *self, int ndx, int ndy, int ndz,
-                               float *dx, float *dy, float *dz);
+                                          float *dx, float *dy, float *dz);
 RVLLIB_API void rvl_set_grid_unit (RVL *self, RVLenum unit);
 RVLLIB_API void rvl_set_grid_origin (RVL *self, float x0, float y0, float z0);
 
 RVLLIB_API RVLenum rvl_get_grid_type (RVL *self);
 RVLLIB_API RVLenum rvl_get_grid_unit (RVL *self);
 
-RVLLIB_API void rvl_get_grid_position (RVL *self, float *x, float *y, float *z);
+RVLLIB_API void rvl_get_grid_origin (RVL *self, float *x, float *y, float *z);
 RVLLIB_API void rvl_get_voxel_dims (RVL *self, float *dx, float *dy, float *dz);
 RVLLIB_API void rvl_get_voxel_dims_v (RVL *self, int *ndx, int *ndy, int *ndz,
-                           const float **dx, const float **dy,
-                           const float **dz);
+                                      const float **dx, const float **dy,
+                                      const float **dz);
 
 /* DATA chunk functions */
 
-// Set the data buffer to be written by the RVL writer. The RVL instance does
-// not own the pointer; the user should allocate the memory before writing
-// and deallocate the memory after writing.
-RVLLIB_API void rvl_set_data_buffer (RVL *self, unsigned int size, const void *buffer);
+// Set the voxel data to be written to file stream by RVL writer instance. The
+// instance does not own the pointer; users should allocate the memory before
+// writing and deallocate the memory after writing.
+RVLLIB_API void rvl_set_voxels (RVL *self, const void *voxels);
 
-// Get the data buffer from the RVL reader. The RVL instance owns the
+// Get the voxel data from RVL reader instance. The instance owns the
 // pointer, and users should not free the memory themselves.
-RVLLIB_API void rvl_get_data_buffer (RVL *self, const void **buffer);
+RVLLIB_API void* rvl_get_voxels (RVL *self);
+
+// Get the pointer to the voxel by x, y, and z indices.
+RVLLIB_API void* rvl_get_voxel_at (RVL *self, int x, int y, int z);
 
 /* TEXT chunk functions */
 RVLLIB_API void rvl_set_text (RVL *self, RVLenum tag, const char *value);
-RVLLIB_API void rvl_get_text (RVL *self, RVLenum tag, const char **value);
-
-/**
- * Helpers
- *
- * These helper functions depend on certain RVL information. Please make sure
- * the instance has been fully configured before using them.
- */
-RVLLIB_API unsigned int rvl_get_primitive_nbytes (RVL *self);
-RVLLIB_API unsigned int rvl_get_data_nbytes (RVL *self);
+RVLLIB_API const char* rvl_get_text_value (RVL *self, RVLenum tag);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif
+
 

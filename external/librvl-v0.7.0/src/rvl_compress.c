@@ -8,14 +8,7 @@
 #include "detail/rvl_compress_p.h"
 #include "detail/rvl_log_p.h"
 
-static void create_lzma_encoder (lzma_stream *self, uint32_t preset);
-static void create_lzma_decoder (lzma_stream *strm);
-static void destroy_lzma_coder (lzma_stream *self);
-
-static lzma_ret run_lzma_compression (lzma_stream *strm, const BYTE *src,
-                                      u32 srcSize, BYTE *dst, u32 dstCap);
-static lzma_ret run_lzma_decompression (lzma_stream *strm, const BYTE *src,
-                                        u32 srcSize, BYTE **dst, u32 dstCap);
+lzma_filter *get_lzma_default_filters ();
 
 static void print_lzma_compression_error (lzma_ret ret);
 static void print_lzma_decompression_error (lzma_ret ret);
@@ -23,8 +16,6 @@ static void print_lzma_decompression_error (lzma_ret ret);
 void
 rvl_compress_lzma (RVL *self, BYTE **out, u32 *size)
 {
-  lzma_stream strm;
-
   const BYTE *src     = self->data.wbuf;
   u32         srcSize = self->data.size;
   u32         dstCap  = self->data.size;
@@ -32,63 +23,63 @@ rvl_compress_lzma (RVL *self, BYTE **out, u32 *size)
   rvl_log_debug ("Starting XZ compression. The original size is %u bytes.",
                  srcSize);
 
+  lzma_filter *filters = get_lzma_default_filters ();
+
   lzma_ret ret;
-  create_lzma_encoder (&strm, 6 | LZMA_PRESET_DEFAULT);
-  ret = run_lzma_compression (&strm, src, srcSize, *out, dstCap);
+  size_t   outPos = 0;
+  ret = lzma_raw_buffer_encode (filters, NULL, src, srcSize, *out, &outPos,
+                                dstCap);
 
-  if (ret != LZMA_STREAM_END)
+  // Handle tiny data
+  if (ret == LZMA_BUF_ERROR)
     {
-      destroy_lzma_coder (&strm);
-      create_lzma_encoder (&strm, 6 | LZMA_PRESET_DEFAULT);
-
-      dstCap = lzma_stream_buffer_bound (self->data.size);
+      dstCap = 256;
       *out   = realloc (*out, dstCap);
 
       rvl_log_debug ("Reallocate output memory to %u bytes.", dstCap);
-
-      ret = run_lzma_compression (&strm, src, srcSize, *out, dstCap);
+      ret = lzma_raw_buffer_encode (filters, NULL, src, srcSize, *out, &outPos,
+                                    dstCap);
     }
 
-  if (ret != LZMA_STREAM_END)
+  if (ret != LZMA_OK)
     {
       print_lzma_compression_error (ret);
       exit (EXIT_FAILURE);
     }
 
-  *size = strm.total_out;
-  destroy_lzma_coder (&strm);
-
-  rvl_log_debug ("Compression succeeded. The result has %u bytes.",
-                 strm.total_out);
+  *size = outPos;
+  rvl_log_debug ("Compression succeeded. The result has %u bytes.", outPos);
 }
 
 void
 rvl_decompress_lzma (RVL *self, const BYTE *in, u32 size)
 {
-  lzma_stream strm;
+  BYTE *out    = self->data.rbuf;
+  u32   dstCap = self->data.size;
+
+  lzma_filter *filters = get_lzma_default_filters ();
 
   lzma_ret ret;
-  create_lzma_decoder (&strm);
-  ret = run_lzma_decompression (&strm, in, size, &self->data.rbuf,
-                                self->data.size);
+  size_t   inPos  = 0;
+  size_t   outPos = 0;
+  ret = lzma_raw_buffer_decode (filters, NULL, in, &inPos, size, out, &outPos,
+                                dstCap);
 
-  if (ret != LZMA_STREAM_END)
+  if (ret != LZMA_OK)
     {
       print_lzma_decompression_error (ret);
       exit (EXIT_FAILURE);
     }
 
-  if (strm.total_out != self->data.size)
+  if (outPos != self->data.size)
     {
       rvl_log_fatal ("Decompression failed. The original data size should be "
                      "%u. However, the decompressed size was %u.",
-                     self->data.size, strm.total_out);
+                     self->data.size, outPos);
       exit (EXIT_FAILURE);
     }
-  destroy_lzma_coder (&strm);
 
-  rvl_log_debug ("Decompression succeeded. The result has %u bytes.",
-                 strm.total_out);
+  rvl_log_debug ("Decompression succeeded. The result has %u bytes.", outPos);
 }
 
 void
@@ -108,10 +99,18 @@ rvl_compress_lz4 (RVL *self, BYTE **out, u32 *size)
   if (nbytes == 0)
     {
       dstCap = LZ4_compressBound (self->data.size);
-      *out   = realloc (*out, srcSize);
-      dst    = (char *)*out;
 
+      rvl_log_debug ("Reallocate output memory to %u bytes.", dstCap);
+
+      *out   = realloc (*out, dstCap);
+      dst    = (char *)*out;
       nbytes = LZ4_compress_HC (src, dst, srcSize, dstCap, LZ4HC_CLEVEL_MIN);
+    }
+
+  if (nbytes <= 0)
+    {
+      rvl_log_fatal ("LZ4 compression failed.");
+      exit (EXIT_FAILURE);
     }
 
   *size = nbytes;
@@ -138,38 +137,39 @@ rvl_decompress_lz4 (RVL *self, const BYTE *in, u32 size)
   rvl_log_debug ("Decompression succeeded. The result has %u bytes.", nbytes);
 }
 
-void
-create_lzma_encoder (lzma_stream *self, uint32_t preset)
+lzma_filter *
+get_lzma_default_filters ()
 {
-  *self = (lzma_stream)LZMA_STREAM_INIT;
+  static bool initialized = false;
 
-  lzma_ret ret = lzma_easy_encoder (self, preset, LZMA_CHECK_CRC64);
+  static lzma_filter       filters[LZMA_FILTERS_MAX + 1];
+  static lzma_options_lzma options;
 
-  // Return successfully
-  if (ret == LZMA_OK)
-    return;
+  if (initialized)
+    {
+      return filters;
+    }
 
-  print_lzma_compression_error (ret);
-}
+  options.preset_dict      = NULL;
+  options.preset_dict_size = 0;
 
-void
-create_lzma_decoder (lzma_stream *self)
-{
-  *self = (lzma_stream)LZMA_STREAM_INIT;
+  options.lc        = LZMA_LC_DEFAULT;
+  options.lp        = LZMA_LP_DEFAULT;
+  options.pb        = LZMA_PB_DEFAULT;
+  options.dict_size = 1U << 23;
+  options.mode      = LZMA_MODE_NORMAL;
+  options.mf        = LZMA_MF_BT4;
+  options.nice_len  = 64;
+  options.depth     = 0;
 
-  lzma_ret ret = lzma_stream_decoder (self, UINT32_MAX, LZMA_CONCATENATED);
+  filters[0].id      = LZMA_FILTER_LZMA2;
+  filters[0].options = &options;
+  filters[1].id      = LZMA_VLI_UNKNOWN;
+  filters[1].options = NULL;
 
-  // Return successfully
-  if (ret == LZMA_OK)
-    return;
+  initialized = true;
 
-  print_lzma_decompression_error (ret);
-}
-
-void
-destroy_lzma_coder (lzma_stream *self)
-{
-  lzma_end (self);
+  return filters;
 }
 
 lzma_ret
@@ -186,11 +186,11 @@ run_lzma_compression (lzma_stream *strm, const BYTE *src, u32 srcSize,
 
 lzma_ret
 run_lzma_decompression (lzma_stream *strm, const BYTE *src, u32 srcSize,
-                        BYTE **dst, u32 dstCap)
+                        BYTE *dst, u32 dstCap)
 {
   strm->next_in   = src;
   strm->avail_in  = srcSize;
-  strm->next_out  = *dst;
+  strm->next_out  = dst;
   strm->avail_out = dstCap;
 
   return lzma_code (strm, LZMA_FINISH);

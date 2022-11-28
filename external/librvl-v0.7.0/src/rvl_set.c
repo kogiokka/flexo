@@ -146,6 +146,13 @@ rvl_set_voxel_dims_v (RVL *self, int ndx, int ndy, int ndz, float *dx,
 }
 
 void
+rvl_set_voxels (RVL *self, const void *voxels)
+{
+  self->data.size = rvl_eval_voxels_nbytes (self);
+  self->data.wbuf = (BYTE *)voxels;
+}
+
+void
 rvl_set_data_buffer (RVL *self, unsigned int size, const void *buffer)
 {
   self->data.size = size;
