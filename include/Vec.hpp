@@ -57,8 +57,16 @@ Vec<Dim, T> operator*(T const& scalar, Vec<Dim, T> const& v);
 template <int Dim, typename T = float>
 T operator*(Vec<Dim, T> const& v1, Vec<Dim, T> const& v2);
 
-using Vec3f = Vec<3, float>;
-using Vec2f = Vec<2, float>;
+template <typename T>
+using Vec2 = Vec<2, T>;
+
+template <typename T>
+using Vec3 = Vec<3, T>;
+
+using Vec2i = Vec2<int>;
+using Vec3i = Vec3<int>;
+using Vec2f = Vec2<float>;
+using Vec3f = Vec3<float>;
 
 #include "Vec.inl"
 #endif
