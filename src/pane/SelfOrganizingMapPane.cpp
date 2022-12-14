@@ -49,8 +49,8 @@ void SelfOrganizingMapPane::PopulateMapPanel()
     comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
         auto map = MapList::Get(m_project)[event.GetSelection()];
         world.theMap = map;
-        int const width = map->mWidth;
-        int const height = map->mHeight;
+        int const width = map->width;
+        int const height = map->height;
         float const diagLen = sqrt(width * width + height * height);
         float const radius = 0.5f * diagLen;
         ProjectSettings::Get(m_project).SetNeighborhood(radius);

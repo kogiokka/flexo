@@ -11,8 +11,8 @@
 
 #include "Attachable.hpp"
 #include "Dataset.hpp"
-#include "Map.hpp"
 #include "LearningRate.hpp"
+#include "Map.hpp"
 #include "Neighborhood.hpp"
 #include "Node.hpp"
 #include "ProjectSettings.hpp"
@@ -134,9 +134,9 @@ void SelfOrganizingMap::CreateProcedure(std::shared_ptr<Map<InDim, OutDim>>& map
 template <int InDim, int OutDim>
 void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shared_ptr<Dataset<InDim>> dataset)
 {
-    auto& neurons = map->mNeurons;
-    int const width = map->mWidth;
-    int const height = map->mHeight;
+    auto& neurons = map->nodes;
+    int const width = map->width;
+    int const height = map->height;
 
     while (m_t < m_tmax) {
         std::unique_lock lk(m_mut);
@@ -150,13 +150,13 @@ void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shar
         auto const& bmu = neurons[index.x + index.y * width];
         UpdateNeighborhood(*map, input, bmu, m_learnRate, m_neighborhood);
 
-        if (map->mFlags & MapFlags_CyclicX) {
+        if (map->flags & MapFlags_CyclicX) {
             for (int y = 0; y < height; y++) {
                 neurons[y * width + width - 1] = neurons[y * width + 0];
             }
         }
 
-        if (map->mFlags & MapFlags_CyclicY) {
+        if (map->flags & MapFlags_CyclicY) {
             for (int x = 0; x < width; x++) {
                 neurons[(height - 1) * width + x] = neurons[0 * width + x];
             }
@@ -173,9 +173,9 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> 
 {
     glm::ivec2 idx;
     float distMin = std::numeric_limits<float>::max();
-    for (int i = 0; i < map.mWidth; i++) {
-        for (int j = 0; j < map.mHeight; j++) {
-            Vec<InDim> const diff = input - map.mNeurons[i + j * map.mWidth].weights;
+    for (int i = 0; i < map.width; i++) {
+        for (int j = 0; j < map.height; j++) {
+            Vec<InDim> const diff = input - map.nodes[i + j * map.width].weights;
             float const diffLen = diff * diff;
             if (distMin > diffLen) {
                 distMin = diffLen;
@@ -187,14 +187,13 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> 
 }
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::UpdateNeighborhood(Map<InDim, OutDim>& map, Vec<InDim> input,
-                                           Node<InDim, OutDim> const& bmu, LearningRate learnRate,
-                                           Neighborhood neighborhood)
+void SelfOrganizingMap::UpdateNeighborhood(Map<InDim, OutDim>& map, Vec<InDim> input, Node<InDim, OutDim> const& bmu,
+                                           LearningRate learnRate, Neighborhood neighborhood)
 {
-    auto& neurons = map.mNeurons;
-    MapFlags const flags = map.mFlags;
-    int const width = map.mWidth;
-    int const height = map.mHeight;
+    auto& neurons = map.nodes;
+    MapFlags const flags = map.flags;
+    int const width = map.width;
+    int const height = map.height;
 
     int const rad = static_cast<int>(neighborhood.radius(m_t));
     int const radSqr = rad * rad;

@@ -106,15 +106,15 @@ void WatermarkingProject::BuildMapMesh() const
     std::vector<glm::vec3> positions;
 
     // Positions
-    auto const& neurons = map.mNeurons;
+    auto const& neurons = map.nodes;
     positions.reserve(neurons.size());
     for (auto const& n : neurons) {
         auto const& w = n.weights;
         positions.emplace_back(w[0], w[1], w[2]);
     }
 
-    int const width = map.mWidth;
-    int const height = map.mHeight;
+    int const width = map.width;
+    int const height = map.height;
     // float const divisor = 1.1f; // FIXME
 
     float const w = static_cast<float>(width - 1);
@@ -148,10 +148,10 @@ void WatermarkingProject::BuildMapMesh() const
             // t2 = glm::vec2((x + 1) / divisor, y / divisor);
             // t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
             // t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-            SetVec2(t1, map.mNeurons[x + y * width].uv);
-            SetVec2(t2, map.mNeurons[x + 1 + y * width].uv);
-            SetVec2(t3, map.mNeurons[x + 1 + (y + 1) * width].uv);
-            SetVec2(t4, map.mNeurons[x + (y + 1) * width].uv);
+            SetVec2(t1, map.nodes[x + y * width].uv);
+            SetVec2(t2, map.nodes[x + 1 + y * width].uv);
+            SetVec2(t3, map.nodes[x + 1 + (y + 1) * width].uv);
+            SetVec2(t4, map.nodes[x + (y + 1) * width].uv);
 
             mesh.positions.push_back(p1);
             mesh.positions.push_back(p2);
@@ -186,8 +186,8 @@ void WatermarkingProject::UpdateMapEdges() const
     std::vector<unsigned int> indices;
 
     auto const& map = *world.theMap;
-    int const width = map.mWidth;
-    int const height = map.mHeight;
+    int const width = map.width;
+    int const height = map.height;
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);

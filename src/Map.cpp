@@ -42,7 +42,7 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                map->mNeurons.emplace_back(Vec3f { xRng.scalar(), yRng.scalar(), zRng.scalar() },
+                map->nodes.emplace_back(Vec3f { xRng.scalar(), yRng.scalar(), zRng.scalar() },
                                            Vec2f { static_cast<float>(i), static_cast<float>(j) },
                                            Vec2f { i / w, j / h });
             }
@@ -53,16 +53,16 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                map->mNeurons.emplace_back(Vec3f { i * dx, j * dy, box.max.z },
+                map->nodes.emplace_back(Vec3f { i * dx, j * dy, box.max.z },
                                            Vec2f { static_cast<float>(i), static_cast<float>(j) },
                                            Vec2f { i / w, j / h });
             }
         }
     }
 
-    map->mWidth = width;
-    map->mHeight = height;
-    map->mFlags = flags;
+    map->width = width;
+    map->height = height;
+    map->flags = flags;
 
     emplace_back(std::move(map));
 }
