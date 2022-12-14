@@ -220,52 +220,10 @@ wxWindow* WatermarkingProject::GetPanel()
 
 void WatermarkingProject::DoWatermark()
 {
-    // Update the texture coordinates of the Volumetric Model.
-    std::vector<glm::vec2> texcrd;
-
-    for (auto const& vx : m_model->Voxels()) {
-        glm::vec2 coord;
-        float minDist = std::numeric_limits<float>::max();
-
-        for (unsigned int n = 0; n < world.theMap->mNeurons.size(); n++) {
-            auto const& node = world.theMap->mNeurons[n];
-            glm::vec3 nodePos(node.weights[0], node.weights[1], node.weights[2]);
-            float const dist = glm::distance(vx.pos, nodePos);
-            if (dist < minDist) {
-                minDist = dist;
-                coord = world.theMap->mTexureCoord[n];
-            }
-        }
-
-        int num = 0;
-        int vis = vx.vis;
-        for (int i = 0; i < 6; i++) {
-            if (vis & 0b0000'0001) {
-                num += 6;
-            }
-            vis >>= 1;
-        }
-        for (int n = 0; n < num; n++) {
-            texcrd.emplace_back(coord);
-        }
-    }
+    m_model->Parameterize(*world.theMap);
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
 
     world.isWatermarked = true;
-
-    // Update the drawlist and the renderer
-    auto& drawlist = DrawList::Get(*this);
-    for (auto const& d : drawlist) {
-        VolumetricModel* ptr = dynamic_cast<VolumetricModel*>(d.get());
-        if (ptr != nullptr) {
-            for (auto it = ptr->m_binds.begin(); it != ptr->m_binds.end(); it++) {
-                Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-                if ((vb != nullptr) && (vb->GetStartAttrib() == 2)) {
-                    vb->Update(Graphics::Get(*this), texcrd);
-                }
-            }
-        }
-    }
-    drawlist.Submit(Renderer::Get(*this));
 }
 
 void WatermarkingProject::UpdateMapGraphics()

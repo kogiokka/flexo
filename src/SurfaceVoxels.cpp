@@ -71,7 +71,7 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
     }
 }
 
-std::vector<Voxel> const& SurfaceVoxels::Voxels()
+std::vector<Voxel> const& SurfaceVoxels::Voxels() const
 {
     return m_voxels;
 }
@@ -83,25 +83,29 @@ Mesh SurfaceVoxels::GenMesh()
     for (auto const& vx : m_voxels) {
         if (vx.vis & Voxel::Vis::XP) {
             AddFace(mesh, VOXEL.face.xp, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::XN) {
             AddFace(mesh, VOXEL.face.xn, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::YP) {
             AddFace(mesh, VOXEL.face.yp, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::YN) {
             AddFace(mesh, VOXEL.face.yn, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::ZP) {
             AddFace(mesh, VOXEL.face.zp, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::ZN) {
             AddFace(mesh, VOXEL.face.zn, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
     }
-
-    mesh.textureCoords = std::vector<glm::vec2>(mesh.positions.size(), glm::vec2(0.0f, 0.0f));
 
     return mesh;
 }
@@ -115,6 +119,23 @@ std::vector<glm::vec3> SurfaceVoxels::GenPositions()
     }
 
     return pos;
+}
+
+void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
+{
+    for (auto& vx : m_voxels) {
+        float minDist = std::numeric_limits<float>::max();
+
+        for (unsigned int n = 0; n < world.theMap->mNeurons.size(); n++) {
+            auto const& node = map.mNeurons[n];
+            glm::vec3 nodePos(node.weights[0], node.weights[1], node.weights[2]);
+            float const dist = glm::distance(vx.pos, nodePos);
+            if (dist < minDist) {
+                minDist = dist;
+                vx.uv = map.mTexureCoord[n];
+            }
+        }
+    }
 }
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)
