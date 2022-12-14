@@ -1,9 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <vector>
-
 #include "Node.hpp"
+#include "Vec.hpp"
 
 using MapFlags = int;
 
@@ -17,6 +16,11 @@ typedef enum {
     MapInitState_Plane,
     MapInitState_Random,
 } MapInitState;
+
+struct Plane {
+    Vec3i indices;
+    glm::vec3 normal;
+};
 
 template <int InDim, int OutDim>
 struct Map {
