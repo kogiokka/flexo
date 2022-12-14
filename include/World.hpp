@@ -22,7 +22,6 @@ struct World {
     Mesh mapMesh;
     Mesh neurons;
 
-    std::shared_ptr<Mesh> theModel;
     std::shared_ptr<Dataset<3>> theDataset;
     std::shared_ptr<Map<3, 2>> theMap;
     std::vector<unsigned int> mapEdges;

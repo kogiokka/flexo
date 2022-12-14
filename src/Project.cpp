@@ -219,8 +219,6 @@ wxWindow* WatermarkingProject::GetPanel()
 
 void WatermarkingProject::DoWatermark()
 {
-    assert(world.theModel);
-
     // Update the texture coordinates of the Volumetric Model.
     std::vector<glm::vec2> texcrd;
 
@@ -300,8 +298,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
     m_model.Read(path.ToStdString().c_str());
 
-    world.theModel = std::make_shared<Mesh>();
-    auto& pos = world.theModel->positions;
+    std::vector<glm::vec3> pos;
 
     glm::ivec3 n = m_model.GetResolution();
     glm::vec3 d = m_model.GetVoxelDims();
@@ -313,7 +310,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
             for (int k = 0; k < n.x; k++) {
                 int index = k + j * n.x + i * n.x * n.y;
                 if (data[index] == model) {
-                    pos.push_back(glm::vec3 { k * d.x, j * d.y, i * d.z });
+                    pos.emplace_back(k * d.x, j * d.y, i * d.z);
                 }
             }
         }
@@ -349,20 +346,18 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
             pos.emplace_back(box.min.x + i * xDiff, box.min.y + j * yDiff, box.min.z);
         }
     }
-
-    auto& positions = world.theModel->positions;
-    auto& texcoord = world.theModel->textureCoords;
-    positions.insert(positions.end(), pos.begin(), pos.end());
-    texcoord = std::vector<glm::vec2>(positions.size(), glm::vec2(0.0f, 0.0f));
+    auto mesh = SurfaceVoxels(m_model).GenMesh();
+    mesh.positions.insert(mesh.positions.end(), pos.begin(), pos.end());
+    mesh.textureCoords = std::vector<glm::vec2>(mesh.positions.size(), glm::vec2(0.0f, 0.0f));
 
     world.theDataset->Insert(pos);
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), SurfaceVoxels(m_model).GenMesh()));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), mesh));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
 {
-    if (world.theModel == nullptr) {
+    if (world.theDataset == nullptr) {
         wxMessageDialog dialog(&ProjectWindow::Get(*this), "Please import a model from the File menu first.", "Error",
                                wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
@@ -380,7 +375,6 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
         glm::vec3 const center = (max + min) * 0.5f;
 
         Mesh const mesh = CreateUVSphereModel(radius, 60, 60, center);
-        world.theModel = std::make_shared<Mesh>(mesh);
         world.theDataset = std::make_shared<Dataset<3>>(mesh.positions);
 
         SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), mesh));

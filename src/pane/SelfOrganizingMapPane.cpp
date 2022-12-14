@@ -173,7 +173,7 @@ void SelfOrganizingMapPane::PopulateControlPanel()
 
 void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
 {
-    if (!world.theModel) {
+    if (!world.theDataset) {
         wxMessageDialog dialog(this, "Please import a model from the File menu first.", "Error",
                                wxCENTER | wxICON_ERROR);
         dialog.ShowModal();

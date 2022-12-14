@@ -5,7 +5,6 @@ World world;
 
 World::World()
 {
-    theModel = nullptr;
     theMap = nullptr;
 
     Logger::info("Hello from World");
