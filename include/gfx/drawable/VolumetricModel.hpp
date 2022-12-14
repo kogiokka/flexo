@@ -45,7 +45,7 @@ class VolumetricModel : public Drawable
     UniformBlock m_ub;
 
 public:
-    VolumetricModel(Graphics& gfx, VolumetricModelData& model);
+    VolumetricModel(Graphics& gfx, Mesh mesh);
     ~VolumetricModel() override;
     void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
@@ -53,9 +53,6 @@ public:
 
 private:
     Mesh m_mesh;
-
-    void CreateMesh(VolumetricModelData& model);
-    void AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale);
 };
 
 #endif

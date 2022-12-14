@@ -17,38 +17,15 @@
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
 
-static STLImporter STLI;
-
-struct Cube {
-    struct {
-        Mesh xp;
-        Mesh xn;
-        Mesh yp;
-        Mesh yn;
-        Mesh zp;
-        Mesh zn;
-    } face;
-};
-
-static Cube const VOXEL = { {
-    STLI.ReadFile("res/models/voxel/cube-x-pos.stl"),
-    STLI.ReadFile("res/models/voxel/cube-x-neg.stl"),
-    STLI.ReadFile("res/models/voxel/cube-y-pos.stl"),
-    STLI.ReadFile("res/models/voxel/cube-y-neg.stl"),
-    STLI.ReadFile("res/models/voxel/cube-z-pos.stl"),
-    STLI.ReadFile("res/models/voxel/cube-z-neg.stl"),
-} };
-
-VolumetricModel::VolumetricModel(Graphics& gfx, VolumetricModelData& model)
+VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     : m_ub {}
+    , m_mesh(mesh)
 {
     std::vector<GLWRInputElementDesc> inputs = {
         { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
         { "normal", GLWRFormat_Float3, 1, 0, GLWRInputClassification_PerVertex, 0 },
         { "textureCoord", GLWRFormat_Float2, 2, 0, GLWRInputClassification_PerVertex, 0 },
     };
-
-    CreateMesh(model);
 
     m_isVisible = true;
 
@@ -126,61 +103,4 @@ void VolumetricModel::Update(Graphics& gfx)
 std::string VolumetricModel::GetName() const
 {
     return "Volumetric Model";
-}
-
-void VolumetricModel::CreateMesh(VolumetricModelData& model)
-{
-    glm::ivec3 n = model.GetResolution();
-    glm::vec3 dims = model.GetVoxelDims();
-    const unsigned char* data = model.GetBuffer();
-
-    world.numVxVerts.resize(n.x * n.y * n.z);
-
-    const unsigned char modelValue = 255;
-    const unsigned char air = 0;
-    for (int i = 0; i < n.z; i++) {
-        for (int j = 0; j < n.y; j++) {
-            for (int k = 0; k < n.x; k++) {
-                int index = k + j * n.x + i * n.x * n.y;
-                glm::vec3 offset { k, j, i };
-                if (data[index] == modelValue) {
-                    if ((k + 1 == n.x) || data[index + 1] == air) {
-                        AddFace(VOXEL.face.xp, offset, dims);
-                        world.numVxVerts[index] += 6;
-                    }
-                    if ((j + 1 == n.y) || (data[index + n.x] == air)) {
-                        AddFace(VOXEL.face.yp, offset, dims);
-                        world.numVxVerts[index] += 6;
-                    }
-                    if ((i + 1 == n.z) || (data[index + n.x * n.y] == air)) {
-                        AddFace(VOXEL.face.zp, offset, dims);
-                        world.numVxVerts[index] += 6;
-                    }
-                    if ((k == 0) || (data[index - 1] == air)) {
-                        AddFace(VOXEL.face.xn, offset, dims);
-                        world.numVxVerts[index] += 6;
-                    }
-                    if ((j == 0) || (data[index - n.x] == air)) {
-                        AddFace(VOXEL.face.yn, offset, dims);
-                        world.numVxVerts[index] += 6;
-                    }
-                    if ((i == 0) || (data[index - n.x * n.y] == air)) {
-                        AddFace(VOXEL.face.zn, offset, dims);
-                        world.numVxVerts[index] += 6;
-                    }
-                }
-            }
-        }
-    }
-
-    m_mesh.textureCoords = std::vector<glm::vec2>(m_mesh.positions.size(), glm::vec2(0.0f, 0.0f));
-    world.theModel->textureCoords = m_mesh.textureCoords;
-}
-
-void VolumetricModel::AddFace(Mesh const& face, glm::vec3 offset, glm::vec3 scale)
-{
-    for (auto const& pos : face.positions) {
-        m_mesh.positions.emplace_back((pos + offset) * scale);
-    }
-    m_mesh.normals.insert(m_mesh.normals.end(), face.normals.begin(), face.normals.end());
 }

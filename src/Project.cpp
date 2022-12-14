@@ -11,6 +11,7 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
+#include "SurfaceVoxels.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 #include "gfx/DrawList.hpp"
@@ -59,7 +60,7 @@ WatermarkingProject::WatermarkingProject()
         drawlist.Remove<VolumetricModel>();
         drawlist.Remove<MapFace>();
 
-        drawlist.Add(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model));
+        SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), SurfaceVoxels(m_model).GenMesh()));
         drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
@@ -322,7 +323,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     world.theDataset = std::make_shared<Dataset<3>>(pos);
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), SurfaceVoxels(m_model).GenMesh()));
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
@@ -356,7 +357,7 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
 
     world.theDataset->Insert(pos);
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model));
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), SurfaceVoxels(m_model).GenMesh()));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
