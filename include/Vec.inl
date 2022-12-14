@@ -8,13 +8,13 @@ Vec<Dim, T>::Vec(I... args)
 }
 
 template <int Dim, typename T>
-float& Vec<Dim, T>::operator[](int index)
+T& Vec<Dim, T>::operator[](int index)
 {
     return mData[index];
 }
 
 template <int Dim, typename T>
-float const& Vec<Dim, T>::operator[](int index) const
+T const& Vec<Dim, T>::operator[](int index) const
 {
     return mData[index];
 }
@@ -65,11 +65,143 @@ Vec<Dim, T> operator*(T const& scalar, Vec<Dim, T> const& v)
 }
 
 template <int Dim, typename T>
-float operator*(Vec<Dim, T> const& v1, Vec<Dim, T> const& v2)
+T operator*(Vec<Dim, T> const& v1, Vec<Dim, T> const& v2)
 {
     T product = 0;
     for (int d = 0; d < Dim; d++) {
         product += v1[d] * v2[d];
     }
     return product;
+}
+
+/*************************** Specialization ***********************************/
+
+template <typename T>
+Vec<2, T>::Vec()
+    : x(0)
+    , y(0)
+{
+}
+
+template <typename T>
+Vec<2, T>::Vec(T x, T y)
+    : x(x)
+    , y(y)
+{
+}
+
+template <typename T>
+int Vec<2, T>::Dimension() const
+{
+    return 2;
+}
+
+template <typename T>
+Vec<2, T> Vec<2, T>::operator-(Vec<2, T> const& other) const
+{
+    Vec<2, T> vec;
+    vec.x = x - other.x;
+    vec.y = y - other.y;
+    return vec;
+}
+
+template <typename T>
+Vec<2, T>& Vec<2, T>::operator+=(Vec<2, T> const& other)
+{
+    x += other.x;
+    y += other.y;
+    return *this;
+}
+
+template <typename T>
+T& Vec<2, T>::operator[](int index)
+{
+    switch (index) {
+    default:
+    case 0:
+        return x;
+    case 1:
+        return y;
+    }
+}
+
+template <typename T>
+T const& Vec<2, T>::operator[](int index) const
+{
+    switch (index) {
+    default:
+    case 0:
+        return x;
+    case 1:
+        return y;
+    }
+}
+
+template <typename T>
+Vec<3, T>::Vec()
+    : x(0)
+    , y(0)
+    , z(0)
+{
+}
+
+template <typename T>
+Vec<3, T>::Vec(T x, T y, T z)
+    : x(x)
+    , y(y)
+    , z(z)
+{
+}
+
+template <typename T>
+int Vec<3, T>::Dimension() const
+{
+    return 3;
+}
+
+template <typename T>
+Vec<3, T> Vec<3, T>::operator-(Vec<3, T> const& other) const
+{
+    Vec<3, T> vec;
+    vec.x = x - other.x;
+    vec.y = y - other.y;
+    vec.z = z - other.z;
+    return vec;
+}
+
+template <typename T>
+Vec<3, T>& Vec<3, T>::operator+=(Vec<3, T> const& other)
+{
+    x += other.x;
+    y += other.y;
+    z += other.z;
+    return *this;
+}
+
+template <typename T>
+T& Vec<3, T>::operator[](int index)
+{
+    switch (index) {
+    default:
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    }
+}
+
+template <typename T>
+T const& Vec<3, T>::operator[](int index) const
+{
+    switch (index) {
+    default:
+    case 0:
+        return x;
+    case 1:
+        return y;
+    case 2:
+        return z;
+    }
 }

@@ -43,8 +43,7 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
                 map->nodes.emplace_back(Vec3f { xRng.scalar(), yRng.scalar(), zRng.scalar() },
-                                           Vec2f { static_cast<float>(i), static_cast<float>(j) },
-                                           Vec2f { i / w, j / h });
+                                        Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
             }
         }
     } else if (initState == MapInitState_Plane) {
@@ -54,8 +53,7 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
                 map->nodes.emplace_back(Vec3f { i * dx, j * dy, box.max.z },
-                                           Vec2f { static_cast<float>(i), static_cast<float>(j) },
-                                           Vec2f { i / w, j / h });
+                                        Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
             }
         }
     }

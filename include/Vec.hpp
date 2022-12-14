@@ -7,15 +7,42 @@ template <int Dim, typename T = float>
 struct Vec {
     template <typename... I>
     explicit Vec(I... args);
-    float& operator[](int index);
-    float const& operator[](int index) const;
+    T& operator[](int index);
+    T const& operator[](int index) const;
     int Dimension() const;
 
     Vec<Dim, T> operator-(Vec<Dim, T> const& other) const;
     Vec<Dim, T>& operator+=(Vec<Dim, T> const& other);
 
-private:
     std::array<T, Dim> mData;
+};
+
+template <typename T>
+struct Vec<2, T> {
+    Vec();
+    explicit Vec(T x, T y);
+    T& operator[](int index);
+    T const& operator[](int index) const;
+    int Dimension() const;
+
+    Vec<2, T> operator-(Vec<2, T> const& other) const;
+    Vec<2, T>& operator+=(Vec<2, T> const& other);
+
+    T x, y;
+};
+
+template <typename T>
+struct Vec<3, T> {
+    Vec();
+    explicit Vec(T x, T y, T z);
+    T& operator[](int index);
+    T const& operator[](int index) const;
+    int Dimension() const;
+
+    Vec<3, T> operator-(Vec<3, T> const& other) const;
+    Vec<3, T>& operator+=(Vec<3, T> const& other);
+
+    T x, y, z;
 };
 
 template <int Dim, typename T = float>
@@ -28,10 +55,10 @@ Vec<Dim, T> operator*(T const& scalar, Vec<Dim, T> const& v);
  * Dot product
  */
 template <int Dim, typename T = float>
-float operator*(Vec<Dim, T> const& v1, Vec<Dim, T> const& v2);
+T operator*(Vec<Dim, T> const& v1, Vec<Dim, T> const& v2);
 
-using Vec3f = Vec<3>;
-using Vec2f = Vec<2>;
+using Vec3f = Vec<3, float>;
+using Vec2f = Vec<2, float>;
 
 #include "Vec.inl"
 #endif
