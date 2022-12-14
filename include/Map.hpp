@@ -25,10 +25,9 @@ typedef enum {
 
 template <int InDim, int OutDim>
 struct Map {
-    int width;
-    int height;
-    MapFlags flags;
+    Vec<OutDim, int> size;
     std::vector<Node<InDim, OutDim>> nodes;
+    MapFlags flags;
 };
 
 class WatermarkingProject;

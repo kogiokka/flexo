@@ -58,8 +58,8 @@ void MapList::Add(int width, int height, MapFlags flags, MapInitState initState,
         }
     }
 
-    map->width = width;
-    map->height = height;
+    map->size.x = width;
+    map->size.y = height;
     map->flags = flags;
 
     emplace_back(std::move(map));

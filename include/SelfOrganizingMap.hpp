@@ -135,8 +135,8 @@ template <int InDim, int OutDim>
 void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shared_ptr<Dataset<InDim>> dataset)
 {
     auto& neurons = map->nodes;
-    int const width = map->width;
-    int const height = map->height;
+    int const width = map->size.x;
+    int const height = map->size.y;
 
     while (m_t < m_tmax) {
         std::unique_lock lk(m_mut);
@@ -173,9 +173,9 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> 
 {
     glm::ivec2 idx;
     float distMin = std::numeric_limits<float>::max();
-    for (int i = 0; i < map.width; i++) {
-        for (int j = 0; j < map.height; j++) {
-            Vec<InDim> const diff = input - map.nodes[i + j * map.width].weights;
+    for (int i = 0; i < map.size.x; i++) {
+        for (int j = 0; j < map.size.y; j++) {
+            Vec<InDim> const diff = input - map.nodes[i + j * map.size.x].weights;
             float const diffLen = diff * diff;
             if (distMin > diffLen) {
                 distMin = diffLen;
@@ -192,8 +192,8 @@ void SelfOrganizingMap::UpdateNeighborhood(Map<InDim, OutDim>& map, Vec<InDim> i
 {
     auto& neurons = map.nodes;
     MapFlags const flags = map.flags;
-    int const width = map.width;
-    int const height = map.height;
+    int const width = map.size.x;
+    int const height = map.size.y;
 
     int const rad = static_cast<int>(neighborhood.radius(m_t));
     int const radSqr = rad * rad;

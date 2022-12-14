@@ -113,8 +113,8 @@ void WatermarkingProject::BuildMapMesh() const
         positions.emplace_back(w[0], w[1], w[2]);
     }
 
-    int const width = map.width;
-    int const height = map.height;
+    int const width = map.size.x;
+    int const height = map.size.y;
     // float const divisor = 1.1f; // FIXME
 
     float const w = static_cast<float>(width - 1);
@@ -186,8 +186,8 @@ void WatermarkingProject::UpdateMapEdges() const
     std::vector<unsigned int> indices;
 
     auto const& map = *world.theMap;
-    int const width = map.width;
-    int const height = map.height;
+    int const width = map.size.x;
+    int const height = map.size.y;
     for (int i = 0; i < height - 1; ++i) {
         for (int j = 0; j < width - 1; ++j) {
             indices.push_back(i * width + j);
