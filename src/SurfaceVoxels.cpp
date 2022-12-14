@@ -36,8 +36,6 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
     const unsigned char modelValue = 255;
     const unsigned char air = 0;
 
-    world.numVxVerts.resize(n.x * n.y * n.z);
-
     for (int i = 0; i < n.z; i++) {
         for (int j = 0; j < n.y; j++) {
             for (int k = 0; k < n.x; k++) {
@@ -47,27 +45,21 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
                 if (data[index] == modelValue) {
                     if ((k + 1 == n.x) || data[index + 1] == air) {
                         vis |= Voxel::Vis::XP;
-                        world.numVxVerts[index] += 6;
                     }
                     if ((j + 1 == n.y) || (data[index + n.x] == air)) {
                         vis |= Voxel::Vis::YP;
-                        world.numVxVerts[index] += 6;
                     }
                     if ((i + 1 == n.z) || (data[index + n.x * n.y] == air)) {
                         vis |= Voxel::Vis::ZP;
-                        world.numVxVerts[index] += 6;
                     }
                     if ((k == 0) || (data[index - 1] == air)) {
                         vis |= Voxel::Vis::XN;
-                        world.numVxVerts[index] += 6;
                     }
                     if ((j == 0) || (data[index - n.x] == air)) {
                         vis |= Voxel::Vis::YN;
-                        world.numVxVerts[index] += 6;
                     }
                     if ((i == 0) || (data[index - n.x * n.y] == air)) {
                         vis |= Voxel::Vis::ZN;
-                        world.numVxVerts[index] += 6;
                     }
 
                     if (vis != Voxel::Vis::None) {

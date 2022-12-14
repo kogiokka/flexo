@@ -28,6 +28,7 @@ WatermarkingProject::WatermarkingProject()
     : m_isMapReady(false)
     , m_frame {}
     , m_panel {}
+    , m_model(nullptr)
 {
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
     Bind(EVT_ADD_PLATE_50_BY_50, &WatermarkingProject::OnMenuAddPlate, this);
@@ -60,7 +61,7 @@ WatermarkingProject::WatermarkingProject()
         drawlist.Remove<VolumetricModel>();
         drawlist.Remove<MapFace>();
 
-        SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), SurfaceVoxels(m_model).GenMesh()));
+        SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
         drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
@@ -222,35 +223,30 @@ void WatermarkingProject::DoWatermark()
     // Update the texture coordinates of the Volumetric Model.
     std::vector<glm::vec2> texcrd;
 
-    glm::ivec3 n = m_model.GetResolution();
-    glm::vec3 d = m_model.GetVoxelDims();
-    const unsigned char* data = m_model.GetBuffer();
+    for (auto const& vx : m_model->Voxels()) {
+        glm::vec2 coord;
+        float minDist = std::numeric_limits<float>::max();
 
-    const unsigned char model = 255;
-    for (int i = 0; i < n.z; i++) {
-        for (int j = 0; j < n.y; j++) {
-            for (int k = 0; k < n.x; k++) {
-                int index = k + j * n.x + i * n.x * n.y;
-                if (data[index] != model)
-                    continue;
-
-                glm::vec2 coord;
-                float minDist = std::numeric_limits<float>::max();
-                glm::vec3 vxPos(k * d.x, j * d.y, i * d.z);
-
-                for (unsigned int n = 0; n < world.theMap->mNeurons.size(); n++) {
-                    auto const& node = world.theMap->mNeurons[n];
-                    glm::vec3 nodePos(node.weights[0], node.weights[1], node.weights[2]);
-                    float const dist = glm::distance(vxPos, nodePos);
-                    if (dist < minDist) {
-                        minDist = dist;
-                        coord = world.theMap->mTexureCoord[n];
-                    }
-                }
-                for (int n = 0; n < world.numVxVerts[index]; n++) {
-                    texcrd.emplace_back(coord);
-                }
+        for (unsigned int n = 0; n < world.theMap->mNeurons.size(); n++) {
+            auto const& node = world.theMap->mNeurons[n];
+            glm::vec3 nodePos(node.weights[0], node.weights[1], node.weights[2]);
+            float const dist = glm::distance(vx.pos, nodePos);
+            if (dist < minDist) {
+                minDist = dist;
+                coord = world.theMap->mTexureCoord[n];
             }
+        }
+
+        int num = 0;
+        int vis = vx.vis;
+        for (int i = 0; i < 6; i++) {
+            if (vis & 0b0000'0001) {
+                num += 6;
+            }
+            vis >>= 1;
+        }
+        for (int n = 0; n < num; n++) {
+            texcrd.emplace_back(coord);
         }
     }
 
@@ -296,13 +292,14 @@ void WatermarkingProject::UpdateMapGraphics()
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
-    m_model.Read(path.ToStdString().c_str());
+    VolumetricModelData data;
+    data.Read(path.ToStdString().c_str());
 
-    auto surf = SurfaceVoxels(m_model);
-    Logger::info("%lu voxels will be rendered.", surf.Voxels().size());
+    m_model = std::make_unique<SurfaceVoxels>(data);
+    Logger::info("%lu voxels will be rendered.", m_model->Voxels().size());
 
-    world.theDataset = std::make_shared<Dataset<3>>(surf.GenPositions());
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), surf.GenMesh()));
+    world.theDataset = std::make_shared<Dataset<3>>(m_model->GenPositions());
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
@@ -328,7 +325,7 @@ void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
             pos.emplace_back(box.min.x + i * xDiff, box.min.y + j * yDiff, box.min.z);
         }
     }
-    auto mesh = SurfaceVoxels(m_model).GenMesh();
+    auto mesh = m_model->GenMesh();
     mesh.positions.insert(mesh.positions.end(), pos.begin(), pos.end());
     mesh.textureCoords = std::vector<glm::vec2>(mesh.positions.size(), glm::vec2(0.0f, 0.0f));
 

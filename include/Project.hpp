@@ -10,7 +10,7 @@
 
 #include "Attachable.hpp"
 #include "Mesh.hpp"
-#include "VolumetricModelData.hpp"
+#include "SurfaceVoxels.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
@@ -44,7 +44,7 @@ private:
     bool m_isMapReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-    VolumetricModelData m_model;
+    std::unique_ptr<SurfaceVoxels> m_model;
 };
 
 #endif
