@@ -70,6 +70,11 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
     }
 }
 
+std::vector<Voxel> const& SurfaceVoxels::Voxels()
+{
+    return m_voxels;
+}
+
 Mesh SurfaceVoxels::GenMesh()
 {
     Mesh mesh;
@@ -98,6 +103,17 @@ Mesh SurfaceVoxels::GenMesh()
     mesh.textureCoords = std::vector<glm::vec2>(mesh.positions.size(), glm::vec2(0.0f, 0.0f));
 
     return mesh;
+}
+
+std::vector<glm::vec3> SurfaceVoxels::GenPositions()
+{
+    std::vector<glm::vec3> pos(m_voxels.size());
+
+    for (unsigned int i = 0; i < m_voxels.size(); i++) {
+        pos[i] = m_voxels[i].pos;
+    }
+
+    return pos;
 }
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)

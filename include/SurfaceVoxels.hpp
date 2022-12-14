@@ -12,8 +12,11 @@ class SurfaceVoxels
 {
 public:
     SurfaceVoxels(VolumetricModelData& modelData);
+    std::vector<Voxel> const& Voxels();
     Mesh GenMesh();
+    std::vector<glm::vec3> GenPositions();
 
+private:
     glm::vec3 m_scale;
     std::vector<Voxel> m_voxels;
 };

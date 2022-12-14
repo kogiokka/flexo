@@ -298,29 +298,11 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 {
     m_model.Read(path.ToStdString().c_str());
 
-    std::vector<glm::vec3> pos;
+    auto surf = SurfaceVoxels(m_model);
+    Logger::info("%lu voxels will be rendered.", surf.Voxels().size());
 
-    glm::ivec3 n = m_model.GetResolution();
-    glm::vec3 d = m_model.GetVoxelDims();
-    const unsigned char* data = m_model.GetBuffer();
-
-    const unsigned char model = 255;
-    for (int i = 0; i < n.z; i++) {
-        for (int j = 0; j < n.y; j++) {
-            for (int k = 0; k < n.x; k++) {
-                int index = k + j * n.x + i * n.x * n.y;
-                if (data[index] == model) {
-                    pos.emplace_back(k * d.x, j * d.y, i * d.z);
-                }
-            }
-        }
-    }
-
-    Logger::info("%lu voxels will be rendered.", pos.size());
-
-    world.theDataset = std::make_shared<Dataset<3>>(pos);
-
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), SurfaceVoxels(m_model).GenMesh()));
+    world.theDataset = std::make_shared<Dataset<3>>(surf.GenPositions());
+    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), surf.GenMesh()));
 }
 
 void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
