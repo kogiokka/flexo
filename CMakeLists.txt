@@ -46,6 +46,7 @@ PRIVATE
     "src/Util.cpp"
     "src/World.cpp"
     "src/VolumetricModelData.cpp"
+    "src/Voxel.cpp"
     "src/SurfaceVoxels.cpp"
     "src/common/Logger.cpp"
     "src/assetlib/BaseImporter.cpp"

@@ -6,16 +6,7 @@
 
 #include "Mesh.hpp"
 #include "VolumetricModelData.hpp"
-
-struct Voxel {
-    Voxel(Mesh mesh, glm::vec2 texcrd)
-        : mMesh(mesh)
-        , mTexcrd(texcrd)
-    {
-    }
-    Mesh mMesh;
-    glm::vec2 mTexcrd;
-};
+#include "Voxel.hpp"
 
 class SurfaceVoxels
 {
@@ -23,6 +14,7 @@ public:
     SurfaceVoxels(VolumetricModelData& modelData);
     Mesh GenMesh();
 
+    glm::vec3 m_scale;
     std::vector<Voxel> m_voxels;
 };
 
