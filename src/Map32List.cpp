@@ -1,36 +1,29 @@
-#include <array>
-#include <cassert>
-#include <memory>
-#include <utility>
-
-#include "Map.hpp"
-#include "Project.hpp"
-#include "RandomRealNumber.hpp"
+#include "Map32List.hpp"
 
 // Register factory: Map
-static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> SharedPtr<MapList> { return std::make_shared<MapList>(project); }
+WatermarkingProject::AttachedObjects::RegisteredFactory const map32ListKey {
+    [](WatermarkingProject& project) -> SharedPtr<MapList<3, 2>> { return std::make_shared<MapList<3, 2>>(project); }
 };
 
-MapList& MapList::Get(WatermarkingProject& project)
+template <>
+MapList<3, 2>& MapList<3, 2>::Get(WatermarkingProject& project)
 {
-    return project.AttachedObjects::Get<MapList>(factoryKey);
+    return project.AttachedObjects::Get<MapList>(map32ListKey);
 }
 
-MapList const& MapList::Get(WatermarkingProject const& project)
+template <>
+MapList<3, 2> const& MapList<3, 2>::Get(WatermarkingProject const& project)
 {
     return Get(const_cast<WatermarkingProject&>(project));
 }
 
-MapList::MapList(WatermarkingProject& project)
-    : m_project(project)
+template <>
+void MapList<3, 2>::Add(Vec2i size, MapFlags flags, MapInitState initState, BoundingBox box)
 {
-}
-
-void MapList::Add(int width, int height, MapFlags flags, MapInitState initState, BoundingBox box)
-{
-    using std::array;
     auto map = std::make_shared<Map<3, 2>>();
+
+    int width = size.x;
+    int height = size.y;
 
     float const w = static_cast<float>(width - 1);
     float const h = static_cast<float>(height - 1);

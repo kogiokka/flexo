@@ -41,7 +41,7 @@ PRIVATE
     "src/pane/SceneViewportPane.cpp"
 
     "src/Camera.cpp"
-    "src/Map.cpp"
+    "src/Map32List.cpp"
     "src/Mesh.cpp"
     "src/Util.cpp"
     "src/VecUtil.cpp"

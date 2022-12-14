@@ -7,6 +7,7 @@
 #include <wx/textctrl.h>
 #include <wx/valnum.h>
 
+#include "Map32List.hpp"
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
@@ -47,7 +48,7 @@ void SelfOrganizingMapPane::PopulateMapPanel()
     heightText->SetValidator(validDimen);
 
     comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
-        auto map = MapList::Get(m_project)[event.GetSelection()];
+        auto map = MapList<3,2>::Get(m_project)[event.GetSelection()];
         world.theMap = map;
         int const width = map->size.x;
         int const height = map->size.y;
@@ -75,11 +76,11 @@ void SelfOrganizingMapPane::PopulateMapPanel()
                     state = MapInitState_Plane;
                 }
                 if (world.theDataset) {
-                    MapList::Get(m_project).Add(width, height, flags, state, world.theDataset->GetBoundingBox());
+                    MapList<3,2>::Get(m_project).Add(Vec2i(width, height), flags, state, world.theDataset->GetBoundingBox());
                 } else {
-                    MapList::Get(m_project).Add(width, height, flags, state);
+                    MapList<3,2>::Get(m_project).Add(Vec2i(width, height), flags, state);
                 }
-                comboBox->Append(wxString::Format("Map.00%zu", MapList::Get(m_project).size()),
+                comboBox->Append(wxString::Format("Map.00%zu", MapList<3,2>::Get(m_project).size()),
                                  wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
             }
         });
