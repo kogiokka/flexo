@@ -44,7 +44,6 @@ PRIVATE
     "src/Map32List.cpp"
     "src/Mesh.cpp"
     "src/Util.cpp"
-    "src/VecUtil.cpp"
     "src/World.cpp"
     "src/VolumetricModelData.cpp"
     "src/Voxel.cpp"

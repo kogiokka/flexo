@@ -148,10 +148,10 @@ void WatermarkingProject::BuildMapMesh() const
             // t2 = glm::vec2((x + 1) / divisor, y / divisor);
             // t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
             // t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-            SetVec2(t1, map.nodes[x + y * width].uv);
-            SetVec2(t2, map.nodes[x + 1 + y * width].uv);
-            SetVec2(t3, map.nodes[x + 1 + (y + 1) * width].uv);
-            SetVec2(t4, map.nodes[x + (y + 1) * width].uv);
+            t1 = VECCONV(map.nodes[x + y * width].uv);
+            t2 = VECCONV(map.nodes[x + 1 + y * width].uv);
+            t3 = VECCONV(map.nodes[x + 1 + (y + 1) * width].uv);
+            t4 = VECCONV(map.nodes[x + (y + 1) * width].uv);
 
             mesh.positions.push_back(p1);
             mesh.positions.push_back(p2);

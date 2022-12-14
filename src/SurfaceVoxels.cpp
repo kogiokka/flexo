@@ -129,11 +129,10 @@ void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
 
         for (unsigned int n = 0; n < world.theMap->nodes.size(); n++) {
             auto const& node = map.nodes[n];
-            glm::vec3 nodePos(node.weights[0], node.weights[1], node.weights[2]);
-            float const dist = glm::distance(vx.pos, nodePos);
+            float const dist = glm::distance(vx.pos, VECCONV(node.weights));
             if (dist < minDist) {
                 minDist = dist;
-                SetVec2(vx.uv, map.nodes[n].uv);
+                vx.uv = VECCONV(map.nodes[n].uv);
             }
         }
     }

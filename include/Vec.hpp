@@ -6,7 +6,7 @@
 template <int Dim, typename T = float>
 struct Vec {
     template <typename... I>
-    explicit Vec(I... args);
+    Vec(I... args);
     T& operator[](int index);
     T const& operator[](int index) const;
     int Dimension() const;
@@ -20,7 +20,7 @@ struct Vec {
 template <typename T>
 struct Vec<2, T> {
     Vec();
-    explicit Vec(T x, T y);
+    Vec(T x, T y);
     T& operator[](int index);
     T const& operator[](int index) const;
     int Dimension() const;
@@ -34,7 +34,7 @@ struct Vec<2, T> {
 template <typename T>
 struct Vec<3, T> {
     Vec();
-    explicit Vec(T x, T y, T z);
+    Vec(T x, T y, T z);
     T& operator[](int index);
     T const& operator[](int index) const;
     int Dimension() const;

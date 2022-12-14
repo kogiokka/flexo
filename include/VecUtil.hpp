@@ -4,9 +4,24 @@
 #include "Vec.hpp"
 #include <glm/glm.hpp>
 
-void SetVec3(Vec<2, float>& to, glm::vec2 const& from);
-void SetVec3(Vec<3, float>& to, glm::vec3 const& from);
-void SetVec2(glm::vec2& to, Vec<2, float> const& from);
-void SetVec2(glm::vec3& to, Vec<3, float> const& from);
+inline glm::vec2 VECCONV(Vec2f v)
+{
+    return { v.x, v.y };
+}
+
+inline glm::vec3 VECCONV(Vec3f v)
+{
+    return { v.x, v.y, v.z };
+}
+
+inline Vec2f VECCONV(glm::vec2 v)
+{
+    return { v.x, v.y };
+}
+
+inline Vec3f VECCONV(glm::vec3 v)
+{
+    return { v.x, v.y, v.z };
+}
 
 #endif
