@@ -1,4 +1,5 @@
 #include "SurfaceVoxels.hpp"
+#include "VecUtil.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 
@@ -132,7 +133,7 @@ void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
             float const dist = glm::distance(vx.pos, nodePos);
             if (dist < minDist) {
                 minDist = dist;
-                vx.uv = map.mTexureCoord[n];
+                SetVec2(vx.uv, map.mNeurons[n].uv);
             }
         }
     }

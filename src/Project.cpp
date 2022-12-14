@@ -12,6 +12,7 @@
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "SurfaceVoxels.hpp"
+#include "VecUtil.hpp"
 #include "World.hpp"
 #include "common/Logger.hpp"
 #include "gfx/DrawList.hpp"
@@ -147,10 +148,10 @@ void WatermarkingProject::BuildMapMesh() const
             // t2 = glm::vec2((x + 1) / divisor, y / divisor);
             // t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
             // t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-            t1 = map.mTexureCoord[x + y * width];
-            t2 = map.mTexureCoord[x + 1 + y * width];
-            t3 = map.mTexureCoord[x + 1 + (y + 1) * width];
-            t4 = map.mTexureCoord[x + (y + 1) * width];
+            SetVec2(t1, map.mNeurons[x + y * width].uv);
+            SetVec2(t2, map.mNeurons[x + 1 + y * width].uv);
+            SetVec2(t3, map.mNeurons[x + 1 + (y + 1) * width].uv);
+            SetVec2(t4, map.mNeurons[x + (y + 1) * width].uv);
 
             mesh.positions.push_back(p1);
             mesh.positions.push_back(p2);

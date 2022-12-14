@@ -29,7 +29,6 @@ struct Map {
     int mHeight;
     MapFlags mFlags;
     std::vector<Node<InDim, OutDim>> mNeurons;
-    std::vector<glm::vec2> mTexureCoord;
 };
 
 class WatermarkingProject;

@@ -7,8 +7,9 @@ template <int InDim, int OutDim>
 struct Node {
     Vec<InDim> weights;
     Vec<OutDim> coords;
+    Vec<OutDim> uv;
 
-    Node(Vec<InDim> weights, Vec<OutDim> coordinates);
+    Node(Vec<InDim> weights, Vec<OutDim> coordinates, Vec<OutDim> uv = Vec<2>(0.0f, 0.0f));
     Node(Node const& other);
     Node& operator=(Node const& other);
 
@@ -18,9 +19,10 @@ struct Node {
 };
 
 template <int InDim, int OutDim>
-Node<InDim, OutDim>::Node(Vec<InDim> weights, Vec<OutDim> coordinates)
+Node<InDim, OutDim>::Node(Vec<InDim> weights, Vec<OutDim> coordinates, Vec<OutDim> uv)
     : weights(weights)
     , coords(coordinates)
+    , uv(uv)
 {
 }
 
@@ -29,6 +31,7 @@ Node<InDim, OutDim>::Node(Node const& other)
 {
     weights = other.weights;
     coords = other.coords;
+    uv = other.uv;
 }
 
 template <int InDim, int OutDim>
@@ -36,6 +39,7 @@ Node<InDim, OutDim>& Node<InDim, OutDim>::operator=(Node<InDim, OutDim> const& o
 {
     weights = other.weights;
     coords = other.coords;
+    uv = other.uv;
     return *this;
 }
 
