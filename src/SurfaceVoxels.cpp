@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 #include "common/Logger.hpp"
 
@@ -8,7 +9,15 @@
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 
+struct Triangle {
+    Vec3i indices;
+    glm::vec3 normal;
+};
+
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale);
+
+std::pair<float, bool> Piont2TriangleDistance(glm::vec3 point, Triangle triangle);
+std::vector<Triangle> MapFaces(Map<3, 2> const& map);
 
 static STLImporter STLI;
 
@@ -129,7 +138,89 @@ std::vector<glm::vec3> SurfaceVoxels::GenPositions()
 
 void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
 {
-    std::vector<Plane> planes;
+    std::vector<Triangle> planes = MapFaces(map);
+
+    for (auto& vx : m_voxels) {
+        // unsigned int index = 0;
+        // float minProj = 0.0f;
+        // float minDist = std::numeric_limits<float>::max();
+        // for (unsigned int i = 0; i < planes.size(); i++) {
+        //     glm::vec3 a = VECCONV(map.nodes[planes[i].indices[0]].weights);
+        //     float proj = glm::dot(vx.pos - a, planes[i].normal);
+        //     float dist = std::abs(proj);
+        //     if (dist < minDist) {
+        //         index = i;
+        //         minProj = proj;
+        //         minDist = dist;
+        //     }
+        // }
+
+        for (Triangle const& plane : planes) {
+            auto const& nodeA = map.nodes[plane.indices[0]];
+            auto const& nodeB = map.nodes[plane.indices[1]];
+            auto const& nodeC = map.nodes[plane.indices[2]];
+            glm::vec3 A = VECCONV(nodeA.weights);
+            glm::vec3 B = VECCONV(nodeB.weights);
+            glm::vec3 C = VECCONV(nodeC.weights);
+
+            // Project the voxel position onto the plane
+            glm::vec3 P = vx.pos + -plane.normal * glm::dot(vx.pos - A, plane.normal);
+
+            // Test if the point is in the triangle
+
+            glm::vec3 AP = A - P;
+            glm::vec3 BP = B - P;
+            glm::vec3 CP = C - P;
+
+            bool res1 = glm::dot(glm::cross(AP, BP), plane.normal) < 0.0f;
+            bool res2 = glm::dot(glm::cross(BP, CP), plane.normal) < 0.0f;
+            bool res3 = glm::dot(glm::cross(CP, AP), plane.normal) < 0.0f;
+
+            if ((res1 == res2) && (res2 == res3)) {
+                // the point is in the triangle
+
+                float areaBCP = glm::length(glm::cross(BP, CP)) * 0.5f;
+                float areaCAP = glm::length(glm::cross(CP, AP)) * 0.5f;
+                float areaABP = glm::length(glm::cross(AP, BP)) * 0.5f;
+                float area = glm::length(glm::cross(B - A, C - A)) * 0.5f;
+                glm::vec3 weight = glm::vec3(areaBCP / area, areaCAP / area, areaABP / area);
+
+                // Logger::info("Barycentric Weights: %.3f, %.3f, %.3f", weight.x, weight.y, weight.z);
+                // Logger::info("Barycentric Weights Sum: %.6f", weight.x + weight.y + weight.z);
+                vx.uv = VECCONV(nodeA.uv * weight.x) + VECCONV(nodeB.uv * weight.y) + VECCONV(nodeC.uv * weight.z);
+            } else {
+                // the point is not in the triangle
+
+                unsigned int index = 0;
+                float minDist = glm::distance(vx.pos, VECCONV(map.nodes[index].weights));
+
+                float dist1 = glm::distance(vx.pos, VECCONV(map.nodes[1].weights));
+                float dist2 = glm::distance(vx.pos, VECCONV(map.nodes[2].weights));
+                if (dist1 < minDist) {
+                    index = 1;
+                    minDist = dist1;
+                }
+                if (dist2 < minDist) {
+                    index = 2;
+                    minDist = dist2;
+                }
+                vx.uv = VECCONV(map.nodes[index].uv);
+            }
+        }
+    }
+}
+
+std::pair<float, bool> Point2TriangleDistance(glm::vec3 point, Triangle triangles)
+{
+    float distance;
+    bool isWithinTriangle;
+
+    return { distance, isWithinTriangle };
+}
+
+std::vector<Triangle> MapFaces(const Map<3, 2>& map)
+{
+    std::vector<Triangle> faces;
 
     int const width = map.size.x;
     int const height = map.size.y;
@@ -138,7 +229,7 @@ void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
         for (int x = 0; x < width - 1; ++x) {
             unsigned int const idx = y * width + x;
 
-            Plane plane1, plane2;
+            Triangle plane1, plane2;
             int i1, i2, i3, i4;
             glm::vec3 p1, p2, p3, p4;
 
@@ -164,51 +255,12 @@ void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
             plane2.indices = { i1, i3, i4 };
             plane2.normal = glm::normalize(glm::cross(p3 - p1, p4 - p1));
 
-            planes.push_back(plane1);
-            planes.push_back(plane2);
+            faces.push_back(plane1);
+            faces.push_back(plane2);
         }
     }
 
-    for (auto& vx : m_voxels) {
-        unsigned int index = 0;
-        float minProj = 0.0f;
-        float minDist = std::numeric_limits<float>::max();
-        for (unsigned int i = 0; i < planes.size(); i++) {
-            glm::vec3 a = VECCONV(map.nodes[planes[i].indices[0]].weights);
-            float proj = glm::dot(vx.pos - a, planes[i].normal);
-            float dist = std::abs(proj);
-            if (dist < minDist) {
-                index = i;
-                minProj = proj;
-                minDist = dist;
-            }
-        }
-
-        Plane const& plane = planes[index];
-        auto const& nodeA = map.nodes[plane.indices[0]];
-        auto const& nodeB = map.nodes[plane.indices[1]];
-        auto const& nodeC = map.nodes[plane.indices[2]];
-        glm::vec3 A = VECCONV(nodeA.weights);
-        glm::vec3 B = VECCONV(nodeB.weights);
-        glm::vec3 C = VECCONV(nodeC.weights);
-
-        glm::vec3 P = vx.pos + -plane.normal * minProj;
-
-        glm::vec3 AP = A - P;
-        glm::vec3 BP = B - P;
-        glm::vec3 CP = C - P;
-
-        float areaBCP = glm::length(glm::cross(BP, CP)) * 0.5f;
-        float areaCAP = glm::length(glm::cross(CP, AP)) * 0.5f;
-        float areaABP = glm::length(glm::cross(AP, BP)) * 0.5f;
-        float area = glm::length(glm::cross(B - A, C - A)) * 0.5f;
-        glm::vec3 weight = glm::vec3(areaBCP / area, areaCAP / area, areaABP / area);
-
-        Logger::info("Areas : %.3f, %.3f, %.3f, All: %.3f", areaBCP, areaCAP, areaABP, area);
-        // Logger::info("Barycentric Weights: %.3f, %.3f, %.3f", weight.x, weight.y, weight.z);
-        Logger::info("Barycentric Weights Sum: %.6f", weight.x + weight.y + weight.z);
-        vx.uv = VECCONV(nodeA.uv * weight.x) + VECCONV(nodeB.uv * weight.y) + VECCONV(nodeC.uv * weight.z);
-    }
+    return faces;
 }
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)
@@ -218,4 +270,3 @@ void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)
     }
     mesh.normals.insert(mesh.normals.end(), face.normals.begin(), face.normals.end());
 }
-

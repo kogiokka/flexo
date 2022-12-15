@@ -17,11 +17,6 @@ typedef enum {
     MapInitState_Random,
 } MapInitState;
 
-struct Plane {
-    Vec3i indices;
-    glm::vec3 normal;
-};
-
 template <int InDim, int OutDim>
 struct Map {
     Vec<OutDim, int> size;
