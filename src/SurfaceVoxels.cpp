@@ -302,9 +302,8 @@ std::vector<TriangleRef> MapFaces(const Map<3, 2>& map)
         for (int x = 0; x < width - 1; ++x) {
             unsigned int const idx = y * width + x;
 
-            TriangleRef plane1, plane2;
+            TriangleRef ref1, ref2;
             int i1, i2, i3, i4;
-            glm::vec3 p1, p2, p3, p4;
 
             /**
              *  4-----3
@@ -316,20 +315,10 @@ std::vector<TriangleRef> MapFaces(const Map<3, 2>& map)
             i2 = idx + 1;
             i3 = idx + width + 1;
             i4 = idx + width;
-            p1 = VECCONV(map.nodes[i1].weights); // [x, y]
-            p2 = VECCONV(map.nodes[i2].weights); // [x + 1, y]
-            p3 = VECCONV(map.nodes[i3].weights); // [x + 1, y + 1]
-            p4 = VECCONV(map.nodes[i4].weights); // [x, y + 1]
-
-            // Normals
-            plane1 = { i1, i2, i3 };
-            // plane1.normal = glm::normalize(glm::cross(p2 - p1, p3 - p1));
-
-            plane2 = { i1, i3, i4 };
-            // plane2.normal = glm::normalize(glm::cross(p3 - p1, p4 - p1);
-
-            faces.push_back(plane1);
-            faces.push_back(plane2);
+            ref1 = { i1, i2, i3 };
+            ref2 = { i1, i3, i4 };
+            faces.push_back(ref1);
+            faces.push_back(ref2);
         }
     }
 
