@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <utility>
 
 #include "common/Logger.hpp"
@@ -9,15 +10,45 @@
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 
-struct Triangle {
-    Vec3i indices;
+struct TrianglePoint {
+    enum Type {
+        OnFace,
+        OnEdge,
+        OnVertex,
+    };
+
+    Vec3<bool> vidx;
+    float distance;
+    glm::vec3 position;
+    Type type;
+};
+
+struct TrianglePlane {
+    Vec3i vidx;
     glm::vec3 normal;
+};
+
+struct TargetTriangle {
+    TrianglePlane plane;
+    TrianglePoint point;
+};
+
+struct LineSeg {
+    glm::vec3 v1, v2;
+};
+
+struct LineSegResult {
+    float portion;
+    bool success;
 };
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale);
 
-std::pair<float, bool> Piont2TriangleDistance(glm::vec3 point, Triangle triangle);
-std::vector<Triangle> MapFaces(Map<3, 2> const& map);
+TrianglePoint FindPointOnTriangle(Map<3, 2> const& map, glm::vec3 point, TrianglePlane const& triangle);
+LineSegResult FindPositionOnLineSeg(glm::vec3 point, LineSeg seg);
+
+glm::vec3 Barycentric(Map<3, 2> const& map, TargetTriangle triangle);
+std::vector<TrianglePlane> MapFaces(Map<3, 2> const& map);
 
 static STLImporter STLI;
 
@@ -138,89 +169,194 @@ std::vector<glm::vec3> SurfaceVoxels::GenPositions()
 
 void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
 {
-    std::vector<Triangle> planes = MapFaces(map);
+    std::vector<TrianglePlane> planes = MapFaces(map);
 
     for (auto& vx : m_voxels) {
-        // unsigned int index = 0;
-        // float minProj = 0.0f;
-        // float minDist = std::numeric_limits<float>::max();
-        // for (unsigned int i = 0; i < planes.size(); i++) {
-        //     glm::vec3 a = VECCONV(map.nodes[planes[i].indices[0]].weights);
-        //     float proj = glm::dot(vx.pos - a, planes[i].normal);
-        //     float dist = std::abs(proj);
-        //     if (dist < minDist) {
-        //         index = i;
-        //         minProj = proj;
-        //         minDist = dist;
-        //     }
-        // }
-
-        for (Triangle const& plane : planes) {
-            auto const& nodeA = map.nodes[plane.indices[0]];
-            auto const& nodeB = map.nodes[plane.indices[1]];
-            auto const& nodeC = map.nodes[plane.indices[2]];
-            glm::vec3 A = VECCONV(nodeA.weights);
-            glm::vec3 B = VECCONV(nodeB.weights);
-            glm::vec3 C = VECCONV(nodeC.weights);
-
-            // Project the voxel position onto the plane
-            glm::vec3 P = vx.pos + -plane.normal * glm::dot(vx.pos - A, plane.normal);
-
-            // Test if the point is in the triangle
-
-            glm::vec3 AP = A - P;
-            glm::vec3 BP = B - P;
-            glm::vec3 CP = C - P;
-
-            bool res1 = glm::dot(glm::cross(AP, BP), plane.normal) < 0.0f;
-            bool res2 = glm::dot(glm::cross(BP, CP), plane.normal) < 0.0f;
-            bool res3 = glm::dot(glm::cross(CP, AP), plane.normal) < 0.0f;
-
-            if ((res1 == res2) && (res2 == res3)) {
-                // the point is in the triangle
-
-                float areaBCP = glm::length(glm::cross(BP, CP)) * 0.5f;
-                float areaCAP = glm::length(glm::cross(CP, AP)) * 0.5f;
-                float areaABP = glm::length(glm::cross(AP, BP)) * 0.5f;
-                float area = glm::length(glm::cross(B - A, C - A)) * 0.5f;
-                glm::vec3 weight = glm::vec3(areaBCP / area, areaCAP / area, areaABP / area);
-
-                // Logger::info("Barycentric Weights: %.3f, %.3f, %.3f", weight.x, weight.y, weight.z);
-                // Logger::info("Barycentric Weights Sum: %.6f", weight.x + weight.y + weight.z);
-                vx.uv = VECCONV(nodeA.uv * weight.x) + VECCONV(nodeB.uv * weight.y) + VECCONV(nodeC.uv * weight.z);
-            } else {
-                // the point is not in the triangle
-
-                unsigned int index = 0;
-                float minDist = glm::distance(vx.pos, VECCONV(map.nodes[index].weights));
-
-                float dist1 = glm::distance(vx.pos, VECCONV(map.nodes[1].weights));
-                float dist2 = glm::distance(vx.pos, VECCONV(map.nodes[2].weights));
-                if (dist1 < minDist) {
-                    index = 1;
-                    minDist = dist1;
-                }
-                if (dist2 < minDist) {
-                    index = 2;
-                    minDist = dist2;
-                }
-                vx.uv = VECCONV(map.nodes[index].uv);
+        TargetTriangle target;
+        float minDist = std::numeric_limits<float>::max();
+        for (auto const& plane : planes) {
+            TrianglePoint point = FindPointOnTriangle(map, vx.pos, plane);
+            if (minDist > point.distance) {
+                minDist = point.distance;
+                target.point = point;
+                target.plane = plane;
             }
         }
+        auto weights = Barycentric(map, target);
+        vx.uv = VECCONV(map.nodes[target.plane.vidx.x].uv) * weights.x
+            + VECCONV(map.nodes[target.plane.vidx.y].uv) * weights.y
+            + VECCONV(map.nodes[target.plane.vidx.z].uv) * weights.z;
     }
 }
 
-std::pair<float, bool> Point2TriangleDistance(glm::vec3 point, Triangle triangles)
+TrianglePoint FindPointOnTriangle(Map<3, 2> const& map, glm::vec3 point, TrianglePlane const& triangle)
 {
-    float distance;
-    bool isWithinTriangle;
+    TrianglePoint tripos;
 
-    return { distance, isWithinTriangle };
+    auto A = VECCONV(map.nodes[triangle.vidx.x].weights);
+    auto B = VECCONV(map.nodes[triangle.vidx.y].weights);
+    auto C = VECCONV(map.nodes[triangle.vidx.z].weights);
+    auto normal = triangle.normal;
+
+    // Project the voxel position onto the plane
+    glm::vec3 P = point + -normal * glm::dot(point - A, normal);
+
+    glm::vec3 AP = A - P;
+    glm::vec3 BP = B - P;
+    glm::vec3 CP = C - P;
+
+    // Test if the point is in the triangle
+    {
+        bool res1 = glm::dot(glm::cross(AP, BP), normal) < 0.0f;
+        bool res2 = glm::dot(glm::cross(BP, CP), normal) < 0.0f;
+        bool res3 = glm::dot(glm::cross(CP, AP), normal) < 0.0f;
+
+        if ((res1 == res2) && (res2 == res3)) {
+            // the point is in the triangle
+            tripos.position = P;
+            tripos.vidx = { true, true, true };
+            tripos.type = TrianglePoint::OnFace;
+            tripos.distance = glm::distance(point, P);
+            return tripos;
+        }
+    }
+
+    // Test if the position is on any of the edges
+    {
+        auto [p1, res1] = FindPositionOnLineSeg(point, { A, B });
+        auto [p2, res2] = FindPositionOnLineSeg(point, { B, C });
+        auto [p3, res3] = FindPositionOnLineSeg(point, { C, A });
+
+        if (res1 || res2 || res3) {
+            glm::vec3 pos(0.0f);
+            float minDist = std::numeric_limits<float>::max();
+            Vec3<bool> vidx;
+            if (res1) {
+                pos = A + p1 * (B - A);
+                minDist = glm::length(point - pos);
+                vidx = { true, true, false };
+            }
+            if (res2) {
+                auto tmp = B + p2 * (C - B);
+                auto dist = glm::length(point - tmp);
+                if (minDist > dist) {
+                    pos = tmp;
+                    minDist = dist;
+                    vidx = { false, true, true };
+                }
+            }
+            if (res3) {
+                auto tmp = C + p3 * (A - C);
+                auto dist = glm::length(point - tmp);
+                if (minDist > dist) {
+                    pos = tmp;
+                    minDist = dist;
+                    vidx = { true, false, true };
+                }
+            }
+
+            tripos.position = pos;
+            tripos.vidx = vidx;
+            tripos.type = TrianglePoint::OnEdge;
+            tripos.distance = glm::distance(point, pos);
+            return tripos;
+        }
+    }
+
+    // Find the closest vertex from the point
+    {
+        float d1 = glm::distance(point, A);
+        float d2 = glm::distance(point, B);
+        float d3 = glm::distance(point, C);
+
+        glm::vec3 pos = A;
+        float minDist = d1;
+        Vec3<bool> vidx = { true, false, false };
+
+        if (minDist > d2) {
+            minDist = d2;
+            pos = B;
+            vidx = { false, true, false };
+        }
+        if (minDist > d3) {
+            minDist = d3;
+            pos = C;
+            vidx = { false, false, true };
+        }
+
+        tripos.position = pos;
+        tripos.vidx = vidx;
+        tripos.type = TrianglePoint::OnVertex;
+        tripos.distance = glm::distance(point, pos);
+        return tripos;
+    }
 }
 
-std::vector<Triangle> MapFaces(const Map<3, 2>& map)
+LineSegResult FindPositionOnLineSeg(glm::vec3 point, LineSeg seg)
 {
-    std::vector<Triangle> faces;
+    auto const& [A, B] = seg;
+    glm::vec3 AB = B - A;
+    float portion = -1.0f;
+    float lensqr = glm::dot(AB, AB);
+
+    if (lensqr != 0.0f) {
+        portion = glm::dot(point - A, AB) / lensqr;
+    }
+
+    return { portion, ((portion > 0.0f) && (portion < 1.0f)) };
+}
+
+glm::vec3 Barycentric(Map<3, 2> const& map, TargetTriangle triangle)
+{
+    auto const& [plane, point] = triangle;
+    auto A = VECCONV(map.nodes[plane.vidx.x].weights);
+    auto B = VECCONV(map.nodes[plane.vidx.y].weights);
+    auto C = VECCONV(map.nodes[plane.vidx.z].weights);
+
+    switch (point.type) {
+    case TrianglePoint::OnFace: {
+        glm::vec3 AP = A - point.position;
+        glm::vec3 BP = B - point.position;
+        glm::vec3 CP = C - point.position;
+        float areaBCP = glm::length(glm::cross(BP, CP)) * 0.5f;
+        float areaCAP = glm::length(glm::cross(CP, AP)) * 0.5f;
+        float areaABP = glm::length(glm::cross(AP, BP)) * 0.5f;
+        float area = glm::length(glm::cross(B - A, C - A)) * 0.5f;
+        glm::vec3 weights = { areaBCP / area, areaCAP / area, areaABP / area };
+        return weights;
+    }
+    case TrianglePoint::OnEdge: {
+        if (point.vidx.x && point.vidx.y) {
+            auto [portion, res] = FindPositionOnLineSeg(point.position, { A, B });
+            return { portion, 1.0f - portion, 0.0f };
+        }
+        if (point.vidx.y && point.vidx.z) {
+            auto [portion, res] = FindPositionOnLineSeg(point.position, { B, C });
+            return { portion, 1.0f - portion, 0.0f };
+        }
+        if (point.vidx.x && point.vidx.z) {
+            auto [portion, res] = FindPositionOnLineSeg(point.position, { C, A });
+            return { portion, 1.0f - portion, 0.0f };
+        }
+    }
+    case TrianglePoint::OnVertex: {
+        if (point.vidx.x) {
+            return { 1.0f, 0.0f, 0.0f };
+        }
+        if (point.vidx.y) {
+            return { 0.0f, 1.0f, 0.0f };
+        }
+        if (point.vidx.z) {
+            return { 0.0f, 0.0f, 1.0f };
+        }
+    }
+    }
+    return { 0.0f, 0.0f, 0.0f };
+}
+
+std::vector<TrianglePlane> MapFaces(const Map<3, 2>& map)
+{
+    std::vector<TrianglePlane> faces;
 
     int const width = map.size.x;
     int const height = map.size.y;
@@ -229,7 +365,7 @@ std::vector<Triangle> MapFaces(const Map<3, 2>& map)
         for (int x = 0; x < width - 1; ++x) {
             unsigned int const idx = y * width + x;
 
-            Triangle plane1, plane2;
+            TrianglePlane plane1, plane2;
             int i1, i2, i3, i4;
             glm::vec3 p1, p2, p3, p4;
 
@@ -249,10 +385,10 @@ std::vector<Triangle> MapFaces(const Map<3, 2>& map)
             p4 = VECCONV(map.nodes[i4].weights); // [x, y + 1]
 
             // Normals
-            plane1.indices = { i1, i2, i3 };
+            plane1.vidx = { i1, i2, i3 };
             plane1.normal = glm::normalize(glm::cross(p2 - p1, p3 - p1));
 
-            plane2.indices = { i1, i3, i4 };
+            plane2.vidx = { i1, i3, i4 };
             plane2.normal = glm::normalize(glm::cross(p3 - p1, p4 - p1));
 
             faces.push_back(plane1);
