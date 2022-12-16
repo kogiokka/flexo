@@ -1,7 +1,5 @@
 #include "gfx/bindable/Texture2D.hpp"
 
-#include "common/Logger.hpp"
-
 namespace Bind
 {
     Texture2D::Texture2D(Graphics& gfx, std::string const& filename, GLuint unit)

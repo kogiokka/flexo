@@ -1,7 +1,7 @@
 #include <cstdlib>
 
 #include "VolumetricModelData.hpp"
-#include "common/Logger.hpp"
+#include "util/Logger.h"
 
 VolumetricModelData::VolumetricModelData()
 {
@@ -27,7 +27,7 @@ void VolumetricModelData::Read(std::string const filename)
     rvl_get_volumetric_format(m_rvl, &res.x, &res.y, &res.z, &primitive, &endian);
 
     if ((primitive != RVL_PRIMITIVE_U8) || rvl_get_grid_type(m_rvl) != RVL_GRID_REGULAR) {
-        Logger::error("Wrong type of volumetric data!");
+        log_error("Wrong type of volumetric data!");
         exit(EXIT_FAILURE);
     }
 

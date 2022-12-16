@@ -11,9 +11,9 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "World.hpp"
-#include "common/Logger.hpp"
 #include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
+#include "util/Logger.h"
 
 #include "Vertex.hpp"
 

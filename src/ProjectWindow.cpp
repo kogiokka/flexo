@@ -7,7 +7,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "common/Logger.hpp"
+#include "util/Logger.h"
 #include "pane/SceneViewportPane.hpp"
 
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);

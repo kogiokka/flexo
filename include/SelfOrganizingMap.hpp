@@ -17,7 +17,7 @@
 #include "Node.hpp"
 #include "ProjectSettings.hpp"
 #include "Vec.hpp"
-#include "common/Logger.hpp"
+#include "util/Logger.h"
 
 class WatermarkingProject;
 
@@ -128,7 +128,7 @@ void SelfOrganizingMap::CreateProcedure(std::shared_ptr<Map<InDim, OutDim>>& map
         = &SelfOrganizingMap::Train;
     m_worker = std::thread(Train, std::ref(*this), map, dataset);
 
-    Logger::info("Training worker created");
+    log_info("SOM worker created.");
 }
 
 template <int InDim, int OutDim>

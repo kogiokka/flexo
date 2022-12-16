@@ -14,7 +14,7 @@
 #include "SurfaceVoxels.hpp"
 #include "VecUtil.hpp"
 #include "World.hpp"
-#include "common/Logger.hpp"
+#include "util/Logger.h"
 #include "gfx/DrawList.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
@@ -256,7 +256,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     data.Read(path.ToStdString().c_str());
 
     m_model = std::make_unique<SurfaceVoxels>(data);
-    Logger::info("%lu voxels will be rendered.", m_model->Voxels().size());
+    log_info("%lu voxels will be rendered.", m_model->Voxels().size());
 
     world.theDataset = std::make_shared<Dataset<3>>(m_model->GenPositions());
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));

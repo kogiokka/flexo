@@ -4,8 +4,8 @@
 #include <stb_image.h>
 
 #include "Project.hpp"
-#include "common/Logger.hpp"
 #include "gfx/Graphics.hpp"
+#include "util/Logger.h"
 
 // Register factory: Graphics
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
@@ -148,7 +148,7 @@ void Graphics::CreateInputLayout(GLWRInputElementDesc const* inputElementDesc, u
         auto const& desc = inputElementDesc[i];
         GLint location = glGetAttribLocation(pProgramWithInputSignature->m_id, desc.semanticName);
         if (location == -1) {
-            Logger::error("Invalid semantic name: %s", desc.semanticName);
+            log_error("Invalid semantic name: %s", desc.semanticName);
             return;
         }
         glEnableVertexAttribArray(location);
@@ -201,7 +201,7 @@ void Graphics::CreateBuffer(GLWRBufferDesc const* pDesc, GLWRResourceData const*
         glBufferData(GL_UNIFORM_BUFFER, pDesc->byteWidth, initialData->mem, pDesc->usage);
         break;
     default:
-        Logger::error("Graphics::CreateBuffer currently does not support this resource type.");
+        log_error("Graphics::CreateBuffer currently does not support this resource type.");
         break;
     }
 }
@@ -368,7 +368,7 @@ void Graphics::AttachShaderStage(GLuint const program, GLenum stage, char const*
     glShaderSource(shaderObject, 1, shaderSourceArray, nullptr);
     glCompileShader(shaderObject);
     if (!IsShaderCompiled(shaderObject)) {
-        Logger::error("Shader object compilation error: %s", source);
+        log_error("Shader object compilation error: %s", source);
     }
     glAttachShader(program, shaderObject);
     glDeleteShader(shaderObject);
@@ -634,7 +634,7 @@ void Graphics::Map(IGLWRResource* pResource, GLWRMapPermission permission, GLWRM
         pMappedResource->data = glMapBuffer(GL_UNIFORM_BUFFER, permission);
         break;
     default:
-        Logger::error("Graphics::Map currently does not support this resource type.");
+        log_error("Graphics::Map currently does not support this resource type.");
         pMappedResource->data = nullptr;
         break;
     }
@@ -658,7 +658,7 @@ void Graphics::Unmap(IGLWRResource* pResource)
         glUnmapBuffer(GL_UNIFORM_BUFFER);
         break;
     default:
-        Logger::error("Graphics::Unmap currently does not support this resource type.");
+        log_error("Graphics::Unmap currently does not support this resource type.");
         break;
     }
 }
@@ -699,7 +699,7 @@ void Graphics::CheckProgramStatus(GLuint const program)
     log.resize(lenLog);
     glGetProgramInfoLog(program, lenLog, nullptr, log.data());
     glDeleteProgram(program);
-    Logger::error("Shader program linking error: %s\n", log.data());
+    log_error("Shader program linking error: %s\n", log.data());
 }
 
 std::string Graphics::SlurpShaderSource(std::string const& filename)
@@ -710,7 +710,7 @@ std::string Graphics::SlurpShaderSource(std::string const& filename)
 
     file.open(filename, std::fstream::in | std::fstream::binary);
     if (file.fail()) {
-        Logger::error("Failed to open shader file: %s", filename.c_str());
+        log_error("Failed to open shader file: %s", filename.c_str());
     }
 
     file.seekg(0, std::fstream::end);
@@ -733,7 +733,7 @@ void Graphics::CreateShaderResourceViewFromFile(Graphics* pContext, char const* 
     stbi_uc* image = stbi_load(filename, &width, &height, &channels, STBI_rgb_alpha);
 
     if (image == nullptr) {
-        Logger::error("Failed to open image: %s. %s", filename, stbi_failure_reason());
+        log_error("Failed to open image: %s. %s", filename, stbi_failure_reason());
     }
 
     GLWRPtr<IGLWRTexture2D> texture;

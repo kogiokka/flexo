@@ -3,6 +3,7 @@ cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 project("SOM Demo"
     VERSION 1.0.3
     DESCRIPTION "A Self-Organizing Map Demo"
+    LANGUAGES C CXX
 )
 
 find_package(OpenGL REQUIRED)
@@ -48,10 +49,10 @@ PRIVATE
     "src/VolumetricModelData.cpp"
     "src/Voxel.cpp"
     "src/SurfaceVoxels.cpp"
-    "src/common/Logger.cpp"
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"
     "src/assetlib/STL/STLImporter.cpp"
+    "src/util/Logger.c"
 
     "src/gfx/Graphics.cpp"
     "src/gfx/Renderer.cpp"

@@ -7,11 +7,11 @@
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
-#include "common/Logger.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 #include "pane/WatermarkingPane.hpp"
+#include "util/Logger.h"
 
 wxIMPLEMENT_APP(WatermarkingApp);
 

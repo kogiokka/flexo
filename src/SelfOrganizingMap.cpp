@@ -2,7 +2,7 @@
 #include "Map.hpp"
 #include "Project.hpp"
 #include "ProjectSettings.hpp"
-#include "common/Logger.hpp"
+#include "util/Logger.h"
 
 // Register factory: SelfOrganizingMap
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
@@ -48,9 +48,9 @@ void SelfOrganizingMap::ToggleTraining()
     m_cv.notify_one();
 
     if (m_isTraining) {
-        Logger::info("Training resumed");
+        log_info("SOM training resumed");
     } else {
-        Logger::info("Training paused");
+        log_info("SOM training paused");
     }
 }
 
@@ -114,6 +114,6 @@ void SelfOrganizingMap::StopWorker()
 
     if (m_worker.joinable()) {
         m_worker.join();
-        Logger::info("The worker joined successfully");
+        log_info("The SOM worker joined successfully");
     }
 }

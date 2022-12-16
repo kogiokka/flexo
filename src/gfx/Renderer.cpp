@@ -4,8 +4,8 @@
 
 #include "Project.hpp"
 #include "World.hpp"
-#include "common/Logger.hpp"
 #include "gfx/Renderer.hpp"
+#include "util/Logger.h"
 
 // Register factory: Renderer
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
