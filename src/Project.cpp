@@ -80,6 +80,7 @@ void WatermarkingProject::CreateProject()
 
     auto& drawlist = DrawList::Get(*this);
     auto& gfx = Graphics::Get(*this);
+    drawlist.Remove<LightSource>();
     drawlist.Add(std::make_shared<LightSource>(gfx, world.uvsphere));
     drawlist.Submit(Renderer::Get(*this));
 
