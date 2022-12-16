@@ -32,9 +32,6 @@ WatermarkingProject::WatermarkingProject()
     , m_model(nullptr)
 {
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
-    Bind(EVT_ADD_PLATE_50_BY_50, &WatermarkingProject::OnMenuAddPlate, this);
-    Bind(EVT_ADD_PLATE_100_BY_100, &WatermarkingProject::OnMenuAddPlate, this);
-    Bind(EVT_ADD_PLATE_200_BY_200, &WatermarkingProject::OnMenuAddPlate, this);
 
     // FIXME
     Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
@@ -260,38 +257,6 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     world.theDataset = std::make_shared<Dataset<3>>(m_model->GenPositions());
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
-}
-
-void WatermarkingProject::OnMenuAddPlate(wxCommandEvent& event)
-{
-    if (!world.theDataset) {
-        wxMessageDialog dialog(&ProjectWindow::Get(*this), "Please import a model from the File menu first.", "Error",
-                               wxCENTER | wxICON_ERROR);
-        dialog.ShowModal();
-        return;
-    }
-
-    int width = event.GetInt();
-    int height = event.GetInt();
-
-    auto box = world.theDataset->GetBoundingBox();
-    float xDiff = (box.max.x - box.min.x) / static_cast<float>(width);
-    float yDiff = (box.max.y - box.min.y) / static_cast<float>(height);
-
-    std::vector<glm::vec3> pos;
-
-    for (int i = 0; i < width; i++) {
-        for (int j = 0; j < height; j++) {
-            pos.emplace_back(box.min.x + i * xDiff, box.min.y + j * yDiff, box.min.z);
-        }
-    }
-    auto mesh = m_model->GenMesh();
-    mesh.positions.insert(mesh.positions.end(), pos.begin(), pos.end());
-    mesh.textureCoords = std::vector<glm::vec2>(mesh.positions.size(), glm::vec2(0.0f, 0.0f));
-
-    world.theDataset->Insert(pos);
-
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), mesh));
 }
 
 void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)

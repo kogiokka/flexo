@@ -7,15 +7,12 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "util/Logger.h"
 #include "pane/SceneViewportPane.hpp"
+#include "util/Logger.h"
 
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
-wxDEFINE_EVENT(EVT_ADD_PLATE_50_BY_50, wxCommandEvent);
-wxDEFINE_EVENT(EVT_ADD_PLATE_100_BY_100, wxCommandEvent);
-wxDEFINE_EVENT(EVT_ADD_PLATE_200_BY_200, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
@@ -82,11 +79,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     auto modelsMenu = new wxMenu;
     modelsMenu->Append(EVT_ADD_UV_SPHERE, "Generate UV Sphere");
 
-    auto plateMenu = new wxMenu;
-    plateMenu->Append(EVT_ADD_PLATE_50_BY_50, "Add 50x50 Plate");
-    plateMenu->Append(EVT_ADD_PLATE_100_BY_100, "Add 100x100 Plate");
-    plateMenu->Append(EVT_ADD_PLATE_200_BY_200, "Add 200x200 Plate");
-
     auto* screenshotMenu = new wxMenu;
     auto* itemScreenshotViewport = new wxMenuItem(screenshotMenu, EVT_SCREENSHOT, "Screenshot 3D Viewport", "");
     itemScreenshotViewport->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE));
@@ -97,7 +89,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     menubar->Append(m_viewMenu, "&View");
     menubar->Append(cameraMenu, "&Camera");
     menubar->Append(modelsMenu, "&Add");
-    menubar->Append(plateMenu, "&Plate");
     menubar->Append(screenshotMenu, "&Screeenshot");
 
     this->SetMenuBar(menubar);
@@ -107,31 +98,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_ADD_UV_SPHERE);
-    Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent&) {
-            wxCommandEvent event(EVT_ADD_PLATE_50_BY_50);
-            event.SetInt(50);
-            m_project.ProcessEvent(event);
-        },
-        EVT_ADD_PLATE_50_BY_50);
-    Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent&) {
-            wxCommandEvent event(EVT_ADD_PLATE_100_BY_100);
-            event.SetInt(100);
-            m_project.ProcessEvent(event);
-        },
-        EVT_ADD_PLATE_100_BY_100);
-    Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent&) {
-            wxCommandEvent event(EVT_ADD_PLATE_200_BY_200);
-            event.SetInt(200);
-            m_project.ProcessEvent(event);
-        },
-        EVT_ADD_PLATE_200_BY_200);
-
     Bind(
         wxEVT_MENU,
         [this](wxCommandEvent&) {
