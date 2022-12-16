@@ -27,7 +27,6 @@ class MapVertex : public InstancedDrawable
             Light light;
             Material material;
             STD140_ALIGN glm::vec3 viewPos;
-            float alpha;
         };
         Frag frag;
     };

@@ -31,7 +31,6 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 
     m_isVisible = true;
 
-    m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
     m_ub.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
@@ -66,7 +65,6 @@ PolygonalModel::~PolygonalModel()
 
 void PolygonalModel::Update(Graphics& gfx)
 {
-    m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;
 

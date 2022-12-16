@@ -18,7 +18,6 @@ struct UniformBuffer_Frag {
     Light light;
     Material material;
     vec3 viewPos;
-    float alpha;
 };
 
 layout(std140, binding = 0) uniform Transform {
@@ -55,5 +54,5 @@ void main()
     vec3 ambient = ubo.frag.light.ambient * ubo.frag.material.ambient;
     vec3 diffusion = ubo.frag.light.diffusion * ubo.frag.material.diffusion * diffuseCoef;
     vec3 specular = ubo.frag.light.specular * ubo.frag.material.specular * specularCoef;
-    outColor = vec4((ambient + diffusion + specular), ubo.frag.alpha);
+    outColor = vec4((ambient + diffusion + specular), 1.0f);
 }

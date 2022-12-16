@@ -65,14 +65,6 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
             }
         }
     });
-
-    auto* group = AddGroup("Properties", 1);
-    auto* slider
-        = group->AddSliderFloat("Model Transparency (%)", (100.0f - world.modelColorAlpha * 100.0f), 0.0f, 100.0f);
-    slider->Bind(EVT_SLIDER_FLOAT, [](SliderFloatEvent& event) {
-        float const value = event.GetValue();
-        world.modelColorAlpha = (100.0f - value) / 100.0f;
-    });
 }
 
 wxTreeListCtrl* SceneOutlinerPane::CreateSceneTree()

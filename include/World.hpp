@@ -15,8 +15,6 @@ struct World {
     World();
     ~World();
 
-    float modelColorAlpha = 0.8f;
-
     Mesh uvsphere;
     Mesh cube;
     Mesh mapMesh;

@@ -33,7 +33,6 @@ MapVertex::MapVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perIns
 
     m_isVisible = true;
 
-    m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = gfx.GetCameraPosition();
     m_ub.frag.light.ambient = glm::vec3(0.8f, 0.8f, 0.8f);
@@ -70,7 +69,6 @@ MapVertex::~MapVertex()
 
 void MapVertex::Update(Graphics& gfx)
 {
-    m_ub.frag.alpha = world.modelColorAlpha;
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = gfx.GetCameraPosition();
 

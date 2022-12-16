@@ -18,7 +18,6 @@ struct UniformBuffer_Frag {
     Light light;
     Material material;
     vec3 viewPos;
-    float alpha;
 };
 
 layout(std140, binding = 0) uniform Transform {
