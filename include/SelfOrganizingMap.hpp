@@ -134,7 +134,7 @@ void SelfOrganizingMap::CreateProcedure(std::shared_ptr<Map<InDim, OutDim>>& map
 template <int InDim, int OutDim>
 void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shared_ptr<Dataset<InDim>> dataset)
 {
-    auto& neurons = map->nodes;
+    auto& nodes = map->nodes;
     int const width = map->size.x;
     int const height = map->size.y;
 
@@ -147,18 +147,18 @@ void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shar
 
         Vec<InDim> const input = dataset->GetInput();
         glm::ivec2 const index = FindBMU(*map, input);
-        auto const& bmu = neurons[index.x + index.y * width];
+        auto const& bmu = nodes[index.x + index.y * width];
         UpdateNeighborhood(*map, input, bmu, m_learnRate, m_neighborhood);
 
         if (map->flags & MapFlags_CyclicX) {
             for (int y = 0; y < height; y++) {
-                neurons[y * width + width - 1] = neurons[y * width + 0];
+                nodes[y * width + width - 1].weights = nodes[y * width + 0].weights;
             }
         }
 
         if (map->flags & MapFlags_CyclicY) {
             for (int x = 0; x < width; x++) {
-                neurons[(height - 1) * width + x] = neurons[0 * width + x];
+                nodes[(height - 1) * width + x].weights = nodes[0 * width + x].weights;
             }
         }
 
