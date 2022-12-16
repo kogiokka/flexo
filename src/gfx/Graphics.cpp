@@ -782,3 +782,4 @@ Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRFormat const format)
         break;
     }
 }
+

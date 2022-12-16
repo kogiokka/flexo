@@ -24,6 +24,7 @@ public:
 
     WatermarkingProject();
     ~WatermarkingProject();
+    void CreateScene();
     void CreateProject();
     void StopProject();
     void BuildMapMesh() const;
