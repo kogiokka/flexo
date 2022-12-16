@@ -82,7 +82,15 @@ void DrawList::Remove(std::string id)
 
 void DrawList::OnDeleteObject(wxCommandEvent& event)
 {
-    Remove(event.GetString().ToStdString());
+    for (auto it = m_drawlist.begin(); it != m_drawlist.end();) {
+        if ((*it)->GetID() == event.GetString()) {
+            m_drawlist.erase(it);
+            break;
+        } else {
+            it++;
+        }
+    }
+
     Submit(Renderer::Get(m_project));
 }
 
