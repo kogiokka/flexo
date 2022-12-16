@@ -22,6 +22,9 @@ class WatermarkingProject;
 enum ObjectType : unsigned int { OBJECT_TYPES };
 #undef X
 
+wxDECLARE_EVENT(EVT_ADD_OBJECT, wxCommandEvent);
+wxDECLARE_EVENT(EVT_REMOVE_OBJECT, wxCommandEvent);
+
 class DrawList : public AttachableBase
 {
 public:
@@ -57,6 +60,9 @@ void DrawList::Remove()
     };
 
     m_drawlist.erase(std::remove_if(m_drawlist.begin(), m_drawlist.end(), FindDrawable), m_drawlist.end());
+
+    wxCommandEvent event(EVT_REMOVE_OBJECT);
+    m_project.ProcessEvent(event);
 }
 
 #endif

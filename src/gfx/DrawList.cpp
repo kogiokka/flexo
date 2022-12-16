@@ -15,6 +15,9 @@ static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey 
     [](WatermarkingProject& project) -> SharedPtr<DrawList> { return std::make_shared<DrawList>(project); }
 };
 
+wxDEFINE_EVENT(EVT_ADD_OBJECT, wxCommandEvent);
+wxDEFINE_EVENT(EVT_REMOVE_OBJECT, wxCommandEvent);
+
 DrawList& DrawList::Get(WatermarkingProject& project)
 {
     return project.AttachedObjects::Get<DrawList>(factoryKey);
@@ -35,17 +38,23 @@ void DrawList::Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable)
 {
     auto it = m_typeCount.find(type);
 
+    std::string id;
     if (it == m_typeCount.end()) {
         m_typeCount.emplace(type, 0);
-        drawable->SetID(ObjectTypeNames[type]);
+        id = ObjectTypeNames[type];
     } else {
         it->second += 1;
         char buf[4];
         snprintf(buf, 4, "%03u", it->second);
-        drawable->SetID(ObjectTypeNames[type] + "." + std::string(buf));
+        id = ObjectTypeNames[type] + "." + std::string(buf);
     }
 
+    drawable->SetID(id);
     m_drawlist.push_back(drawable);
+
+    wxCommandEvent event(EVT_ADD_OBJECT);
+    event.SetString(id);
+    m_project.ProcessEvent(event);
 }
 
 void DrawList::Submit(Renderer& renderer) const

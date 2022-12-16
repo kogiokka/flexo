@@ -10,6 +10,7 @@
 #include "gfx/DrawList.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 #include "pane/SceneOutlinerPane.hpp"
+#include "util/Logger.h"
 
 // Register factory: SceneOutlinerPane
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
@@ -38,9 +39,18 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     m_sceneTree = CreateSceneTree();
     GetSizer()->Add(m_sceneTree, wxSizerFlags(5).Expand());
 
-    Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent&) {
+    m_project.Bind(EVT_ADD_OBJECT, [this](wxCommandEvent& event) {
+        for (auto const& drawable : DrawList::Get(m_project)) {
+            if (event.GetString() == drawable->GetID()) {
+                auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
+                m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
+                break;
+            }
+        }
+    });
+
+    m_project.Bind(EVT_REMOVE_OBJECT, [this](wxCommandEvent&) {
         m_sceneTree->DeleteAllItems();
-        // Each drawable has only one task currently
         for (auto const& drawable : DrawList::Get(m_project)) {
             auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
             m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
