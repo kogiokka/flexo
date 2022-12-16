@@ -12,6 +12,7 @@
 #include "VolumetricModelData.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/bindable/Texture2D.hpp"
+#include "gfx/drawable/Drawable.hpp"
 #include "gfx/drawable/InstancedDrawable.hpp"
 
 class VolumetricModel : public Drawable
