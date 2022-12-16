@@ -26,7 +26,6 @@ public:
     MapEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices);
     ~MapEdge() override;
     void Update(Graphics& gfx) override;
-    std::string GetName() const override;
 };
 
 #endif

@@ -14,7 +14,6 @@
 #include "SurfaceVoxels.hpp"
 #include "VecUtil.hpp"
 #include "World.hpp"
-#include "util/Logger.h"
 #include "gfx/DrawList.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
@@ -24,6 +23,7 @@
 #include "gfx/drawable/MapVertex.hpp"
 #include "gfx/drawable/PolygonalModel.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
+#include "util/Logger.h"
 
 WatermarkingProject::WatermarkingProject()
     : m_isMapReady(false)
@@ -60,7 +60,7 @@ WatermarkingProject::WatermarkingProject()
         drawlist.Remove<MapFace>();
 
         SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
-        drawlist.Add(std::make_shared<MapFace>(gfx, world.mapMesh));
+        drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, world.mapMesh));
         drawlist.Submit(Renderer::Get(*this));
     });
 }
@@ -78,7 +78,7 @@ void WatermarkingProject::CreateProject()
     auto& drawlist = DrawList::Get(*this);
     auto& gfx = Graphics::Get(*this);
     drawlist.Remove<LightSource>();
-    drawlist.Add(std::make_shared<LightSource>(gfx, world.uvsphere));
+    drawlist.Add(ObjectType_Light, std::make_shared<LightSource>(gfx, world.uvsphere));
     drawlist.Submit(Renderer::Get(*this));
 
     world.isWatermarked = false;
@@ -231,19 +231,15 @@ void WatermarkingProject::UpdateMapGraphics()
     m_isMapReady = true;
     BuildMapMesh();
 
-    std::vector<std::shared_ptr<DrawableBase>> drawables;
     auto& gfx = Graphics::Get(*this);
-    drawables.push_back(std::make_shared<MapVertex>(gfx, world.uvsphere, world.neurons));
-    drawables.push_back(std::make_shared<MapEdge>(gfx, world.neurons, world.mapEdges));
-    drawables.push_back(std::make_shared<MapFace>(gfx, world.mapMesh));
 
     auto& drawlist = DrawList::Get(*this);
     drawlist.Remove<MapVertex>();
     drawlist.Remove<MapEdge>();
     drawlist.Remove<MapFace>();
-    for (auto& d : drawables) {
-        drawlist.Add(d);
-    }
+    drawlist.Add(ObjectType_MapVertex, std::make_shared<MapVertex>(gfx, world.uvsphere, world.neurons));
+    drawlist.Add(ObjectType_MapEdge, std::make_shared<MapEdge>(gfx, world.neurons, world.mapEdges));
+    drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, world.mapMesh));
     drawlist.Submit(Renderer::Get(*this));
 }
 
@@ -290,7 +286,7 @@ void WatermarkingProject::SetModelDrawable(std::shared_ptr<DrawableBase> drawabl
     auto& drawlist = DrawList::Get(*this);
     drawlist.Remove<VolumetricModel>();
     drawlist.Remove<PolygonalModel>();
-    drawlist.Add(drawable);
+    drawlist.Add(ObjectType_Model, drawable);
     drawlist.Submit(Renderer::Get(*this));
 }
 

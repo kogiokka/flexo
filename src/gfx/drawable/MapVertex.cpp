@@ -88,8 +88,3 @@ void MapVertex::Update(Graphics& gfx)
         }
     }
 }
-
-std::string MapVertex::GetName() const
-{
-    return "Map Vertex";
-}

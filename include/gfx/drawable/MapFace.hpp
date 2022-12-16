@@ -40,7 +40,6 @@ public:
     ~MapFace() override;
     void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
-    std::string GetName() const override;
 };
 
 #endif

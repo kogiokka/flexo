@@ -37,6 +37,5 @@ public:
     MapVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
     ~MapVertex() override;
     void Update(Graphics& gfx) override;
-    std::string GetName() const override;
 };
 #endif

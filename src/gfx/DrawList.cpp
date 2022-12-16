@@ -1,7 +1,14 @@
 #include <algorithm>
+#include <array>
+#include <cstdio>
+#include <string>
 
 #include "Project.hpp"
 #include "gfx/DrawList.hpp"
+
+#define X(type, name) name,
+static std::string ObjectTypeNames[] = { OBJECT_TYPES };
+#undef X
 
 // Register factory: DrawList
 static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
@@ -24,8 +31,20 @@ DrawList::DrawList(WatermarkingProject& project)
 {
 }
 
-void DrawList::Add(std::shared_ptr<DrawableBase> drawable)
+void DrawList::Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable)
 {
+    auto it = m_typeCount.find(type);
+
+    if (it == m_typeCount.end()) {
+        m_typeCount.emplace(type, 0);
+        drawable->SetID(ObjectTypeNames[type]);
+    } else {
+        it->second += 1;
+        char buf[4];
+        snprintf(buf, 4, "%03u", it->second);
+        drawable->SetID(ObjectTypeNames[type] + "." + std::string(buf));
+    }
+
     m_drawlist.push_back(drawable);
 }
 

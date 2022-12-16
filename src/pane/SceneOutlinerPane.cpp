@@ -42,7 +42,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         m_sceneTree->DeleteAllItems();
         // Each drawable has only one task currently
         for (auto const& drawable : DrawList::Get(m_project)) {
-            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetName());
+            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
             m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
         }
     });
@@ -51,7 +51,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         wxTreeListItem const item = event.GetItem();
         wxString const text = m_sceneTree->GetItemText(item);
         for (auto const& drawable : DrawList::Get(m_project)) {
-            if (text == drawable->GetName()) {
+            if (text == drawable->GetID()) {
                 switch (m_sceneTree->GetCheckedState(item)) {
                 case wxCHK_CHECKED:
                     drawable->SetVisible(true);

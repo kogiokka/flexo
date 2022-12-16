@@ -2,6 +2,7 @@
 #define DRAW_LIST_H
 
 #include <memory>
+#include <unordered_map>
 #include <vector>
 
 #include "Attachable.hpp"
@@ -10,13 +11,24 @@
 
 class WatermarkingProject;
 
+#define OBJECT_TYPES                                                                                                   \
+    X(ObjectType_Model, "Model")                                                                                       \
+    X(ObjectType_MapFace, "Map.face")                                                                                  \
+    X(ObjectType_MapEdge, "Map.edge")                                                                                  \
+    X(ObjectType_MapVertex, "Map.vertex")                                                                              \
+    X(ObjectType_Light, "Light")
+
+#define X(type, name) type,
+enum ObjectType : unsigned int { OBJECT_TYPES };
+#undef X
+
 class DrawList : public AttachableBase
 {
 public:
     static DrawList& Get(WatermarkingProject& project);
     static DrawList const& Get(WatermarkingProject const& project);
     DrawList(WatermarkingProject& project);
-    void Add(std::shared_ptr<DrawableBase> drawable);
+    void Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable);
     template <typename T>
     void Remove();
     void Submit(Renderer& renderer) const;
@@ -32,6 +44,7 @@ public:
 
 private:
     std::vector<std::shared_ptr<DrawableBase>> m_drawlist;
+    std::unordered_map<enum ObjectType, unsigned int> m_typeCount;
     WatermarkingProject& m_project;
 };
 

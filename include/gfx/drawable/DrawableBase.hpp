@@ -25,20 +25,18 @@ public:
 
     virtual void Update(Graphics& gfx) = 0;
     virtual void Bind(Graphics& gfx) const = 0;
-    virtual std::string GetName() const = 0;
-    void SetVisible(bool visible)
-    {
-        m_isVisible = visible;
-    }
-    bool IsVisible() const
-    {
-        return m_isVisible;
-    }
+    void SetVisible(bool visible);
+    bool IsVisible() const;
+
+    void SetID(std::string id);
+    std::string GetID() const;
 
 protected:
     bool m_isVisible;
     std::vector<Task> m_tasks;
     std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
+
+    std::string m_id;
 };
 
 #endif

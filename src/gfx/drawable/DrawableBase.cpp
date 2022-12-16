@@ -15,3 +15,23 @@ void DrawableBase::Submit(Renderer& renderer) const
         renderer.Accept(task);
     }
 };
+
+void DrawableBase::SetVisible(bool visible)
+{
+    m_isVisible = visible;
+}
+
+bool DrawableBase::IsVisible() const
+{
+    return m_isVisible;
+}
+
+void DrawableBase::SetID(std::string id)
+{
+    m_id = id;
+}
+
+std::string DrawableBase::GetID() const
+{
+    return m_id;
+}

@@ -98,8 +98,3 @@ void VolumetricModel::Update(Graphics& gfx)
         }
     }
 }
-
-std::string VolumetricModel::GetName() const
-{
-    return "Volumetric Model";
-}

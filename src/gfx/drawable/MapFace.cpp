@@ -114,8 +114,3 @@ void MapFace::Update(Graphics& gfx)
         }
     }
 }
-
-std::string MapFace::GetName() const
-{
-    return "Map Face";
-}

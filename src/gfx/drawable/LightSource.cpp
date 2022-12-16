@@ -67,8 +67,3 @@ void LightSource::Update(Graphics& gfx)
         }
     }
 }
-
-std::string LightSource::GetName() const
-{
-    return "Light";
-}

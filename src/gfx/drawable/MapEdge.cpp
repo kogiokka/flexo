@@ -70,8 +70,3 @@ void MapEdge::Update(Graphics& gfx)
         }
     }
 }
-
-std::string MapEdge::GetName() const
-{
-    return "Map Edge";
-}
