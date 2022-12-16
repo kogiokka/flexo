@@ -19,7 +19,6 @@
 
 VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     : m_ub {}
-    , m_mesh(mesh)
 {
     std::vector<GLWRInputElementDesc> inputs = {
         { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
@@ -47,9 +46,9 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     samplerDesc.filter = GLWRFilter_MinMagNearest_NoMip;
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.positions, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.normals, 1));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, m_mesh.textureCoords, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.positions, 0));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.normals, 1));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.textureCoords, 2));
 
     Task draw;
     draw.mDrawable = this;
