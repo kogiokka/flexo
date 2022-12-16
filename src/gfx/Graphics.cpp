@@ -439,11 +439,9 @@ void Graphics::SetRenderTargets(unsigned int numViews, IGLWRRenderTargetView* co
         break;
     }
 
-#ifndef NDEBUG
     if (glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
-        Logger::error("Framebuffer failed to generate!");
+        log_error("Framebuffer failed to generate!");
     }
-#endif
 }
 
 void Graphics::SetInputLayout(IGLWRInputLayout* pInputLayout)
