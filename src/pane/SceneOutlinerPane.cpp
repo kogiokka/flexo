@@ -14,6 +14,7 @@
 #include "pane/SceneOutlinerPane.hpp"
 
 wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
+wxDEFINE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);
 
 // Register factory: SceneOutlinerPane
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
@@ -43,6 +44,13 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     GetSizer()->Add(m_sceneTree, wxSizerFlags(5).Expand());
 
     m_project.Bind(EVT_OUTLINER_ADD_OBJECT, &SceneOutlinerPane::OnAddObject, this);
+    m_project.Bind(EVT_OUTLINER_DELETE_OBJECT, [this](wxCommandEvent&) {
+        m_sceneTree->DeleteAllItems();
+        for (auto const& drawable : DrawList::Get(m_project)) {
+            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
+            m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
+        }
+    });
 
     m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CONTEXT_MENU, [this](wxTreeListEvent& event) {
         enum { ID_Delete };

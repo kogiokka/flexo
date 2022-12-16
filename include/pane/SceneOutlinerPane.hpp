@@ -9,6 +9,7 @@
 #include "pane/ControlsPaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
+wxDECLARE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);
 
 class SceneOutlinerPane : public ControlsPaneBase, public AttachableBase
 {

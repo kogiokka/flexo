@@ -37,6 +37,11 @@ DrawList::DrawList(WatermarkingProject& project)
 
 void DrawList::Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable)
 {
+    // FIXME: Let the user handle all the deletion from the scene outliner
+    std::string id = ObjectTypeNames[type];
+    Remove(id);
+
+    /*
     auto it = m_typeCount.find(type);
 
     std::string id;
@@ -49,6 +54,7 @@ void DrawList::Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable)
         snprintf(buf, 4, "%03u", it->second);
         id = ObjectTypeNames[type] + "." + std::string(buf);
     }
+    */
 
     drawable->SetID(id);
     m_drawlist.push_back(drawable);
@@ -58,10 +64,10 @@ void DrawList::Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable)
     m_project.ProcessEvent(event);
 }
 
-void DrawList::OnDeleteObject(wxCommandEvent& event)
+void DrawList::Remove(std::string id)
 {
     for (auto it = m_drawlist.begin(); it != m_drawlist.end();) {
-        if ((*it)->GetID() == event.GetString()) {
+        if ((*it)->GetID() == id) {
             m_drawlist.erase(it);
             break;
         } else {
@@ -69,6 +75,14 @@ void DrawList::OnDeleteObject(wxCommandEvent& event)
         }
     }
 
+    wxCommandEvent event(EVT_OUTLINER_DELETE_OBJECT);
+    event.SetString(id);
+    m_project.ProcessEvent(event);
+}
+
+void DrawList::OnDeleteObject(wxCommandEvent& event)
+{
+    Remove(event.GetString().ToStdString());
     Submit(Renderer::Get(m_project));
 }
 

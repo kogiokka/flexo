@@ -2,6 +2,7 @@
 #define DRAW_LIST_H
 
 #include <memory>
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -45,6 +46,7 @@ public:
     const_iterator cend() const;
 
 private:
+    void Remove(std::string id);
     void OnDeleteObject(wxCommandEvent& event);
 
     std::vector<std::shared_ptr<DrawableBase>> m_drawlist;
