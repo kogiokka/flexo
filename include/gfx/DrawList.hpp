@@ -5,6 +5,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include <wx/event.h>
+
 #include "Attachable.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
@@ -22,8 +24,7 @@ class WatermarkingProject;
 enum ObjectType : unsigned int { OBJECT_TYPES };
 #undef X
 
-wxDECLARE_EVENT(EVT_ADD_OBJECT, wxCommandEvent);
-wxDECLARE_EVENT(EVT_REMOVE_OBJECT, wxCommandEvent);
+wxDECLARE_EVENT(EVT_DRAWLIST_DELETE_OBJECT, wxCommandEvent);
 
 class DrawList : public AttachableBase
 {
@@ -32,8 +33,6 @@ public:
     static DrawList const& Get(WatermarkingProject const& project);
     DrawList(WatermarkingProject& project);
     void Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable);
-    template <typename T>
-    void Remove();
     void Submit(Renderer& renderer) const;
 
 public:
@@ -46,23 +45,11 @@ public:
     const_iterator cend() const;
 
 private:
+    void OnDeleteObject(wxCommandEvent& event);
+
     std::vector<std::shared_ptr<DrawableBase>> m_drawlist;
     std::unordered_map<enum ObjectType, unsigned int> m_typeCount;
     WatermarkingProject& m_project;
 };
-
-template <typename T>
-void DrawList::Remove()
-{
-    bool (*const FindDrawable)(std::shared_ptr<DrawableBase>&) = [](std::shared_ptr<DrawableBase>& drawable) {
-        auto* ptr = drawable.get();
-        return (dynamic_cast<T*>(ptr) != nullptr);
-    };
-
-    m_drawlist.erase(std::remove_if(m_drawlist.begin(), m_drawlist.end(), FindDrawable), m_drawlist.end());
-
-    wxCommandEvent event(EVT_REMOVE_OBJECT);
-    m_project.ProcessEvent(event);
-}
 
 #endif

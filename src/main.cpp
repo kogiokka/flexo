@@ -95,5 +95,7 @@ bool WatermarkingApp::OnInit()
 
     wxUpdateUIEvent::SetUpdateInterval(16);
 
+    m_project->CreateScene();
+
     return true;
 }

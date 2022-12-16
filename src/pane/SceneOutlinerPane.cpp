@@ -1,5 +1,6 @@
 #include <wx/checkbox.h>
 #include <wx/clntdata.h>
+#include <wx/menu.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
 #include <wx/stattext.h>
@@ -8,9 +9,11 @@
 #include "ProjectWindow.hpp"
 #include "World.hpp"
 #include "gfx/DrawList.hpp"
+#include "gfx/Renderer.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 #include "pane/SceneOutlinerPane.hpp"
-#include "util/Logger.h"
+
+wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
 
 // Register factory: SceneOutlinerPane
 static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
@@ -39,21 +42,22 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     m_sceneTree = CreateSceneTree();
     GetSizer()->Add(m_sceneTree, wxSizerFlags(5).Expand());
 
-    m_project.Bind(EVT_ADD_OBJECT, [this](wxCommandEvent& event) {
-        for (auto const& drawable : DrawList::Get(m_project)) {
-            if (event.GetString() == drawable->GetID()) {
-                auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
-                m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
-                break;
-            }
-        }
-    });
+    m_project.Bind(EVT_OUTLINER_ADD_OBJECT, &SceneOutlinerPane::OnAddObject, this);
 
-    m_project.Bind(EVT_REMOVE_OBJECT, [this](wxCommandEvent&) {
-        m_sceneTree->DeleteAllItems();
-        for (auto const& drawable : DrawList::Get(m_project)) {
-            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
-            m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
+    m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CONTEXT_MENU, [this](wxTreeListEvent& event) {
+        enum { ID_Delete };
+        wxMenu menu;
+        menu.Append(ID_Delete, "&Delete");
+        switch (m_sceneTree->GetPopupMenuSelectionFromUser(menu)) {
+        case ID_Delete:
+            auto item = event.GetItem();
+
+            wxCommandEvent event(EVT_DRAWLIST_DELETE_OBJECT);
+            event.SetString(m_sceneTree->GetItemText(item).ToStdString());
+            m_project.ProcessEvent(event);
+
+            m_sceneTree->DeleteItem(item);
+            break;
         }
     });
 
@@ -87,4 +91,15 @@ wxTreeListCtrl* SceneOutlinerPane::CreateSceneTree()
     sceneTree->SetFont(font);
 
     return sceneTree;
+}
+
+void SceneOutlinerPane::OnAddObject(wxCommandEvent& event)
+{
+    for (auto const& drawable : DrawList::Get(m_project)) {
+        if (event.GetString() == drawable->GetID()) {
+            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
+            m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
+            break;
+        }
+    }
 }

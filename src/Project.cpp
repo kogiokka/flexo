@@ -56,8 +56,6 @@ WatermarkingProject::WatermarkingProject()
         }
 
         auto& drawlist = DrawList::Get(*this);
-        drawlist.Remove<VolumetricModel>();
-        drawlist.Remove<MapFace>();
 
         SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
         drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, world.mapMesh));
@@ -69,17 +67,20 @@ WatermarkingProject::~WatermarkingProject()
 {
 }
 
+void
+WatermarkingProject::CreateScene()
+{
+    auto& drawlist = DrawList::Get(*this);
+    auto& gfx = Graphics::Get(*this);
+    drawlist.Add(ObjectType_Light, std::make_shared<LightSource>(gfx, world.uvsphere));
+    drawlist.Submit(Renderer::Get(*this));
+}
+
 void WatermarkingProject::CreateProject()
 {
     assert(world.theDataset);
 
     SelfOrganizingMap::Get(*this).CreateProcedure(world.theMap, world.theDataset);
-
-    auto& drawlist = DrawList::Get(*this);
-    auto& gfx = Graphics::Get(*this);
-    drawlist.Remove<LightSource>();
-    drawlist.Add(ObjectType_Light, std::make_shared<LightSource>(gfx, world.uvsphere));
-    drawlist.Submit(Renderer::Get(*this));
 
     world.isWatermarked = false;
 }
@@ -234,9 +235,6 @@ void WatermarkingProject::UpdateMapGraphics()
     auto& gfx = Graphics::Get(*this);
 
     auto& drawlist = DrawList::Get(*this);
-    drawlist.Remove<MapVertex>();
-    drawlist.Remove<MapEdge>();
-    drawlist.Remove<MapFace>();
     drawlist.Add(ObjectType_MapVertex, std::make_shared<MapVertex>(gfx, world.uvsphere, world.neurons));
     drawlist.Add(ObjectType_MapEdge, std::make_shared<MapEdge>(gfx, world.neurons, world.mapEdges));
     drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, world.mapMesh));
@@ -284,8 +282,6 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
 void WatermarkingProject::SetModelDrawable(std::shared_ptr<DrawableBase> drawable)
 {
     auto& drawlist = DrawList::Get(*this);
-    drawlist.Remove<VolumetricModel>();
-    drawlist.Remove<PolygonalModel>();
     drawlist.Add(ObjectType_Model, drawable);
     drawlist.Submit(Renderer::Get(*this));
 }

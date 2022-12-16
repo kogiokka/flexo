@@ -345,3 +345,5 @@ void SceneViewportPane::InitFrame(Graphics& gfx)
 
     gfx.SetRenderTargets(1, m_rtv.GetAddressOf(), m_dsv.Get());
 }
+
+
