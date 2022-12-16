@@ -1,9 +1,40 @@
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <utility>
+
 #include "SurfaceVoxels.hpp"
 #include "VecUtil.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 
+class Trianglemeter
+{
+public:
+    using Edge = Vec2i;
+    using Result = std::pair<glm::vec3, bool>;
+
+    Trianglemeter(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3);
+    glm::vec3 NearestPoint(glm::vec3 point);
+    glm::vec3 Barycentric(glm::vec3 point);
+
+private:
+    Result NearestOnFace(glm::vec3 point);
+    Result NearestOnEdge(glm::vec3 point, Trianglemeter::Edge edge);
+    glm::vec3 NearestVertex(glm::vec3 point);
+
+    Vec3<glm::vec3> m_verts;
+    Vec3<Edge> m_edges;
+
+public:
+    glm::vec3 m_normal;
+};
+
+using TriangleRef = Vec3i;
+
+std::vector<TriangleRef> MapFaces(Map<3, 2> const& map);
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale);
+float SquaredDistance(glm::vec3 p1, glm::vec3 p2);
 
 static STLImporter STLI;
 
@@ -124,18 +155,178 @@ std::vector<glm::vec3> SurfaceVoxels::GenPositions()
 
 void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
 {
+    std::vector<TriangleRef> planes = MapFaces(map);
+
     for (auto& vx : m_voxels) {
+        glm::vec3 nearest;
+        TriangleRef target;
         float minDist = std::numeric_limits<float>::max();
 
-        for (unsigned int n = 0; n < world.theMap->nodes.size(); n++) {
-            auto const& node = map.nodes[n];
-            float const dist = glm::distance(vx.pos, VECCONV(node.weights));
-            if (dist < minDist) {
+        for (auto const& plane : planes) {
+            auto meter = Trianglemeter(VECCONV(map.nodes[plane.x].weights), VECCONV(map.nodes[plane.y].weights),
+                                       VECCONV(map.nodes[plane.z].weights));
+
+            glm::vec3 point = meter.NearestPoint(vx.pos);
+            float dist = SquaredDistance(vx.pos, point);
+            if (minDist > dist) {
                 minDist = dist;
-                vx.uv = VECCONV(map.nodes[n].uv);
+                nearest = point;
+                target = plane;
+            }
+        }
+
+        auto weights = Trianglemeter(VECCONV(map.nodes[target.x].weights), VECCONV(map.nodes[target.y].weights),
+                                     VECCONV(map.nodes[target.z].weights))
+                           .Barycentric(nearest);
+        vx.uv = VECCONV(map.nodes[target.x].uv) * weights.x + VECCONV(map.nodes[target.y].uv) * weights.y
+            + VECCONV(map.nodes[target.z].uv) * weights.z;
+    }
+}
+
+Trianglemeter::Trianglemeter(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3)
+    : m_edges { Vec2i(0, 1), Vec2i(1, 2), Vec2i(2, 0) }
+{
+    m_verts = { v1, v2, v3 };
+    m_normal = glm::normalize(glm::cross(v2 - v1, v3 - v1));
+}
+
+glm::vec3 Trianglemeter::NearestPoint(glm::vec3 point)
+{
+    glm::vec3 nearest;
+    bool success = false;
+
+    std::tie(nearest, success) = NearestOnFace(point);
+
+    if (success) {
+        return nearest;
+    }
+
+    // Test if the position is on any of the edges
+    float minDist = std::numeric_limits<float>::max();
+
+    for (int i = 0; i < 3; i++) {
+        glm::vec3 tmp;
+        std::tie(tmp, success) = NearestOnEdge(point, m_edges[i]);
+        if (success) {
+            float dist = SquaredDistance(point, tmp);
+            if (minDist > dist) {
+                minDist = dist;
+                nearest = tmp;
             }
         }
     }
+
+    if (success) {
+        return nearest;
+    }
+
+    return NearestVertex(point);
+}
+
+Trianglemeter::Result Trianglemeter::NearestOnFace(glm::vec3 point)
+{
+    auto const& [A, B, C] = m_verts;
+
+    glm::vec3 P = point + -m_normal * glm::dot(point - A, m_normal);
+
+    glm::vec3 AP = A - P;
+    glm::vec3 BP = B - P;
+    glm::vec3 CP = C - P;
+    bool res1 = glm::dot(glm::cross(AP, BP), m_normal) < 0.0f;
+    bool res2 = glm::dot(glm::cross(BP, CP), m_normal) < 0.0f;
+    bool res3 = glm::dot(glm::cross(CP, AP), m_normal) < 0.0f;
+
+    return { P, (res1 == res2) && (res2 == res3) };
+}
+
+Trianglemeter::Result Trianglemeter::NearestOnEdge(glm::vec3 point, Trianglemeter::Edge edge)
+{
+    glm::vec3 nearest;
+
+    glm::vec3 v1 = m_verts[edge.x];
+    glm::vec3 v2 = m_verts[edge.y];
+
+    float portion = -1.0f;
+    float len = SquaredDistance(v1, v2);
+    glm::vec3 vec = v2 - v1;
+
+    if (len != 0.0f) {
+        portion = glm::dot(point - v1, vec) / len;
+        nearest = v1 + portion * vec;
+    }
+
+    return { nearest, ((portion >= 0.0f) && (portion <= 1.0f)) };
+}
+
+glm::vec3 Trianglemeter::NearestVertex(glm::vec3 point)
+{
+    glm::vec3 nearest;
+
+    float minDist = std::numeric_limits<float>::max();
+
+    for (int i = 0; i < 3; i++) {
+        float dist = SquaredDistance(point, m_verts[i]);
+        if (minDist > dist) {
+            minDist = dist;
+            nearest = m_verts[i];
+        }
+    }
+
+    return nearest;
+}
+
+glm::vec3 Trianglemeter::Barycentric(glm::vec3 point)
+{
+    auto const& [A, B, C] = m_verts;
+    glm::vec3 PA = A - point;
+    glm::vec3 PB = B - point;
+    glm::vec3 PC = C - point;
+    float BCP = glm::length(glm::cross(PB, PC));
+    float CAP = glm::length(glm::cross(PC, PA));
+    float ABP = glm::length(glm::cross(PA, PB));
+    float total = glm::length(glm::cross(B - A, C - A));
+    glm::vec3 weights = { BCP / total, CAP / total, ABP / total };
+    return weights;
+}
+
+float SquaredDistance(glm::vec3 p1, glm::vec3 p2)
+{
+    glm::vec3 v = p1 - p2;
+    return glm::dot(v, v);
+}
+
+std::vector<TriangleRef> MapFaces(const Map<3, 2>& map)
+{
+    std::vector<TriangleRef> faces;
+
+    int const width = map.size.x;
+    int const height = map.size.y;
+
+    for (int y = 0; y < height - 1; ++y) {
+        for (int x = 0; x < width - 1; ++x) {
+            unsigned int const idx = y * width + x;
+
+            TriangleRef ref1, ref2;
+            int i1, i2, i3, i4;
+
+            /**
+             *  4-----3
+             *  |     |
+             *  |     |
+             *  1-----2
+             */
+            i1 = idx;
+            i2 = idx + 1;
+            i3 = idx + width + 1;
+            i4 = idx + width;
+            ref1 = { i1, i2, i3 };
+            ref2 = { i1, i3, i4 };
+            faces.push_back(ref1);
+            faces.push_back(ref2);
+        }
+    }
+
+    return faces;
 }
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)

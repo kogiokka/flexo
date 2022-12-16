@@ -1,9 +1,8 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <vector>
-
 #include "Node.hpp"
+#include "Vec.hpp"
 
 using MapFlags = int;
 
