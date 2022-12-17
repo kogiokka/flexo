@@ -7,6 +7,7 @@ project("SOM Demo"
 )
 
 find_package(OpenGL REQUIRED)
+find_package(OpenMP)
 include("cmake/ExternalProjects.cmake")
 
 add_executable(som-demo)
@@ -112,6 +113,10 @@ target_link_libraries(som-demo PRIVATE
     ${wxWidgets_LIBRARIES}
     ${CMAKE_DL_LIBS}
 )
+
+if(OpenMP_CXX_FOUND)
+    target_link_libraries(som-demo PRIVATE OpenMP::OpenMP_CXX)
+endif()
 
 add_custom_command(TARGET som-demo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink

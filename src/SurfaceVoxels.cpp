@@ -155,11 +155,13 @@ void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
 {
     Mesh mesh = MapMesh(map);
 
+#pragma omp parallel for
     for (auto& vx : m_voxels) {
         glm::vec3 nearest;
         Face target;
         float minDist = std::numeric_limits<float>::max();
 
+#pragma omp parallel for
         for (auto const& f : mesh.faces) {
             auto meter = Trianglemeter(mesh.positions[f.indices[0]], mesh.positions[f.indices[1]],
                                        mesh.positions[f.indices[2]]);
