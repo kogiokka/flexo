@@ -75,7 +75,7 @@ void MapVertex::Update(Graphics& gfx)
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
         if ((vb != nullptr) && (vb->GetStartAttrib() == 1)) {
-            vb->Update(gfx, world.neurons.positions);
+            vb->Update(gfx, world.mapMesh.positions);
         }
     }
 

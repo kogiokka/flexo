@@ -16,7 +16,7 @@
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 #include "gfx/drawable/MapEdge.hpp"
 
-MapEdge::MapEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices)
+MapEdge::MapEdge(Graphics& gfx, Mesh const& mesh)
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
@@ -24,6 +24,23 @@ MapEdge::MapEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> cons
     };
 
     std::vector<glm::vec3> vertices = mesh.positions;
+    std::vector<unsigned int> indices;
+
+    auto const& map = *world.theMap;
+    int const width = map.size.x;
+    int const height = map.size.y;
+    for (int i = 0; i < height - 1; ++i) {
+        for (int j = 0; j < width - 1; ++j) {
+            indices.push_back(i * width + j);
+            indices.push_back(i * width + j + 1);
+            indices.push_back(i * width + j + 1);
+            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back((i + 1) * width + j + 1);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back((i + 1) * width + j);
+            indices.push_back(i * width + j);
+        }
+    }
 
     m_isVisible = true;
 
@@ -57,7 +74,7 @@ void MapEdge::Update(Graphics& gfx)
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
         if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
-            vb->Update(gfx, world.neurons.positions);
+            vb->Update(gfx, world.mapMesh.positions);
         }
     }
 

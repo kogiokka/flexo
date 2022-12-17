@@ -24,15 +24,16 @@
 #include "gfx/drawable/MapVertex.hpp"
 #include "gfx/drawable/PolygonalModel.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
+#include "pane/SelfOrganizingMapPane.hpp"
 #include "util/Logger.h"
 
 WatermarkingProject::WatermarkingProject()
-    : m_isMapReady(false)
-    , m_frame {}
+    : m_frame {}
     , m_panel {}
     , m_model(nullptr)
 {
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
+    Bind(EVT_SOM_PANE_MAP_CHANGED, &WatermarkingProject::OnSOMPaneMapChanged, this);
 
     // FIXME
     Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
@@ -94,115 +95,6 @@ void WatermarkingProject::StopProject()
     som.StopWorker();
 }
 
-void WatermarkingProject::BuildMapMesh() const
-{
-    if (!m_isMapReady)
-        return;
-
-    Map<3, 2> const& map = *world.theMap;
-    Mesh mesh;
-
-    std::vector<glm::vec3> positions;
-
-    // Positions
-    auto const& neurons = map.nodes;
-    positions.reserve(neurons.size());
-    for (auto const& n : neurons) {
-        auto const& w = n.weights;
-        positions.emplace_back(w[0], w[1], w[2]);
-    }
-
-    int const width = map.size.x;
-    int const height = map.size.y;
-    // float const divisor = 1.1f; // FIXME
-
-    float const w = static_cast<float>(width - 1);
-    float const h = static_cast<float>(height - 1);
-    for (int y = 0; y < height - 1; ++y) {
-        for (int x = 0; x < width - 1; ++x) {
-
-            unsigned int const idx = y * width + x;
-            glm::vec3 p1, p2, p3, p4;
-            glm::vec3 n1, n2;
-            glm::vec2 t1, t2, t3, t4;
-            Face f1, f2;
-
-            /**
-             *  4-----3
-             *  |     |
-             *  |     |
-             *  1-----2
-             */
-            p1 = positions[idx]; // [x, y]
-            p2 = positions[idx + 1]; // [x + 1, y]
-            p3 = positions[idx + width + 1]; // [x + 1, y + 1]
-            p4 = positions[idx + width]; // [x, y + 1]
-
-            // Normals
-            n1 = glm::normalize(glm::cross(p2 - p1, p3 - p1));
-            n2 = glm::normalize(glm::cross(p3 - p1, p4 - p1));
-
-            // TextureCoords
-            // t1 = glm::vec2(x / divisor, y / divisor);
-            // t2 = glm::vec2((x + 1) / divisor, y / divisor);
-            // t3 = glm::vec2((x + 1) / divisor, (y + 1) / divisor);
-            // t4 = glm::vec2(x / divisor, (y + 1) / divisor);
-            t1 = VECCONV(map.nodes[x + y * width].uv);
-            t2 = VECCONV(map.nodes[x + 1 + y * width].uv);
-            t3 = VECCONV(map.nodes[x + 1 + (y + 1) * width].uv);
-            t4 = VECCONV(map.nodes[x + (y + 1) * width].uv);
-
-            mesh.positions.push_back(p1);
-            mesh.positions.push_back(p2);
-            mesh.positions.push_back(p3);
-            mesh.positions.push_back(p1);
-            mesh.positions.push_back(p3);
-            mesh.positions.push_back(p4);
-            mesh.normals.push_back(n1);
-            mesh.normals.push_back(n1);
-            mesh.normals.push_back(n1);
-            mesh.normals.push_back(n2);
-            mesh.normals.push_back(n2);
-            mesh.normals.push_back(n2);
-            mesh.textureCoords.push_back(t1);
-            mesh.textureCoords.push_back(t2);
-            mesh.textureCoords.push_back(t3);
-            mesh.textureCoords.push_back(t1);
-            mesh.textureCoords.push_back(t3);
-            mesh.textureCoords.push_back(t4);
-        }
-    }
-
-    world.neurons.positions = positions;
-    world.mapMesh = mesh;
-
-    // FIXME?
-    UpdateMapEdges();
-}
-
-void WatermarkingProject::UpdateMapEdges() const
-{
-    std::vector<unsigned int> indices;
-
-    auto const& map = *world.theMap;
-    int const width = map.size.x;
-    int const height = map.size.y;
-    for (int i = 0; i < height - 1; ++i) {
-        for (int j = 0; j < width - 1; ++j) {
-            indices.push_back(i * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back(i * width + j);
-        }
-    }
-
-    world.mapEdges = indices;
-}
-
 void WatermarkingProject::SetFrame(wxFrame* frame)
 {
     m_frame = frame;
@@ -235,17 +127,17 @@ void WatermarkingProject::DoWatermark()
     world.isWatermarked = true;
 }
 
-void WatermarkingProject::UpdateMapGraphics()
+void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)
 {
-    // TODO: Better solution
-    m_isMapReady = true;
-    BuildMapMesh();
+    Mesh mesh = GenMapMesh(*world.theMap);
+
+    world.mapMesh = mesh;
 
     auto& gfx = Graphics::Get(*this);
-
     auto& drawlist = DrawList::Get(*this);
-    drawlist.Add(ObjectType_MapVertex, std::make_shared<MapVertex>(gfx, world.uvsphere, world.neurons));
-    drawlist.Add(ObjectType_MapEdge, std::make_shared<MapEdge>(gfx, world.neurons, world.mapEdges));
+
+    drawlist.Add(ObjectType_MapVertex, std::make_shared<MapVertex>(gfx, world.uvsphere, world.mapMesh));
+    drawlist.Add(ObjectType_MapEdge, std::make_shared<MapEdge>(gfx, world.mapMesh));
     drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, world.mapMesh));
     drawlist.Submit(Renderer::Get(*this));
 }

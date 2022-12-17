@@ -2,6 +2,7 @@
 #define SELF_ORGANIZING_MAP_PANE_H
 
 #include <wx/button.h>
+#include <wx/event.h>
 #include <wx/panel.h>
 #include <wx/sizer.h>
 #include <wx/slider.h>
@@ -9,6 +10,8 @@
 
 #include "Map.hpp"
 #include "pane/ControlsPaneBase.hpp"
+
+wxDECLARE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);
 
 class SelfOrganizingMapPane : public ControlsPaneBase
 {

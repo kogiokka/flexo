@@ -13,6 +13,8 @@
 #include "World.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
+wxDEFINE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);
+
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
@@ -56,7 +58,9 @@ void SelfOrganizingMapPane::PopulateMapPanel()
         float const radius = 0.5f * diagLen;
         ProjectSettings::Get(m_project).SetNeighborhood(radius);
         SetupNeighborhoodRadiusSlider(diagLen, radius);
-        m_project.UpdateMapGraphics();
+
+        wxCommandEvent evt(EVT_SOM_PANE_MAP_CHANGED);
+        m_project.ProcessEvent(evt);
     });
 
     addBtn->Bind(

@@ -49,6 +49,7 @@ PRIVATE
     "src/World.cpp"
     "src/VolumetricModelData.cpp"
     "src/Voxel.cpp"
+    "src/Map.cpp"
     "src/SurfaceVoxels.cpp"
     "src/assetlib/BaseImporter.cpp"
     "src/assetlib/OBJ/OBJImporter.cpp"

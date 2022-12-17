@@ -4,14 +4,14 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+#include "Vec.hpp"
+
 struct BoundingBox {
     glm::vec3 max;
     glm::vec3 min;
 };
 
-struct Face {
-    std::vector<unsigned int> indices;
-};
+using Face = Vec3<unsigned int>;
 
 struct Mesh {
     std::vector<glm::vec3> positions;

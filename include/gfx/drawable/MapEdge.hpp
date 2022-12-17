@@ -23,7 +23,7 @@ class MapEdge : public IndexedDrawable
     UniformBlock m_ub;
 
 public:
-    MapEdge(Graphics& gfx, Mesh const& mesh, std::vector<unsigned int> const& indices);
+    MapEdge(Graphics& gfx, Mesh const& mesh);
     ~MapEdge() override;
     void Update(Graphics& gfx) override;
 };

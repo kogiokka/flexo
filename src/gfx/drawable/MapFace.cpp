@@ -23,12 +23,31 @@ MapFace::MapFace(Graphics& gfx, Mesh const& mesh)
     };
 
     std::vector<VertexPNT> vertices;
-    for (unsigned int i = 0; i < mesh.positions.size(); i++) {
-        VertexPNT v;
-        v.position = mesh.positions[i];
-        v.normal = mesh.normals[i];
-        v.texcoord = mesh.textureCoords[i];
-        vertices.push_back(v);
+    vertices.reserve(mesh.faces.size() * 3);
+
+    for (auto const& f : mesh.faces) {
+        VertexPNT v1, v2, v3;
+        glm::vec3 p1, p2, p3;
+        glm::vec3 normal;
+
+        p1 = mesh.positions[f.x];
+        p2 = mesh.positions[f.y];
+        p3 = mesh.positions[f.z];
+        normal = glm::cross(p2 - p1, p3 - p1);
+
+        v1.position = mesh.positions[f.x];
+        v2.position = mesh.positions[f.y];
+        v3.position = mesh.positions[f.z];
+        v1.texcoord = mesh.textureCoords[f.x];
+        v2.texcoord = mesh.textureCoords[f.y];
+        v3.texcoord = mesh.textureCoords[f.z];
+        v1.normal = normal;
+        v2.normal = normal;
+        v3.normal = normal;
+
+        vertices.push_back(v1);
+        vertices.push_back(v2);
+        vertices.push_back(v3);
     }
 
     m_isVisible = false;
@@ -92,14 +111,33 @@ void MapFace::Update(Graphics& gfx)
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
         if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
+            Mesh mesh = world.mapMesh;
             std::vector<VertexPNT> vertices;
-            vertices.resize(world.mapMesh.positions.size());
-            for (unsigned int i = 0; i < world.mapMesh.positions.size(); i++) {
-                VertexPNT v;
-                v.position = world.mapMesh.positions[i];
-                v.normal = world.mapMesh.normals[i];
-                v.texcoord = world.mapMesh.textureCoords[i];
-                vertices[i] = v;
+            vertices.reserve(mesh.faces.size() * 3);
+
+            for (auto const& f : mesh.faces) {
+                VertexPNT v1, v2, v3;
+                glm::vec3 p1, p2, p3;
+                glm::vec3 normal;
+
+                p1 = mesh.positions[f.x];
+                p2 = mesh.positions[f.y];
+                p3 = mesh.positions[f.z];
+                normal = glm::cross(p2 - p1, p3 - p1);
+
+                v1.position = mesh.positions[f.x];
+                v2.position = mesh.positions[f.y];
+                v3.position = mesh.positions[f.z];
+                v1.texcoord = mesh.textureCoords[f.x];
+                v2.texcoord = mesh.textureCoords[f.y];
+                v3.texcoord = mesh.textureCoords[f.z];
+                v1.normal = normal;
+                v2.normal = normal;
+                v3.normal = normal;
+
+                vertices.push_back(v1);
+                vertices.push_back(v2);
+                vertices.push_back(v3);
             }
             vb->Update(gfx, vertices);
         }

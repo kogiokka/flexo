@@ -27,21 +27,18 @@ public:
     void CreateScene();
     void CreateProject();
     void StopProject();
-    void BuildMapMesh() const;
     void DoWatermark();
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();
-    void UpdateMapGraphics();
     void ImportVolumetricModel(wxString const& path);
 
 private:
-    void UpdateMapEdges() const;
+    void OnSOMPaneMapChanged(wxCommandEvent& event);
     void OnMenuAddModel(wxCommandEvent& event);
     void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
     Mesh CreateUVSphereModel(float radius, int numSegments, int numRings, glm::vec3 center);
 
-    bool m_isMapReady;
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
     std::unique_ptr<SurfaceVoxels> m_model;

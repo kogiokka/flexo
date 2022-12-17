@@ -89,7 +89,10 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearRenderTargetView(m_rtv.Get(), bgColor);
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
-    m_project.BuildMapMesh();
+    if (world.theMap) {
+        world.mapMesh = GenMapMesh(*world.theMap);
+    }
+
     Renderer::Get(m_project).Render(gfx);
 
     gfx.Present();
@@ -345,5 +348,3 @@ void SceneViewportPane::InitFrame(Graphics& gfx)
 
     gfx.SetRenderTargets(1, m_rtv.GetAddressOf(), m_dsv.Get());
 }
-
-
