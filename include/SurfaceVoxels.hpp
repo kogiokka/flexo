@@ -1,8 +1,9 @@
 #ifndef VOXEL_SURFACE_H
 #define VOXEL_SURFACE_H
 
-#include <glm/glm.hpp>
 #include <vector>
+
+#include <glm/glm.hpp>
 
 #include "Map.hpp"
 #include "Mesh.hpp"
@@ -24,3 +25,4 @@ private:
 };
 
 #endif
+

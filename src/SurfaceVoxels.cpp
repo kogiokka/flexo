@@ -30,9 +30,7 @@ public:
     glm::vec3 m_normal;
 };
 
-using TriangleRef = Vec3i;
-
-std::vector<TriangleRef> MapFaces(Map<3, 2> const& map);
+Mesh MapMesh(Map<3, 2> const& map);
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale);
 float SquaredDistance(glm::vec3 p1, glm::vec3 p2);
 
@@ -155,31 +153,31 @@ std::vector<glm::vec3> SurfaceVoxels::GenPositions()
 
 void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
 {
-    std::vector<TriangleRef> planes = MapFaces(map);
+    Mesh mesh = MapMesh(map);
 
     for (auto& vx : m_voxels) {
         glm::vec3 nearest;
-        TriangleRef target;
+        Face target;
         float minDist = std::numeric_limits<float>::max();
 
-        for (auto const& plane : planes) {
-            auto meter = Trianglemeter(VECCONV(map.nodes[plane.x].weights), VECCONV(map.nodes[plane.y].weights),
-                                       VECCONV(map.nodes[plane.z].weights));
+        for (auto const& f : mesh.faces) {
+            auto meter = Trianglemeter(mesh.positions[f.indices[0]], mesh.positions[f.indices[1]],
+                                       mesh.positions[f.indices[2]]);
 
             glm::vec3 point = meter.NearestPoint(vx.pos);
             float dist = SquaredDistance(vx.pos, point);
             if (minDist > dist) {
                 minDist = dist;
                 nearest = point;
-                target = plane;
+                target.indices = f.indices;
             }
         }
 
-        auto weights = Trianglemeter(VECCONV(map.nodes[target.x].weights), VECCONV(map.nodes[target.y].weights),
-                                     VECCONV(map.nodes[target.z].weights))
+        auto weights = Trianglemeter(mesh.positions[target.indices[0]], mesh.positions[target.indices[1]],
+                                     mesh.positions[target.indices[2]])
                            .Barycentric(nearest);
-        vx.uv = VECCONV(map.nodes[target.x].uv) * weights.x + VECCONV(map.nodes[target.y].uv) * weights.y
-            + VECCONV(map.nodes[target.z].uv) * weights.z;
+        vx.uv = mesh.textureCoords[target.indices[0]] * weights.x + mesh.textureCoords[target.indices[1]] * weights.y
+            + mesh.textureCoords[target.indices[2]] * weights.z;
     }
 }
 
@@ -295,19 +293,24 @@ float SquaredDistance(glm::vec3 p1, glm::vec3 p2)
     return glm::dot(v, v);
 }
 
-std::vector<TriangleRef> MapFaces(const Map<3, 2>& map)
+Mesh MapMesh(Map<3, 2> const& map)
 {
-    std::vector<TriangleRef> faces;
+    Mesh mesh;
 
     int const width = map.size.x;
     int const height = map.size.y;
+
+    for (auto const& node : map.nodes) {
+        mesh.positions.push_back(VECCONV(node.weights));
+        mesh.textureCoords.push_back(VECCONV(node.uv));
+    }
 
     for (int y = 0; y < height - 1; ++y) {
         for (int x = 0; x < width - 1; ++x) {
             unsigned int const idx = y * width + x;
 
-            TriangleRef ref1, ref2;
-            int i1, i2, i3, i4;
+            Face f1, f2;
+            unsigned int i1, i2, i3, i4;
 
             /**
              *  4-----3
@@ -319,14 +322,15 @@ std::vector<TriangleRef> MapFaces(const Map<3, 2>& map)
             i2 = idx + 1;
             i3 = idx + width + 1;
             i4 = idx + width;
-            ref1 = { i1, i2, i3 };
-            ref2 = { i1, i3, i4 };
-            faces.push_back(ref1);
-            faces.push_back(ref2);
+            f1.indices = { i1, i2, i3 };
+            f2.indices = { i1, i3, i4 };
+
+            mesh.faces.push_back(f1);
+            mesh.faces.push_back(f2);
         }
     }
 
-    return faces;
+    return mesh;
 }
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)
