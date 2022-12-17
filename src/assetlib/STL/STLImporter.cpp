@@ -1,5 +1,4 @@
 #include "assetlib/STL/STLImporter.hpp"
-#include "Util.hpp"
 
 #include <filesystem>
 #include <fstream>
