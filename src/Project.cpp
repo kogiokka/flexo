@@ -4,6 +4,7 @@
 #include <limits>
 
 #include <wx/msgdlg.h>
+#include <wx/progdlg.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
@@ -67,8 +68,7 @@ WatermarkingProject::~WatermarkingProject()
 {
 }
 
-void
-WatermarkingProject::CreateScene()
+void WatermarkingProject::CreateScene()
 {
     auto& drawlist = DrawList::Get(*this);
     auto& gfx = Graphics::Get(*this);
@@ -220,7 +220,16 @@ wxWindow* WatermarkingProject::GetPanel()
 
 void WatermarkingProject::DoWatermark()
 {
-    m_model->Parameterize(*world.theMap);
+    float progress;
+    auto status = m_model->Parameterize(*world.theMap, progress);
+
+    wxProgressDialog dialog("Texture Mapping", "Please wait...", 100, &ProjectWindow::Get(*this),
+                            wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
+
+    while (status.wait_for(std::chrono::milliseconds(16)) != std::future_status::ready) {
+        dialog.Update(static_cast<int>(progress));
+    }
+
     SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
 
     world.isWatermarked = true;

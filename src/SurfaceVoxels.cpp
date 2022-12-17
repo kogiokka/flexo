@@ -151,36 +151,46 @@ std::vector<glm::vec3> SurfaceVoxels::GenPositions()
     return pos;
 }
 
-void SurfaceVoxels::Parameterize(Map<3, 2> const& map)
+std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progress)
 {
+    progress = 0.0f;
+
     Mesh mesh = MapMesh(map);
-
+    return std::async(
+        std::launch::async,
+        [this, &progress](Mesh const& mesh) -> void {
+            float const diff = 100.0f / static_cast<float>(m_voxels.size());
 #pragma omp parallel for
-    for (auto& vx : m_voxels) {
-        glm::vec3 nearest;
-        Face target;
-        float minDist = std::numeric_limits<float>::max();
+            for (auto& vx : m_voxels) {
+                glm::vec3 nearest;
+                Face target;
+                float minDist = std::numeric_limits<float>::max();
 
-#pragma omp parallel for
-        for (auto const& f : mesh.faces) {
-            auto meter = Trianglemeter(mesh.positions[f.indices[0]], mesh.positions[f.indices[1]],
-                                       mesh.positions[f.indices[2]]);
+#pragma omp parallel for reduction(+:progress)
+                for (auto const& f : mesh.faces) {
+                    auto meter = Trianglemeter(mesh.positions[f.indices[0]], mesh.positions[f.indices[1]],
+                                               mesh.positions[f.indices[2]]);
 
-            glm::vec3 point = meter.NearestPoint(vx.pos);
-            float dist = SquaredDistance(vx.pos, point);
-            if (minDist > dist) {
-                minDist = dist;
-                nearest = point;
-                target.indices = f.indices;
+                    glm::vec3 point = meter.NearestPoint(vx.pos);
+                    float dist = SquaredDistance(vx.pos, point);
+                    if (minDist > dist) {
+                        minDist = dist;
+                        nearest = point;
+                        target.indices = f.indices;
+                    }
+                }
+
+                auto weights = Trianglemeter(mesh.positions[target.indices[0]], mesh.positions[target.indices[1]],
+                                             mesh.positions[target.indices[2]])
+                                   .Barycentric(nearest);
+                vx.uv = mesh.textureCoords[target.indices[0]] * weights.x
+                    + mesh.textureCoords[target.indices[1]] * weights.y
+                    + mesh.textureCoords[target.indices[2]] * weights.z;
+
+                progress += diff;
             }
-        }
-
-        auto weights = Trianglemeter(mesh.positions[target.indices[0]], mesh.positions[target.indices[1]],
-                                     mesh.positions[target.indices[2]])
-                           .Barycentric(nearest);
-        vx.uv = mesh.textureCoords[target.indices[0]] * weights.x + mesh.textureCoords[target.indices[1]] * weights.y
-            + mesh.textureCoords[target.indices[2]] * weights.z;
-    }
+        },
+        mesh);
 }
 
 Trianglemeter::Trianglemeter(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3)
