@@ -147,20 +147,22 @@ Mesh EditableMesh::GenerateMesh()
     mesh.positions.reserve(size);
     mesh.normals.reserve(size);
 
-    std::vector<TriangularFace> triangles;
-
     using VertexCount = unsigned int;
-    std::unordered_map<VertexCount, std::vector<TriangularFace>> cache;
+    using ListOfTriangles = std::vector<TriangularFace>;
+
+    ListOfTriangles triangles;
+    std::unordered_map<VertexCount, ListOfTriangles> cache;
+
     for (Face const& face : faces) {
         VertexCount count = face.size();
         // Convex polygon triangulation
         if (cache.find(count) == cache.end()) {
-            std::vector<TriangularFace> triplet;
-            triplet.reserve(3 * (count - 2));
+            ListOfTriangles triplets;
+            triplets.reserve(3 * (count - 2));
             for (unsigned int i = 1; i <= count - 2; ++i) {
-                triplet.emplace_back(0, i, i + 1);
+                triplets.emplace_back(0, i, i + 1);
             }
-            cache.insert({ count, triplet });
+            cache.insert({ count, triplets });
         }
 
         for (auto const& [x, y, z] : cache[count]) {
