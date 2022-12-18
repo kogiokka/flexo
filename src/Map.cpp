@@ -1,10 +1,10 @@
 #include "Map.hpp"
-#include "Mesh.hpp"
+#include "EditableMesh.hpp"
 #include "VecUtil.hpp"
 
-Mesh GenMapMesh(Map<3, 2> const& map)
+EditableMesh GenMapEditableMesh(Map<3, 2> const& map)
 {
-    Mesh mesh;
+    EditableMesh mesh;
 
     int const width = map.size.x;
     int const height = map.size.y;

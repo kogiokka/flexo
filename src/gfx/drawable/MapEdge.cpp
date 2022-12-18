@@ -16,14 +16,13 @@
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 #include "gfx/drawable/MapEdge.hpp"
 
-MapEdge::MapEdge(Graphics& gfx, Mesh const& mesh)
+MapEdge::MapEdge(Graphics& gfx, std::vector<glm::vec3> const& positions)
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
         { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
     };
 
-    std::vector<glm::vec3> vertices = mesh.positions;
     std::vector<unsigned int> indices;
 
     auto const& map = *world.theMap;
@@ -47,7 +46,7 @@ MapEdge::MapEdge(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, positions));
     AddBind(std::make_shared<Bind::IndexBuffer>(gfx, indices));
 
     Task draw;

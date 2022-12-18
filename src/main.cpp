@@ -1,6 +1,5 @@
 #include <memory>
 
-#include "Mesh.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "WatermarkingApp.hpp"
@@ -36,10 +35,6 @@ bool WatermarkingApp::OnInit()
     if (!wxApp::OnInit()) {
         return false;
     }
-
-    STLImporter stlImp;
-    world.uvsphere = stlImp.ReadFile("res/models/UVSphere.stl");
-    world.cube = stlImp.ReadFile("res/models/cube.stl");
 
     m_project = std::make_shared<WatermarkingProject>();
     auto& project = *m_project;

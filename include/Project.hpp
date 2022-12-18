@@ -37,7 +37,6 @@ private:
     void OnSOMPaneMapChanged(wxCommandEvent& event);
     void OnMenuAddModel(wxCommandEvent& event);
     void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
-    Mesh CreateUVSphereModel(float radius, int numSegments, int numRings, glm::vec3 center);
 
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;

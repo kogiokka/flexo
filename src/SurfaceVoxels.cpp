@@ -154,10 +154,10 @@ std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progr
 {
     progress = 0.0f;
 
-    Mesh mesh = GenMapMesh(map);
+    EditableMesh mesh = GenMapEditableMesh(map);
     return std::async(
         std::launch::async,
-        [this, &progress](Mesh const& mesh) -> void {
+        [this, &progress](EditableMesh const& mesh) -> void {
             float const diff = 100.0f / static_cast<float>(m_voxels.size());
 #pragma omp parallel for
             for (auto& vx : m_voxels) {

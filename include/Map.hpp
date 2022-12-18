@@ -1,6 +1,7 @@
 #ifndef MAP_H
 #define MAP_H
 
+#include "EditableMesh.hpp"
 #include "Node.hpp"
 #include "Vec.hpp"
 
@@ -28,6 +29,6 @@ struct Map {
     MapFlags flags;
 };
 
-Mesh GenMapMesh(Map<3, 2> const& map);
+EditableMesh GenMapEditableMesh(Map<3, 2> const& map);
 
 #endif

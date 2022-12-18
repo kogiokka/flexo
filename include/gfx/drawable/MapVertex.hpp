@@ -34,7 +34,7 @@ class MapVertex : public InstancedDrawable
     UniformBlock m_ub;
 
 public:
-    MapVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData);
+    MapVertex(Graphics& gfx, Mesh const& instanceMesh, std::vector<glm::vec3> const& perInstanceData);
     ~MapVertex() override;
     void Update(Graphics& gfx) override;
 };

@@ -14,7 +14,7 @@
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 #include "gfx/drawable/MapVertex.hpp"
 
-MapVertex::MapVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perInstanceData)
+MapVertex::MapVertex(Graphics& gfx, Mesh const& instanceMesh, std::vector<glm::vec3> const& perInstanceData)
     : m_ub {}
 {
     std::vector<GLWRInputElementDesc> inputs = {
@@ -45,7 +45,7 @@ MapVertex::MapVertex(Graphics& gfx, Mesh const& instanceMesh, Mesh const& perIns
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData.positions, 1));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, perInstanceData, 1));
 
     Task draw;
     draw.mDrawable = this;

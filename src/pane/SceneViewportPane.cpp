@@ -90,7 +90,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
     if (world.theMap) {
-        world.mapMesh = GenMapMesh(*world.theMap);
+        world.mapMesh = GenMapEditableMesh(*world.theMap);
     }
 
     Renderer::Get(m_project).Render(gfx);
