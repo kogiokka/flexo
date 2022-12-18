@@ -2,7 +2,6 @@
 #include <utility>
 #include <vector>
 
-#include "Vertex.hpp"
 #include "World.hpp"
 #include "gfx/Task.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
@@ -19,10 +18,6 @@
 MapEdge::MapEdge(Graphics& gfx, std::vector<glm::vec3> const& positions)
     : m_ub {}
 {
-    std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
-    };
-
     std::vector<unsigned int> indices;
 
     auto const& map = *world.theMap;
@@ -45,8 +40,13 @@ MapEdge::MapEdge(Graphics& gfx, std::vector<glm::vec3> const& positions)
 
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
+    VertexBuffer bufpos(positions);
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRFormat_Float3, 0, bufpos.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
+    };
+
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, positions));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, bufpos));
     AddBind(std::make_shared<Bind::IndexBuffer>(gfx, indices));
 
     Task draw;
@@ -73,7 +73,7 @@ void MapEdge::Update(Graphics& gfx)
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
         if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
-            vb->Update(gfx, world.mapMesh.positions);
+            vb->Update(gfx, VertexBuffer(world.mapMesh.positions));
         }
     }
 

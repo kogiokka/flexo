@@ -1,9 +1,9 @@
 #include <utility>
 #include <vector>
 
-#include "Vertex.hpp"
 #include "World.hpp"
 #include "gfx/Task.hpp"
+#include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
@@ -16,19 +16,6 @@
 
 PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, offsetof(VertexPN, position), GLWRInputClassification_PerVertex, 0 },
-        { "normal", GLWRFormat_Float3, 0, offsetof(VertexPN, normal), GLWRInputClassification_PerVertex, 0 },
-    };
-
-    std::vector<VertexPN> vertices;
-    for (unsigned int i = 0; i < mesh.positions.size(); i++) {
-        VertexPN v;
-        v.position = mesh.positions[i];
-        v.normal = mesh.normals[i];
-        vertices.push_back(v);
-    }
-
     m_isVisible = true;
 
     m_ub.frag.viewPos = gfx.GetCameraPosition();
@@ -41,8 +28,14 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.frag.material.shininess = 32.0f;
 
+    VertexBuffer buf(mesh);
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, buf));
+
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRFormat_Float3, 0, buf.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 0, buf.OffsetOfNormal(), GLWRInputClassification_PerVertex, 0 },
+    };
 
     Task draw;
     draw.mDrawable = this;

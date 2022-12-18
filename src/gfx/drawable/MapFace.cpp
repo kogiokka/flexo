@@ -1,7 +1,7 @@
 #include "gfx/drawable/MapFace.hpp"
-#include "Vertex.hpp"
 #include "World.hpp"
 #include "gfx/Task.hpp"
+#include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
@@ -16,22 +16,6 @@
 
 MapFace::MapFace(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, offsetof(VertexPNT, position), GLWRInputClassification_PerVertex, 0 },
-        { "normal", GLWRFormat_Float3, 0, offsetof(VertexPNT, normal), GLWRInputClassification_PerVertex, 0 },
-        { "textureCoord", GLWRFormat_Float2, 0, offsetof(VertexPNT, texcoord), GLWRInputClassification_PerVertex, 0 },
-    };
-
-    std::vector<VertexPNT> vertices;
-    vertices.reserve(mesh.faces.size() * 3);
-    for (unsigned int i = 0; i < mesh.positions.size(); i++) {
-        VertexPNT v;
-        v.position = mesh.positions[i];
-        v.texcoord = mesh.textureCoords[i];
-        v.normal = mesh.normals[i];
-        vertices.push_back(v);
-    }
-
     m_isVisible = false;
 
     GLWRSamplerDesc samplerDesc;
@@ -50,8 +34,16 @@ MapFace::MapFace(Graphics& gfx, Mesh const& mesh)
     m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
     m_ub.frag.material.shininess = 32.0f;
 
+    VertexBuffer buf(mesh);
+
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRFormat_Float3, 0, buf.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 0, buf.OffsetOfNormal(), GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 0, buf.OffsetOfTextureCoords(), GLWRInputClassification_PerVertex, 0 },
+    };
+
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, buf));
 
     Task draw;
     draw.mDrawable = this;
@@ -93,17 +85,8 @@ void MapFace::Update(Graphics& gfx)
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
         if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
-            Mesh mesh = world.mapMesh.GenerateMesh();
-            std::vector<VertexPNT> vertices;
-            vertices.reserve(mesh.faces.size() * 3);
-            for (unsigned int i = 0; i < mesh.positions.size(); i++) {
-                VertexPNT v;
-                v.position = mesh.positions[i];
-                v.texcoord = mesh.textureCoords[i];
-                v.normal = mesh.normals[i];
-                vertices.push_back(v);
-            }
-            vb->Update(gfx, vertices);
+            VertexBuffer buffer(world.mapMesh.GenerateMesh());
+            vb->Update(gfx, buffer);
         }
     }
 

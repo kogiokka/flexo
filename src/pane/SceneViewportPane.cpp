@@ -15,8 +15,6 @@
 #include "pane/SceneViewportPane.hpp"
 #include "util/Logger.h"
 
-#include "Vertex.hpp"
-
 enum {
     Pane_SceneViewport = wxID_HIGHEST + 1,
 };

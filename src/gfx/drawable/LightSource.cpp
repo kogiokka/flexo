@@ -5,6 +5,7 @@
 
 #include "World.hpp"
 #include "gfx/Task.hpp"
+#include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
@@ -16,23 +17,16 @@
 
 LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 {
-    std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
-    };
-
-    std::vector<VertexPN> vertices;
-    for (unsigned int i = 0; i < mesh.positions.size(); i++) {
-        VertexPN v;
-        v.position = mesh.positions[i];
-        v.normal = mesh.normals[i];
-        vertices.push_back(v);
-    }
-
     m_isVisible = false;
     m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
 
+    VertexBuffer buf(mesh);
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, buf));
+
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRFormat_Float3, 0, buf.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
+    };
 
     Task draw;
     draw.mDrawable = this;

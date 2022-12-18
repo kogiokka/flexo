@@ -1,7 +1,6 @@
 #include <utility>
 #include <vector>
 
-#include "Vertex.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "gfx/Task.hpp"
@@ -20,12 +19,6 @@
 VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     : m_ub {}
 {
-    std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
-        { "normal", GLWRFormat_Float3, 1, 0, GLWRInputClassification_PerVertex, 0 },
-        { "textureCoord", GLWRFormat_Float2, 2, 0, GLWRInputClassification_PerVertex, 0 },
-    };
-
     m_isVisible = true;
 
     m_ub.vert.viewPos = gfx.GetCameraPosition();
@@ -45,10 +38,19 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     samplerDesc.coordinateR = GLWRTextureCoordinatesMode_Wrap;
     samplerDesc.filter = GLWRFilter_MinMagNearest_NoMip;
 
+    auto bufp = VertexBuffer(mesh.positions);
+    auto bufn = VertexBuffer(mesh.normals);
+    auto buft = VertexBuffer(mesh.textureCoords);
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.positions, 0));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.normals, 1));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, mesh.textureCoords, 2));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, bufp, 0));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, bufn, 1));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, buft, 2));
+
+    std::vector<GLWRInputElementDesc> inputs = {
+        { "position", GLWRFormat_Float3, 0, bufp.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 1, bufn.OffsetOfNormal(), GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 2, buft.OffsetOfTextureCoords(), GLWRInputClassification_PerVertex, 0 },
+    };
 
     Task draw;
     draw.mDrawable = this;
