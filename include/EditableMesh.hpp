@@ -4,7 +4,9 @@
 #include <glm/glm.hpp>
 
 #include "Mesh.hpp"
+#include "Vec.hpp"
 
+using Face = std::vector<unsigned int>;
 struct EditableMesh {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec2> textureCoords;

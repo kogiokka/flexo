@@ -167,7 +167,7 @@ std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progr
 
 #pragma omp parallel for reduction(+ : progress)
                 for (auto const& f : mesh.faces) {
-                    auto meter = Trianglemeter(mesh.positions[f.x], mesh.positions[f.y], mesh.positions[f.z]);
+                    auto meter = Trianglemeter(mesh.positions[f[0]], mesh.positions[f[1]], mesh.positions[f[2]]);
 
                     glm::vec3 point = meter.NearestPoint(vx.pos);
                     float dist = SquaredDistance(vx.pos, point);
@@ -179,10 +179,10 @@ std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progr
                 }
 
                 auto weights
-                    = Trianglemeter(mesh.positions[target.x], mesh.positions[target.y], mesh.positions[target.z])
+                    = Trianglemeter(mesh.positions[target[0]], mesh.positions[target[1]], mesh.positions[target[2]])
                           .Barycentric(nearest);
-                vx.uv = mesh.textureCoords[target.x] * weights.x + mesh.textureCoords[target.y] * weights.y
-                    + mesh.textureCoords[target.z] * weights.z;
+                vx.uv = mesh.textureCoords[target[0]] * weights[0] + mesh.textureCoords[target[1]] * weights[1]
+                    + mesh.textureCoords[target[2]] * weights[2];
 
                 progress += diff;
             }

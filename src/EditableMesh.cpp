@@ -1,3 +1,5 @@
+#include <unordered_map>
+
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "EditableMesh.hpp"
@@ -63,23 +65,17 @@ EditableMesh ConstructCube()
 
     mesh.faces = {
         // z
-        { 0, 1, 2 },
-        { 0, 2, 3 },
+        { 0, 1, 2, 3 },
         // -z
-        { 4, 5, 6 },
-        { 4, 6, 7 },
+        { 4, 5, 6, 7 },
         // -y
-        { 4, 5, 1 },
-        { 4, 1, 0 },
+        { 4, 5, 1, 0 },
         // y
-        { 6, 7, 3 },
-        { 6, 3, 2 },
+        { 6, 7, 3, 2 },
         // x
-        { 1, 2, 6 },
-        { 1, 6, 5 },
+        { 1, 2, 6, 5 },
         // -x
-        { 3, 0, 4 },
-        { 3, 4, 7 },
+        { 3, 0, 4, 7 },
     };
     return mesh;
 }
@@ -110,10 +106,11 @@ EditableMesh ConstructSphere(int numSegments, int numRings)
     }
 
     for (int j = 0; j < numSegments; j++) {
-        auto i1 = 0;
-        auto i2 = (j + 1) % numSegments + 1;
-        auto i3 = j % numSegments + 1;
-        mesh.faces.emplace_back(i1, i2, i3);
+        unsigned int i1, i2, i3;
+        i1 = 0;
+        i2 = (j + 1) % numSegments + 1;
+        i3 = j % numSegments + 1;
+        mesh.faces.push_back({ i1, i2, i3 });
     }
 
     for (int i = 0; i < numRings - 2; i++) {
@@ -123,20 +120,21 @@ EditableMesh ConstructSphere(int numSegments, int numRings)
              *  |   |
              *  1---2
              */
-            int i1 = (i * numSegments + (j % numSegments)) + 1;
-            int i2 = (i * numSegments + ((j + 1) % numSegments)) + 1;
-            int i3 = ((i + 1) * numSegments + ((j + 1) % numSegments)) + 1;
-            int i4 = ((i + 1) * numSegments + (j % numSegments)) + 1;
-            mesh.faces.emplace_back(i1, i2, i3);
-            mesh.faces.emplace_back(i1, i3, i4);
+            unsigned int i1, i2, i3, i4;
+            i1 = (i * numSegments + (j % numSegments)) + 1;
+            i2 = (i * numSegments + ((j + 1) % numSegments)) + 1;
+            i3 = ((i + 1) * numSegments + ((j + 1) % numSegments)) + 1;
+            i4 = ((i + 1) * numSegments + (j % numSegments)) + 1;
+            mesh.faces.push_back({ i1, i2, i3, i4 });
         }
     }
 
     for (int j = 0; j < numSegments; j++) {
-        auto i1 = ((numRings - 2) * numSegments + 1) + (j % numSegments);
-        auto i2 = ((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments);
-        auto i3 = mesh.positions.size() - 1;
-        mesh.faces.emplace_back(i1, i2, i3);
+        unsigned int i1, i2, i3;
+        i1 = ((numRings - 2) * numSegments + 1) + (j % numSegments);
+        i2 = ((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments);
+        i3 = mesh.positions.size() - 1;
+        mesh.faces.push_back({ i1, i2, i3 });
     }
 
     return mesh;
@@ -149,7 +147,28 @@ Mesh EditableMesh::GenerateMesh()
     mesh.positions.reserve(size);
     mesh.normals.reserve(size);
 
-    for (auto const& f : faces) {
+    std::vector<TriangularFace> triangles;
+
+    using VertexCount = unsigned int;
+    std::unordered_map<VertexCount, std::vector<TriangularFace>> cache;
+    for (Face const& face : faces) {
+        VertexCount count = face.size();
+        // Convex polygon triangulation
+        if (cache.find(count) == cache.end()) {
+            std::vector<TriangularFace> triplet;
+            triplet.reserve(3 * (count - 2));
+            for (unsigned int i = 1; i <= count - 2; ++i) {
+                triplet.emplace_back(0, i, i + 1);
+            }
+            cache.insert({ count, triplet });
+        }
+
+        for (auto const& [x, y, z] : cache[count]) {
+            triangles.emplace_back(face[x], face[y], face[z]);
+        }
+    }
+
+    for (auto const& f : triangles) {
         glm::vec3 p1, p2, p3;
         glm::vec3 normal;
 

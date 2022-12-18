@@ -11,13 +11,13 @@ struct BoundingBox {
     glm::vec3 min;
 };
 
-using Face = Vec3<unsigned int>;
+using TriangularFace = Vec3<unsigned int>;
 
 struct Mesh {
     std::vector<glm::vec3> positions;
     std::vector<glm::vec3> normals;
     std::vector<glm::vec2> textureCoords;
-    std::vector<Face> faces;
+    std::vector<TriangularFace> faces;
 
     bool HasPositions() const;
     bool HasNormals() const;
