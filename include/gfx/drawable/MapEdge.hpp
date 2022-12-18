@@ -5,6 +5,7 @@
 
 #include <glm/glm.hpp>
 
+#include "Wireframe.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/drawable/IndexedDrawable.hpp"
@@ -22,7 +23,7 @@ class MapEdge : public IndexedDrawable
     UniformBlock m_ub;
 
 public:
-    MapEdge(Graphics& gfx, std::vector<glm::vec3> const& positions);
+    MapEdge(Graphics& gfx, Wireframe const& wireframe);
     ~MapEdge() override;
     void Update(Graphics& gfx) override;
 };

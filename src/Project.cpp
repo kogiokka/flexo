@@ -138,7 +138,7 @@ void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)
 
     drawlist.Add(ObjectType_MapVertex,
                  std::make_shared<MapVertex>(gfx, ConstructSphere(32, 16).GenerateMesh(), emesh.positions));
-    drawlist.Add(ObjectType_MapEdge, std::make_shared<MapEdge>(gfx, emesh.positions));
+    drawlist.Add(ObjectType_MapEdge, std::make_shared<MapEdge>(gfx, emesh.GenerateWireframe()));
     drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, emesh.GenerateMesh()));
     drawlist.Submit(Renderer::Get(*this));
 }

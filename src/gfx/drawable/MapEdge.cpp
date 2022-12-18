@@ -15,32 +15,21 @@
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 #include "gfx/drawable/MapEdge.hpp"
 
-MapEdge::MapEdge(Graphics& gfx, std::vector<glm::vec3> const& positions)
+MapEdge::MapEdge(Graphics& gfx, Wireframe const& wireframe)
     : m_ub {}
 {
     std::vector<unsigned int> indices;
 
-    auto const& map = *world.theMap;
-    int const width = map.size.x;
-    int const height = map.size.y;
-    for (int i = 0; i < height - 1; ++i) {
-        for (int j = 0; j < width - 1; ++j) {
-            indices.push_back(i * width + j);
-            indices.push_back(i * width + j + 1);
-            indices.push_back(i * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j + 1);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back((i + 1) * width + j);
-            indices.push_back(i * width + j);
-        }
+    for (auto const& edge : wireframe.edges) {
+        indices.push_back(edge.x);
+        indices.push_back(edge.y);
     }
 
     m_isVisible = true;
 
     m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
 
-    VertexBuffer bufpos(positions);
+    VertexBuffer bufpos(wireframe.positions);
     std::vector<GLWRInputElementDesc> inputs = {
         { "position", GLWRFormat_Float3, 0, bufpos.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
     };

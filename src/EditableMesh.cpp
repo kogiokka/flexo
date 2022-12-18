@@ -195,3 +195,17 @@ Mesh EditableMesh::GenerateMesh()
 
     return mesh;
 }
+
+Wireframe EditableMesh::GenerateWireframe()
+{
+    Wireframe wf;
+
+    wf.positions = positions;
+    for (auto const& face : faces) {
+        for (unsigned int i = 0; i < face.size() - 1; i++) {
+            wf.edges.emplace_back(face[i], face[i + 1]);
+        }
+    }
+
+    return wf;
+}

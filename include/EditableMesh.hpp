@@ -5,6 +5,7 @@
 
 #include "Mesh.hpp"
 #include "Vec.hpp"
+#include "Wireframe.hpp"
 
 using Face = std::vector<unsigned int>;
 struct EditableMesh {
@@ -15,6 +16,7 @@ struct EditableMesh {
     bool HasPositions() const;
     bool HasTextureCoords() const;
     Mesh GenerateMesh();
+    Wireframe GenerateWireframe();
 
     struct TransformStack {
         TransformStack();
