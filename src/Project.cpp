@@ -58,11 +58,7 @@ WatermarkingProject::WatermarkingProject()
             }
         }
 
-        auto& drawlist = DrawList::Get(*this);
-
-        SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
-        drawlist.Add(ObjectType_MapFace, std::make_shared<TexturedDrawable>(gfx, world.mapMesh.GenerateMesh()));
-        drawlist.Submit(Renderer::Get(*this));
+        drawables.Submit(Renderer::Get(*this));
     });
 }
 
