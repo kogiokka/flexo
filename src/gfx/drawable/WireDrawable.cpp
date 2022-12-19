@@ -27,7 +27,9 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
 
     m_isVisible = true;
 
-    m_ub.frag.color = glm::vec3(0.7f, 0.7f, 0.7f);
+    m_ub.AddElement(UniformBlock::Type::vec3f32, "color");
+    m_ub.FinalizeLayout();
+    m_ub.Assign("color", glm::vec3(0.7f, 0.7f, 0.7f));
 
     VertexBuffer bufpos(wireframe.positions);
     std::vector<GLWRInputElementDesc> inputs = {
@@ -71,7 +73,7 @@ void WireDrawable::Update(Graphics& gfx)
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
         Bind::UniformBuffer* ub = dynamic_cast<Bind::UniformBuffer*>(it->get());
         if (ub != nullptr) {
-            ub->Update<UniformBlock>(gfx, m_ub);
+            ub->Update(gfx, m_ub);
         }
     }
 }

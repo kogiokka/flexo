@@ -24,15 +24,33 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh)
     samplerDesc.coordinateR = GLWRTextureCoordinatesMode_Wrap;
     samplerDesc.filter = GLWRFilter_MinMagNearest_MipNearest;
 
-    m_ub.frag.viewPos = gfx.GetCameraPosition();
-    m_ub.frag.light.position = world.lightPos;
-    m_ub.frag.light.ambient = glm::vec3(0.2f, 0.2f, 0.2f);
-    m_ub.frag.light.diffusion = glm::vec3(0.5f, 0.4f, 0.5f);
-    m_ub.frag.light.specular = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_ub.frag.material.ambient = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_ub.frag.material.diffusion = glm::vec3(1.0f, 1.0f, 1.0f);
-    m_ub.frag.material.specular = glm::vec3(0.3f, 0.3f, 0.3f);
-    m_ub.frag.material.shininess = 32.0f;
+    m_ublight.AddElement(UniformBlock::Type::vec3f32, "light.position");
+    m_ublight.AddElement(UniformBlock::Type::vec3f32, "light.ambient");
+    m_ublight.AddElement(UniformBlock::Type::vec3f32, "light.diffusion");
+    m_ublight.AddElement(UniformBlock::Type::vec3f32, "light.specular");
+
+    m_ubmat.AddElement(UniformBlock::Type::vec3f32, "material.ambient");
+    m_ubmat.AddElement(UniformBlock::Type::vec3f32, "material.diffusion");
+    m_ubmat.AddElement(UniformBlock::Type::vec3f32, "material.specular");
+    m_ubmat.AddElement(UniformBlock::Type::f32, "material.shininess");
+
+    m_ubo.AddElement(UniformBlock::Type::vec3f32, "viewPos");
+
+    m_ublight.FinalizeLayout();
+    m_ubmat.FinalizeLayout();
+    m_ubo.FinalizeLayout();
+
+    m_ublight.Assign("light.position", world.lightPos);
+    m_ublight.Assign("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
+    m_ublight.Assign("light.diffusion", glm::vec3(0.5f, 0.4f, 0.5f));
+    m_ublight.Assign("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+
+    m_ubmat.Assign("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_ubmat.Assign("material.diffusion", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_ubmat.Assign("material.specular", glm::vec3(0.3f, 0.3f, 0.3f));
+    m_ubmat.Assign("material.shininess", 32.0f);
+
+    m_ubo.Assign("viewPos", gfx.GetCameraPosition());
 
     VertexBuffer buf(mesh);
 
@@ -53,7 +71,9 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/TexturedDrawable.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
-    draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ub, 1));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ublight, 1));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ubmat, 2));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ubo, 3));
     draw.AddBindable(Bind::TextureManager::Resolve(gfx, world.imagePath.c_str(), 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(
@@ -79,8 +99,8 @@ void TexturedDrawable::ChangeTexture(Graphics& gfx, char const* filename)
 
 void TexturedDrawable::Update(Graphics& gfx)
 {
-    m_ub.frag.viewPos = gfx.GetCameraPosition();
-    m_ub.frag.light.position = world.lightPos;
+    m_ublight.Assign("light.position", world.lightPos);
+    m_ubo.Assign("viewPos", gfx.GetCameraPosition());
 
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
@@ -95,7 +115,12 @@ void TexturedDrawable::Update(Graphics& gfx)
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
         Bind::UniformBuffer* ub = dynamic_cast<Bind::UniformBuffer*>(it->get());
         if (ub != nullptr) {
-            ub->Update(gfx, m_ub);
+            if (ub->Index() == 1) {
+                ub->Update(gfx, m_ublight);
+            }
+            if (ub->Index() == 3) {
+                ub->Update(gfx, m_ubo);
+            }
         }
     }
 }

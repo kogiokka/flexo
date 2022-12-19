@@ -18,7 +18,9 @@
 LightSource::LightSource(Graphics& gfx, Mesh const& mesh)
 {
     m_isVisible = false;
-    m_ub.frag.lightColor = glm::vec3(1.0f, 1.0f, 1.0f);
+    m_ub.AddElement(UniformBlock::Type::vec3f32, "lightColor");
+    m_ub.FinalizeLayout();
+    m_ub.Assign("lightColor", glm::vec3(1.0f, 1.0f, 1.0f));
 
     VertexBuffer buf(mesh);
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));

@@ -19,37 +19,16 @@ class VolumetricModel : public Drawable
 {
     friend WatermarkingProject;
 
-    struct UniformBlock {
-        struct Vert {
-            struct Light {
-                STD140_ALIGN glm::vec3 position;
-                STD140_ALIGN glm::vec3 ambient;
-                STD140_ALIGN glm::vec3 diffusion;
-                STD140_ALIGN glm::vec3 specular;
-            };
-
-            struct Material {
-                STD140_ALIGN glm::vec3 ambient;
-                STD140_ALIGN glm::vec3 diffusion;
-                STD140_ALIGN glm::vec3 specular;
-                float shininess;
-            };
-            Light light;
-            Material material;
-            STD140_ALIGN glm::vec3 viewPos;
-            bool isWatermarked;
-        };
-
-        Vert vert;
-    };
-
-    UniformBlock m_ub;
-
 public:
     VolumetricModel(Graphics& gfx, Mesh mesh);
     ~VolumetricModel() override;
     void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
+
+private:
+    UniformBlock m_ublight;
+    UniformBlock m_ubmat;
+    UniformBlock m_ubo;
 };
 
 #endif

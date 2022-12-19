@@ -1,21 +1,17 @@
 #version 430
 
-struct UniformBuffer_Frag {
-    vec3 color;
-};
-
 layout(std140, binding = 0) uniform Transform {
     mat4 model;
     mat4 viewProj;
 } mx;
 
 layout(std140, binding = 1) uniform UniformBuffer {
-    UniformBuffer_Frag frag;
+    vec3 color;
 } ubo;
 
 out vec4 outColor;
 
 void main()
 {
-    outColor = vec4(ubo.frag.color, 1.0);
+    outColor = vec4(ubo.color, 1.0);
 }

@@ -2,6 +2,7 @@
 #define TRANSFORM_UNIFORM_BUFFER_H
 
 #include <cstring>
+#include <memory>
 #include <string>
 
 #include "gfx/Graphics.hpp"
@@ -13,13 +14,9 @@ namespace Bind
 {
     class TransformUniformBuffer : public Bindable
     {
-        struct TransformMatrices {
-            glm::mat4 model;
-            glm::mat4 viewProj;
-        };
-
         glm::mat4 m_mat;
-        UniformBuffer m_buffer;
+        UniformBlock m_ub;
+        std::unique_ptr<UniformBuffer> m_buffer;
 
     public:
         TransformUniformBuffer(Graphics& gfx, glm::mat4 transform);

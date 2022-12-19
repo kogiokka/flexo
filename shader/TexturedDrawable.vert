@@ -1,33 +1,9 @@
 #version 430
 
-struct Light {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffusion;
-    vec3 specular;
-};
-
-struct Material {
-    vec3 ambient;
-    vec3 diffusion;
-    vec3 specular;
-    float shininess;
-};
-
-struct UniformBuffer_Frag {
-    Light light;
-    Material material;
-    vec3 viewPos;
-};
-
 layout(std140, binding = 0) uniform Transform {
     mat4 model;
     mat4 viewProj;
 } mx;
-
-layout(std140, binding = 1) uniform UniformBuffer {
-    UniformBuffer_Frag frag;
-} ubo;
 
 in vec3 position;
 in vec3 normal;

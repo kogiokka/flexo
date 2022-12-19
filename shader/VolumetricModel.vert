@@ -1,33 +1,28 @@
 #version 430
 
-struct Light {
-    vec3 position;
-    vec3 ambient;
-    vec3 diffusion;
-    vec3 specular;
-};
-
-struct Material {
-    vec3 ambient;
-    vec3 diffusion;
-    vec3 specular;
-    float shininess;
-};
-
-struct UniformBuffer_Vert {
-    Light light;
-    Material material;
-    vec3 viewPos;
-    bool isWatermarked;
-};
 
 layout(std140, binding = 0) uniform Transform {
     mat4 model;
     mat4 viewProj;
 } mx;
 
-layout(std140, binding = 1) uniform UniformBuffer {
-    UniformBuffer_Vert vert;
+layout(std140, binding = 1) uniform Light {
+    vec3 position;
+    vec3 ambient;
+    vec3 diffusion;
+    vec3 specular;
+} light;
+
+layout(std140, binding = 2) uniform Material {
+    vec3 ambient;
+    vec3 diffusion;
+    vec3 specular;
+    float shininess;
+} material;
+
+layout(std140, binding = 3) uniform UniformBuffer {
+    vec3 viewPos;
+    bool isWatermarked;
 } ubo;
 
 in vec3 position;
@@ -44,18 +39,18 @@ out VertOut {
 void main()
 {
     vec3 norm = normalize(normal);
-    vec3 lightDir = normalize(ubo.vert.light.position - position);
+    vec3 lightDir = normalize(light.position - position);
 
     float diffuseCoef = max(dot(norm, lightDir), 0.0);
     vec3 reflectDir = reflect(-lightDir, norm);
-    vec3 viewDir = normalize(ubo.vert.viewPos - position);
-    float specularCoef = pow(max(dot(viewDir, reflectDir), 0.0), ubo.vert.material.shininess);
+    vec3 viewDir = normalize(ubo.viewPos - position);
+    float specularCoef = pow(max(dot(viewDir, reflectDir), 0.0), material.shininess);
 
-    vec3 ambient = ubo.vert.light.ambient * ubo.vert.material.ambient;
-    vec3 diffusion = ubo.vert.light.diffusion * ubo.vert.material.diffusion * diffuseCoef;
-    vec3 specular = ubo.vert.light.specular * ubo.vert.material.specular * specularCoef;
+    vec3 ambient = light.ambient * material.ambient;
+    vec3 diffusion = light.diffusion * material.diffusion * diffuseCoef;
+    vec3 specular = light.specular * material.specular * specularCoef;
 
-    if (ubo.vert.isWatermarked) {
+    if (ubo.isWatermarked) {
         outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelPattern, textureCoord);
     } else {
         outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelColor, textureCoord);

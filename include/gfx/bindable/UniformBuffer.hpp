@@ -5,6 +5,7 @@
 #include <string>
 
 #include "gfx/Graphics.hpp"
+#include "gfx/UniformBlock.hpp"
 #include "gfx/bindable/Bindable.hpp"
 
 namespace Bind
@@ -15,38 +16,12 @@ namespace Bind
         GLuint m_bindingIndex;
 
     public:
-        template <typename T>
-        UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex = 0);
+        UniformBuffer(Graphics& gfx, UniformBlock const& ub, GLuint bindingIndex = 0);
         ~UniformBuffer() = default;
         void Bind(Graphics& gfx) override;
-        template <typename T>
-        void Update(Graphics& gfx, T const& uniformBlock);
+        void Update(Graphics& gfx, UniformBlock const& ub);
+        unsigned int Index() const;
     };
-
-    template <typename T>
-    UniformBuffer::UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex)
-        : m_bindingIndex(bindingIndex)
-    {
-        GLWRBufferDesc desc;
-        GLWRResourceData data;
-
-        desc.type = GLWRResourceType_UniformBuffer;
-        desc.usage = GL_STREAM_DRAW;
-        desc.byteWidth = sizeof(T);
-        desc.stride = sizeof(T);
-
-        data.mem = &uniformBlock;
-        gfx.CreateBuffer(&desc, &data, &m_buffer);
-    }
-
-    template <typename T>
-    void UniformBuffer::Update(Graphics& gfx, T const& uniformBlock)
-    {
-        GLWRMappedSubresource mem;
-        gfx.Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);
-        std::memcpy(mem.data, &uniformBlock, sizeof(T));
-        gfx.Unmap(m_buffer.Get());
-    }
 }
 
 #endif

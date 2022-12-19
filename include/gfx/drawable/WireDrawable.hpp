@@ -12,20 +12,13 @@
 
 class WireDrawable : public IndexedDrawable
 {
-    struct UniformBlock {
-        struct Frag {
-            STD140_ALIGN glm::vec3 color;
-        };
-
-        Frag frag;
-    };
-
-    UniformBlock m_ub;
-
 public:
     WireDrawable(Graphics& gfx, Wireframe const& wireframe);
     ~WireDrawable() override;
     void Update(Graphics& gfx) override;
+
+private:
+    UniformBlock m_ub;
 };
 
 #endif
