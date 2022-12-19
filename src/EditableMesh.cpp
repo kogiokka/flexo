@@ -140,13 +140,8 @@ EditableMesh ConstructSphere(int numSegments, int numRings)
     return mesh;
 }
 
-Mesh EditableMesh::GenerateMesh()
+std::vector<TriangularFace> EditableMesh::GenerateTriangularFaces() const
 {
-    Mesh mesh;
-    unsigned int size = faces.size() * 3;
-    mesh.positions.reserve(size);
-    mesh.normals.reserve(size);
-
     using VertexCount = unsigned int;
     using ListOfTriangles = std::vector<TriangularFace>;
 
@@ -169,6 +164,18 @@ Mesh EditableMesh::GenerateMesh()
             triangles.emplace_back(face[x], face[y], face[z]);
         }
     }
+
+    return triangles;
+}
+
+Mesh EditableMesh::GenerateMesh() const
+{
+    Mesh mesh;
+    unsigned int size = faces.size() * 3;
+    mesh.positions.reserve(size);
+    mesh.normals.reserve(size);
+
+    auto triangles = GenerateTriangularFaces();
 
     for (auto const& f : triangles) {
         glm::vec3 p1, p2, p3;
@@ -196,14 +203,20 @@ Mesh EditableMesh::GenerateMesh()
     return mesh;
 }
 
-Wireframe EditableMesh::GenerateWireframe()
+Wireframe EditableMesh::GenerateWireframe() const
 {
     Wireframe wf;
 
     wf.positions = positions;
+    /**
+     *  3---2
+     *  |   |
+     *  0---1
+     */
     for (auto const& face : faces) {
-        for (unsigned int i = 0; i < face.size() - 1; i++) {
-            wf.edges.emplace_back(face[i], face[i + 1]);
+        unsigned int count = face.size();
+        for (unsigned int i = 0; i < count; i++) {
+            wf.edges.emplace_back(face[i], face[(i + 1) % count]);
         }
     }
 

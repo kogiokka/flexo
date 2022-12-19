@@ -154,20 +154,22 @@ std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progr
 {
     progress = 0.0f;
 
-    EditableMesh mesh = GenMapEditableMesh(map);
+    auto mesh = GenMapEditableMesh(map);
+    auto const& faces = mesh.GenerateTriangularFaces();
+
     return std::async(
         std::launch::async,
-        [this, &progress](EditableMesh const& mesh) -> void {
+        [this, &progress](EditableMesh const& mesh, std::vector<TriangularFace> const& faces) -> void {
             float const diff = 100.0f / static_cast<float>(m_voxels.size());
 #pragma omp parallel for
             for (auto& vx : m_voxels) {
                 glm::vec3 nearest;
-                Face target;
+                TriangularFace target;
                 float minDist = std::numeric_limits<float>::max();
 
 #pragma omp parallel for reduction(+ : progress)
-                for (auto const& f : mesh.faces) {
-                    auto meter = Trianglemeter(mesh.positions[f[0]], mesh.positions[f[1]], mesh.positions[f[2]]);
+                for (auto const& f : faces) {
+                    auto meter = Trianglemeter(mesh.positions[f.x], mesh.positions[f.y], mesh.positions[f.z]);
 
                     glm::vec3 point = meter.NearestPoint(vx.pos);
                     float dist = SquaredDistance(vx.pos, point);
@@ -179,15 +181,15 @@ std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progr
                 }
 
                 auto weights
-                    = Trianglemeter(mesh.positions[target[0]], mesh.positions[target[1]], mesh.positions[target[2]])
+                    = Trianglemeter(mesh.positions[target.x], mesh.positions[target.y], mesh.positions[target.z])
                           .Barycentric(nearest);
-                vx.uv = mesh.textureCoords[target[0]] * weights[0] + mesh.textureCoords[target[1]] * weights[1]
-                    + mesh.textureCoords[target[2]] * weights[2];
+                vx.uv = mesh.textureCoords[target.x] * weights.x + mesh.textureCoords[target.y] * weights.y
+                    + mesh.textureCoords[target.z] * weights.z;
 
                 progress += diff;
             }
         },
-        mesh);
+        mesh, faces);
 }
 
 Trianglemeter::Trianglemeter(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3)

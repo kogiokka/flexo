@@ -15,8 +15,9 @@ struct EditableMesh {
 
     bool HasPositions() const;
     bool HasTextureCoords() const;
-    Mesh GenerateMesh();
-    Wireframe GenerateWireframe();
+    std::vector<TriangularFace> GenerateTriangularFaces() const;
+    Mesh GenerateMesh() const;
+    Wireframe GenerateWireframe() const;
 
     struct TransformStack {
         TransformStack();

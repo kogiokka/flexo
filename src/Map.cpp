@@ -30,8 +30,7 @@ EditableMesh GenMapEditableMesh(Map<3, 2> const& map)
             i3 = idx + width + 1;
             i4 = idx + width;
 
-            mesh.faces.push_back({i1, i2, i3});
-            mesh.faces.push_back({i1, i3, i4});
+            mesh.faces.push_back({ i1, i2, i3, i4 });
         }
     }
 
