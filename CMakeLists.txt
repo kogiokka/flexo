@@ -92,7 +92,7 @@ PRIVATE
     "src/gfx/drawable/LightSource.cpp"
     "src/gfx/drawable/MapVertex.cpp"
     "src/gfx/drawable/SolidDrawable.cpp"
-    "src/gfx/drawable/WireframeDrawable.cpp"
+    "src/gfx/drawable/WireDrawable.cpp"
     "src/gfx/drawable/TexturedDrawable.cpp"
 
     "src/LearningRate.cpp"
