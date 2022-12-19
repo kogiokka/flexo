@@ -22,15 +22,13 @@ layout(std140, binding = 2) uniform Material {
 
 layout(std140, binding = 3) uniform UniformBuffer {
     vec3 viewPos;
-    bool isWatermarked;
 } ubo;
 
 in vec3 position;
 in vec3 normal;
 in vec2 textureCoord;
 
-layout (binding = 0) uniform sampler2D voxelPattern;
-layout (binding = 1) uniform sampler2D voxelColor;
+layout (binding = 0) uniform sampler2D pattern;
 
 out VertOut {
     vec4 color;
@@ -50,11 +48,7 @@ void main()
     vec3 diffusion = light.diffusion * material.diffusion * diffuseCoef;
     vec3 specular = light.specular * material.specular * specularCoef;
 
-    if (ubo.isWatermarked) {
-        outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelPattern, textureCoord);
-    } else {
-        outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(voxelColor, textureCoord);
-    }
+    outData.color = vec4((ambient + diffusion + specular), 1.0f) * texture(pattern, textureCoord);
 
     gl_Position = mx.viewProj * mx.model * vec4(position, 1.0);
 }

@@ -33,7 +33,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     m_ubmat.AddElement(UniformBlock::Type::f32, "material.shininess");
 
     m_ubo.AddElement(UniformBlock::Type::vec3f32, "viewPos");
-    m_ubo.AddElement(UniformBlock::Type::bool32, "isWatermarked");
 
     m_ublight.FinalizeLayout();
     m_ubmat.FinalizeLayout();
@@ -50,7 +49,6 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     m_ubmat.Assign("material.shininess", 256.0f);
 
     m_ubo.Assign("viewPos", gfx.GetCameraPosition());
-    m_ubo.Assign("isWatermarked", world.isWatermarked);
 
     GLWRSamplerDesc samplerDesc;
     samplerDesc.coordinateS = GLWRTextureCoordinatesMode_Wrap;
@@ -85,8 +83,7 @@ VolumetricModel::VolumetricModel(Graphics& gfx, Mesh mesh)
     draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ubo, 3));
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
-    draw.AddBindable(Bind::TextureManager::Resolve(gfx, world.imagePath.c_str(), 0));
-    draw.AddBindable(Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 1));
+    draw.AddBindable(Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 1));
     AddTask(draw);
@@ -111,7 +108,6 @@ void VolumetricModel::Update(Graphics& gfx)
 {
     m_ublight.Assign("light.position", gfx.GetCameraPosition());
     m_ubo.Assign("viewPos", gfx.GetCameraPosition());
-    m_ubo.Assign("isWatermarked", world.isWatermarked);
 
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;

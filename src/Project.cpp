@@ -83,8 +83,6 @@ void WatermarkingProject::CreateProject()
     assert(world.theDataset);
 
     SelfOrganizingMap::Get(*this).CreateProcedure(world.theMap, world.theDataset);
-
-    world.isWatermarked = false;
 }
 
 void WatermarkingProject::StopProject()
@@ -123,9 +121,9 @@ void WatermarkingProject::DoWatermark()
         dialog.Update(static_cast<int>(progress));
     }
 
-    SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
-
-    world.isWatermarked = true;
+    auto model = std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh());
+    model->ChangeTexture(Graphics::Get(*this), world.imagePath.c_str());
+    SetModelDrawable(model);
 }
 
 void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)
