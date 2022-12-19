@@ -6,7 +6,6 @@
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
 #include "gfx/bindable/Sampler.hpp"
-#include "gfx/bindable/Texture2D.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "gfx/bindable/TransformUniformBuffer.hpp"
 #include "gfx/bindable/UniformBuffer.hpp"
@@ -14,7 +13,7 @@
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 
-TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh)
+TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_ptr<Bind::Texture2D> texture)
 {
     m_isVisible = false;
 
@@ -74,7 +73,7 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ublight, 1));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ubmat, 2));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ubo, 3));
-    draw.AddBindable(Bind::TextureManager::Resolve(gfx, world.imagePath.c_str(), 0));
+    draw.AddBindable(texture);
     draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
@@ -87,14 +86,14 @@ TexturedDrawable::~TexturedDrawable()
 }
 
 // FIXME
-void TexturedDrawable::ChangeTexture(Graphics& gfx, char const* filename)
+void TexturedDrawable::ChangeTexture(std::shared_ptr<Bind::Texture2D> texture)
 {
     bool (*const FindTexture)(std::shared_ptr<Bind::Bindable>&)
         = [](std::shared_ptr<Bind::Bindable>& bind) { return (dynamic_cast<Bind::Texture2D*>(bind.get()) != nullptr); };
 
     auto& taskBinds = m_tasks.front().mBinds;
     taskBinds.erase(std::remove_if(taskBinds.begin(), taskBinds.end(), FindTexture), taskBinds.end());
-    m_tasks.front().AddBindable(Bind::TextureManager::Resolve(gfx, filename, 0));
+    m_tasks.front().AddBindable(texture);
 }
 
 void TexturedDrawable::Update(Graphics& gfx)

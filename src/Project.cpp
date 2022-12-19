@@ -19,6 +19,7 @@
 #include "gfx/DrawList.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
+#include "gfx/bindable/TextureManager.hpp"
 #include "gfx/drawable/LightSource.hpp"
 #include "gfx/drawable/MapVertex.hpp"
 #include "gfx/drawable/SolidDrawable.hpp"
@@ -33,28 +34,26 @@ WatermarkingProject::WatermarkingProject()
     , m_panel {}
     , m_model(nullptr)
 {
+    m_imageFile = "res/images/mandala.png";
     Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
     Bind(EVT_SOM_PANE_MAP_CHANGED, &WatermarkingProject::OnSOMPaneMapChanged, this);
 
     // FIXME
     Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
-        world.imagePath = event.GetString().ToStdString();
+        m_imageFile = event.GetString().ToStdString();
 
         auto& gfx = Graphics::Get(*this);
         std::string const filename = event.GetString().ToStdString();
         auto& drawables = DrawList::Get(*this);
         for (auto it = drawables.begin(); it != drawables.end(); it++) {
-            {
-                TexturedDrawable* face = dynamic_cast<TexturedDrawable*>(it->get());
-                if (face != nullptr) {
-                    face->ChangeTexture(gfx, filename.c_str());
-                }
+            auto tex = Bind::TextureManager::Resolve(gfx, filename.c_str(), 0);
+            TexturedDrawable* face = dynamic_cast<TexturedDrawable*>(it->get());
+            if (face != nullptr) {
+                face->ChangeTexture(tex);
             }
-            {
-                VolumetricModel* model = dynamic_cast<VolumetricModel*>(it->get());
-                if (model != nullptr) {
-                    model->ChangeTexture(gfx, filename.c_str());
-                }
+            VolumetricModel* model = dynamic_cast<VolumetricModel*>(it->get());
+            if (model != nullptr) {
+                model->ChangeTexture(tex);
             }
         }
 
@@ -118,7 +117,7 @@ void WatermarkingProject::DoWatermark()
     }
 
     auto model = std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh());
-    model->ChangeTexture(Graphics::Get(*this), world.imagePath.c_str());
+    model->ChangeTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
     SetModelDrawable(model);
 }
 
@@ -133,7 +132,9 @@ void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)
     drawlist.Add(ObjectType_MapVertex,
                  std::make_shared<MapVertex>(gfx, ConstructSphere(32, 16).GenerateMesh(), emesh.positions));
     drawlist.Add(ObjectType_MapEdge, std::make_shared<WireDrawable>(gfx, emesh.GenerateWireframe()));
-    drawlist.Add(ObjectType_MapFace, std::make_shared<TexturedDrawable>(gfx, emesh.GenerateMesh()));
+    drawlist.Add(ObjectType_MapFace,
+                 std::make_shared<TexturedDrawable>(gfx, emesh.GenerateMesh(),
+                                                    Bind::TextureManager::Resolve(gfx, m_imageFile.c_str(), 0)));
     drawlist.Submit(Renderer::Get(*this));
 }
 

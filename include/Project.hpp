@@ -2,6 +2,7 @@
 #define WATERMARKING_PROJECT_H
 
 #include <memory>
+#include <string>
 #include <vector>
 
 #include <wx/event.h>
@@ -41,6 +42,7 @@ private:
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
     std::unique_ptr<SurfaceVoxels> m_model;
+    std::string m_imageFile;
 };
 
 #endif

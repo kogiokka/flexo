@@ -22,7 +22,8 @@ class VolumetricModel : public Drawable
 public:
     VolumetricModel(Graphics& gfx, Mesh mesh);
     ~VolumetricModel() override;
-    void ChangeTexture(Graphics& gfx, char const* filename);
+    void ChangeTexture(std::shared_ptr<Bind::Texture2D> texture);
+
     void Update(Graphics& gfx) override;
 
 private:

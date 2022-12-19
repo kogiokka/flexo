@@ -94,14 +94,14 @@ VolumetricModel::~VolumetricModel()
 }
 
 // FIXME
-void VolumetricModel::ChangeTexture(Graphics& gfx, char const* filename)
+void VolumetricModel::ChangeTexture(std::shared_ptr<Bind::Texture2D> texture)
 {
     bool (*const FindTexture)(std::shared_ptr<Bind::Bindable>&)
         = [](std::shared_ptr<Bind::Bindable>& bind) { return (dynamic_cast<Bind::Texture2D*>(bind.get()) != nullptr); };
 
     auto& taskBinds = m_tasks.front().mBinds;
     taskBinds.erase(std::remove_if(taskBinds.begin(), taskBinds.end(), FindTexture), taskBinds.end());
-    m_tasks.front().AddBindable(Bind::TextureManager::Resolve(gfx, filename, 0));
+    m_tasks.front().AddBindable(texture);
 }
 
 void VolumetricModel::Update(Graphics& gfx)
