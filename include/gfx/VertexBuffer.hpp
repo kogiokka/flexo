@@ -10,7 +10,7 @@ class VertexBuffer
 public:
     explicit VertexBuffer(Mesh const& mesh);
     template <typename T>
-    explicit VertexBuffer(std::vector<T> data);
+    explicit VertexBuffer(std::vector<T> const& data);
     ~VertexBuffer();
 
     unsigned int OffsetOfPosition();
@@ -32,7 +32,7 @@ private:
 };
 
 template <typename T>
-VertexBuffer::VertexBuffer(std::vector<T> data)
+VertexBuffer::VertexBuffer(std::vector<T> const& data)
 {
     unsigned int stride = sizeof(T);
     unsigned int size = stride * data.size();
