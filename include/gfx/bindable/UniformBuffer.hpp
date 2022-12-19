@@ -9,38 +9,22 @@
 
 namespace Bind
 {
-    template <typename T>
     class UniformBuffer : public Bindable
     {
         GLWRPtr<IGLWRBuffer> m_buffer;
         GLuint m_bindingIndex;
 
     public:
-        UniformBuffer(Graphics& gfx, GLuint bindingIndex = 0);
+        template <typename T>
         UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex = 0);
-        ~UniformBuffer();
+        ~UniformBuffer() = default;
         void Bind(Graphics& gfx) override;
+        template <typename T>
         void Update(Graphics& gfx, T const& uniformBlock);
     };
 
     template <typename T>
-    UniformBuffer<T>::UniformBuffer(Graphics& gfx, GLuint bindingIndex)
-        : m_bindingIndex(bindingIndex)
-    {
-        GLWRBufferDesc desc;
-        GLWRResourceData data;
-
-        desc.type = GLWRResourceType_UniformBuffer;
-        desc.usage = GL_STREAM_DRAW;
-        desc.byteWidth = sizeof(T);
-        desc.stride = sizeof(T);
-
-        data.mem = nullptr;
-        gfx.CreateBuffer(&desc, &data, &m_buffer);
-    }
-
-    template <typename T>
-    UniformBuffer<T>::UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex)
+    UniformBuffer::UniformBuffer(Graphics& gfx, T const& uniformBlock, GLuint bindingIndex)
         : m_bindingIndex(bindingIndex)
     {
         GLWRBufferDesc desc;
@@ -56,18 +40,7 @@ namespace Bind
     }
 
     template <typename T>
-    UniformBuffer<T>::~UniformBuffer()
-    {
-    }
-
-    template <typename T>
-    void UniformBuffer<T>::Bind(Graphics& gfx)
-    {
-        gfx.SetUniformBuffers(m_bindingIndex, 1, m_buffer.GetAddressOf());
-    }
-
-    template <typename T>
-    void UniformBuffer<T>::Update(Graphics& gfx, T const& uniformBlock)
+    void UniformBuffer::Update(Graphics& gfx, T const& uniformBlock)
     {
         GLWRMappedSubresource mem;
         gfx.Map(m_buffer.Get(), GLWRMapPermission_WriteOnly, &mem);

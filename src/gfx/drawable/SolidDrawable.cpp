@@ -45,7 +45,7 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
     draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/SolidDrawable.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
-    draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
+    draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, m_ub, 1));
     draw.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
 
@@ -64,9 +64,9 @@ void SolidDrawable::Update(Graphics& gfx)
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
-        Bind::UniformBuffer<UniformBlock>* ub = dynamic_cast<Bind::UniformBuffer<UniformBlock>*>(it->get());
+        Bind::UniformBuffer* ub = dynamic_cast<Bind::UniformBuffer*>(it->get());
         if (ub != nullptr) {
-            ub->Update(gfx, m_ub);
+            ub->Update<UniformBlock>(gfx, m_ub);
         }
     }
 }

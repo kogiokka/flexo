@@ -18,8 +18,8 @@ namespace Bind
             glm::mat4 viewProj;
         };
 
-        UniformBuffer<TransformMatrices> m_buffer;
         glm::mat4 m_mat;
+        UniformBuffer m_buffer;
 
     public:
         TransformUniformBuffer(Graphics& gfx, glm::mat4 transform);
