@@ -1,5 +1,5 @@
-#ifndef MAP_FACE_H
-#define MAP_FACE_H
+#ifndef TEXTURED_DRAWABLE_H
+#define TEXTURED_DRAWABLE_H
 
 #include <glm/glm.hpp>
 
@@ -7,7 +7,7 @@
 #include "gfx/Graphics.hpp"
 #include "gfx/drawable/Drawable.hpp"
 
-class MapFace : public Drawable
+class TexturedDrawable : public Drawable
 {
     struct UniformBlock {
         struct Frag {
@@ -33,13 +33,14 @@ class MapFace : public Drawable
         Frag frag;
     };
 
-    UniformBlock m_ub;
-
 public:
-    MapFace(Graphics& gfx, Mesh const& mesh);
-    ~MapFace() override;
+    TexturedDrawable(Graphics& gfx, Mesh const& mesh);
+    ~TexturedDrawable() override;
     void ChangeTexture(Graphics& gfx, char const* filename);
     void Update(Graphics& gfx) override;
+
+private:
+    UniformBlock m_ub;
 };
 
 #endif

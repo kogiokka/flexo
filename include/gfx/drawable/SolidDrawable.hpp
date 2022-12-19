@@ -1,13 +1,10 @@
-#ifndef POLYGONAL_MODEL_H
-#define POLYGONAL_MODEL_H
+#ifndef SOLID_DRAWABLE_H
+#define SOLID_DRAWABLE_H
 
-#include <glm/glm.hpp>
-
-#include "Mesh.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/drawable/Drawable.hpp"
 
-class PolygonalModel : public Drawable
+class SolidDrawable : public Drawable
 {
     struct UniformBlock {
         struct Frag {
@@ -36,8 +33,8 @@ class PolygonalModel : public Drawable
     UniformBlock m_ub;
 
 public:
-    PolygonalModel(Graphics& gfx, Mesh const& mesh);
-    ~PolygonalModel() override;
+    SolidDrawable(Graphics& gfx, Mesh const& mesh);
+    ~SolidDrawable() override;
     void Update(Graphics& gfx) override;
 };
 

@@ -12,9 +12,9 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
-#include "gfx/drawable/PolygonalModel.hpp"
+#include "gfx/drawable/SolidDrawable.hpp"
 
-PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
+SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
 {
     m_isVisible = true;
 
@@ -40,9 +40,9 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     Task draw;
     draw.mDrawable = this;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/PolygonalModel.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/SolidDrawable.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/PolygonalModel.frag"));
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/SolidDrawable.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
@@ -52,11 +52,11 @@ PolygonalModel::PolygonalModel(Graphics& gfx, Mesh const& mesh)
     AddTask(draw);
 }
 
-PolygonalModel::~PolygonalModel()
+SolidDrawable::~SolidDrawable()
 {
 }
 
-void PolygonalModel::Update(Graphics& gfx)
+void SolidDrawable::Update(Graphics& gfx)
 {
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;

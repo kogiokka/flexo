@@ -1,5 +1,5 @@
-#ifndef MAP_EDGE_H
-#define MAP_EDGE_H
+#ifndef WIRE_DRAWABLE_H
+#define WIRE_DRAWABLE_H
 
 #include <vector>
 
@@ -10,7 +10,7 @@
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/drawable/IndexedDrawable.hpp"
 
-class MapEdge : public IndexedDrawable
+class WireDrawable : public IndexedDrawable
 {
     struct UniformBlock {
         struct Frag {
@@ -23,8 +23,8 @@ class MapEdge : public IndexedDrawable
     UniformBlock m_ub;
 
 public:
-    MapEdge(Graphics& gfx, Wireframe const& wireframe);
-    ~MapEdge() override;
+    WireDrawable(Graphics& gfx, Wireframe const& wireframe);
+    ~WireDrawable() override;
     void Update(Graphics& gfx) override;
 };
 

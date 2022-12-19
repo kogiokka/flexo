@@ -1,4 +1,4 @@
-#include "gfx/drawable/MapFace.hpp"
+#include "gfx/drawable/TexturedDrawable.hpp"
 #include "World.hpp"
 #include "gfx/Task.hpp"
 #include "gfx/VertexBuffer.hpp"
@@ -14,7 +14,7 @@
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 
-MapFace::MapFace(Graphics& gfx, Mesh const& mesh)
+TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh)
 {
     m_isVisible = false;
 
@@ -48,9 +48,9 @@ MapFace::MapFace(Graphics& gfx, Mesh const& mesh)
     Task draw;
     draw.mDrawable = this;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/MapFace.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/TexturedDrawable.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/MapFace.frag"));
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/TexturedDrawable.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
@@ -62,12 +62,12 @@ MapFace::MapFace(Graphics& gfx, Mesh const& mesh)
     AddTask(draw);
 }
 
-MapFace::~MapFace()
+TexturedDrawable::~TexturedDrawable()
 {
 }
 
 // FIXME
-void MapFace::ChangeTexture(Graphics& gfx, char const* filename)
+void TexturedDrawable::ChangeTexture(Graphics& gfx, char const* filename)
 {
     bool (*const FindTexture)(std::shared_ptr<Bind::Bindable>&)
         = [](std::shared_ptr<Bind::Bindable>& bind) { return (dynamic_cast<Bind::Texture2D*>(bind.get()) != nullptr); };
@@ -77,7 +77,7 @@ void MapFace::ChangeTexture(Graphics& gfx, char const* filename)
     m_tasks.front().AddBindable(Bind::TextureManager::Resolve(gfx, filename, 0));
 }
 
-void MapFace::Update(Graphics& gfx)
+void TexturedDrawable::Update(Graphics& gfx)
 {
     m_ub.frag.viewPos = gfx.GetCameraPosition();
     m_ub.frag.light.position = world.lightPos;

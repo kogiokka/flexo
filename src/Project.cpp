@@ -20,11 +20,11 @@
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/drawable/LightSource.hpp"
-#include "gfx/drawable/MapEdge.hpp"
-#include "gfx/drawable/MapFace.hpp"
 #include "gfx/drawable/MapVertex.hpp"
-#include "gfx/drawable/PolygonalModel.hpp"
+#include "gfx/drawable/SolidDrawable.hpp"
+#include "gfx/drawable/TexturedDrawable.hpp"
 #include "gfx/drawable/VolumetricModel.hpp"
+#include "gfx/drawable/WireDrawable.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 #include "util/Logger.h"
 
@@ -45,7 +45,7 @@ WatermarkingProject::WatermarkingProject()
         auto& drawables = DrawList::Get(*this);
         for (auto it = drawables.begin(); it != drawables.end(); it++) {
             {
-                MapFace* face = dynamic_cast<MapFace*>(it->get());
+                TexturedDrawable* face = dynamic_cast<TexturedDrawable*>(it->get());
                 if (face != nullptr) {
                     face->ChangeTexture(gfx, filename.c_str());
                 }
@@ -61,7 +61,7 @@ WatermarkingProject::WatermarkingProject()
         auto& drawlist = DrawList::Get(*this);
 
         SetModelDrawable(std::make_shared<VolumetricModel>(Graphics::Get(*this), m_model->GenMesh()));
-        drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, world.mapMesh.GenerateMesh()));
+        drawlist.Add(ObjectType_MapFace, std::make_shared<TexturedDrawable>(gfx, world.mapMesh.GenerateMesh()));
         drawlist.Submit(Renderer::Get(*this));
     });
 }
@@ -138,8 +138,8 @@ void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)
 
     drawlist.Add(ObjectType_MapVertex,
                  std::make_shared<MapVertex>(gfx, ConstructSphere(32, 16).GenerateMesh(), emesh.positions));
-    drawlist.Add(ObjectType_MapEdge, std::make_shared<MapEdge>(gfx, emesh.GenerateWireframe()));
-    drawlist.Add(ObjectType_MapFace, std::make_shared<MapFace>(gfx, emesh.GenerateMesh()));
+    drawlist.Add(ObjectType_MapEdge, std::make_shared<WireDrawable>(gfx, emesh.GenerateWireframe()));
+    drawlist.Add(ObjectType_MapFace, std::make_shared<TexturedDrawable>(gfx, emesh.GenerateMesh()));
     drawlist.Submit(Renderer::Get(*this));
 }
 
@@ -181,7 +181,7 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
 
         world.theDataset = std::make_shared<Dataset<3>>(sphere.positions);
 
-        SetModelDrawable(std::make_shared<PolygonalModel>(Graphics::Get(*this), sphere.GenerateMesh()));
+        SetModelDrawable(std::make_shared<SolidDrawable>(Graphics::Get(*this), sphere.GenerateMesh()));
     }
 }
 

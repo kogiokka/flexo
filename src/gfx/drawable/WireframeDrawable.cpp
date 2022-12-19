@@ -13,9 +13,9 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
-#include "gfx/drawable/MapEdge.hpp"
+#include "gfx/drawable/WireDrawable.hpp"
 
-MapEdge::MapEdge(Graphics& gfx, Wireframe const& wireframe)
+WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     : m_ub {}
 {
     std::vector<unsigned int> indices;
@@ -41,9 +41,9 @@ MapEdge::MapEdge(Graphics& gfx, Wireframe const& wireframe)
     Task draw;
     draw.mDrawable = this;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/MapEdge.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/WireDrawable.vert");
     draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/MapEdge.frag"));
+    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
     draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     draw.AddBindable(std::make_shared<Bind::TransformUniformBuffer>(gfx, glm::mat4(1.0f)));
     draw.AddBindable(std::make_shared<Bind::UniformBuffer<UniformBlock>>(gfx, m_ub, 1));
@@ -53,11 +53,11 @@ MapEdge::MapEdge(Graphics& gfx, Wireframe const& wireframe)
     AddTask(draw);
 }
 
-MapEdge::~MapEdge()
+WireDrawable::~WireDrawable()
 {
 }
 
-void MapEdge::Update(Graphics& gfx)
+void WireDrawable::Update(Graphics& gfx)
 {
     for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
         Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
