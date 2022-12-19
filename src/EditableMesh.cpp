@@ -144,9 +144,9 @@ std::vector<TriangularFace> EditableMesh::GenerateTriangularFaces() const
 {
     using VertexCount = unsigned int;
     using ListOfTriangles = std::vector<TriangularFace>;
+    static std::unordered_map<VertexCount, ListOfTriangles> cache;
 
     ListOfTriangles triangles;
-    std::unordered_map<VertexCount, ListOfTriangles> cache;
 
     for (Face const& face : faces) {
         VertexCount count = face.size();
