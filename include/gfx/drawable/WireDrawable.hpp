@@ -15,6 +15,7 @@ class WireDrawable : public IndexedDrawable
 public:
     WireDrawable(Graphics& gfx, Wireframe const& wireframe);
     ~WireDrawable() override;
+    void SetColor(float r, float g, float b);
     void Update(Graphics& gfx) override;
 
 private:

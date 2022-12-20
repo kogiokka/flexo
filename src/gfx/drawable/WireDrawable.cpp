@@ -57,6 +57,11 @@ WireDrawable::~WireDrawable()
 {
 }
 
+void WireDrawable::SetColor(float r, float g, float b)
+{
+    m_ub.Assign("color", glm::vec3(r, g, b));
+}
+
 void WireDrawable::Update(Graphics& gfx)
 {
     // FIXME Need to rework UniformBuffer creation/update

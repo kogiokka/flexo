@@ -35,14 +35,18 @@ void Object::GenerateDrawables(Graphics& gfx)
     case ObjectViewFlag_Wire:
         list.push_back(std::make_shared<WireDrawable>(gfx, GenerateWireMesh()));
         break;
-    case ObjectViewFlag_SolidWithWireframe:
+    case ObjectViewFlag_SolidWithWireframe: {
         list.push_back(std::make_shared<SolidDrawable>(gfx, GenerateSolidMesh()));
-        list.push_back(std::make_shared<WireDrawable>(gfx, GenerateWireMesh()));
-        break;
-    case ObjectViewFlag_TexturedWithWireframe:
+        auto wireframe = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
+        wireframe->SetColor(0.0f, 0.0f, 0.0f);
+        list.push_back(wireframe);
+    } break;
+    case ObjectViewFlag_TexturedWithWireframe: {
         list.push_back(std::make_shared<TexturedDrawable>(gfx, GenerateTexturedMesh(), m_texture));
-        list.push_back(std::make_shared<WireDrawable>(gfx, GenerateWireMesh()));
-        break;
+        auto wireframe = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
+        wireframe->SetColor(0.0f, 0.0f, 0.0f);
+        list.push_back(wireframe);
+    } break;
     }
 
     m_drawables = list;
