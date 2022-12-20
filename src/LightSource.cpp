@@ -1,5 +1,4 @@
 #include "LightSource.hpp"
-#include "World.hpp"
 
 LightSource::LightSource()
 {
