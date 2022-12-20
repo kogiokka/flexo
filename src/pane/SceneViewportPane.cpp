@@ -84,7 +84,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
 
     auto& gfx = Graphics::Get(m_project);
 
-    float bgColor[4] = { 0.2f, 0.2f, 0.2f, 1.0f };
+    float bgColor[4] = { 0.2157f, 0.2157f, 0.2157f, 1.0f };
     gfx.ClearRenderTargetView(m_rtv.Get(), bgColor);
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 

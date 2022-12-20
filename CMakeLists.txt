@@ -59,6 +59,7 @@ PRIVATE
 
     "src/Object.cpp"
     "src/LightSource.cpp"
+    "src/Guides.cpp"
     "src/gfx/Graphics.cpp"
     "src/gfx/Renderer.cpp"
     "src/gfx/ObjectList.cpp"

@@ -140,6 +140,37 @@ EditableMesh ConstructSphere(int numSegments, int numRings)
     return mesh;
 }
 
+EditableMesh ConstructGrid(int numXDiv, int numYDiv)
+{
+    EditableMesh mesh;
+
+    float ox = -1.0f;
+    float oy = -1.0f;
+    float dx = 2.0f / static_cast<float>(numXDiv);
+    float dy = 2.0f / static_cast<float>(numYDiv);
+
+    for (int y = 0; y < numYDiv; y++) {
+        for (int x = 0; x < numXDiv; x++) {
+            mesh.positions.emplace_back(ox + x * dx, oy + y * dy, 0.0f);
+        }
+    }
+
+    for (int y = 0; y < numYDiv - 1; y++) {
+        for (int x = 0; x < numXDiv - 1; x++) {
+            unsigned int index = y * numXDiv + x;
+
+            unsigned int i1, i2, i3, i4;
+            i1 = index;
+            i2 = index + 1;
+            i3 = index + numXDiv + 1;
+            i4 = index + numXDiv;
+            mesh.faces.push_back({ i1, i2, i3, i4 });
+        }
+    }
+
+    return mesh;
+}
+
 std::vector<TriangularFace> EditableMesh::GenerateTriangularFaces() const
 {
     using VertexCount = unsigned int;

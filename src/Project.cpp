@@ -10,6 +10,7 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "EditableMesh.hpp"
+#include "Guides.hpp"
 #include "LightSource.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
@@ -64,10 +65,12 @@ WatermarkingProject::~WatermarkingProject()
 void WatermarkingProject::CreateScene()
 {
     auto& objlist = ObjectList::Get(*this);
+    auto& renderer = Renderer::Get(*this);
     auto light = std::make_shared<LightSource>();
     light->SetPosition(0.0f, 5.0f, 0.0f);
     objlist.Add(ObjectType_Light, light);
-    objlist.Submit(Renderer::Get(*this));
+    objlist.Add(ObjectType_Guides, std::make_shared<Guides>());;
+    objlist.Submit(renderer);
 }
 
 void WatermarkingProject::CreateProject()

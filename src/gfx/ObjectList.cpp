@@ -33,6 +33,7 @@ ObjectList::ObjectList(WatermarkingProject& project)
     : m_list()
     , m_project(project)
 {
+    m_showHandle = true;
     m_project.Bind(EVT_OBJECTLIST_DELETE_OBJECT, &ObjectList::OnDeleteObject, this);
 }
 

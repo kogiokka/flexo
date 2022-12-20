@@ -7,6 +7,7 @@
 
 #include "Wireframe.hpp"
 #include "gfx/Graphics.hpp"
+#include "gfx/UniformBlock.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/drawable/IndexedDrawable.hpp"
 

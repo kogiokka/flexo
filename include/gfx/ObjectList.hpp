@@ -15,6 +15,7 @@
 class WatermarkingProject;
 
 #define OBJECT_TYPES                                                                                                   \
+    X(ObjectType_Guides, "Guides")                                                                                     \
     X(ObjectType_Model, "Model")                                                                                       \
     X(ObjectType_Map, "Map")                                                                                           \
     X(ObjectType_Light, "Light")
@@ -51,6 +52,7 @@ private:
     void Remove(std::string id);
     void OnDeleteObject(wxCommandEvent& event);
 
+    bool m_showHandle;
     std::vector<std::shared_ptr<Object>> m_list;
     std::unordered_map<enum ObjectType, unsigned int> m_typeCount;
     WatermarkingProject& m_project;
