@@ -124,7 +124,7 @@ void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)
     auto& objlist = ObjectList::Get(*this);
 
     world.theMap->SetTexture(Bind::TextureManager::Resolve(gfx, m_imageFile.c_str(), 0));
-    world.theMap->SetViewFlags(ObjectViewFlag_Wire | ObjectViewFlag_Textured);
+    world.theMap->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
     objlist.Add(ObjectType_Map, world.theMap);
     objlist.Submit(Renderer::Get(*this));
 }

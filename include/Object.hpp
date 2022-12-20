@@ -15,9 +15,11 @@
 typedef int ObjectViewFlag;
 
 enum ObjectViewFlag_ {
-    ObjectViewFlag_Solid = 0b0001,
-    ObjectViewFlag_Textured = 0b0010,
-    ObjectViewFlag_Wire = 0b0100,
+    ObjectViewFlag_Solid,
+    ObjectViewFlag_Textured,
+    ObjectViewFlag_Wire,
+    ObjectViewFlag_SolidWithWireframe,
+    ObjectViewFlag_TexturedWithWireframe,
 };
 
 class Object
@@ -32,6 +34,7 @@ public:
 
     void SetID(std::string id);
     void SetViewFlags(ObjectViewFlag flags);
+    ObjectViewFlag GetViewFlags() const;
     void SetTexture(std::shared_ptr<Bind::Texture2D> texture);
 
     std::string GetID() const;
@@ -51,3 +54,4 @@ protected:
 };
 
 #endif
+

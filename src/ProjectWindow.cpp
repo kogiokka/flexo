@@ -20,6 +20,7 @@ enum {
     TIMER_UPDATE_UI = wxID_HIGHEST + 1,
     EVT_VIEW_MENU_SCENE_VIEWPORT,
     EVT_VIEW_MENU_SOM,
+    EVT_VIEW_MENU_PROPERTIES,
     EVT_VIEW_MENU_WATERMARKING,
     EVT_VIEW_MENU_SCENE_OUTLINER,
 };
@@ -72,6 +73,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SOM, "Toggle SOM Pane");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_WATERMARKING, "Toggle Watermarking Pane");
+    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_PROPERTIES, "Toggle Properties Pane");
 
     auto cameraMenu = new wxMenu;
     cameraMenu->Append(wxID_REFRESH, "Reset");
@@ -109,6 +111,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SOM);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_WATERMARKING);
+    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_PROPERTIES);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
 
     m_updateUITimer = new wxTimer(this, TIMER_UPDATE_UI);
@@ -207,6 +210,7 @@ void ProjectWindow::OnTimerUpdateUI(wxTimerEvent&)
     m_viewMenu->Check(EVT_VIEW_MENU_SCENE_VIEWPORT, m_mgr.GetPane("viewport").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_SCENE_OUTLINER, m_mgr.GetPane("outliner").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_SOM, m_mgr.GetPane("som").IsShown());
+    m_viewMenu->Check(EVT_VIEW_MENU_PROPERTIES, m_mgr.GetPane("properties").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_WATERMARKING, m_mgr.GetPane("watermarking").IsShown());
 
     UpdateWindowUI();
@@ -225,6 +229,8 @@ void ProjectWindow::OnTogglePane(wxCommandEvent& event)
         name = "outliner";
     } else if (id == EVT_VIEW_MENU_SCENE_VIEWPORT) {
         name = "viewport";
+    } else if (id == EVT_VIEW_MENU_PROPERTIES) {
+        name = "properties";
     }
 
     wxAuiPaneInfo& paneInfo = m_mgr.GetPane(name);

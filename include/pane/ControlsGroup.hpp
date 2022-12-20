@@ -58,6 +58,7 @@ public:
     wxTextCtrl* AddInputText(wxString const& label, wxString const& value = wxEmptyString);
     wxTextCtrl* AddReadOnlyText(wxString const& label, wxString const& value = wxEmptyString);
     wxSlider* AddSliderFloat(wxString const& label, float value, float minValue, float maxValue);
+    wxComboBox* AddComboBox(wxString const& label);
     wxBitmapComboBox* AddBitmapComboBox(wxString const& label);
 
 private:

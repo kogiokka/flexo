@@ -108,6 +108,18 @@ wxSlider* ControlsGroup::AddSliderFloat(wxString const& label, float value, floa
     return slider;
 }
 
+wxComboBox* ControlsGroup::AddComboBox(wxString const& label)
+{
+    wxComboBox* combo = new wxComboBox(GetPane(), wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, 0, nullptr,
+                                       wxCB_READONLY);
+    combo->SetCanFocus(false);
+    combo->SetFont(m_widgetFont);
+
+    AppendControl(label, combo);
+
+    return combo;
+}
+
 wxBitmapComboBox* ControlsGroup::AddBitmapComboBox(wxString const& label)
 {
     wxBitmapComboBox* comboBox

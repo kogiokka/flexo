@@ -6,6 +6,7 @@
 #include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
+#include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
@@ -52,6 +53,7 @@ bool WatermarkingApp::OnInit()
     auto* outliner = new SceneOutlinerPane(page, project);
     auto* som = new SelfOrganizingMapPane(page, project);
     auto* watermarking = new WatermarkingPane(page, project);
+    auto* properties = new PropertiesPane(page, project);
     watermarking->Disable();
 
     wxSize const minSize = page->FromDIP(wxSize(450, 20));
@@ -67,6 +69,15 @@ bool WatermarkingApp::OnInit()
                 wxAuiPaneInfo()
                     .Name("outliner")
                     .Caption("Scene Outliner")
+                    .Right()
+                    .Layer(1)
+                    .CloseButton(true)
+                    .MaximizeButton(true)
+                    .MinSize(minSize));
+    mgr.AddPane(properties,
+                wxAuiPaneInfo()
+                    .Name("properties")
+                    .Caption("Properties")
                     .Right()
                     .Layer(1)
                     .CloseButton(true)
@@ -94,3 +105,4 @@ bool WatermarkingApp::OnInit()
 
     return true;
 }
+

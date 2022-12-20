@@ -200,6 +200,10 @@ Mesh EditableMesh::GenerateMesh() const
         }
     }
 
+    if (!HasTextureCoords()) {
+        mesh.textureCoords = std::vector<glm::vec2>(mesh.positions.size(), glm::vec2(0.0f, 0.0f));
+    }
+
     return mesh;
 }
 

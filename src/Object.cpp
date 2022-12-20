@@ -20,16 +20,29 @@ void Object::GenerateDrawables(Graphics& gfx)
 {
     Object::DrawList list;
 
-    if (m_flags & ObjectViewFlag_Solid) {
+    // FIXME
+    if (!m_texture) {
+        m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
+    }
+
+    switch (m_flags) {
+    case ObjectViewFlag_Solid:
         list.push_back(std::make_shared<SolidDrawable>(gfx, GenerateSolidMesh()));
-    }
-
-    if (m_flags & ObjectViewFlag_Textured) {
+        break;
+    case ObjectViewFlag_Textured:
         list.push_back(std::make_shared<TexturedDrawable>(gfx, GenerateTexturedMesh(), m_texture));
-    }
-
-    if (m_flags & ObjectViewFlag_Wire) {
+        break;
+    case ObjectViewFlag_Wire:
         list.push_back(std::make_shared<WireDrawable>(gfx, GenerateWireMesh()));
+        break;
+    case ObjectViewFlag_SolidWithWireframe:
+        list.push_back(std::make_shared<SolidDrawable>(gfx, GenerateSolidMesh()));
+        list.push_back(std::make_shared<WireDrawable>(gfx, GenerateWireMesh()));
+        break;
+    case ObjectViewFlag_TexturedWithWireframe:
+        list.push_back(std::make_shared<TexturedDrawable>(gfx, GenerateTexturedMesh(), m_texture));
+        list.push_back(std::make_shared<WireDrawable>(gfx, GenerateWireMesh()));
+        break;
     }
 
     m_drawables = list;
@@ -47,6 +60,11 @@ Object::DrawList const& Object::GetDrawables() const
 void Object::SetViewFlags(ObjectViewFlag flags)
 {
     m_flags = flags;
+}
+
+ObjectViewFlag Object::GetViewFlags() const
+{
+    return m_flags;
 }
 
 void Object::SetID(std::string id)

@@ -12,11 +12,6 @@
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 
-TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh)
-{
-    TexturedDrawable(gfx, mesh, Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0));
-}
-
 TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_ptr<Bind::Texture2D> texture)
 {
     GLWRSamplerDesc samplerDesc;

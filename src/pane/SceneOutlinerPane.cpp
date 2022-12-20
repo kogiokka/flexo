@@ -11,6 +11,7 @@
 #include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
+#include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 
 wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
@@ -86,6 +87,14 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
                 }
             }
         }
+    });
+
+    m_sceneTree->Bind(wxEVT_TREELIST_ITEM_ACTIVATED, [this](wxTreeListEvent& event) {
+        wxTreeListItem const item = event.GetItem();
+        wxString const id = m_sceneTree->GetItemText(item);
+        wxCommandEvent evt(EVT_PROPERTIES_PANE_OBJECT_CHANGED);
+        evt.SetString(id);
+        m_project.ProcessEvent(evt);
     });
 }
 
