@@ -9,47 +9,49 @@
 #include <wx/event.h>
 
 #include "Attachable.hpp"
+#include "Object.hpp"
 #include "gfx/Renderer.hpp"
-#include "gfx/drawable/DrawableBase.hpp"
 
 class WatermarkingProject;
 
 #define OBJECT_TYPES                                                                                                   \
     X(ObjectType_Model, "Model")                                                                                       \
-    X(ObjectType_MapFace, "Map.face")                                                                                  \
-    X(ObjectType_MapEdge, "Map.edge")                                                                                  \
-    X(ObjectType_MapVertex, "Map.vertex")                                                                              \
+    X(ObjectType_Map, "Map")                                                                                           \
     X(ObjectType_Light, "Light")
 
 #define X(type, name) type,
 enum ObjectType : unsigned int { OBJECT_TYPES };
 #undef X
 
-wxDECLARE_EVENT(EVT_DRAWLIST_DELETE_OBJECT, wxCommandEvent);
+wxDECLARE_EVENT(EVT_OBJECTLIST_DELETE_OBJECT, wxCommandEvent);
 
-class DrawList : public AttachableBase
+class ObjectList : public AttachableBase
 {
 public:
-    static DrawList& Get(WatermarkingProject& project);
-    static DrawList const& Get(WatermarkingProject const& project);
-    DrawList(WatermarkingProject& project);
-    void Add(enum ObjectType type, std::shared_ptr<DrawableBase> drawable);
+    static ObjectList& Get(WatermarkingProject& project);
+    static ObjectList const& Get(WatermarkingProject const& project);
+    ObjectList(WatermarkingProject& project);
+    void Add(enum ObjectType type, std::shared_ptr<Object> object);
+    void UpdateObjectDrawables(std::string const& id);
     void Submit(Renderer& renderer) const;
 
 public:
     // Forward the iterator functions
-    using iterator = std::vector<std::shared_ptr<DrawableBase>>::iterator;
+    using iterator = std::vector<std::shared_ptr<Object>>::iterator;
     iterator begin();
     iterator end();
-    using const_iterator = std::vector<std::shared_ptr<DrawableBase>>::const_iterator;
+    using const_iterator = std::vector<std::shared_ptr<Object>>::const_iterator;
     const_iterator cbegin() const;
     const_iterator cend() const;
+
+    using size_type = std::vector<std::shared_ptr<Object>>::size_type;
+    size_type size() const;
 
 private:
     void Remove(std::string id);
     void OnDeleteObject(wxCommandEvent& event);
 
-    std::vector<std::shared_ptr<DrawableBase>> m_drawlist;
+    std::vector<std::shared_ptr<Object>> m_list;
     std::unordered_map<enum ObjectType, unsigned int> m_typeCount;
     WatermarkingProject& m_project;
 };

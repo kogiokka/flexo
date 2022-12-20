@@ -7,6 +7,7 @@
 #include "VecUtil.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
+#include "util/Logger.h"
 
 class Trianglemeter
 {
@@ -105,7 +106,35 @@ std::vector<Voxel> const& SurfaceVoxels::Voxels() const
     return m_voxels;
 }
 
-Mesh SurfaceVoxels::GenMesh()
+Mesh SurfaceVoxels::GenerateSolidMesh() const
+{
+    Mesh mesh;
+
+    for (auto const& vx : m_voxels) {
+        if (vx.vis & Voxel::Vis::XP) {
+            AddFace(mesh, VOXEL.face.xp, vx.pos, m_scale);
+        }
+        if (vx.vis & Voxel::Vis::XN) {
+            AddFace(mesh, VOXEL.face.xn, vx.pos, m_scale);
+        }
+        if (vx.vis & Voxel::Vis::YP) {
+            AddFace(mesh, VOXEL.face.yp, vx.pos, m_scale);
+        }
+        if (vx.vis & Voxel::Vis::YN) {
+            AddFace(mesh, VOXEL.face.yn, vx.pos, m_scale);
+        }
+        if (vx.vis & Voxel::Vis::ZP) {
+            AddFace(mesh, VOXEL.face.zp, vx.pos, m_scale);
+        }
+        if (vx.vis & Voxel::Vis::ZN) {
+            AddFace(mesh, VOXEL.face.zn, vx.pos, m_scale);
+        }
+    }
+
+    return mesh;
+}
+
+Mesh SurfaceVoxels::GenerateTexturedMesh() const
 {
     Mesh mesh;
 
@@ -137,6 +166,14 @@ Mesh SurfaceVoxels::GenMesh()
     }
 
     return mesh;
+}
+
+Wireframe SurfaceVoxels::GenerateWireMesh() const
+{
+    Wireframe wire;
+
+    // TODO;
+    return wire;
 }
 
 std::vector<glm::vec3> SurfaceVoxels::GenPositions()
@@ -311,3 +348,4 @@ void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)
     }
     mesh.normals.insert(mesh.normals.end(), face.normals.begin(), face.normals.end());
 }
+

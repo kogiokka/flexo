@@ -16,8 +16,6 @@
 
 SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
 {
-    m_isVisible = true;
-
     m_ublight.AddElement(UniformBlock::Type::vec3f32, "light.position");
     m_ublight.AddElement(UniformBlock::Type::vec3f32, "light.ambient");
     m_ublight.AddElement(UniformBlock::Type::vec3f32, "light.diffusion");
@@ -32,14 +30,15 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
     m_ubmat.FinalizeLayout();
     m_ubo.FinalizeLayout();
 
-    m_ublight.Assign("light.position", world.lightPos);
-    m_ublight.Assign("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    m_ublight.Assign("light.diffusion", glm::vec3(0.5f, 0.5f, 0.5f));
-    m_ublight.Assign("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
-    m_ubmat.Assign("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
-    m_ubmat.Assign("material.diffusion", glm::vec3(0.0f, 0.6352941f, 0.9294118f));
+    m_ublight.Assign("light.position", gfx.GetCameraPosition());
+    m_ublight.Assign("light.ambient", glm::vec3(0.8f, 0.8f, 0.8f));
+    m_ublight.Assign("light.diffusion", glm::vec3(0.8f, 0.8f, 0.8f));
+    m_ublight.Assign("light.specular", glm::vec3(0.8f, 0.8f, 0.8f));
+
+    m_ubmat.Assign("material.ambient", glm::vec3(0.3f, 0.3f, 0.3f));
+    m_ubmat.Assign("material.diffusion", glm::vec3(0.6f, 0.6f, 0.6f));
     m_ubmat.Assign("material.specular", glm::vec3(0.3f, 0.3f, 0.3f));
-    m_ubmat.Assign("material.shininess", 32.0f);
+    m_ubmat.Assign("material.shininess", 256.0f);
     m_ubo.Assign("viewPos", gfx.GetCameraPosition());
 
     VertexBuffer buf(mesh);
@@ -75,7 +74,7 @@ SolidDrawable::~SolidDrawable()
 void SolidDrawable::Update(Graphics& gfx)
 {
     m_ubo.Assign("viewPos", gfx.GetCameraPosition());
-    m_ublight.Assign("light.position", world.lightPos);
+    m_ublight.Assign("light.position", gfx.GetCameraPosition());
 
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;

@@ -37,11 +37,10 @@ public:
 private:
     void OnSOMPaneMapChanged(wxCommandEvent& event);
     void OnMenuAddModel(wxCommandEvent& event);
-    void SetModelDrawable(std::shared_ptr<DrawableBase> drawable);
 
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-    std::unique_ptr<SurfaceVoxels> m_model;
+    std::shared_ptr<SurfaceVoxels> m_model;
     std::string m_imageFile;
 };
 

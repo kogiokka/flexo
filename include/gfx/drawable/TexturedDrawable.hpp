@@ -12,6 +12,7 @@
 class TexturedDrawable : public Drawable
 {
 public:
+    TexturedDrawable(Graphics& gfx, Mesh const& mesh);
     TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_ptr<Bind::Texture2D> texture);
     ~TexturedDrawable() override;
     void ChangeTexture(std::shared_ptr<Bind::Texture2D> texture);

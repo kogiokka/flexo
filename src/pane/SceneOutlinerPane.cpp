@@ -8,7 +8,7 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "World.hpp"
-#include "gfx/DrawList.hpp"
+#include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 #include "pane/SceneOutlinerPane.hpp"
@@ -46,7 +46,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     m_project.Bind(EVT_OUTLINER_ADD_OBJECT, &SceneOutlinerPane::OnAddObject, this);
     m_project.Bind(EVT_OUTLINER_DELETE_OBJECT, [this](wxCommandEvent&) {
         m_sceneTree->DeleteAllItems();
-        for (auto const& drawable : DrawList::Get(m_project)) {
+        for (auto const& drawable : ObjectList::Get(m_project)) {
             auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
             m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
         }
@@ -60,7 +60,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         case ID_Delete:
             auto item = event.GetItem();
 
-            wxCommandEvent event(EVT_DRAWLIST_DELETE_OBJECT);
+            wxCommandEvent event(EVT_OBJECTLIST_DELETE_OBJECT);
             event.SetString(m_sceneTree->GetItemText(item).ToStdString());
             m_project.ProcessEvent(event);
 
@@ -72,14 +72,14 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CHECKED, [this](wxTreeListEvent& event) {
         wxTreeListItem const item = event.GetItem();
         wxString const text = m_sceneTree->GetItemText(item);
-        for (auto const& drawable : DrawList::Get(m_project)) {
-            if (text == drawable->GetID()) {
+        for (auto const& obj : ObjectList::Get(m_project)) {
+            if (text == obj->GetID()) {
                 switch (m_sceneTree->GetCheckedState(item)) {
                 case wxCHK_CHECKED:
-                    drawable->SetVisible(true);
+                    obj->SetVisible(true);
                     break;
                 case wxCHK_UNCHECKED:
-                    drawable->SetVisible(false);
+                    obj->SetVisible(false);
                     break;
                 default:
                     break;
@@ -103,10 +103,10 @@ wxTreeListCtrl* SceneOutlinerPane::CreateSceneTree()
 
 void SceneOutlinerPane::OnAddObject(wxCommandEvent& event)
 {
-    for (auto const& drawable : DrawList::Get(m_project)) {
-        if (event.GetString() == drawable->GetID()) {
-            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), drawable->GetID());
-            m_sceneTree->CheckItem(item, drawable->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
+    for (auto const& obj : ObjectList::Get(m_project)) {
+        if (event.GetString() == obj->GetID()) {
+            auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), obj->GetID());
+            m_sceneTree->CheckItem(item, obj->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
             break;
         }
     }

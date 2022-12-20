@@ -4,6 +4,11 @@
 #include "gfx/Task.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 
+DrawableBase::DrawableBase()
+    : m_isVisible(true)
+{
+}
+
 void DrawableBase::AddTask(Task task)
 {
     m_tasks.push_back(std::move(task));
@@ -24,14 +29,4 @@ void DrawableBase::SetVisible(bool visible)
 bool DrawableBase::IsVisible() const
 {
     return m_isVisible;
-}
-
-void DrawableBase::SetID(std::string id)
-{
-    m_id = id;
-}
-
-std::string DrawableBase::GetID() const
-{
-    return m_id;
 }

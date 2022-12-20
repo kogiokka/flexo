@@ -11,6 +11,7 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "World.hpp"
+#include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "util/Logger.h"
@@ -87,11 +88,13 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearRenderTargetView(m_rtv.Get(), bgColor);
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
+    auto& renderer = Renderer::Get(m_project);
     if (world.theMap) {
-        world.mapMesh = GenMapEditableMesh(*world.theMap);
+        world.theMap->GenerateDrawables(gfx);
+        ObjectList::Get(m_project).UpdateObjectDrawables(world.theMap->GetID());
     }
 
-    Renderer::Get(m_project).Render(gfx);
+    renderer.Render(gfx);
 
     gfx.Present();
 

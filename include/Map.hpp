@@ -3,7 +3,9 @@
 
 #include "EditableMesh.hpp"
 #include "Node.hpp"
+#include "Object.hpp"
 #include "Vec.hpp"
+#include "gfx/drawable/TexturedDrawable.hpp"
 
 #include <vector>
 
@@ -23,12 +25,37 @@ typedef enum {
 struct Mesh;
 
 template <int InDim, int OutDim>
-struct Map {
+struct Map : public Object {
+    Map() = default;
+    virtual ~Map() = default;
     Vec<OutDim, int> size;
     std::vector<Node<InDim, OutDim>> nodes;
     MapFlags flags;
+
+private:
+    Mesh GenerateSolidMesh() const override;
+    Mesh GenerateTexturedMesh() const override;
+    Wireframe GenerateWireMesh() const override;
 };
 
 EditableMesh GenMapEditableMesh(Map<3, 2> const& map);
+
+template <int InDim, int OutDim>
+Mesh Map<InDim, OutDim>::GenerateSolidMesh() const
+{
+    return GenMapEditableMesh(*this).GenerateMesh();
+}
+
+template <int InDim, int OutDim>
+Mesh Map<InDim, OutDim>::GenerateTexturedMesh() const
+{
+    return GenMapEditableMesh(*this).GenerateMesh();
+}
+
+template <int InDim, int OutDim>
+Wireframe Map<InDim, OutDim>::GenerateWireMesh() const
+{
+    return GenMapEditableMesh(*this).GenerateWireframe();
+}
 
 #endif

@@ -8,19 +8,24 @@
 
 #include "Map.hpp"
 #include "Mesh.hpp"
+#include "Object.hpp"
 #include "VolumetricModelData.hpp"
 #include "Voxel.hpp"
 
-class SurfaceVoxels
+class SurfaceVoxels : public Object
 {
 public:
     SurfaceVoxels(VolumetricModelData& modelData);
+    virtual ~SurfaceVoxels() = default;
     std::vector<Voxel> const& Voxels() const;
-    Mesh GenMesh();
     std::vector<glm::vec3> GenPositions();
     std::future<void> Parameterize(Map<3, 2> const& map, float& progress);
 
 private:
+    virtual Mesh GenerateTexturedMesh() const override;
+    virtual Mesh GenerateSolidMesh() const override;
+    virtual Wireframe GenerateWireMesh() const override;
+
     glm::vec3 m_scale;
     std::vector<Voxel> m_voxels;
 };

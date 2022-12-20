@@ -25,8 +25,6 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
         indices.push_back(edge.y);
     }
 
-    m_isVisible = true;
-
     m_ub.AddElement(UniformBlock::Type::vec3f32, "color");
     m_ub.FinalizeLayout();
     m_ub.Assign("color", glm::vec3(0.7f, 0.7f, 0.7f));
@@ -61,13 +59,6 @@ WireDrawable::~WireDrawable()
 
 void WireDrawable::Update(Graphics& gfx)
 {
-    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-        if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
-            vb->Update(gfx, VertexBuffer(world.mapMesh.positions));
-        }
-    }
-
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;
     for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {

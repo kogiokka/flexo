@@ -6,17 +6,19 @@
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
 #include "gfx/bindable/Sampler.hpp"
-#include "gfx/bindable/TextureManager.hpp"
 #include "gfx/bindable/TransformUniformBuffer.hpp"
 #include "gfx/bindable/UniformBuffer.hpp"
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
 
+TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh)
+{
+    TexturedDrawable(gfx, mesh, Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0));
+}
+
 TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_ptr<Bind::Texture2D> texture)
 {
-    m_isVisible = false;
-
     GLWRSamplerDesc samplerDesc;
     samplerDesc.coordinateS = GLWRTextureCoordinatesMode_Wrap;
     samplerDesc.coordinateT = GLWRTextureCoordinatesMode_Wrap;
@@ -39,15 +41,15 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
     m_ubmat.FinalizeLayout();
     m_ubo.FinalizeLayout();
 
-    m_ublight.Assign("light.position", world.lightPos);
-    m_ublight.Assign("light.ambient", glm::vec3(0.2f, 0.2f, 0.2f));
-    m_ublight.Assign("light.diffusion", glm::vec3(0.5f, 0.4f, 0.5f));
-    m_ublight.Assign("light.specular", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_ublight.Assign("light.position", gfx.GetCameraPosition());
+    m_ublight.Assign("light.ambient", glm::vec3(0.8f, 0.8f, 0.8f));
+    m_ublight.Assign("light.diffusion", glm::vec3(0.8f, 0.8f, 0.8f));
+    m_ublight.Assign("light.specular", glm::vec3(0.8f, 0.8f, 0.8f));
 
-    m_ubmat.Assign("material.ambient", glm::vec3(1.0f, 1.0f, 1.0f));
-    m_ubmat.Assign("material.diffusion", glm::vec3(1.0f, 1.0f, 1.0f));
+    m_ubmat.Assign("material.ambient", glm::vec3(0.3f, 0.3f, 0.3f));
+    m_ubmat.Assign("material.diffusion", glm::vec3(0.6f, 0.6f, 0.6f));
     m_ubmat.Assign("material.specular", glm::vec3(0.3f, 0.3f, 0.3f));
-    m_ubmat.Assign("material.shininess", 32.0f);
+    m_ubmat.Assign("material.shininess", 256.0f);
 
     m_ubo.Assign("viewPos", gfx.GetCameraPosition());
 
@@ -98,16 +100,16 @@ void TexturedDrawable::ChangeTexture(std::shared_ptr<Bind::Texture2D> texture)
 
 void TexturedDrawable::Update(Graphics& gfx)
 {
-    m_ublight.Assign("light.position", world.lightPos);
+    m_ublight.Assign("light.position", gfx.GetCameraPosition());
     m_ubo.Assign("viewPos", gfx.GetCameraPosition());
 
-    for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
-        Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
-        if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
-            VertexBuffer buffer(world.mapMesh.GenerateMesh());
-            vb->Update(gfx, buffer);
-        }
-    }
+    // for (auto it = m_binds.begin(); it != m_binds.end(); it++) {
+    //     Bind::VertexBuffer* vb = dynamic_cast<Bind::VertexBuffer*>(it->get());
+    //     if ((vb != nullptr) && (vb->GetStartAttrib() == 0)) {
+    //         // VertexBuffer buffer(world.mapMesh.GenerateMesh());
+    //         // vb->Update(gfx, buffer);
+    //     }
+    // }
 
     // FIXME Need to rework UniformBuffer creation/update
     auto const& taskBinds = m_tasks.front().mBinds;
