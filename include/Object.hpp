@@ -41,10 +41,11 @@ public:
     void SetVisible(bool visible);
     bool IsVisible() const;
 
-protected:
     virtual Mesh GenerateSolidMesh() const = 0;
     virtual Mesh GenerateTexturedMesh() const = 0;
     virtual Wireframe GenerateWireMesh() const = 0;
+
+protected:
 
     std::string m_id;
     std::shared_ptr<Bind::Texture2D> m_texture;

@@ -58,7 +58,7 @@ PRIVATE
     "src/util/Logger.c"
 
     "src/Object.cpp"
-    "src/LightSource.cpp"
+    "src/Sphere.cpp"
     "src/Guides.cpp"
     "src/gfx/Graphics.cpp"
     "src/gfx/Renderer.cpp"

@@ -47,6 +47,11 @@ void EditableMesh::TransformStack::Apply(EditableMesh& mesh)
     }
 }
 
+void EditableMesh::TransformStack::Clear()
+{
+    stack = glm::mat4(1.0f);
+}
+
 EditableMesh ConstructCube()
 {
     EditableMesh mesh;

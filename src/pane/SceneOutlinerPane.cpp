@@ -54,11 +54,22 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
     });
 
     m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CONTEXT_MENU, [this](wxTreeListEvent& event) {
-        enum { ID_Delete };
+        enum { ID_GenDataset, ID_Delete };
         wxMenu menu;
+        menu.Append(ID_GenDataset, "&Generate Dataset from this");
         menu.Append(ID_Delete, "&Delete");
         switch (m_sceneTree->GetPopupMenuSelectionFromUser(menu)) {
-        case ID_Delete:
+        case ID_GenDataset: {
+            auto item = event.GetItem();
+            auto id = m_sceneTree->GetItemText(item);
+            for (auto const& obj : ObjectList::Get(m_project)) {
+                if (obj->GetID() == id) {
+                    world.theDataset = std::make_shared<Dataset<3>>(obj->GenerateSolidMesh().positions);
+                    break;
+                }
+            }
+        } break;
+        case ID_Delete: {
             auto item = event.GetItem();
 
             wxCommandEvent event(EVT_OBJECTLIST_DELETE_OBJECT);
@@ -66,7 +77,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
             m_project.ProcessEvent(event);
 
             m_sceneTree->DeleteItem(item);
-            break;
+        } break;
         }
     });
 

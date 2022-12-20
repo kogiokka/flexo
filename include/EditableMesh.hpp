@@ -25,6 +25,7 @@ struct EditableMesh {
         void PushTranslate(glm::vec3 translate);
         void PushScale(float x, float y, float z);
         void PushTranslate(float x, float y, float z);
+        void Clear();
         void Apply(EditableMesh& mesh);
 
     private:

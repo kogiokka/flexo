@@ -11,10 +11,10 @@
 
 #include "EditableMesh.hpp"
 #include "Guides.hpp"
-#include "LightSource.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
+#include "Sphere.hpp"
 #include "SurfaceVoxels.hpp"
 #include "VecUtil.hpp"
 #include "World.hpp"
@@ -66,10 +66,15 @@ void WatermarkingProject::CreateScene()
 {
     auto& objlist = ObjectList::Get(*this);
     auto& renderer = Renderer::Get(*this);
-    auto light = std::make_shared<LightSource>();
-    light->SetPosition(0.0f, 5.0f, 0.0f);
+
+    EditableMesh::TransformStack tf;
+    tf.PushTranslate(0.0f, 5.0f, 0.0f);
+    tf.PushScale(0.2f, 0.2f, 0.2f);
+    auto light = std::make_shared<Sphere>();
+    light->SetTransform(tf);
+
     objlist.Add(ObjectType_Light, light);
-    objlist.Add(ObjectType_Guides, std::make_shared<Guides>());;
+    objlist.Add(ObjectType_Guides, std::make_shared<Guides>());
     objlist.Submit(renderer);
 }
 
@@ -174,15 +179,15 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
         float const radius = glm::length((max - min) * 0.5f);
         glm::vec3 const center = (max + min) * 0.5f;
 
-        EditableMesh sphere = ConstructSphere(60, 60);
+        auto sphere = std::make_shared<Sphere>(60, 60);
 
         EditableMesh::TransformStack stack;
         stack.PushTranslate(center);
         stack.PushScale(radius, radius, radius);
-        stack.Apply(sphere);
+        sphere->SetTransform(stack);
 
-        world.theDataset = std::make_shared<Dataset<3>>(sphere.positions);
-
-        ObjectList::Get(*this).Add(ObjectType_Model, m_model);
+        auto& objlist = ObjectList::Get(*this);
+        objlist.Add(ObjectType_Sphere, sphere);
+        objlist.Submit(Renderer::Get(*this));
     }
 }
