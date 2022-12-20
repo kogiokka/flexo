@@ -40,13 +40,20 @@ WatermarkingProject::WatermarkingProject()
         m_imageFile = event.GetString().ToStdString();
 
         auto& gfx = Graphics::Get(*this);
-        std::string const filename = event.GetString().ToStdString();
-        m_model->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-        world.theMap->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
         auto& objlist = ObjectList::Get(*this);
-        objlist.Add(ObjectType_Model, m_model);
-        objlist.Add(ObjectType_Map, world.theMap);
-        objlist.Submit(Renderer::Get(*this));
+        std::string const filename = event.GetString().ToStdString();
+
+        if (m_model) {
+            m_model->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
+            objlist.Add(ObjectType_Model, m_model);
+            objlist.Submit(Renderer::Get(*this));
+        }
+
+        if (world.theMap) {
+            world.theMap->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
+            objlist.Add(ObjectType_Map, world.theMap);
+            objlist.Submit(Renderer::Get(*this));
+        }
     });
 }
 
