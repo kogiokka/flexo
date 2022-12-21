@@ -34,7 +34,6 @@ public:
     static ObjectList const& Get(WatermarkingProject const& project);
     ObjectList(WatermarkingProject& project);
     void Add(enum ObjectType type, std::shared_ptr<Object> object);
-    void UpdateObjectDrawables(std::string const& id);
     void Submit(Renderer& renderer) const;
 
 public:

@@ -57,21 +57,12 @@ void ObjectList::Add(enum ObjectType type, std::shared_ptr<Object> object)
     }*/
 
     object->SetID(id);
+    object->GenerateDrawables(Graphics::Get(m_project));
     m_list.push_back(object);
 
     wxCommandEvent event(EVT_OUTLINER_ADD_OBJECT);
     event.SetString(id);
     m_project.ProcessEvent(event);
-}
-
-void ObjectList::UpdateObjectDrawables(std::string const& id)
-{
-    Renderer::Get(m_project).Clear();
-    for (auto& obj : m_list) {
-        for (auto const& drawable : obj->GetDrawables()) {
-            drawable->Submit(Renderer::Get(m_project));
-        }
-    }
 }
 
 void ObjectList::Remove(std::string id)
@@ -108,8 +99,7 @@ void ObjectList::Submit(Renderer& renderer) const
 {
     renderer.Clear();
     for (auto const& obj : m_list) {
-        obj->GenerateDrawables(Graphics::Get(m_project));
-        for (auto const& drawable : obj->GetDrawables()) {
+        for (auto const& drawable : obj->GetDrawList()) {
             drawable->Submit(renderer);
         }
     }

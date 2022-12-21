@@ -1,8 +1,5 @@
 #include "Object.hpp"
 
-#include "gfx/drawable/SolidDrawable.hpp"
-#include "gfx/drawable/TexturedDrawable.hpp"
-#include "gfx/drawable/WireDrawable.hpp"
 #include "util/Logger.h"
 
 Object::Object()
@@ -18,47 +15,50 @@ Object::~Object()
 
 void Object::GenerateDrawables(Graphics& gfx)
 {
-    Object::DrawList list;
-
     // FIXME
     if (!m_texture) {
         m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
     }
 
-    switch (m_flags) {
-    case ObjectViewFlag_Solid:
-        list.push_back(std::make_shared<SolidDrawable>(gfx, GenerateSolidMesh()));
-        break;
-    case ObjectViewFlag_Textured:
-        list.push_back(std::make_shared<TexturedDrawable>(gfx, GenerateTexturedMesh(), m_texture));
-        break;
-    case ObjectViewFlag_Wire:
-        list.push_back(std::make_shared<WireDrawable>(gfx, GenerateWireMesh()));
-        break;
-    case ObjectViewFlag_SolidWithWireframe: {
-        list.push_back(std::make_shared<SolidDrawable>(gfx, GenerateSolidMesh()));
-        auto wireframe = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
-        wireframe->SetColor(0.0f, 0.0f, 0.0f);
-        list.push_back(wireframe);
-    } break;
-    case ObjectViewFlag_TexturedWithWireframe: {
-        list.push_back(std::make_shared<TexturedDrawable>(gfx, GenerateTexturedMesh(), m_texture));
-        auto wireframe = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
-        wireframe->SetColor(0.0f, 0.0f, 0.0f);
-        list.push_back(wireframe);
-    } break;
-    }
-
-    m_drawables = list;
-
-    for (auto& d : m_drawables) {
-        d->SetVisible(m_isVisible);
-    }
+    m_solid = std::make_shared<SolidDrawable>(gfx, GenerateSolidMesh());
+    m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateTexturedMesh(), m_texture);
+    m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
 }
 
-Object::DrawList const& Object::GetDrawables() const
+Object::DrawList const& Object::GetDrawList()
 {
-    return m_drawables;
+    Object::DrawList list;
+
+    switch (m_flags) {
+    case ObjectViewFlag_Solid:
+        list.push_back(m_solid);
+        break;
+    case ObjectViewFlag_Textured:
+        list.push_back(m_textured);
+        break;
+    case ObjectViewFlag_Wire:
+        m_wire->SetColor(0.7f, 0.7f, 0.7f);
+        list.push_back(m_wire);
+        break;
+    case ObjectViewFlag_SolidWithWireframe: {
+        list.push_back(m_solid);
+        m_wire->SetColor(0.0f, 0.0f, 0.0f);
+        list.push_back(m_wire);
+    } break;
+    case ObjectViewFlag_TexturedWithWireframe: {
+        list.push_back(m_textured);
+        m_wire->SetColor(0.0f, 0.0f, 0.0f);
+        list.push_back(m_wire);
+    } break;
+    }
+
+    for (auto& d : list) {
+        d->SetVisible(m_isVisible);
+    }
+
+    m_drawlist = list;
+
+    return m_drawlist;
 }
 
 void Object::SetViewFlags(ObjectViewFlag flags)
@@ -89,10 +89,6 @@ std::string Object::GetID() const
 void Object::SetVisible(bool visible)
 {
     m_isVisible = visible;
-
-    for (auto& d : m_drawables) {
-        d->SetVisible(visible);
-    }
 }
 
 bool Object::IsVisible() const

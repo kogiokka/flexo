@@ -91,7 +91,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     auto& renderer = Renderer::Get(m_project);
     if (world.theMap) {
         world.theMap->GenerateDrawables(gfx);
-        ObjectList::Get(m_project).UpdateObjectDrawables(world.theMap->GetID());
+        ObjectList::Get(m_project).Submit(renderer);
     }
 
     renderer.Render(gfx);

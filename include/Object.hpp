@@ -11,6 +11,9 @@
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
+#include "gfx/drawable/SolidDrawable.hpp"
+#include "gfx/drawable/TexturedDrawable.hpp"
+#include "gfx/drawable/WireDrawable.hpp"
 
 typedef int ObjectViewFlag;
 
@@ -30,7 +33,7 @@ public:
     Object();
     ~Object();
     virtual void GenerateDrawables(Graphics& gfx);
-    DrawList const& GetDrawables() const;
+    virtual DrawList const& GetDrawList();
 
     void SetID(std::string id);
     void SetViewFlags(ObjectViewFlag flags);
@@ -46,13 +49,14 @@ public:
     virtual Wireframe GenerateWireMesh() const = 0;
 
 protected:
-
     std::string m_id;
     std::shared_ptr<Bind::Texture2D> m_texture;
-    DrawList m_drawables;
     ObjectViewFlag m_flags;
     bool m_isVisible;
+    std::shared_ptr<SolidDrawable> m_solid;
+    std::shared_ptr<TexturedDrawable> m_textured;
+    std::shared_ptr<WireDrawable> m_wire;
+    DrawList m_drawlist;
 };
 
 #endif
-

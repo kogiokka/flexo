@@ -6,6 +6,8 @@
 
 Guides::Guides()
 {
+    SetViewFlags(ObjectViewFlag_Wire);
+
     m_mesh = ConstructGrid(180, 180);
 
     EditableMesh::TransformStack tf;
@@ -17,10 +19,16 @@ void Guides::GenerateDrawables(Graphics& gfx)
 {
     auto wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
     wire->SetColor(0.3f, 0.3f, 0.3f);
+    wire->SetVisible(m_isVisible);
 
-    auto const& drawable = std::dynamic_pointer_cast<DrawableBase>(wire);
-    drawable->SetVisible(m_isVisible);
-    m_drawables.push_back(drawable);
+    m_wire = wire;
+}
+
+Object::DrawList const& Guides::GetDrawList()
+{
+    m_drawlist.clear();
+    m_drawlist.push_back(m_wire);
+    return m_drawlist;
 }
 
 Mesh Guides::GenerateSolidMesh() const

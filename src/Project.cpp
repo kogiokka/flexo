@@ -82,10 +82,8 @@ void WatermarkingProject::CreateProject()
 {
     assert(world.theDataset);
 
-    auto& objlist = ObjectList::Get(*this);
     m_model->SetViewFlags(ObjectViewFlag_Solid);
-    objlist.Add(ObjectType_Model, m_model);
-    objlist.Submit(Renderer::Get(*this));
+    ObjectList::Get(*this).Submit(Renderer::Get(*this));
 
     SelfOrganizingMap::Get(*this).CreateProcedure(world.theMap, world.theDataset);
 }
@@ -118,6 +116,8 @@ void WatermarkingProject::DoWatermark()
 {
     float progress;
     auto status = m_model->Parameterize(*world.theMap, progress);
+    // Regen textured drawable
+    m_model->GenerateDrawables(Graphics::Get(*this));
 
     wxProgressDialog dialog("Texture Mapping", "Please wait...", 100, &ProjectWindow::Get(*this),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
@@ -127,10 +127,7 @@ void WatermarkingProject::DoWatermark()
     }
 
     m_model->SetViewFlags(ObjectViewFlag_Textured);
-
-    auto& objlist = ObjectList::Get(*this);
-    objlist.Add(ObjectType_Model, m_model);
-    objlist.Submit(Renderer::Get(*this));
+    ObjectList::Get(*this).Submit(Renderer::Get(*this));
 }
 
 void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)

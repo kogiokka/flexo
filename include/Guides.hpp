@@ -14,6 +14,7 @@ public:
     Mesh GenerateSolidMesh() const override;
     Wireframe GenerateWireMesh() const override;
     Mesh GenerateTexturedMesh() const override;
+    Object::DrawList const& GetDrawList() override;
 
 private:
     EditableMesh m_mesh;
