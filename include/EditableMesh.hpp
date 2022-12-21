@@ -33,6 +33,7 @@ struct EditableMesh {
     };
 };
 
+EditableMesh ConstructPlane();
 EditableMesh ConstructCube();
 EditableMesh ConstructSphere(int numSegments, int numRings);
 EditableMesh ConstructGrid(int numXDiv = 10, int numYDiv = 10);

@@ -52,6 +52,27 @@ void EditableMesh::TransformStack::Clear()
     stack = glm::mat4(1.0f);
 }
 
+EditableMesh ConstructPlane()
+{
+    EditableMesh mesh;
+    mesh.positions = {
+        // 0
+        { -1.0f, -1.0f, 0.0f },
+        { 1.0f, -1.0f, 0.0f },
+        { 1.0f, 1.0f, 0.0f },
+        { -1.0f, 1.0f, 0.0f },
+    };
+
+    mesh.faces = {
+        // z
+        { 0, 1, 2, 3 },
+    };
+
+    mesh.textureCoords = { { 0.0f, 0.0f }, { 1.0f, 0.0f }, { 1.0f, 1.0f }, { 0.0f, 1.0f } };
+
+    return mesh;
+}
+
 EditableMesh ConstructCube()
 {
     EditableMesh mesh;
@@ -82,6 +103,7 @@ EditableMesh ConstructCube()
         // -x
         { 3, 0, 4, 7 },
     };
+
     return mesh;
 }
 

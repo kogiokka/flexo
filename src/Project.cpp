@@ -22,6 +22,7 @@
 #include "gfx/drawable/SolidDrawable.hpp"
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "gfx/drawable/WireDrawable.hpp"
+#include "object/Cube.hpp"
 #include "object/Guides.hpp"
 #include "object/Sphere.hpp"
 #include "object/SurfaceVoxels.hpp"
@@ -73,6 +74,10 @@ void WatermarkingProject::CreateScene()
     auto light = std::make_shared<Sphere>();
     light->SetTransform(tf);
 
+    auto cube = std::make_shared<Cube>();
+    cube->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
+    cube->SetViewFlags(ObjectViewFlag_Solid);
+    objlist.Add(ObjectType_Cube, cube);
     objlist.Add(ObjectType_Light, light);
     objlist.Add(ObjectType_Guides, std::make_shared<Guides>());
     objlist.Submit(renderer);

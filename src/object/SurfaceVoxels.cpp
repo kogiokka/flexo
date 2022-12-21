@@ -36,7 +36,7 @@ float SquaredDistance(glm::vec3 p1, glm::vec3 p2);
 
 static STLImporter STLI;
 
-struct Cube {
+struct CUBE {
     struct {
         Mesh xp;
         Mesh xn;
@@ -47,7 +47,7 @@ struct Cube {
     } face;
 };
 
-static Cube const VOXEL = { {
+static CUBE const VOXEL = { {
     STLI.ReadFile("res/models/voxel/cube-x-pos.stl"),
     STLI.ReadFile("res/models/voxel/cube-x-neg.stl"),
     STLI.ReadFile("res/models/voxel/cube-y-pos.stl"),

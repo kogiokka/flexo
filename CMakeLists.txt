@@ -44,6 +44,8 @@ PRIVATE
     "src/pane/SceneViewportPane.cpp"
 
     "src/object/Object.cpp"
+    "src/object/Plane.cpp"
+    "src/object/Cube.cpp"
     "src/object/Map.cpp"
     "src/object/Sphere.cpp"
     "src/object/Guides.cpp"
