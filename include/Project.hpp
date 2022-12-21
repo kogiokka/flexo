@@ -11,8 +11,8 @@
 
 #include "Attachable.hpp"
 #include "Mesh.hpp"
-#include "SurfaceVoxels.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
+#include "object/SurfaceVoxels.hpp"
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;

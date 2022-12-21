@@ -11,6 +11,7 @@
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
+#include "object/Map.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
 wxDEFINE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);
@@ -50,7 +51,7 @@ void SelfOrganizingMapPane::PopulateMapPanel()
     heightText->SetValidator(validDimen);
 
     comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
-        auto map = MapList<3,2>::Get(m_project)[event.GetSelection()];
+        auto map = MapList<3, 2>::Get(m_project)[event.GetSelection()];
         world.theMap = map;
         int const width = map->size.x;
         int const height = map->size.y;
@@ -63,31 +64,32 @@ void SelfOrganizingMapPane::PopulateMapPanel()
         m_project.ProcessEvent(evt);
     });
 
-    addBtn->Bind(
-        wxEVT_BUTTON, [this, widthText, heightText, cyclicX, cyclicY, comboBox, initStatePlane](wxCommandEvent&) {
-            long width;
-            long height;
-            MapFlags flags = MapFlags_CyclicNone;
-            if (cyclicX->GetValue()) {
-                flags |= MapFlags_CyclicX;
-            }
-            if (cyclicY->GetValue()) {
-                flags |= MapFlags_CyclicY;
-            }
-            if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
-                MapInitState state = MapInitState_Random;
-                if (initStatePlane->GetValue()) {
-                    state = MapInitState_Plane;
-                }
-                if (world.theDataset) {
-                    MapList<3,2>::Get(m_project).Add(Vec2i(width, height), flags, state, world.theDataset->GetBoundingBox());
-                } else {
-                    MapList<3,2>::Get(m_project).Add(Vec2i(width, height), flags, state);
-                }
-                comboBox->Append(wxString::Format("Map.00%zu", MapList<3,2>::Get(m_project).size()),
-                                 wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
-            }
-        });
+    addBtn->Bind(wxEVT_BUTTON,
+                 [this, widthText, heightText, cyclicX, cyclicY, comboBox, initStatePlane](wxCommandEvent&) {
+                     long width;
+                     long height;
+                     MapFlags flags = MapFlags_CyclicNone;
+                     if (cyclicX->GetValue()) {
+                         flags |= MapFlags_CyclicX;
+                     }
+                     if (cyclicY->GetValue()) {
+                         flags |= MapFlags_CyclicY;
+                     }
+                     if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
+                         MapInitState state = MapInitState_Random;
+                         if (initStatePlane->GetValue()) {
+                             state = MapInitState_Plane;
+                         }
+                         if (world.theDataset) {
+                             MapList<3, 2>::Get(m_project).Add(Vec2i(width, height), flags, state,
+                                                               world.theDataset->GetBoundingBox());
+                         } else {
+                             MapList<3, 2>::Get(m_project).Add(Vec2i(width, height), flags, state);
+                         }
+                         comboBox->Append(wxString::Format("Map.00%zu", MapList<3, 2>::Get(m_project).size()),
+                                          wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
+                     }
+                 });
 
     group->Bind(wxEVT_UPDATE_UI,
                 [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });

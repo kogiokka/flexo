@@ -3,9 +3,9 @@
 
 #include "EditableMesh.hpp"
 #include "Node.hpp"
-#include "Object.hpp"
 #include "Vec.hpp"
 #include "gfx/drawable/TexturedDrawable.hpp"
+#include "object/Object.hpp"
 
 #include <vector>
 

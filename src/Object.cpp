@@ -1,97 +1,42 @@
-#include "Object.hpp"
+#include <memory>
 
-#include "util/Logger.h"
+#include "gfx/drawable/DrawableBase.hpp"
+#include "gfx/drawable/WireDrawable.hpp"
+#include "object/Guides.hpp"
 
-Object::Object()
-    : m_texture(nullptr)
-    , m_flags(ObjectViewFlag_Solid)
-    , m_isVisible(true)
+Guides::Guides()
 {
+    SetViewFlags(ObjectViewFlag_Wire);
+
+    m_mesh = ConstructGrid(180, 180);
+
+    EditableMesh::TransformStack tf;
+    tf.PushScale(180.0f, 180.0f, 1.0f);
+    tf.Apply(m_mesh);
 }
 
-Object::~Object()
+void Guides::GenerateDrawables(Graphics& gfx)
 {
+    auto wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
+    wire->SetColor(0.3f, 0.3f, 0.3f);
+    wire->SetVisible(m_isVisible);
+
+    m_wire = wire;
 }
 
-void Object::GenerateDrawables(Graphics& gfx)
+Object::DrawList const& Guides::GetDrawList()
 {
-    // FIXME
-    if (!m_texture) {
-        m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
-    }
-
-    m_solid = std::make_shared<SolidDrawable>(gfx, GenerateMesh());
-    m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
-    m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
-}
-
-Object::DrawList const& Object::GetDrawList()
-{
-    Object::DrawList list;
-
-    switch (m_flags) {
-    case ObjectViewFlag_Solid:
-        list.push_back(m_solid);
-        break;
-    case ObjectViewFlag_Textured:
-        list.push_back(m_textured);
-        break;
-    case ObjectViewFlag_Wire:
-        m_wire->SetColor(0.7f, 0.7f, 0.7f);
-        list.push_back(m_wire);
-        break;
-    case ObjectViewFlag_SolidWithWireframe: {
-        list.push_back(m_solid);
-        m_wire->SetColor(0.0f, 0.0f, 0.0f);
-        list.push_back(m_wire);
-    } break;
-    case ObjectViewFlag_TexturedWithWireframe: {
-        list.push_back(m_textured);
-        m_wire->SetColor(0.0f, 0.0f, 0.0f);
-        list.push_back(m_wire);
-    } break;
-    }
-
-    for (auto& d : list) {
-        d->SetVisible(m_isVisible);
-    }
-
-    m_drawlist = list;
-
+    m_drawlist.clear();
+    m_drawlist.push_back(m_wire);
     return m_drawlist;
 }
 
-void Object::SetViewFlags(ObjectViewFlag flags)
+Mesh Guides::GenerateMesh() const
 {
-    m_flags = flags;
+    return m_mesh.GenerateMesh();
 }
 
-ObjectViewFlag Object::GetViewFlags() const
+Wireframe Guides::GenerateWireMesh() const
 {
-    return m_flags;
-}
-
-void Object::SetID(std::string id)
-{
-    m_id = id;
-}
-
-void Object::SetTexture(std::shared_ptr<Bind::Texture2D> texture)
-{
-    m_texture = texture;
-}
-
-std::string Object::GetID() const
-{
-    return m_id;
-}
-
-void Object::SetVisible(bool visible)
-{
-    m_isVisible = visible;
-}
-
-bool Object::IsVisible() const
-{
-    return m_isVisible;
+    return m_mesh.GenerateWireframe();
 }

@@ -3,10 +3,10 @@
 #include <limits>
 #include <utility>
 
-#include "SurfaceVoxels.hpp"
 #include "VecUtil.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
+#include "object/SurfaceVoxels.hpp"
 #include "util/Logger.h"
 
 class Trianglemeter
@@ -314,4 +314,3 @@ void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)
     }
     mesh.normals.insert(mesh.normals.end(), face.normals.begin(), face.normals.end());
 }
-

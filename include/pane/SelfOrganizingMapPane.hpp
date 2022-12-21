@@ -8,7 +8,6 @@
 #include <wx/slider.h>
 #include <wx/stattext.h>
 
-#include "Map.hpp"
 #include "pane/ControlsPaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);

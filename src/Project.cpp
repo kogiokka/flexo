@@ -10,12 +10,9 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "EditableMesh.hpp"
-#include "Guides.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "Sphere.hpp"
-#include "SurfaceVoxels.hpp"
 #include "VecUtil.hpp"
 #include "World.hpp"
 #include "gfx/Graphics.hpp"
@@ -25,6 +22,9 @@
 #include "gfx/drawable/SolidDrawable.hpp"
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "gfx/drawable/WireDrawable.hpp"
+#include "object/Guides.hpp"
+#include "object/Sphere.hpp"
+#include "object/SurfaceVoxels.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 #include "util/Logger.h"
 

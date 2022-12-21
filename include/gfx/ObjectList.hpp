@@ -9,8 +9,8 @@
 #include <wx/event.h>
 
 #include "Attachable.hpp"
-#include "Object.hpp"
 #include "gfx/Renderer.hpp"
+#include "object/Object.hpp"
 
 class WatermarkingProject;
 

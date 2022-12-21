@@ -12,11 +12,11 @@
 #include "Attachable.hpp"
 #include "Dataset.hpp"
 #include "LearningRate.hpp"
-#include "Map.hpp"
 #include "Neighborhood.hpp"
 #include "Node.hpp"
 #include "ProjectSettings.hpp"
 #include "Vec.hpp"
+#include "object/Map.hpp"
 #include "util/Logger.h"
 
 class WatermarkingProject;

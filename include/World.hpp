@@ -7,7 +7,7 @@
 #include <vector>
 
 #include "Dataset.hpp"
-#include "Map.hpp"
+#include "object/Map.hpp"
 
 struct World {
     World();

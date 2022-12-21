@@ -1,6 +1,7 @@
 #ifndef WIRE_DRAWABLE_H
 #define WIRE_DRAWABLE_H
 
+#include "Wireframe.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/drawable/IndexedDrawable.hpp"
 

@@ -7,9 +7,9 @@
 
 #include "Attachable.hpp"
 #include "Dataset.hpp"
-#include "Map.hpp"
 #include "Project.hpp"
 #include "RandomRealNumber.hpp"
+#include "object/Map.hpp"
 
 class WatermarkingProject;
 

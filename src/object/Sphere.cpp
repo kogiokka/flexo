@@ -1,4 +1,4 @@
-#include "Sphere.hpp"
+#include "object/Sphere.hpp"
 
 Sphere::Sphere(int numSegments, int numRings)
 {

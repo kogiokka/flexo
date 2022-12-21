@@ -1,7 +1,7 @@
 #include "SelfOrganizingMap.hpp"
-#include "Map.hpp"
 #include "Project.hpp"
 #include "ProjectSettings.hpp"
+#include "object/Map.hpp"
 #include "util/Logger.h"
 
 // Register factory: SelfOrganizingMap
