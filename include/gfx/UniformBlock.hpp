@@ -37,14 +37,17 @@ public:
     UniformBlock();
     ~UniformBlock();
     void AddElement(UniformBlock::Type type, std::string name);
+    void SetBIndex(unsigned int index);
     void FinalizeLayout();
     unsigned int Size() const;
     void const* Data() const;
+    unsigned int BIndex() const;
 
     template <typename T>
     void Assign(std::string const& name, T const& value);
 
 private:
+    unsigned int m_bindex;
     unsigned int m_size;
     unsigned char* m_buffer;
     std::vector<Element> m_struct;

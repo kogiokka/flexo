@@ -85,7 +85,6 @@ PRIVATE
     "src/gfx/bindable/VertexBuffer.cpp"
     "src/gfx/bindable/Texture2D.cpp"
     "src/gfx/bindable/Sampler.cpp"
-    "src/gfx/bindable/TransformUniformBuffer.cpp"
     "src/gfx/bindable/RasterizerState.cpp"
     "src/gfx/bindable/program/VertexShaderProgram.cpp"
     "src/gfx/bindable/program/FragmentShaderProgram.cpp"

@@ -1,6 +1,8 @@
 #ifndef WIRE_DRAWABLE_H
 #define WIRE_DRAWABLE_H
 
+#include <string>
+#include <unordered_map>
 #include <vector>
 
 #include <glm/glm.hpp>
@@ -20,7 +22,8 @@ public:
     void Update(Graphics& gfx) override;
 
 private:
-    UniformBlock m_ub;
+    std::unordered_map<std::string, UniformBlock> m_ubs;
 };
 
 #endif
+

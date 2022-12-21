@@ -1,9 +1,12 @@
+#include <cstring>
+
 #include "gfx/bindable/UniformBuffer.hpp"
 
 namespace Bind
 {
-    UniformBuffer::UniformBuffer(Graphics& gfx, UniformBlock const& ub, GLuint bindingIndex)
-        : m_bindingIndex(bindingIndex)
+    UniformBuffer::UniformBuffer(Graphics& gfx, UniformBlock const& ub, std::string id)
+        : m_bindex(ub.BIndex())
+        , m_id(id)
     {
         GLWRBufferDesc desc;
         GLWRResourceData data;
@@ -19,7 +22,7 @@ namespace Bind
 
     void UniformBuffer::Bind(Graphics& gfx)
     {
-        gfx.SetUniformBuffers(m_bindingIndex, 1, m_buffer.GetAddressOf());
+        gfx.SetUniformBuffers(m_bindex, 1, m_buffer.GetAddressOf());
     }
 
     void UniformBuffer::Update(Graphics& gfx, UniformBlock const& ub)
@@ -30,8 +33,14 @@ namespace Bind
         gfx.Unmap(m_buffer.Get());
     }
 
-    unsigned int UniformBuffer::Index() const
+    unsigned int UniformBuffer::BIndex() const
     {
-        return m_bindingIndex;
+        return m_bindex;
     }
+
+    std::string Bind::UniformBuffer::Id() const
+    {
+        return m_id;
+    }
+
 }

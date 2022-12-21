@@ -1,7 +1,7 @@
 #ifndef TEXTURED_DRAWABLE_H
 #define TEXTURED_DRAWABLE_H
 
-#include <glm/glm.hpp>
+#include <unordered_map>
 
 #include "Mesh.hpp"
 #include "gfx/Graphics.hpp"
@@ -18,9 +18,7 @@ public:
     void Update(Graphics& gfx) override;
 
 private:
-    UniformBlock m_ublight;
-    UniformBlock m_ubmat;
-    UniformBlock m_ubo;
+    std::unordered_map<std::string, UniformBlock> m_ubs;
 };
 
 #endif

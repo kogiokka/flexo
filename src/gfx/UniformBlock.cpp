@@ -9,7 +9,8 @@ static unsigned int ElementPaddedSize[] = { UNIFORM_ELEMENT_TYPES };
 #undef X
 
 UniformBlock::UniformBlock()
-    : m_size(0)
+    : m_bindex(0)
+    , m_size(0)
     , m_buffer(nullptr)
     , m_layout()
 {
@@ -26,6 +27,11 @@ void UniformBlock::AddElement(UniformBlock::Type type, std::string name)
     elem.name = name;
     elem.type = type;
     m_struct.push_back(elem);
+}
+
+void UniformBlock::SetBIndex(unsigned int index)
+{
+    m_bindex = index;
 }
 
 void UniformBlock::FinalizeLayout()
@@ -70,4 +76,9 @@ unsigned int UniformBlock::Size() const
 void const* UniformBlock::Data() const
 {
     return m_buffer;
+}
+
+unsigned int UniformBlock::BIndex() const
+{
+    return m_bindex;
 }

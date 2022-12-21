@@ -1,6 +1,8 @@
 #ifndef SOLID_DRAWABLE_H
 #define SOLID_DRAWABLE_H
 
+#include <unordered_map>
+
 #include "gfx/Graphics.hpp"
 #include "gfx/UniformBlock.hpp"
 #include "gfx/drawable/Drawable.hpp"
@@ -13,9 +15,7 @@ public:
     void Update(Graphics& gfx) override;
 
 private:
-    UniformBlock m_ublight;
-    UniformBlock m_ubmat;
-    UniformBlock m_ubo;
+    std::unordered_map<std::string, UniformBlock> m_ubs;
 };
 
 #endif
