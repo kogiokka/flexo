@@ -3,7 +3,7 @@
 #include <vector>
 
 #include "World.hpp"
-#include "gfx/Task.hpp"
+#include "gfx/DrawTask.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
@@ -15,7 +15,6 @@
 #include "gfx/drawable/WireDrawable.hpp"
 
 WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
-    : m_ubs()
 {
     std::vector<unsigned int> indices;
 
@@ -45,20 +44,19 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, bufpos));
     AddBind(std::make_shared<Bind::IndexBuffer>(gfx, indices));
 
-    Task draw;
-    draw.mDrawable = this;
-
+    BindStep step;
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/WireDrawable.vert");
-    draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
-    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    step.AddBindable(vs);
+    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
+    step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     for (auto const& [id, ub] : m_ubs) {
-        draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));
     }
-    draw.AddBindable(
+    step.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
+    AddBindStep(step);
 
-    AddTask(draw);
+    m_indexCount = indices.size();
 }
 
 WireDrawable::~WireDrawable()
@@ -74,12 +72,5 @@ void WireDrawable::Update(Graphics& gfx)
 {
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
 
-    // FIXME Need to rework UniformBuffer creation/update
-    auto const& taskBinds = m_tasks.front().mBinds;
-    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
-        Bind::UniformBuffer* ub = dynamic_cast<Bind::UniformBuffer*>(it->get());
-        if (ub != nullptr) {
-            ub->Update(gfx, m_ubs[ub->Id()]);
-        }
-    }
+    UpdateUniformBuffers(gfx);
 }

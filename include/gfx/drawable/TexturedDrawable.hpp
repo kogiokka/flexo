@@ -15,10 +15,7 @@ public:
     TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_ptr<Bind::Texture2D> texture);
     ~TexturedDrawable() override;
     void ChangeTexture(std::shared_ptr<Bind::Texture2D> texture);
-    void Update(Graphics& gfx) override;
-
-private:
-    std::unordered_map<std::string, UniformBlock> m_ubs;
+    virtual void Update(Graphics& gfx) override;
 };
 
 #endif

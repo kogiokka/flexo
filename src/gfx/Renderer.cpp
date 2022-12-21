@@ -29,12 +29,12 @@ Renderer::Renderer(WatermarkingProject& project)
 
 void Renderer::Render(Graphics& gfx)
 {
-    for (auto const& task : m_tasks) {
+    for (auto& task : m_tasks) {
         task.Execute(gfx);
     }
 }
 
-void Renderer::Accept(Task task)
+void Renderer::Accept(DrawTask task)
 {
     m_tasks.push_back(task);
 }

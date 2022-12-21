@@ -5,8 +5,8 @@
 #include <vector>
 
 #include "Attachable.hpp"
+#include "DrawTask.hpp"
 #include "Mesh.hpp"
-#include "Task.hpp"
 #include "gfx/Graphics.hpp"
 
 class WatermarkingProject;
@@ -19,11 +19,11 @@ public:
 
     Renderer(WatermarkingProject& project);
     void Render(Graphics& gfx);
-    void Accept(Task task);
+    void Accept(DrawTask task);
     void Clear();
 
 private:
-    std::vector<Task> m_tasks;
+    std::vector<DrawTask> m_tasks;
     WatermarkingProject& m_project;
 };
 

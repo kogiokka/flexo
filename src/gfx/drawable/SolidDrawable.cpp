@@ -2,7 +2,7 @@
 #include <vector>
 
 #include "World.hpp"
-#include "gfx/Task.hpp"
+#include "gfx/BindStep.hpp"
 #include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
@@ -58,20 +58,21 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
         { "normal", GLWRFormat_Float3, 0, buf.OffsetOfNormal(), GLWRInputClassification_PerVertex, 0 },
     };
 
-    Task draw;
-    draw.mDrawable = this;
+    BindStep step;
 
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/SolidDrawable.vert");
-    draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/SolidDrawable.frag"));
-    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    step.AddBindable(vs);
+    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/SolidDrawable.frag"));
+    step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     for (auto const& [id, ub] : m_ubs) {
-        draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));
     }
-    draw.AddBindable(
+    step.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
 
-    AddTask(draw);
+    AddBindStep(step);
+
+    m_vertCount = buf.Count();
 }
 
 SolidDrawable::~SolidDrawable()
@@ -84,12 +85,5 @@ void SolidDrawable::Update(Graphics& gfx)
     m_ubs["viewPos"].Assign("viewPos", gfx.GetCameraPosition());
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
 
-    // FIXME Need to rework UniformBuffer creation/update
-    auto const& taskBinds = m_tasks.front().mBinds;
-    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
-        Bind::UniformBuffer* ub = dynamic_cast<Bind::UniformBuffer*>(it->get());
-        if (ub != nullptr) {
-            ub->Update(gfx, m_ubs[ub->Id()]);
-        }
-    }
+    UpdateUniformBuffers(gfx);
 }

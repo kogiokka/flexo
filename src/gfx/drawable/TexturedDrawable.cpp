@@ -1,6 +1,6 @@
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "World.hpp"
-#include "gfx/Task.hpp"
+#include "gfx/BindStep.hpp"
 #include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
@@ -64,22 +64,23 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, buf));
 
-    Task draw;
-    draw.mDrawable = this;
+    BindStep step;
 
     auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/TexturedDrawable.vert");
-    draw.AddBindable(vs);
-    draw.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/TexturedDrawable.frag"));
-    draw.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+    step.AddBindable(vs);
+    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/TexturedDrawable.frag"));
+    step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     for (auto const& [id, ub] : m_ubs) {
-        draw.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));
     }
-    draw.AddBindable(texture);
-    draw.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
-    draw.AddBindable(
+    step.AddBindable(texture);
+    step.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
+    step.AddBindable(
         std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
 
-    AddTask(draw);
+    AddBindStep(step);
+
+    m_vertCount = buf.Count();
 }
 
 TexturedDrawable::~TexturedDrawable()
@@ -92,9 +93,9 @@ void TexturedDrawable::ChangeTexture(std::shared_ptr<Bind::Texture2D> texture)
     bool (*const FindTexture)(std::shared_ptr<Bind::Bindable>&)
         = [](std::shared_ptr<Bind::Bindable>& bind) { return (dynamic_cast<Bind::Texture2D*>(bind.get()) != nullptr); };
 
-    auto& taskBinds = m_tasks.front().mBinds;
-    taskBinds.erase(std::remove_if(taskBinds.begin(), taskBinds.end(), FindTexture), taskBinds.end());
-    m_tasks.front().AddBindable(texture);
+    auto& bindings = m_steps.front().bindables;
+    bindings.erase(std::remove_if(bindings.begin(), bindings.end(), FindTexture), bindings.end());
+    m_steps.front().AddBindable(texture);
 }
 
 void TexturedDrawable::Update(Graphics& gfx)
@@ -103,12 +104,5 @@ void TexturedDrawable::Update(Graphics& gfx)
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
     m_ubs["viewPos"].Assign("viewPos", gfx.GetCameraPosition());
 
-    // FIXME Need to rework UniformBuffer creation/update
-    auto const& taskBinds = m_tasks.front().mBinds;
-    for (auto it = taskBinds.begin(); it != taskBinds.end(); it++) {
-        Bind::UniformBuffer* ub = dynamic_cast<Bind::UniformBuffer*>(it->get());
-        if (ub != nullptr) {
-            ub->Update(gfx, m_ubs[ub->Id()]);
-        }
-    }
+    UpdateUniformBuffers(gfx);
 }
