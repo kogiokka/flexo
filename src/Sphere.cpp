@@ -10,12 +10,7 @@ void Sphere::SetTransform(EditableMesh::TransformStack stack)
     stack.Apply(m_mesh);
 }
 
-Mesh Sphere::GenerateSolidMesh() const
-{
-    return m_mesh.GenerateMesh();
-}
-
-Mesh Sphere::GenerateTexturedMesh() const
+Mesh Sphere::GenerateMesh() const
 {
     return m_mesh.GenerateMesh();
 }

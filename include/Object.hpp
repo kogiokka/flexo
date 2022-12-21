@@ -44,8 +44,7 @@ public:
     void SetVisible(bool visible);
     bool IsVisible() const;
 
-    virtual Mesh GenerateSolidMesh() const = 0;
-    virtual Mesh GenerateTexturedMesh() const = 0;
+    virtual Mesh GenerateMesh() const = 0;
     virtual Wireframe GenerateWireMesh() const = 0;
 
 protected:

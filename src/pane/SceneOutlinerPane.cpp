@@ -64,7 +64,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
             auto id = m_sceneTree->GetItemText(item);
             for (auto const& obj : ObjectList::Get(m_project)) {
                 if (obj->GetID() == id) {
-                    world.theDataset = std::make_shared<Dataset<3>>(obj->GenerateSolidMesh().positions);
+                    world.theDataset = std::make_shared<Dataset<3>>(obj->GenerateMesh().positions);
                     break;
                 }
             }

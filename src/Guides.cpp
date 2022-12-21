@@ -31,12 +31,7 @@ Object::DrawList const& Guides::GetDrawList()
     return m_drawlist;
 }
 
-Mesh Guides::GenerateSolidMesh() const
-{
-    return m_mesh.GenerateMesh();
-}
-
-Mesh Guides::GenerateTexturedMesh() const
+Mesh Guides::GenerateMesh() const
 {
     return m_mesh.GenerateMesh();
 }

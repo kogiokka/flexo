@@ -106,7 +106,7 @@ std::vector<Voxel> const& SurfaceVoxels::Voxels() const
     return m_voxels;
 }
 
-Mesh SurfaceVoxels::GenerateSolidMesh() const
+Mesh SurfaceVoxels::GenerateMesh() const
 {
     Mesh mesh;
 
@@ -128,40 +128,6 @@ Mesh SurfaceVoxels::GenerateSolidMesh() const
         }
         if (vx.vis & Voxel::Vis::ZN) {
             AddFace(mesh, VOXEL.face.zn, vx.pos, m_scale);
-        }
-    }
-
-    return mesh;
-}
-
-Mesh SurfaceVoxels::GenerateTexturedMesh() const
-{
-    Mesh mesh;
-
-    for (auto const& vx : m_voxels) {
-        if (vx.vis & Voxel::Vis::XP) {
-            AddFace(mesh, VOXEL.face.xp, vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & Voxel::Vis::XN) {
-            AddFace(mesh, VOXEL.face.xn, vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & Voxel::Vis::YP) {
-            AddFace(mesh, VOXEL.face.yp, vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & Voxel::Vis::YN) {
-            AddFace(mesh, VOXEL.face.yn, vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & Voxel::Vis::ZP) {
-            AddFace(mesh, VOXEL.face.zp, vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & Voxel::Vis::ZN) {
-            AddFace(mesh, VOXEL.face.zn, vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
     }
 

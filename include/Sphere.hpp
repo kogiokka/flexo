@@ -11,9 +11,8 @@ public:
     virtual ~Sphere() = default;
     void SetTransform(EditableMesh::TransformStack stack);
 
-    Mesh GenerateSolidMesh() const override;
+    Mesh GenerateMesh() const override;
     Wireframe GenerateWireMesh() const override;
-    Mesh GenerateTexturedMesh() const override;
 
 private:
     EditableMesh m_mesh;

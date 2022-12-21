@@ -22,8 +22,7 @@ public:
     std::future<void> Parameterize(Map<3, 2> const& map, float& progress);
 
 private:
-    virtual Mesh GenerateTexturedMesh() const override;
-    virtual Mesh GenerateSolidMesh() const override;
+    virtual Mesh GenerateMesh() const override;
     virtual Wireframe GenerateWireMesh() const override;
 
     glm::vec3 m_scale;

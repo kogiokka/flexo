@@ -11,9 +11,8 @@ public:
     virtual ~Guides() = default;
 
     void GenerateDrawables(Graphics& gfx) override;
-    Mesh GenerateSolidMesh() const override;
+    Mesh GenerateMesh() const override;
     Wireframe GenerateWireMesh() const override;
-    Mesh GenerateTexturedMesh() const override;
     Object::DrawList const& GetDrawList() override;
 
 private:

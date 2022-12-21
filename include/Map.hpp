@@ -33,21 +33,14 @@ struct Map : public Object {
     MapFlags flags;
 
 private:
-    Mesh GenerateSolidMesh() const override;
-    Mesh GenerateTexturedMesh() const override;
+    Mesh GenerateMesh() const override;
     Wireframe GenerateWireMesh() const override;
 };
 
 EditableMesh GenMapEditableMesh(Map<3, 2> const& map);
 
 template <int InDim, int OutDim>
-Mesh Map<InDim, OutDim>::GenerateSolidMesh() const
-{
-    return GenMapEditableMesh(*this).GenerateMesh();
-}
-
-template <int InDim, int OutDim>
-Mesh Map<InDim, OutDim>::GenerateTexturedMesh() const
+Mesh Map<InDim, OutDim>::GenerateMesh() const
 {
     return GenMapEditableMesh(*this).GenerateMesh();
 }
