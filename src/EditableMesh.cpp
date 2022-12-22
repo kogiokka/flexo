@@ -81,50 +81,56 @@ EditableMesh ConstructSphere(int numSegments, int numRings)
     float deltaLat = glm::radians(180.0f) / numRings;
 
     mesh.positions.resize((numRings - 1) * numSegments + 2);
-    mesh.positions.front() = center + radius * glm::vec3(0.0f, cos(0.0f), 0.0f);
-    mesh.positions.back() = center + radius * glm::vec3(0.0f, cos(glm::radians(180.0f)), 0.0f);
 
-    // Iterate through the rings without the first and the last.
-    for (int i = 1; i < numRings; i++) {
+    // The first ring (top)
+    mesh.positions.front() = center + glm::vec3(0.0f, 0.0f, radius);
+    for (int j = 0; j < numSegments; j++) {
+        unsigned int i1, i2, i3;
+        i1 = 0; // zenith
+        i2 = (j % numSegments) + 1;
+        i3 = (j + 1) % numSegments + 1;
+        mesh.faces.push_back({ i1, i2, i3 });
+    }
+
+    // The last ring (bottom)
+    mesh.positions.back() = center + radius * glm::vec3(0.0f, 0.0f, -radius);
+    for (int j = 0; j < numSegments; j++) {
+        unsigned int last = mesh.positions.size() - 1;
+        unsigned int i1, i2, i3;
+        i1 = (last - numSegments) + ((j + 1) % numSegments);
+        i2 = (last - numSegments) + (j % numSegments);
+        i3 = last;
+        mesh.faces.push_back({ i1, i2, i3 });
+    }
+
+    // Vertices for rings without the first one
+    for (int i = 0; i < numRings - 1; i++) {
         for (int j = 0; j < numSegments; j++) {
-            float const theta = deltaLat * i;
-            float const phi = glm::radians(180.0f) - deltaLong * j;
-            glm::vec3 const coord = radius * glm::vec3(sin(theta) * cos(phi), cos(theta), sin(theta) * sin(phi));
-            int const idx = (i - 1) * numSegments + j + 1;
+            float const theta = deltaLat * (i + 1);
+            float const phi = deltaLong * j;
+            glm::vec3 const coord = radius * glm::vec3(sin(theta) * cos(phi), sin(theta) * sin(phi), cos(theta));
+            unsigned int idx = (1 /* zenith vertex */) + (i * numSegments + j);
             mesh.positions[idx] = center + coord;
         }
     }
 
-    for (int j = 0; j < numSegments; j++) {
-        unsigned int i1, i2, i3;
-        i1 = 0;
-        i2 = (j + 1) % numSegments + 1;
-        i3 = j % numSegments + 1;
-        mesh.faces.push_back({ i1, i2, i3 });
-    }
-
+    // Indices for rings without the first one and the last one
     for (int i = 0; i < numRings - 2; i++) {
         for (int j = 0; j < numSegments; j++) {
             /**
-             *  4---3
+             * Quad face on the sphere
+             *
+             *  1---4 ring i
              *  |   |
-             *  1---2
+             *  2---3 ring i+1
              */
             unsigned int i1, i2, i3, i4;
-            i1 = (i * numSegments + (j % numSegments)) + 1;
-            i2 = (i * numSegments + ((j + 1) % numSegments)) + 1;
-            i3 = ((i + 1) * numSegments + ((j + 1) % numSegments)) + 1;
-            i4 = ((i + 1) * numSegments + (j % numSegments)) + 1;
+            i1 = 1 + (i * numSegments + (j % numSegments));
+            i2 = 1 + ((i + 1) * numSegments + (j % numSegments));
+            i3 = 1 + ((i + 1) * numSegments + ((j + 1) % numSegments));
+            i4 = 1 + (i * numSegments + ((j + 1) % numSegments));
             mesh.faces.push_back({ i1, i2, i3, i4 });
         }
-    }
-
-    for (int j = 0; j < numSegments; j++) {
-        unsigned int i1, i2, i3;
-        i1 = ((numRings - 2) * numSegments + 1) + (j % numSegments);
-        i2 = ((numRings - 2) * numSegments + 1) + ((j + 1) % numSegments);
-        i3 = mesh.positions.size() - 1;
-        mesh.faces.push_back({ i1, i2, i3 });
     }
 
     return mesh;
