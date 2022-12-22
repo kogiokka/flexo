@@ -122,8 +122,6 @@ void WatermarkingProject::DoWatermark()
 {
     float progress;
     auto status = m_model->Parameterize(*world.theMap, progress);
-    // Regen textured drawable
-    m_model->GenerateDrawables(Graphics::Get(*this));
 
     wxProgressDialog dialog("Texture Mapping", "Please wait...", 100, &ProjectWindow::Get(*this),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
@@ -131,6 +129,9 @@ void WatermarkingProject::DoWatermark()
     while (status.wait_for(std::chrono::milliseconds(16)) != std::future_status::ready) {
         dialog.Update(static_cast<int>(progress));
     }
+
+    // After the parametrization done, regenerate the drawables to update texture coordinates.
+    m_model->GenerateDrawables(Graphics::Get(*this));
 
     m_model->SetViewFlags(ObjectViewFlag_Textured);
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
