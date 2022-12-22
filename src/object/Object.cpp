@@ -89,6 +89,10 @@ std::string Object::GetID() const
 void Object::SetVisible(bool visible)
 {
     m_isVisible = visible;
+
+    for (auto& d : m_drawlist) {
+        d->SetVisible(visible);
+    }
 }
 
 bool Object::IsVisible() const
