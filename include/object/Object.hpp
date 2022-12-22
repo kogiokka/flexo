@@ -7,13 +7,14 @@
 
 #include "Mesh.hpp"
 #include "Wireframe.hpp"
-#include "gfx/Graphics.hpp"
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 #include "gfx/drawable/SolidDrawable.hpp"
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "gfx/drawable/WireDrawable.hpp"
+
+class Graphics;
 
 typedef int ObjectViewFlag;
 

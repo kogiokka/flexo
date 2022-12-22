@@ -1,5 +1,5 @@
 #include "object/Object.hpp"
-
+#include "gfx/Graphics.hpp"
 #include "util/Logger.h"
 
 Object::Object()

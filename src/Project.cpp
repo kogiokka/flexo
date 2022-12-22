@@ -14,6 +14,7 @@
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "VecUtil.hpp"
+#include "VolumetricModelData.hpp"
 #include "World.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/ObjectList.hpp"

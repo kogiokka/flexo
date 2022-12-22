@@ -1,11 +1,11 @@
 #ifndef TEXTURE_H
 #define TEXTURE_H
 
-#include "gfx/Graphics.hpp"
-#include "gfx/bindable/Bindable.hpp"
-
 #include <string>
 #include <vector>
+
+#include "gfx/Graphics.hpp"
+#include "gfx/bindable/Bindable.hpp"
 
 namespace Bind
 {

@@ -1,7 +1,7 @@
 #ifndef BINDABLE_H
 #define BINDABLE_H
 
-#include "gfx/Graphics.hpp"
+class Graphics;
 
 namespace Bind
 {

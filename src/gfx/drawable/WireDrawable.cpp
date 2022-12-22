@@ -2,8 +2,10 @@
 #include <utility>
 #include <vector>
 
+#include "Wireframe.hpp"
 #include "World.hpp"
 #include "gfx/DrawTask.hpp"
+#include "gfx/Graphics.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"

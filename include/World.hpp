@@ -1,10 +1,7 @@
 #ifndef WORLD_H
 #define WORLD_H
 
-#include <glm/glm.hpp>
 #include <memory>
-#include <string>
-#include <vector>
 
 #include "Dataset.hpp"
 #include "object/Map.hpp"

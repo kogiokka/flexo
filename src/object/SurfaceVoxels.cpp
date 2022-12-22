@@ -3,7 +3,9 @@
 #include <limits>
 #include <utility>
 
+#include "object/Map.hpp"
 #include "VecUtil.hpp"
+#include "VolumetricModelData.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "object/SurfaceVoxels.hpp"

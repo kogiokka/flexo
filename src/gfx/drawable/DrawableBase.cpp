@@ -2,6 +2,7 @@
 
 #include "gfx/DrawTask.hpp"
 #include "gfx/Renderer.hpp"
+#include "gfx/bindable/Bindable.hpp"
 #include "gfx/bindable/UniformBuffer.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 

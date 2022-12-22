@@ -9,11 +9,15 @@
 #include <glm/glm.hpp>
 
 #include "gfx/BindStep.hpp"
-#include "gfx/Graphics.hpp"
 #include "gfx/UniformBlock.hpp"
-#include "gfx/bindable/Bindable.hpp"
 
 class Renderer;
+class Graphics;
+
+namespace Bind
+{
+    class Bindable;
+};
 
 class DrawableBase
 {
@@ -42,4 +46,3 @@ protected:
 };
 
 #endif
-

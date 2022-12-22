@@ -117,3 +117,4 @@ void SelfOrganizingMap::StopWorker()
         log_info("The SOM worker joined successfully");
     }
 }
+

@@ -10,9 +10,9 @@
 #include <wx/weakref.h>
 
 #include "Attachable.hpp"
-#include "Mesh.hpp"
-#include "gfx/drawable/DrawableBase.hpp"
-#include "object/SurfaceVoxels.hpp"
+
+class WatermarkingProject;
+class SurfaceVoxels;
 
 using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;

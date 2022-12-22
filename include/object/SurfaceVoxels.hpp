@@ -9,8 +9,9 @@
 #include "Map.hpp"
 #include "Mesh.hpp"
 #include "Object.hpp"
-#include "VolumetricModelData.hpp"
 #include "Voxel.hpp"
+
+class VolumetricModelData;
 
 class SurfaceVoxels : public Object
 {
