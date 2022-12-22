@@ -166,7 +166,8 @@ void ProjectWindow::OnOpenImageFile(wxCommandEvent&)
 {
     namespace fs = std::filesystem;
     static wxString defaultDir = "";
-    wxFileDialog dialog(this, "Open Image", defaultDir, "", "PNG Image|*.png", wxFD_OPEN | wxFD_FILE_MUST_EXIST);
+    wxFileDialog dialog(this, "Open Image", defaultDir, "", "PNG or JPG Images|*.png;*.jpg",
+                        wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
     dialog.CenterOnParent();
 
     wxBusyCursor wait;
