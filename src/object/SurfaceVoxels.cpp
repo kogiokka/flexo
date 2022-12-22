@@ -3,11 +3,11 @@
 #include <limits>
 #include <utility>
 
-#include "object/Map.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
 #include "World.hpp"
 #include "assetlib/STL/STLImporter.hpp"
+#include "object/Map.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "util/Logger.h"
 
@@ -115,21 +115,27 @@ Mesh SurfaceVoxels::GenerateMesh() const
     for (auto const& vx : m_voxels) {
         if (vx.vis & Voxel::Vis::XP) {
             AddFace(mesh, VOXEL.face.xp, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::XN) {
             AddFace(mesh, VOXEL.face.xn, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::YP) {
             AddFace(mesh, VOXEL.face.yp, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::YN) {
             AddFace(mesh, VOXEL.face.yn, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::ZP) {
             AddFace(mesh, VOXEL.face.zp, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
         if (vx.vis & Voxel::Vis::ZN) {
             AddFace(mesh, VOXEL.face.zn, vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
     }
 
