@@ -11,7 +11,7 @@ Guides::Guides()
     m_mesh = ConstructGrid(180, 180);
 
     EditableMesh::TransformStack tf;
-    tf.PushScale(180.0f, 180.0f, 1.0f);
+    tf.PushScale(90.0f, 90.0f, 1.0f);
     tf.Apply(m_mesh);
 }
 
