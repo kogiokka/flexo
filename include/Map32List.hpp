@@ -31,7 +31,7 @@ public:
     MapList(MapList const&) = delete;
     MapList& operator=(MapList const&) = delete;
     void Add(Vec<OutDim, int> size, MapFlags flags, MapInitState initState = MapInitState_Random,
-             BoundingBox box = { { -100.0f, -100.0f, -100.0f }, { 100.0f, 100.0f, 100.0f } });
+             BoundingBox box = { { 5.0f, 5.0f, 5.0f }, { -5.0f, -5.0f, -5.0f } });
 
 private:
     WatermarkingProject& m_project;

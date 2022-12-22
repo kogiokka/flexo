@@ -45,7 +45,7 @@ void MapList<3, 2>::Add(Vec2i size, MapFlags flags, MapInitState initState, Boun
 
         for (int j = 0; j < height; ++j) {
             for (int i = 0; i < width; ++i) {
-                map->nodes.emplace_back(Vec3f { i * dx, j * dy, box.max.z },
+                map->nodes.emplace_back(Vec3f { box.min.x + i * dx, box.min.y + j * dy, box.max.z },
                                         Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
             }
         }
