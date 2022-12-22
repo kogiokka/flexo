@@ -18,19 +18,6 @@ struct EditableMesh {
     std::vector<TriangularFace> GenerateTriangularFaces() const;
     Mesh GenerateMesh() const;
     Wireframe GenerateWireframe() const;
-
-    struct TransformStack {
-        TransformStack();
-        void PushScale(glm::vec3 scale);
-        void PushTranslate(glm::vec3 translate);
-        void PushScale(float x, float y, float z);
-        void PushTranslate(float x, float y, float z);
-        void Clear();
-        void Apply(EditableMesh& mesh);
-
-    private:
-        glm::mat4 stack;
-    };
 };
 
 EditableMesh ConstructPlane();

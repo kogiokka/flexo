@@ -1,12 +1,13 @@
 #include <algorithm>
+#include <array>
 #include <cmath>
 #include <limits>
 #include <utility>
 
+#include "TransformStack.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
 #include "World.hpp"
-#include "assetlib/STL/STLImporter.hpp"
 #include "object/Map.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "util/Logger.h"
@@ -35,28 +36,9 @@ public:
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale);
 float SquaredDistance(glm::vec3 p1, glm::vec3 p2);
+void ConstructVoxelMesh();
 
-static STLImporter STLI;
-
-struct CUBE {
-    struct {
-        Mesh xp;
-        Mesh xn;
-        Mesh yp;
-        Mesh yn;
-        Mesh zp;
-        Mesh zn;
-    } face;
-};
-
-static CUBE const VOXEL = { {
-    STLI.ReadFile("res/models/voxel/cube-x-pos.stl"),
-    STLI.ReadFile("res/models/voxel/cube-x-neg.stl"),
-    STLI.ReadFile("res/models/voxel/cube-y-pos.stl"),
-    STLI.ReadFile("res/models/voxel/cube-y-neg.stl"),
-    STLI.ReadFile("res/models/voxel/cube-z-pos.stl"),
-    STLI.ReadFile("res/models/voxel/cube-z-neg.stl"),
-} };
+std::array<Mesh, 6> VOXEL_MESH;
 
 SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
 {
@@ -72,35 +54,37 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
         for (int j = 0; j < n.y; j++) {
             for (int k = 0; k < n.x; k++) {
                 int index = k + j * n.x + i * n.x * n.y;
-                unsigned char vis = Voxel::Vis::None;
+                VoxelVis vis = VoxelVis_None;
                 glm::vec3 offset { k, j, i };
                 if (data[index] == modelValue) {
                     if ((k + 1 == n.x) || data[index + 1] == air) {
-                        vis |= Voxel::Vis::XP;
+                        vis |= VoxelVis_XPos;
                     }
                     if ((j + 1 == n.y) || (data[index + n.x] == air)) {
-                        vis |= Voxel::Vis::YP;
+                        vis |= VoxelVis_YPos;
                     }
                     if ((i + 1 == n.z) || (data[index + n.x * n.y] == air)) {
-                        vis |= Voxel::Vis::ZP;
+                        vis |= VoxelVis_ZPos;
                     }
                     if ((k == 0) || (data[index - 1] == air)) {
-                        vis |= Voxel::Vis::XN;
+                        vis |= VoxelVis_XNeg;
                     }
                     if ((j == 0) || (data[index - n.x] == air)) {
-                        vis |= Voxel::Vis::YN;
+                        vis |= VoxelVis_YNeg;
                     }
                     if ((i == 0) || (data[index - n.x * n.y] == air)) {
-                        vis |= Voxel::Vis::ZN;
+                        vis |= VoxelVis_ZNeg;
                     }
 
-                    if (vis != Voxel::Vis::None) {
-                        m_voxels.emplace_back(offset * m_scale, glm::vec2(0.0f, 0.0f), static_cast<Voxel::Vis>(vis));
+                    if (vis != VoxelVis_None) {
+                        m_voxels.emplace_back(offset * m_scale, glm::vec2(0.0f, 0.0f), vis);
                     }
                 }
             }
         }
     }
+
+    ConstructVoxelMesh();
 }
 
 std::vector<Voxel> const& SurfaceVoxels::Voxels() const
@@ -113,28 +97,28 @@ Mesh SurfaceVoxels::GenerateMesh() const
     Mesh mesh;
 
     for (auto const& vx : m_voxels) {
-        if (vx.vis & Voxel::Vis::XP) {
-            AddFace(mesh, VOXEL.face.xp, vx.pos, m_scale);
+        if (vx.vis & VoxelVis_XPos) {
+            AddFace(mesh, VOXEL_MESH[0], vx.pos, m_scale);
             mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
-        if (vx.vis & Voxel::Vis::XN) {
-            AddFace(mesh, VOXEL.face.xn, vx.pos, m_scale);
+        if (vx.vis & VoxelVis_XNeg) {
+            AddFace(mesh, VOXEL_MESH[1], vx.pos, m_scale);
             mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
-        if (vx.vis & Voxel::Vis::YP) {
-            AddFace(mesh, VOXEL.face.yp, vx.pos, m_scale);
+        if (vx.vis & VoxelVis_YPos) {
+            AddFace(mesh, VOXEL_MESH[2], vx.pos, m_scale);
             mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
-        if (vx.vis & Voxel::Vis::YN) {
-            AddFace(mesh, VOXEL.face.yn, vx.pos, m_scale);
+        if (vx.vis & VoxelVis_YNeg) {
+            AddFace(mesh, VOXEL_MESH[3], vx.pos, m_scale);
             mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
-        if (vx.vis & Voxel::Vis::ZP) {
-            AddFace(mesh, VOXEL.face.zp, vx.pos, m_scale);
+        if (vx.vis & VoxelVis_ZPos) {
+            AddFace(mesh, VOXEL_MESH[4], vx.pos, m_scale);
             mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
-        if (vx.vis & Voxel::Vis::ZN) {
-            AddFace(mesh, VOXEL.face.zn, vx.pos, m_scale);
+        if (vx.vis & VoxelVis_ZNeg) {
+            AddFace(mesh, VOXEL_MESH[5], vx.pos, m_scale);
             mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
         }
     }
@@ -313,6 +297,57 @@ float SquaredDistance(glm::vec3 p1, glm::vec3 p2)
 {
     glm::vec3 v = p1 - p2;
     return glm::dot(v, v);
+}
+
+void ConstructVoxelMesh()
+{
+    EditableMesh plane;
+    TransformStack ts;
+
+    // +X
+    ts.PushTranslate(1.0f, 0.0f, 0.0f);
+    ts.PushRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    plane = ConstructPlane();
+    ts.Apply(plane);
+    VOXEL_MESH[0] = plane.GenerateMesh();
+
+    // -X
+    ts.Clear();
+    ts.PushTranslate(-1.0f, 0.0f, 0.0f);
+    ts.PushRotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+    plane = ConstructPlane();
+    ts.Apply(plane);
+    VOXEL_MESH[1] = plane.GenerateMesh();
+
+    // +Y
+    ts.Clear();
+    ts.PushTranslate(0.0f, 1.0f, 0.0f);
+    ts.PushRotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    plane = ConstructPlane();
+    ts.Apply(plane);
+    VOXEL_MESH[2] = plane.GenerateMesh();
+
+    // -Y
+    ts.Clear();
+    ts.PushTranslate(0.0f, -1.0f, 0.0f);
+    ts.PushRotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
+    plane = ConstructPlane();
+    ts.Apply(plane);
+    VOXEL_MESH[3] = plane.GenerateMesh();
+
+    // +Z
+    ts.Clear();
+    ts.PushTranslate(0.0f, 0.0f, 1.0f);
+    plane = ConstructPlane();
+    ts.Apply(plane);
+    VOXEL_MESH[4] = plane.GenerateMesh();
+
+    // -Z
+    ts.Clear();
+    ts.PushTranslate(0.0f, 0.0f, -1.0f);
+    plane = ConstructPlane();
+    ts.Apply(plane);
+    VOXEL_MESH[5] = plane.GenerateMesh();
 }
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)

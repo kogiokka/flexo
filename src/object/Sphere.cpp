@@ -1,11 +1,12 @@
 #include "object/Sphere.hpp"
+#include "TransformStack.hpp"
 
 Sphere::Sphere(int numSegments, int numRings)
 {
     m_mesh = ConstructSphere(numSegments, numRings);
 }
 
-void Sphere::SetTransform(EditableMesh::TransformStack stack)
+void Sphere::SetTransform(TransformStack stack)
 {
     stack.Apply(m_mesh);
 }

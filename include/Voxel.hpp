@@ -16,24 +16,25 @@
  * -Z  0010 0000
  */
 
-struct Voxel {
-    enum Vis : unsigned char {
-        None = 0b0000'0000,
-        XP = 0b0000'0001,
-        XN = 0b0000'0010,
-        YP = 0b0000'0100,
-        YN = 0b0000'1000,
-        ZP = 0b0001'0000,
-        ZN = 0b0010'0000,
-        All = 0b0011'1111,
-    };
+typedef unsigned char VoxelVis;
 
-    Voxel(glm::vec3 pos, glm::vec2 uv, Voxel::Vis vis = Voxel::Vis::All);
+enum VoxelVis_ : unsigned char {
+    VoxelVis_None = 0b0000'0000,
+    VoxelVis_XPos = 0b0000'0001,
+    VoxelVis_XNeg = 0b0000'0010,
+    VoxelVis_YPos = 0b0000'0100,
+    VoxelVis_YNeg = 0b0000'1000,
+    VoxelVis_ZPos = 0b0001'0000,
+    VoxelVis_ZNeg = 0b0010'0000,
+    VoxelVis_All = 0b0011'1111,
+};
+
+struct Voxel {
+    Voxel(glm::vec3 pos, glm::vec2 uv, VoxelVis vis = VoxelVis_All);
 
     glm::vec3 pos;
     glm::vec2 uv;
-    Voxel::Vis vis;
+    VoxelVis vis;
 };
 
 #endif
-

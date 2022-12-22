@@ -3,6 +3,7 @@
 #include "gfx/drawable/DrawableBase.hpp"
 #include "gfx/drawable/WireDrawable.hpp"
 #include "object/Guides.hpp"
+#include "TransformStack.hpp"
 
 Guides::Guides()
 {
@@ -10,9 +11,9 @@ Guides::Guides()
 
     m_mesh = ConstructGrid(180, 180);
 
-    EditableMesh::TransformStack tf;
-    tf.PushScale(90.0f, 90.0f, 1.0f);
-    tf.Apply(m_mesh);
+    TransformStack ts;
+    ts.PushScale(90.0f, 90.0f, 1.0f);
+    ts.Apply(m_mesh);
 }
 
 void Guides::GenerateDrawables(Graphics& gfx)

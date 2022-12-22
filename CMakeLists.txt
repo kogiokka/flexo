@@ -55,6 +55,7 @@ PRIVATE
     "src/Map32List.cpp"
     "src/Mesh.cpp"
     "src/EditableMesh.cpp"
+    "src/TransformStack.cpp"
     "src/World.cpp"
     "src/VolumetricModelData.cpp"
     "src/Voxel.cpp"

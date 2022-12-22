@@ -15,43 +15,6 @@ bool EditableMesh::HasTextureCoords() const
     return !textureCoords.empty();
 }
 
-EditableMesh::TransformStack::TransformStack()
-    : stack(glm::mat4(1.0f))
-{
-}
-
-void EditableMesh::TransformStack::PushScale(glm::vec3 scale)
-{
-    stack = glm::scale(stack, scale);
-}
-
-void EditableMesh::TransformStack::PushTranslate(glm::vec3 translate)
-{
-    stack = glm::translate(stack, translate);
-}
-
-void EditableMesh::TransformStack::PushScale(float x, float y, float z)
-{
-    TransformStack::PushScale(glm::vec3(x, y, z));
-}
-
-void EditableMesh::TransformStack::PushTranslate(float x, float y, float z)
-{
-    TransformStack::PushTranslate(glm::vec3(x, y, z));
-}
-
-void EditableMesh::TransformStack::Apply(EditableMesh& mesh)
-{
-    for (auto& p : mesh.positions) {
-        p = glm::vec3(stack * glm::vec4(p, 1.0f));
-    }
-}
-
-void EditableMesh::TransformStack::Clear()
-{
-    stack = glm::mat4(1.0f);
-}
-
 EditableMesh ConstructPlane()
 {
     EditableMesh mesh;

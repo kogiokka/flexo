@@ -13,7 +13,7 @@ public:
     Mesh GenerateMesh() const override;
     Wireframe GenerateWireMesh() const override;
 
-private:
+// private:
     EditableMesh m_mesh;
 };
 
