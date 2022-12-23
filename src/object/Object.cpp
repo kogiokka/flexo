@@ -31,21 +31,26 @@ Object::DrawList const& Object::GetDrawList()
 
     switch (m_flags) {
     case ObjectViewFlag_Solid:
+        log_trace("\"%s\" has solid drawable", m_id.c_str());
         list.push_back(m_solid);
         break;
     case ObjectViewFlag_Textured:
+        log_trace("\"%s\" has textured drawable", m_id.c_str());
         list.push_back(m_textured);
         break;
     case ObjectViewFlag_Wire:
+        log_trace("\"%s\" has wire drawable", m_id.c_str());
         m_wire->SetColor(0.7f, 0.7f, 0.7f);
         list.push_back(m_wire);
         break;
     case ObjectViewFlag_SolidWithWireframe: {
+        log_trace("\"%s\" has solid drawable with wireframe", m_id.c_str());
         list.push_back(m_solid);
         m_wire->SetColor(0.0f, 0.0f, 0.0f);
         list.push_back(m_wire);
     } break;
     case ObjectViewFlag_TexturedWithWireframe: {
+        log_trace("\"%s\" has textured drawable with wireframe", m_id.c_str());
         list.push_back(m_textured);
         m_wire->SetColor(0.0f, 0.0f, 0.0f);
         list.push_back(m_wire);

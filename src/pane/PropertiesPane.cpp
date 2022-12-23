@@ -2,7 +2,6 @@
 
 #include "Project.hpp"
 #include "gfx/Renderer.hpp"
-#include "util/Logger.h"
 
 wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_CHANGED, wxCommandEvent);
 
@@ -56,13 +55,12 @@ void PropertiesPane::OnSelectDisplayType(wxCommandEvent& event)
     auto selection = event.GetSelection();
     auto& objlist = ObjectList::Get(m_project);
     auto& renderer = Renderer::Get(m_project);
+    log_trace("Changing ObjectViewFlags for \"%s\"", m_obj->GetID().c_str());
     switch (selection) {
     case DisplayType_Solid:
         if (m_hasWireframe) {
-            log_info("Hi");
             m_obj->SetViewFlags(ObjectViewFlag_SolidWithWireframe);
         } else {
-            log_info("No");
             m_obj->SetViewFlags(ObjectViewFlag_Solid);
         }
         break;
@@ -88,6 +86,7 @@ void PropertiesPane::OnCheckWireframe(wxCommandEvent&)
 
     m_hasWireframe = m_chkWire->GetValue();
 
+    log_trace("Changing ObjectViewFlags for \"%s\"", m_obj->GetID().c_str());
     if (m_hasWireframe) {
         switch (flags) {
         case ObjectViewFlag_Solid:
@@ -121,6 +120,7 @@ void PropertiesPane::GetObjectStatus(std::string const& id)
 
     m_hasWireframe = false;
 
+    log_trace("Detecting ObjectViewFlags for \"%s\"", m_obj->GetID().c_str());
     switch (m_obj->GetViewFlags()) {
     case ObjectViewFlag_Solid:
         m_combo->SetSelection(DisplayType_Solid);
