@@ -100,7 +100,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
         }
     });
 
-    m_sceneTree->Bind(wxEVT_TREELIST_ITEM_ACTIVATED, [this](wxTreeListEvent& event) {
+    m_sceneTree->Bind(wxEVT_TREELIST_SELECTION_CHANGED, [this](wxTreeListEvent& event) {
         wxTreeListItem const item = event.GetItem();
         wxString const id = m_sceneTree->GetItemText(item);
         wxCommandEvent evt(EVT_PROPERTIES_PANE_OBJECT_CHANGED);
