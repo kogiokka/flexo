@@ -13,6 +13,7 @@
 #include "World.hpp"
 #include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
+#include "gfx/TechniqueManager.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "util/Logger.h"
 
@@ -87,6 +88,43 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     float bgColor[4] = { 0.2157f, 0.2157f, 0.2157f, 1.0f };
     gfx.ClearRenderTargetView(m_rtv.Get(), bgColor);
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
+
+    UniformBlock transform;
+    transform.AddElement(UniformBlock::Type::mat4, "model");
+    transform.AddElement(UniformBlock::Type::mat4, "viewProj");
+    transform.SetBIndex(0);
+    transform.FinalizeLayout();
+        transform.Assign("model", glm::vec4(1.0f));
+        transform.Assign("viewProj", gfx.GetViewProjectionMatrix());
+        transform.Assign("light", "position", gfx.GetCameraPosition());
+        transform.Assign("view", "viewPos", gfx.GetCameraPosition());
+
+    {
+        auto tech = TechniqueManager::Resolve("solid");
+        tech->UpdateUniform(gfx, "transform", transform);
+        tech->Update(gfx);
+    }
+    {
+        auto tech = TechniqueManager::Resolve("textured");
+        tech->SetUniform("transform", "viewProj", gfx.GetViewProjectionMatrix());
+        tech->SetUniform("light", "position", gfx.GetCameraPosition());
+        tech->SetUniform("view", "viewPos", gfx.GetCameraPosition());
+        tech->Update(gfx);
+    }
+    {
+        auto wire = TechniqueManager::Resolve("wire");
+        wire->SetUniform("transform", "viewProj", gfx.GetViewProjectionMatrix());
+        wire->Update(gfx);
+        auto guides = TechniqueManager::Resolve("guides");
+        guides->SetUniform("transform", "viewProj", gfx.GetViewProjectionMatrix());
+        guides->Update(gfx);
+        auto xaxis = TechniqueManager::Resolve("x-axis");
+        xaxis->SetUniform("transform", "viewProj", gfx.GetViewProjectionMatrix());
+        xaxis->Update(gfx);
+        auto yaxis = TechniqueManager::Resolve("y-axis");
+        yaxis->SetUniform("transform", "viewProj", gfx.GetViewProjectionMatrix());
+        yaxis->Update(gfx);
+    }
 
     auto& renderer = Renderer::Get(m_project);
     if (world.theMap) {

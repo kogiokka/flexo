@@ -35,7 +35,11 @@ private:
 
 public:
     UniformBlock();
+
+    UniformBlock(UniformBlock const& other);
+    UniformBlock& operator=(UniformBlock const& other);
     ~UniformBlock();
+
     void AddElement(UniformBlock::Type type, std::string name);
     void SetBIndex(unsigned int index);
     void FinalizeLayout();

@@ -16,15 +16,15 @@ void DrawableBase::AddBind(std::shared_ptr<Bind::Bindable> bind)
     m_binds.push_back(std::move(bind));
 }
 
-void DrawableBase::AddBindStep(BindStep step)
+void DrawableBase::AddTechnique(Technique tech)
 {
-    m_steps.push_back(std::move(step));
+    m_techs.push_back(std::move(tech));
 }
 
 void DrawableBase::Submit(Renderer& renderer)
 {
-    for (auto& step : m_steps) {
-        step.Submit(renderer, *this);
+    for (auto& tech : m_techs) {
+        tech.Submit(renderer, *this);
     }
 };
 
@@ -32,21 +32,6 @@ void DrawableBase::Bind(Graphics& gfx) const
 {
     for (auto const& b : m_binds) {
         b->Bind(gfx);
-    }
-}
-
-void DrawableBase::UpdateUniformBuffers(Graphics& gfx) const
-{
-    // FIXME Better solution
-    auto const& bindings = m_steps.front().bindables;
-    for (auto it = bindings.begin(); it != bindings.end(); it++) {
-        Bind::UniformBuffer* buf = dynamic_cast<Bind::UniformBuffer*>(it->get());
-        if (buf != nullptr) {
-            auto it = m_ubs.find(buf->Id());
-            if (it != m_ubs.end()) {
-                buf->Update(gfx, it->second);
-            }
-        }
     }
 }
 

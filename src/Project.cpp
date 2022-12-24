@@ -20,6 +20,7 @@
 #include "gfx/Graphics.hpp"
 #include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
+#include "gfx/Technique.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "gfx/drawable/SolidDrawable.hpp"
 #include "gfx/drawable/TexturedDrawable.hpp"
@@ -30,6 +31,17 @@
 #include "object/SurfaceVoxels.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 #include "util/Logger.h"
+
+#include "gfx/TechniqueManager.hpp"
+#include "gfx/bindable/InputLayout.hpp"
+#include "gfx/bindable/Primitive.hpp"
+#include "gfx/bindable/RasterizerState.hpp"
+#include "gfx/bindable/UniformBuffer.hpp"
+#include "gfx/bindable/VertexBuffer.hpp"
+#include "gfx/bindable/program/FragmentShaderProgram.hpp"
+#include "gfx/bindable/program/VertexShaderProgram.hpp"
+
+void InitRenderingTechniques(Graphics& gfx);
 
 WatermarkingProject::WatermarkingProject()
     : m_frame {}
@@ -67,6 +79,7 @@ WatermarkingProject::~WatermarkingProject()
 
 void WatermarkingProject::CreateScene()
 {
+    InitRenderingTechniques(Graphics::Get(*this));
     auto& objlist = ObjectList::Get(*this);
     auto& renderer = Renderer::Get(*this);
 
@@ -194,5 +207,238 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
         auto& objlist = ObjectList::Get(*this);
         objlist.Add(ObjectType_Sphere, sphere);
         objlist.Submit(Renderer::Get(*this));
+    }
+}
+
+void InitRenderingTechniques(Graphics& gfx)
+{
+    {
+        auto tech = TechniqueManager::Resolve("solid");
+        BindStep step;
+        std::shared_ptr<UniformBlock> transform, light, mat, view;
+        transform = std::make_shared<UniformBlock>();
+        light = std::make_shared<UniformBlock>();
+        mat = std::make_shared<UniformBlock>();
+        view = std::make_shared<UniformBlock>();
+
+        transform->AddElement(UniformBlock::Type::mat4, "model");
+        transform->AddElement(UniformBlock::Type::mat4, "viewProj");
+        light->AddElement(UniformBlock::Type::vec3f32, "position");
+        light->AddElement(UniformBlock::Type::vec3f32, "ambient");
+        light->AddElement(UniformBlock::Type::vec3f32, "diffusion");
+        light->AddElement(UniformBlock::Type::vec3f32, "specular");
+        mat->AddElement(UniformBlock::Type::vec3f32, "ambient");
+        mat->AddElement(UniformBlock::Type::vec3f32, "diffusion");
+        mat->AddElement(UniformBlock::Type::vec3f32, "specular");
+        mat->AddElement(UniformBlock::Type::f32, "shininess");
+        view->AddElement(UniformBlock::Type::vec3f32, "viewPos");
+
+        transform->FinalizeLayout();
+        light->FinalizeLayout();
+        mat->FinalizeLayout();
+        view->FinalizeLayout();
+
+        transform->Assign("model", glm::mat4(1.0f));
+        transform->Assign("viewProj", gfx.GetViewProjectionMatrix());
+        light->Assign("position", gfx.GetCameraPosition());
+        light->Assign("ambient", glm::vec3(0.8f, 0.8f, 0.8f));
+        light->Assign("diffusion", glm::vec3(0.8f, 0.8f, 0.8f));
+        light->Assign("specular", glm::vec3(0.8f, 0.8f, 0.8f));
+        mat->Assign("ambient", glm::vec3(0.3f, 0.3f, 0.3f));
+        mat->Assign("diffusion", glm::vec3(0.6f, 0.6f, 0.6f));
+        mat->Assign("specular", glm::vec3(0.3f, 0.3f, 0.3f));
+        mat->Assign("shininess", 256.0f);
+        view->Assign("viewPos", gfx.GetCameraPosition());
+
+        transform->SetBIndex(0);
+        light->SetBIndex(1);
+        mat->SetBIndex(2);
+        view->SetBIndex(3);
+
+        tech->AddUniformBlock("transform", transform);
+        tech->AddUniformBlock("light", light);
+        tech->AddUniformBlock("material", mat);
+        tech->AddUniformBlock("view", view);
+
+        std::vector<GLWRInputElementDesc> inputs = {
+            { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
+            { "normal", GLWRFormat_Float3, 0, 3 * sizeof(float), GLWRInputClassification_PerVertex, 0 },
+        };
+
+        auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/SolidDrawable.vert");
+        step.AddBindable(vs);
+        step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/SolidDrawable.frag"));
+        step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *transform, "transform"));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *light, "light"));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *mat, "material"));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *view, "view"));
+        step.AddBindable(
+            std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
+        tech->AddBindStep(step);
+    }
+    {
+        auto tech = TechniqueManager::Resolve("textured");
+        BindStep step;
+        std::shared_ptr<UniformBlock> transform, light, mat, view;
+        transform = std::make_shared<UniformBlock>();
+        light = std::make_shared<UniformBlock>();
+        mat = std::make_shared<UniformBlock>();
+        view = std::make_shared<UniformBlock>();
+
+        transform->AddElement(UniformBlock::Type::mat4, "model");
+        transform->AddElement(UniformBlock::Type::mat4, "viewProj");
+        light->AddElement(UniformBlock::Type::vec3f32, "position");
+        light->AddElement(UniformBlock::Type::vec3f32, "ambient");
+        light->AddElement(UniformBlock::Type::vec3f32, "diffusion");
+        light->AddElement(UniformBlock::Type::vec3f32, "specular");
+        mat->AddElement(UniformBlock::Type::vec3f32, "ambient");
+        mat->AddElement(UniformBlock::Type::vec3f32, "diffusion");
+        mat->AddElement(UniformBlock::Type::vec3f32, "specular");
+        mat->AddElement(UniformBlock::Type::f32, "shininess");
+        view->AddElement(UniformBlock::Type::vec3f32, "viewPos");
+
+        transform->FinalizeLayout();
+        light->FinalizeLayout();
+        mat->FinalizeLayout();
+        view->FinalizeLayout();
+
+        transform->Assign("model", glm::mat4(1.0f));
+        transform->Assign("viewProj", gfx.GetViewProjectionMatrix());
+        light->Assign("position", gfx.GetCameraPosition());
+        light->Assign("ambient", glm::vec3(0.8f, 0.8f, 0.8f));
+        light->Assign("diffusion", glm::vec3(0.8f, 0.8f, 0.8f));
+        light->Assign("specular", glm::vec3(0.8f, 0.8f, 0.8f));
+        mat->Assign("ambient", glm::vec3(0.3f, 0.3f, 0.3f));
+        mat->Assign("diffusion", glm::vec3(0.6f, 0.6f, 0.6f));
+        mat->Assign("specular", glm::vec3(0.3f, 0.3f, 0.3f));
+        mat->Assign("shininess", 256.0f);
+        view->Assign("viewPos", gfx.GetCameraPosition());
+
+        transform->SetBIndex(0);
+        light->SetBIndex(1);
+        mat->SetBIndex(2);
+        view->SetBIndex(3);
+
+        tech->AddUniformBlock("transform", transform);
+        tech->AddUniformBlock("light", light);
+        tech->AddUniformBlock("material", mat);
+        tech->AddUniformBlock("view", view);
+
+        GLWRSamplerDesc samplerDesc;
+        samplerDesc.coordinateS = GLWRTextureCoordinatesMode_Wrap;
+        samplerDesc.coordinateT = GLWRTextureCoordinatesMode_Wrap;
+        samplerDesc.coordinateR = GLWRTextureCoordinatesMode_Wrap;
+        samplerDesc.filter = GLWRFilter_MinMagNearest_MipNearest;
+        std::vector<GLWRInputElementDesc> inputs = {
+            { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
+            { "normal", GLWRFormat_Float3, 0, 3 * sizeof(float), GLWRInputClassification_PerVertex, 0 },
+            { "textureCoord", GLWRFormat_Float2, 0, 6 * sizeof(float), GLWRInputClassification_PerVertex, 0 },
+        };
+
+        auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/SolidDrawable.vert");
+        step.AddBindable(vs);
+        step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/SolidDrawable.frag"));
+        step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *transform, "transform"));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *light, "light"));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *mat, "material"));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *view, "view"));
+        // step.AddBindable(texture);
+        // step.AddBindable(std::make_shared<Bind::Sampler>(gfx, samplerDesc, 0));
+        step.AddBindable(
+            std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_None }));
+        tech->AddBindStep(step);
+    }
+    {
+        std::shared_ptr<UniformBlock> transform, color;
+        transform = std::make_shared<UniformBlock>();
+        color = std::make_shared<UniformBlock>();
+        transform->AddElement(UniformBlock::Type::mat4, "model");
+        transform->AddElement(UniformBlock::Type::mat4, "viewProj");
+        transform->SetBIndex(0);
+        transform->FinalizeLayout();
+        color->AddElement(UniformBlock::Type::vec3f32, "color");
+        color->FinalizeLayout();
+        color->SetBIndex(1);
+
+        transform->Assign("model", glm::mat4(1.0f));
+        transform->Assign("viewProj", gfx.GetViewProjectionMatrix());
+
+        std::vector<GLWRInputElementDesc> inputs = {
+            { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
+        };
+
+        BindStep step;
+        auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/WireDrawable.vert");
+        step.AddBindable(vs);
+        step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
+        step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *transform, "transform"));
+        step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *color, "color"));
+        step.AddBindable(
+            std::make_shared<Bind::RasterizerState>(gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
+
+        {
+            auto wire = TechniqueManager::Resolve("wire");
+            color->Assign("color", glm::vec3(0.7f, 0.7f, 0.7f));
+            wire->AddUniformBlock("transform", transform);
+            wire->AddUniformBlock("color", color);
+            step = BindStep();
+            step.AddBindable(vs);
+            step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
+            step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *transform, "transform"));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *color, "color"));
+            step.AddBindable(std::make_shared<Bind::RasterizerState>(
+                gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
+            wire->AddBindStep(step);
+        }
+        {
+            auto guides = TechniqueManager::Resolve("guides");
+            color->Assign("color", glm::vec3(0.3f, 0.3f, 0.3f));
+            guides->AddUniformBlock("transform", transform);
+            guides->AddUniformBlock("color", color);
+            step = BindStep();
+            step.AddBindable(vs);
+            step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
+            step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *transform, "transform"));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *color, "color"));
+            step.AddBindable(std::make_shared<Bind::RasterizerState>(
+                gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
+            guides->AddBindStep(step);
+        }
+        {
+            auto xaxis = TechniqueManager::Resolve("x-axis");
+            color->Assign("color", glm::vec3(0.8f, 0.3f, 0.3f));
+            xaxis->AddUniformBlock("transform", transform);
+            xaxis->AddUniformBlock("color", color);
+            step = BindStep();
+            step.AddBindable(vs);
+            step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
+            step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *transform, "transform"));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *color, "color"));
+            step.AddBindable(std::make_shared<Bind::RasterizerState>(
+                gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
+            xaxis->AddBindStep(step);
+        }
+        {
+            auto yaxis = TechniqueManager::Resolve("y-axis");
+            color->Assign("color", glm::vec3(0.3f, 0.8f, 0.3f));
+            yaxis->AddUniformBlock("transform", transform);
+            yaxis->AddUniformBlock("color", color);
+
+            step = BindStep();
+            step.AddBindable(vs);
+            step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
+            step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *transform, "transform"));
+            step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, *color, "color"));
+            step.AddBindable(std::make_shared<Bind::RasterizerState>(
+                gfx, GLWRRasterizerDesc { GLWRFillMode_Solid, GLWRCullMode_Back }));
+            yaxis->AddBindStep(step);
+       }
     }
 }

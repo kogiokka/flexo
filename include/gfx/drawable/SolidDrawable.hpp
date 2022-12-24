@@ -10,7 +10,6 @@ class SolidDrawable : public Drawable
 public:
     SolidDrawable(Graphics& gfx, Mesh const& mesh);
     ~SolidDrawable() override;
-    virtual void Update(Graphics& gfx) override;
 };
 
 #endif

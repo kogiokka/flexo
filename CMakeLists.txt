@@ -69,6 +69,7 @@ PRIVATE
     "src/gfx/BindStep.cpp"
     "src/gfx/DrawTask.cpp"
     "src/gfx/ObjectList.cpp"
+    "src/gfx/Technique.cpp"
     "src/gfx/glwr/IGLWRState.cpp"
     "src/gfx/glwr/IGLWRBuffer.cpp"
     "src/gfx/glwr/IGLWRInputLayout.cpp"

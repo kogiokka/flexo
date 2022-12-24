@@ -16,6 +16,32 @@ UniformBlock::UniformBlock()
 {
 }
 
+// copy constructor
+UniformBlock::UniformBlock(UniformBlock const& other)
+{
+    m_bindex = other.m_bindex;
+    m_size = other.m_size;
+    m_layout = other.m_layout;
+    m_struct = other.m_struct;
+
+    m_buffer = new unsigned char[m_size];
+    std::memcpy(m_buffer, other.m_buffer, m_size);
+}
+
+// copy assignment operator
+UniformBlock& UniformBlock::operator=(UniformBlock const& other)
+{
+    m_bindex = other.m_bindex;
+    m_size = other.m_size;
+    m_layout = other.m_layout;
+    m_struct = other.m_struct;
+
+    m_buffer = new unsigned char[m_size];
+    std::memcpy(m_buffer, other.m_buffer, m_size);
+    return *this;
+}
+
+// destructor
 UniformBlock::~UniformBlock()
 {
     delete[] m_buffer;

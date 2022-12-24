@@ -1,6 +1,7 @@
 #include <memory>
 
 #include "TransformStack.hpp"
+#include "gfx/TechniqueManager.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
 #include "gfx/drawable/WireDrawable.hpp"
 #include "object/Guides.hpp"
@@ -51,19 +52,19 @@ void Guides::GenerateDrawables(Graphics& gfx)
 {
     {
         auto wire = std::make_shared<WireDrawable>(gfx, m_grid.GenerateWireframe());
-        wire->SetColor(0.3f, 0.3f, 0.3f);
+        wire->AddTechnique(*TechniqueManager::Resolve("guides"));
         wire->SetVisible(m_isVisible);
         m_drawlist.push_back(wire);
     }
     {
         auto axis = std::make_shared<WireDrawable>(gfx, m_xAxis.GenerateWireframe());
-        axis->SetColor(0.8f, 0.3f, 0.3f);
+        axis->AddTechnique(*TechniqueManager::Resolve("x-axis"));
         axis->SetVisible(m_isVisible);
         m_drawlist.push_back(axis);
     }
     {
         auto axis = std::make_shared<WireDrawable>(gfx, m_yAxis.GenerateWireframe());
-        axis->SetColor(0.3f, 0.8f, 0.3f);
+        axis->AddTechnique(*TechniqueManager::Resolve("x-ayis"));
         axis->SetVisible(m_isVisible);
         m_drawlist.push_back(axis);
     }

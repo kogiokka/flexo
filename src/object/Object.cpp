@@ -1,5 +1,6 @@
 #include "object/Object.hpp"
 #include "gfx/Graphics.hpp"
+#include "gfx/TechniqueManager.hpp"
 #include "util/Logger.h"
 
 Object::Object()
@@ -23,6 +24,10 @@ void Object::GenerateDrawables(Graphics& gfx)
     m_solid = std::make_shared<SolidDrawable>(gfx, GenerateMesh());
     m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
     m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
+
+    m_solid->AddTechnique(*TechniqueManager::Resolve("solid"));
+    m_textured->AddTechnique(*TechniqueManager::Resolve("textured"));
+    m_wire->AddTechnique(*TechniqueManager::Resolve("wire"));
 }
 
 Object::DrawList const& Object::GetDrawList()
@@ -40,19 +45,19 @@ Object::DrawList const& Object::GetDrawList()
         break;
     case ObjectViewFlag_Wire:
         log_trace("\"%s\" has wire drawable", m_id.c_str());
-        m_wire->SetColor(0.7f, 0.7f, 0.7f);
+        TechniqueManager::Resolve("wire")->SetUniform("color", "color", glm::vec3(0.7f, 0.7f, 0.7f));
         list.push_back(m_wire);
         break;
     case ObjectViewFlag_SolidWithWireframe: {
         log_trace("\"%s\" has solid drawable with wireframe", m_id.c_str());
         list.push_back(m_solid);
-        m_wire->SetColor(0.0f, 0.0f, 0.0f);
+        TechniqueManager::Resolve("wire")->SetUniform("color", "color", glm::vec3(0.0f, 0.0f, 0.0f));
         list.push_back(m_wire);
     } break;
     case ObjectViewFlag_TexturedWithWireframe: {
         log_trace("\"%s\" has textured drawable with wireframe", m_id.c_str());
         list.push_back(m_textured);
-        m_wire->SetColor(0.0f, 0.0f, 0.0f);
+        TechniqueManager::Resolve("wire")->SetUniform("color", "color", glm::vec3(0.0f, 0.0f, 0.0f));
         list.push_back(m_wire);
     } break;
     }
