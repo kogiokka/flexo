@@ -103,6 +103,4 @@ void TexturedDrawable::Update(Graphics& gfx)
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
     m_ubs["viewPos"].Assign("viewPos", gfx.GetCameraPosition());
-
-    UpdateUniformBuffers(gfx);
 }

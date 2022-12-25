@@ -30,6 +30,7 @@ void DrawableBase::Submit(Renderer& renderer)
 
 void DrawableBase::Bind(Graphics& gfx) const
 {
+    UpdateUniformBuffers(gfx);
     for (auto const& b : m_binds) {
         b->Bind(gfx);
     }

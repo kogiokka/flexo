@@ -84,6 +84,4 @@ void SolidDrawable::Update(Graphics& gfx)
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["viewPos"].Assign("viewPos", gfx.GetCameraPosition());
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
-
-    UpdateUniformBuffers(gfx);
 }

@@ -73,6 +73,4 @@ void WireDrawable::SetColor(float r, float g, float b)
 void WireDrawable::Update(Graphics& gfx)
 {
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
-
-    UpdateUniformBuffers(gfx);
 }
