@@ -4,6 +4,7 @@
 #include "EditableMesh.hpp"
 #include "Node.hpp"
 #include "Vec.hpp"
+#include "VecUtil.hpp"
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "object/Object.hpp"
 
@@ -56,8 +57,11 @@ Wireframe Map<InDim, OutDim>::GenerateWireMesh() const
 template <int InDim, int OutDim>
 void Map<InDim, OutDim>::ApplyTransform()
 {
-    // auto st = GenerateTransformStack();
-    // st.Apply();
+    auto mat = GenerateTransformStack().GetMatrix();
+    for (auto& n : nodes) {
+        n.weights = VECCONV(glm::vec3(mat * glm::vec4(VECCONV(n.weights), 1.0f)));
+    }
+    m_transform = Transform();
 }
 
 #endif

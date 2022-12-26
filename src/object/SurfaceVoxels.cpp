@@ -95,6 +95,7 @@ std::vector<Voxel> const& SurfaceVoxels::Voxels() const
 void SurfaceVoxels::ApplyTransform()
 {
     auto mat = GenerateTransformStack().GetMatrix();
+    m_scale *= m_transform.scale; // Voxel will have the same scaling factors as the model.
     for (auto& vx : m_voxels) {
         vx.pos = glm::vec3(mat * glm::vec4(vx.pos, 1.0f));
     }

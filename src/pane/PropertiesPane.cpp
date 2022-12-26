@@ -46,9 +46,11 @@ PropertiesPane::PropertiesPane(wxWindow* parent, WatermarkingProject& project)
     m_transform.scale.z->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformScale, this);
 
     auto* btnApply = transform->AddButton("Apply");
+    btnApply->SetToolTip("Apply Object Transform");
     btnApply->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
         m_obj->ApplyTransform();
         m_obj->GenerateDrawables(Graphics::Get(m_project));
+        ObjectList::Get(m_project).Submit(Renderer::Get(m_project));
         m_transform.location.x->Clear();
         m_transform.location.y->Clear();
         m_transform.location.z->Clear();
