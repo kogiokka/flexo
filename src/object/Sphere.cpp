@@ -1,14 +1,9 @@
 #include "object/Sphere.hpp"
-#include "TransformStack.hpp"
+#include "util/Logger.h"
 
 Sphere::Sphere(int numSegments, int numRings)
 {
     m_mesh = ConstructSphere(numSegments, numRings);
-}
-
-void Sphere::SetTransform(TransformStack stack)
-{
-    stack.Apply(m_mesh);
 }
 
 Mesh Sphere::GenerateMesh() const
@@ -19,4 +14,11 @@ Mesh Sphere::GenerateMesh() const
 Wireframe Sphere::GenerateWireMesh() const
 {
     return m_mesh.GenerateWireframe();
+}
+
+void Sphere::ApplyTransform()
+{
+    auto st = GenerateTransformStack();
+    st.Apply(m_mesh);
+    m_transform = Transform();
 }

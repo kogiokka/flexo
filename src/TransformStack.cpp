@@ -41,7 +41,19 @@ void TransformStack::Apply(EditableMesh& mesh)
     }
 }
 
+void TransformStack::Apply(std::vector<glm::vec3>& positions)
+{
+    for (auto& p : positions) {
+        p = glm::vec3(stack * glm::vec4(p, 1.0f));
+    }
+}
+
 void TransformStack::Clear()
 {
     stack = glm::mat4(1.0f);
+}
+
+glm::mat4 TransformStack::GetMatrix()
+{
+    return stack;
 }

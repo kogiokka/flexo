@@ -23,6 +23,11 @@ void Object::GenerateDrawables(Graphics& gfx)
     m_solid = std::make_shared<SolidDrawable>(gfx, GenerateMesh());
     m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
     m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
+
+    auto modelMat = GenerateTransformStack().GetMatrix();
+    m_solid->SetTransform(modelMat);
+    m_textured->SetTransform(modelMat);
+    m_wire->SetTransform(modelMat);
 }
 
 Object::DrawList const& Object::GetDrawList()
@@ -103,4 +108,50 @@ void Object::SetVisible(bool visible)
 bool Object::IsVisible() const
 {
     return m_isVisible;
+}
+
+void Object::SetLocation(float x, float y, float z)
+{
+    m_transform.location = glm::vec3(x, y, z);
+
+    TransformStack st = GenerateTransformStack();
+    for (auto& d : m_drawlist) {
+        d->SetTransform(st.GetMatrix());
+    }
+}
+
+void Object::SetRotation(float x, float y, float z)
+{
+    m_transform.rotation = glm::vec3(x, y, z);
+
+    TransformStack st = GenerateTransformStack();
+    for (auto& d : m_drawlist) {
+        d->SetTransform(st.GetMatrix());
+    }
+}
+
+void Object::SetScale(float x, float y, float z)
+{
+    m_transform.scale = glm::vec3(x, y, z);
+
+    TransformStack st = GenerateTransformStack();
+    for (auto& d : m_drawlist) {
+        d->SetTransform(st.GetMatrix());
+    }
+}
+
+Object::Transform Object::GetTransform() const
+{
+    return m_transform;
+}
+
+TransformStack Object::GenerateTransformStack()
+{
+    TransformStack st;
+    st.PushTranslate(m_transform.location);
+    st.PushRotate(m_transform.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
+    st.PushRotate(m_transform.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
+    st.PushRotate(m_transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    st.PushScale(m_transform.scale);
+    return st;
 }

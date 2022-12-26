@@ -27,6 +27,7 @@ public:
     virtual ~DrawableBase() = default;
     virtual void AddBind(std::shared_ptr<Bind::Bindable> bind);
     void Submit(Renderer& renderer);
+    void SetTransform(glm::mat4 transform);
     void AddBindStep(BindStep step);
     void UpdateUniformBuffers(Graphics& gfx) const;
     void Bind(Graphics& gfx) const;
@@ -38,6 +39,7 @@ public:
 
 protected:
     bool m_isVisible;
+    glm::mat4 m_transform;
     std::vector<BindStep> m_steps;
     std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
     std::unordered_map<std::string, UniformBlock> m_ubs;

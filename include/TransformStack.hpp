@@ -1,6 +1,7 @@
 #ifndef TRNASFORM_STACK_H
 #define TRNASFORM_STACK_H
 
+#include <vector>
 #include <glm/glm.hpp>
 
 struct EditableMesh;
@@ -14,6 +15,8 @@ struct TransformStack {
     void PushTranslate(float x, float y, float z);
     void Clear();
     void Apply(EditableMesh& mesh);
+    void Apply(std::vector<glm::vec3>& positions);
+    glm::mat4 GetMatrix();
 
 private:
     glm::mat4 stack;

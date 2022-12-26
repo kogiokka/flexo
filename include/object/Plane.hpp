@@ -12,8 +12,9 @@ public:
 
     Mesh GenerateMesh() const override;
     Wireframe GenerateWireMesh() const override;
+    void ApplyTransform() override;
 
-// private:
+private:
     EditableMesh m_mesh;
 };
 

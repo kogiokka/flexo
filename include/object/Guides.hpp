@@ -13,6 +13,7 @@ public:
     void GenerateDrawables(Graphics& gfx) override;
     Mesh GenerateMesh() const override;
     Wireframe GenerateWireMesh() const override;
+    void ApplyTransform() override;
     Object::DrawList const& GetDrawList() override;
 
 private:

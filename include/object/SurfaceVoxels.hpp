@@ -23,6 +23,7 @@ public:
     std::future<void> Parameterize(Map<3, 2> const& map, float& progress);
 
 private:
+    void ApplyTransform() override;
     virtual Mesh GenerateMesh() const override;
     virtual Wireframe GenerateWireMesh() const override;
 

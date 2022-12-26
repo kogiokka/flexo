@@ -32,6 +32,8 @@ struct Map : public Object {
     std::vector<Node<InDim, OutDim>> nodes;
     MapFlags flags;
 
+    void ApplyTransform() override;
+
 private:
     Mesh GenerateMesh() const override;
     Wireframe GenerateWireMesh() const override;
@@ -49,6 +51,13 @@ template <int InDim, int OutDim>
 Wireframe Map<InDim, OutDim>::GenerateWireMesh() const
 {
     return GenMapEditableMesh(*this).GenerateWireframe();
+}
+
+template <int InDim, int OutDim>
+void Map<InDim, OutDim>::ApplyTransform()
+{
+    // auto st = GenerateTransformStack();
+    // st.Apply();
 }
 
 #endif

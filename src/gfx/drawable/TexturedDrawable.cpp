@@ -36,7 +36,7 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
     m_ubs["material"].FinalizeLayout();
     m_ubs["viewPos"].FinalizeLayout();
 
-    m_ubs["transform"].Assign("model", glm::mat4(1.0f));
+    m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
     m_ubs["light"].Assign("ambient", glm::vec3(0.8f, 0.8f, 0.8f));
@@ -100,6 +100,7 @@ void TexturedDrawable::ChangeTexture(std::shared_ptr<Bind::Texture2D> texture)
 
 void TexturedDrawable::Update(Graphics& gfx)
 {
+    m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
     m_ubs["viewPos"].Assign("viewPos", gfx.GetCameraPosition());

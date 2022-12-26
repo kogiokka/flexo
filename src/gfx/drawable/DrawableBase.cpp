@@ -8,6 +8,7 @@
 
 DrawableBase::DrawableBase()
     : m_isVisible(true)
+    , m_transform(glm::mat4(1.0f))
 {
 }
 
@@ -27,6 +28,11 @@ void DrawableBase::Submit(Renderer& renderer)
         step.Submit(renderer, *this);
     }
 };
+
+void DrawableBase::SetTransform(glm::mat4 transform)
+{
+    m_transform = transform;
+}
 
 void DrawableBase::Bind(Graphics& gfx) const
 {
