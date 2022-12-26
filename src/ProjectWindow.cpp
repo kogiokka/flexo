@@ -16,6 +16,9 @@ wxDEFINE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
+wxDEFINE_EVENT(EVT_MENU_CAMERA_PERSPECTIVE, wxCommandEvent);
+wxDEFINE_EVENT(EVT_MENU_CAMERA_ORTHOGONAL, wxCommandEvent);
+
 enum {
     TIMER_UPDATE_UI = wxID_HIGHEST + 1,
     EVT_VIEW_MENU_SCENE_VIEWPORT,
@@ -76,7 +79,31 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_PROPERTIES, "Toggle Properties Pane");
 
     auto cameraMenu = new wxMenu;
+    auto perspItem = cameraMenu->AppendRadioItem(EVT_MENU_CAMERA_PERSPECTIVE, "Perspective");
+    perspItem->Check();
+    cameraMenu->AppendRadioItem(EVT_MENU_CAMERA_ORTHOGONAL, "Orthogonal");
     cameraMenu->Append(wxID_REFRESH, "Reset");
+    cameraMenu->Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent&) {
+            wxCommandEvent event(EVT_MENU_CAMERA_PERSPECTIVE);
+            m_project.ProcessEvent(event);
+        },
+        EVT_MENU_CAMERA_PERSPECTIVE);
+    cameraMenu->Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent&) {
+            wxCommandEvent event(EVT_MENU_CAMERA_ORTHOGONAL);
+            m_project.ProcessEvent(event);
+        },
+        EVT_MENU_CAMERA_ORTHOGONAL);
+    cameraMenu->Bind(
+        wxEVT_MENU,
+        [this, perspItem](wxCommandEvent&) {
+            SceneViewportPane::Get(m_project).ResetCamera();
+            perspItem->Check();
+        },
+        wxID_REFRESH);
 
     auto modelsMenu = new wxMenu;
     modelsMenu->Append(EVT_ADD_UV_SPHERE, "Generate UV Sphere");
@@ -98,7 +125,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenModelFile, this, EVT_OPEN_MODEL);
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenImageFile, this, EVT_OPEN_IMAGE);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
-    Bind(wxEVT_MENU, &ProjectWindow::OnMenuCameraReset, this, wxID_REFRESH);
     Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_ADD_UV_SPHERE);
     Bind(
         wxEVT_MENU,
@@ -186,11 +212,6 @@ void ProjectWindow::OnOpenImageFile(wxCommandEvent&)
 void ProjectWindow::OnExit(wxCommandEvent&)
 {
     Close(true);
-}
-
-void ProjectWindow::OnMenuCameraReset(wxCommandEvent&)
-{
-    SceneViewportPane::Get(m_project).ResetCamera();
 }
 
 // FIXME: Why do I need this?

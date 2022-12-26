@@ -39,7 +39,6 @@ private:
     void OnMenuScreenshot(wxCommandEvent& event);
     void OnUpdateUI(wxUpdateUIEvent& event);
     Camera CreateDefaultCamera() const;
-    float CameraZoomStep(float zoom) const;
     inline float RoundGuard(float radian);
     void InitFrame(Graphics& gfx);
 

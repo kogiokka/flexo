@@ -8,6 +8,7 @@
 
 #include <stb_image_write.h>
 
+#include "Camera.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "World.hpp"
@@ -71,6 +72,15 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
     m_context = std::make_unique<wxGLContext>(this, nullptr, &attrs);
 
     m_project.Bind(EVT_SCREENSHOT, &SceneViewportPane::OnMenuScreenshot, this);
+
+    m_project.Bind(EVT_MENU_CAMERA_PERSPECTIVE, [this](wxCommandEvent&) {
+        auto& cam = Graphics::Get(m_project).GetCamera();
+        cam.SetProjectionMode(Camera::ProjectionMode::Perspective);
+    });
+    m_project.Bind(EVT_MENU_CAMERA_ORTHOGONAL, [this](wxCommandEvent&) {
+        auto& cam = Graphics::Get(m_project).GetCamera();
+        cam.SetProjectionMode(Camera::ProjectionMode::Orthogonal);
+    });
 }
 
 SceneViewportPane::~SceneViewportPane()
@@ -183,15 +193,9 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
 
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
 {
-    int const direction = -1 * event.GetWheelRotation() / 120;
-    float& zoom = Graphics::Get(m_project).GetCamera().zoom;
-    float const tmp = zoom + direction * CameraZoomStep(zoom);
-
-    if (tmp <= 0.001f || tmp >= 20.0f) {
-        return;
-    }
-
-    zoom = tmp;
+    auto& cam = Graphics::Get(m_project).GetCamera();
+    int const diff = -1 * event.GetWheelRotation() / 120;
+    cam.Zoom(diff);
 }
 
 void SceneViewportPane::OnMouseLeftDown(wxMouseEvent& event)
@@ -205,15 +209,15 @@ void SceneViewportPane::OnMouseRightDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    auto& coord = Graphics::Get(m_project).GetCamera().coord;
+    auto coord = Graphics::Get(m_project).GetCamera().coord.lock();
     // Change rotating direction if the camera passes through the polars.
     // Theta is guaranteed to be on either [0, pi] or (pi, 2 * pi).
-    if (coord.theta > MATH_PI)
+    if (coord->theta > MATH_PI)
         m_dirHorizontal = -1;
     else
         m_dirHorizontal = 1;
 
-    m_originRotate = std::make_tuple(x, y, coord.phi, coord.theta);
+    m_originRotate = std::make_tuple(x, y, coord->phi, coord->theta);
 }
 
 void SceneViewportPane::OnMouseMotion(wxMouseEvent& event)
@@ -225,14 +229,17 @@ void SceneViewportPane::OnMouseMotion(wxMouseEvent& event)
 
     if (event.LeftIsDown()) {
         auto const& [oX, oY, oTarget] = m_originTranslate;
-        cam.center = oTarget + (-(x - oX) * cam.basis.sideway + (y - oY) * cam.basis.up) * m_rateMove * cam.zoom;
+        cam.center = oTarget + (-(x - oX) * cam.basis.sideway + (y - oY) * cam.basis.up) * m_rateMove;
         cam.UpdateViewCoord();
     }
     if (event.RightIsDown()) {
         auto const& [oX, oY, oPhi, oTheta] = m_originRotate;
-        auto& coord = cam.coord;
-        coord.phi = RoundGuard(m_dirHorizontal * -(x - oX) * m_rateRotate + oPhi);
-        coord.theta = RoundGuard(-(y - oY) * m_rateRotate + oTheta);
+        float phi = RoundGuard(m_dirHorizontal * -(x - oX) * m_rateRotate + oPhi);
+        float theta = RoundGuard(-(y - oY) * m_rateRotate + oTheta);
+        cam.orthoCoord->phi = phi;
+        cam.orthoCoord->theta = theta;
+        cam.perspCoord->phi = phi;
+        cam.perspCoord->theta = theta;
         cam.UpdateViewCoord();
     }
 }
@@ -261,37 +268,10 @@ void SceneViewportPane::OnUpdateUI(wxUpdateUIEvent&)
 Camera SceneViewportPane::CreateDefaultCamera() const
 {
     Camera camera;
-
-    camera.position = { 0.0f, 0.0f, 0.0f };
-    camera.basis = {};
-    camera.worldUp = { 0.0f, 1.0f, 0.0f };
-    camera.center = { 0.0f, 0.0f, 0.0f };
-    camera.coord = { 500.0f, 1.25f, 0.0f };
-    camera.volumeSize = 10.0f;
-    camera.zoom = 1.0f;
-
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    camera.aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
-    camera.UpdateViewCoord();
+    camera.aspectRatio = static_cast<float>(size.x)/static_cast<float>(size.y);
 
     return camera;
-}
-
-float SceneViewportPane::CameraZoomStep(float zoom) const
-{
-    if (zoom <= 0.025f) {
-        return 0.001f;
-    } else if (zoom <= 0.05f) {
-        return 0.002f;
-    } else if (zoom <= 0.2f) {
-        return 0.01f;
-    } else if (zoom <= 1.0f) {
-        return 0.05f;
-    } else if (zoom <= 5.0f) {
-        return 0.25f;
-    } else {
-        return 0.3f;
-    }
 }
 
 // Restrict both phi and theta within 0 and 360 degrees.

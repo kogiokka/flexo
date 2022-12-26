@@ -16,6 +16,9 @@ wxDECLARE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDECLARE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
+wxDECLARE_EVENT(EVT_MENU_CAMERA_PERSPECTIVE, wxCommandEvent);
+wxDECLARE_EVENT(EVT_MENU_CAMERA_ORTHOGONAL, wxCommandEvent);
+
 class ProjectWindow final : public wxFrame
 {
 public:
@@ -42,7 +45,6 @@ private:
     void OnOpenModelFile(wxCommandEvent& event);
     void OnOpenImageFile(wxCommandEvent& event);
     void OnExit(wxCommandEvent&);
-    void OnMenuCameraReset(wxCommandEvent& event);
     void OnMenuGenerateModelDome(wxCommandEvent& event);
     void OnTimerUpdateUI(wxTimerEvent& event);
     void OnTogglePane(wxCommandEvent& event);
