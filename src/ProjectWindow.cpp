@@ -105,8 +105,8 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
         },
         wxID_REFRESH);
 
-    auto modelsMenu = new wxMenu;
-    modelsMenu->Append(EVT_ADD_UV_SPHERE, "Generate UV Sphere");
+    auto addMenu = new wxMenu;
+    addMenu->Append(EVT_ADD_UV_SPHERE, "UV Sphere");
 
     auto* screenshotMenu = new wxMenu;
     auto* itemScreenshotViewport = new wxMenuItem(screenshotMenu, EVT_SCREENSHOT, "Screenshot 3D Viewport", "");
@@ -117,7 +117,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     menubar->Append(fileMenu, "&File");
     menubar->Append(m_viewMenu, "&View");
     menubar->Append(cameraMenu, "&Camera");
-    menubar->Append(modelsMenu, "&Add");
+    menubar->Append(addMenu, "&Add");
     menubar->Append(screenshotMenu, "&Screeenshot");
 
     this->SetMenuBar(menubar);
@@ -125,7 +125,14 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenModelFile, this, EVT_OPEN_MODEL);
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenImageFile, this, EVT_OPEN_IMAGE);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
-    Bind(wxEVT_MENU, &ProjectWindow::OnMenuGenerateModelDome, this, EVT_ADD_UV_SPHERE);
+    Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent&) {
+            wxCommandEvent event(EVT_ADD_UV_SPHERE);
+            event.SetId(EVT_ADD_UV_SPHERE);
+            m_project.ProcessEvent(event);
+        },
+        EVT_ADD_UV_SPHERE);
     Bind(
         wxEVT_MENU,
         [this](wxCommandEvent&) {
@@ -212,14 +219,6 @@ void ProjectWindow::OnOpenImageFile(wxCommandEvent&)
 void ProjectWindow::OnExit(wxCommandEvent&)
 {
     Close(true);
-}
-
-// FIXME: Why do I need this?
-void ProjectWindow::OnMenuGenerateModelDome(wxCommandEvent&)
-{
-    wxCommandEvent event(EVT_ADD_UV_SPHERE);
-    event.SetId(EVT_ADD_UV_SPHERE);
-    m_project.ProcessEvent(event);
 }
 
 wxWindow* ProjectWindow::GetMainPage()

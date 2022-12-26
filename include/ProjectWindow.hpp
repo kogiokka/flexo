@@ -45,7 +45,6 @@ private:
     void OnOpenModelFile(wxCommandEvent& event);
     void OnOpenImageFile(wxCommandEvent& event);
     void OnExit(wxCommandEvent&);
-    void OnMenuGenerateModelDome(wxCommandEvent& event);
     void OnTimerUpdateUI(wxTimerEvent& event);
     void OnTogglePane(wxCommandEvent& event);
 };
