@@ -158,7 +158,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
 
     log_info("%lu voxels will be rendered.", m_model->Voxels().size());
 
-    world.theDataset = std::make_shared<Dataset<3>>(m_model->GenPositions());
+    world.theDataset = std::make_shared<Dataset<3>>(m_model->GetPositions());
 
     auto& objlist = ObjectList::Get(*this);
     objlist.Add(ObjectType_Model, m_model);

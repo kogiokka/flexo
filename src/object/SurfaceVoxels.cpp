@@ -144,7 +144,7 @@ Wireframe SurfaceVoxels::GenerateWireMesh() const
     return wire;
 }
 
-std::vector<glm::vec3> SurfaceVoxels::GenPositions()
+std::vector<glm::vec3> SurfaceVoxels::GetPositions() const
 {
     std::vector<glm::vec3> pos(m_voxels.size());
 

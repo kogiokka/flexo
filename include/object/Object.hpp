@@ -5,6 +5,7 @@
 #include <string>
 #include <vector>
 
+#include "EditableMesh.hpp"
 #include "Mesh.hpp"
 #include "TransformStack.hpp"
 #include "Wireframe.hpp"
@@ -61,6 +62,7 @@ public:
 
     virtual Mesh GenerateMesh() const = 0;
     virtual Wireframe GenerateWireMesh() const = 0;
+    virtual std::vector<glm::vec3> GetPositions() const;
     virtual void ApplyTransform() = 0;
 
     void SetLocation(float x, float y, float z);
@@ -82,6 +84,7 @@ protected:
     DrawList m_drawlist;
 
     Transform m_transform;
+    EditableMesh m_mesh;
 };
 
 #endif

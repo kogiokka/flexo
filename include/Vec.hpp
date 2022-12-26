@@ -70,3 +70,4 @@ using Vec3f = Vec3<float>;
 
 #include "Vec.inl"
 #endif
+

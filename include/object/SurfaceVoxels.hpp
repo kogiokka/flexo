@@ -19,11 +19,12 @@ public:
     SurfaceVoxels(VolumetricModelData& modelData);
     virtual ~SurfaceVoxels() = default;
     std::vector<Voxel> const& Voxels() const;
-    std::vector<glm::vec3> GenPositions();
+    virtual std::vector<glm::vec3> GetPositions() const override;
     std::future<void> Parameterize(Map<3, 2> const& map, float& progress);
 
 private:
     void ApplyTransform() override;
+    void GenEditableMesh();
     virtual Mesh GenerateMesh() const override;
     virtual Wireframe GenerateWireMesh() const override;
 

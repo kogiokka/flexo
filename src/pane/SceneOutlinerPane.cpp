@@ -13,6 +13,7 @@
 #include "gfx/drawable/DrawableBase.hpp"
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
+#include "util/Logger.h"
 
 wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);
@@ -64,7 +65,9 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
             auto id = m_sceneTree->GetItemText(item);
             for (auto const& obj : ObjectList::Get(m_project)) {
                 if (obj->GetID() == id) {
-                    world.theDataset = std::make_shared<Dataset<3>>(obj->GenerateMesh().positions);
+                    auto const& pos = obj->GetPositions();
+                    world.theDataset = std::make_shared<Dataset<3>>(pos);
+                    log_info("Dataset count: %lu", pos.size());
                     break;
                 }
             }

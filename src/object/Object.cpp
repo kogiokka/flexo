@@ -30,6 +30,12 @@ void Object::GenerateDrawables(Graphics& gfx)
     m_wire->SetTransform(modelMat);
 }
 
+std::vector<glm::vec3>
+Object::GetPositions() const
+{
+    return m_mesh.positions;
+}
+
 Object::DrawList const& Object::GetDrawList()
 {
     Object::DrawList list;
