@@ -17,7 +17,8 @@ public:
     Object::DrawList const& GetDrawList() override;
 
 private:
-    EditableMesh m_grid;
+    EditableMesh m_fine;
+    EditableMesh m_coarse;
     EditableMesh m_xAxis;
     EditableMesh m_yAxis;
 };
