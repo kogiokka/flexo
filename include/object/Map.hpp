@@ -57,7 +57,7 @@ Wireframe Map<InDim, OutDim>::GenerateWireMesh() const
 template <int InDim, int OutDim>
 void Map<InDim, OutDim>::ApplyTransform()
 {
-    auto mat = GenerateTransformStack().GetMatrix();
+    auto mat = GenerateTransformStack().GenerateMatrix();
     for (auto& n : nodes) {
         n.weights = VECCONV(glm::vec3(mat * glm::vec4(VECCONV(n.weights), 1.0f)));
     }

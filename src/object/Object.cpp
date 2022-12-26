@@ -24,7 +24,7 @@ void Object::GenerateDrawables(Graphics& gfx)
     m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
     m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
 
-    auto modelMat = GenerateTransformStack().GetMatrix();
+    auto modelMat = GenerateTransformStack().GenerateMatrix();
     m_solid->SetTransform(modelMat);
     m_textured->SetTransform(modelMat);
     m_wire->SetTransform(modelMat);
@@ -116,7 +116,7 @@ void Object::SetLocation(float x, float y, float z)
 
     TransformStack st = GenerateTransformStack();
     for (auto& d : m_drawlist) {
-        d->SetTransform(st.GetMatrix());
+        d->SetTransform(st.GenerateMatrix());
     }
 }
 
@@ -126,7 +126,7 @@ void Object::SetRotation(float x, float y, float z)
 
     TransformStack st = GenerateTransformStack();
     for (auto& d : m_drawlist) {
-        d->SetTransform(st.GetMatrix());
+        d->SetTransform(st.GenerateMatrix());
     }
 }
 
@@ -136,7 +136,7 @@ void Object::SetScale(float x, float y, float z)
 
     TransformStack st = GenerateTransformStack();
     for (auto& d : m_drawlist) {
-        d->SetTransform(st.GetMatrix());
+        d->SetTransform(st.GenerateMatrix());
     }
 }
 

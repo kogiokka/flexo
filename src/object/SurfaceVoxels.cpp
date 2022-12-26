@@ -94,7 +94,7 @@ std::vector<Voxel> const& SurfaceVoxels::Voxels() const
 
 void SurfaceVoxels::ApplyTransform()
 {
-    auto mat = GenerateTransformStack().GetMatrix();
+    auto mat = GenerateTransformStack().GenerateMatrix();
     m_scale *= m_transform.scale; // Voxel will have the same scaling factors as the model.
     for (auto& vx : m_voxels) {
         vx.pos = glm::vec3(mat * glm::vec4(vx.pos, 1.0f));
@@ -318,7 +318,7 @@ void ConstructVoxelMesh()
     ts.PushTranslate(1.0f, 0.0f, 0.0f);
     ts.PushRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     plane = ConstructPlane();
-    ts.Apply(plane);
+    ts.Apply(plane.positions);
     VOXEL_MESH[0] = plane.GenerateMesh();
 
     // -X
@@ -326,7 +326,7 @@ void ConstructVoxelMesh()
     ts.PushTranslate(-1.0f, 0.0f, 0.0f);
     ts.PushRotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     plane = ConstructPlane();
-    ts.Apply(plane);
+    ts.Apply(plane.positions);
     VOXEL_MESH[1] = plane.GenerateMesh();
 
     // +Y
@@ -334,7 +334,7 @@ void ConstructVoxelMesh()
     ts.PushTranslate(0.0f, 1.0f, 0.0f);
     ts.PushRotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     plane = ConstructPlane();
-    ts.Apply(plane);
+    ts.Apply(plane.positions);
     VOXEL_MESH[2] = plane.GenerateMesh();
 
     // -Y
@@ -342,21 +342,21 @@ void ConstructVoxelMesh()
     ts.PushTranslate(0.0f, -1.0f, 0.0f);
     ts.PushRotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     plane = ConstructPlane();
-    ts.Apply(plane);
+    ts.Apply(plane.positions);
     VOXEL_MESH[3] = plane.GenerateMesh();
 
     // +Z
     ts.Clear();
     ts.PushTranslate(0.0f, 0.0f, 1.0f);
     plane = ConstructPlane();
-    ts.Apply(plane);
+    ts.Apply(plane.positions);
     VOXEL_MESH[4] = plane.GenerateMesh();
 
     // -Z
     ts.Clear();
     ts.PushTranslate(0.0f, 0.0f, -1.0f);
     plane = ConstructPlane();
-    ts.Apply(plane);
+    ts.Apply(plane.positions);
     VOXEL_MESH[5] = plane.GenerateMesh();
 }
 

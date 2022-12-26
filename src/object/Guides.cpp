@@ -42,9 +42,9 @@ Guides::Guides()
 
     TransformStack ts;
     ts.PushScale(90.0f, 90.0f, 1.0f);
-    ts.Apply(m_grid);
-    ts.Apply(m_xAxis);
-    ts.Apply(m_yAxis);
+    ts.Apply(m_grid.positions);
+    ts.Apply(m_xAxis.positions);
+    ts.Apply(m_yAxis.positions);
 }
 
 void Guides::GenerateDrawables(Graphics& gfx)
@@ -88,9 +88,9 @@ Wireframe Guides::GenerateWireMesh() const
 void Guides::ApplyTransform()
 {
     auto st = GenerateTransformStack();
-    st.Apply(m_grid);
-    st.Apply(m_xAxis);
-    st.Apply(m_yAxis);
+    st.Apply(m_grid.positions);
+    st.Apply(m_xAxis.positions);
+    st.Apply(m_yAxis.positions);
 
     m_transform = Transform();
 }

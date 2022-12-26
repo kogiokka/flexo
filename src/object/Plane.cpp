@@ -18,6 +18,6 @@ Wireframe Plane::GenerateWireMesh() const
 void Plane::ApplyTransform()
 {
     auto st = GenerateTransformStack();
-    st.Apply(m_mesh);
+    st.Apply(m_mesh.positions);
     m_transform = Transform();
 }

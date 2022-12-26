@@ -1,27 +1,60 @@
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "EditableMesh.hpp"
 #include "TransformStack.hpp"
 
+struct TransformStack::TranslateCmd : public TransformStack::Cmd {
+    TranslateCmd(glm::vec3 translate)
+        : translate(translate) {};
+    virtual ~TranslateCmd() = default;
+    glm::vec3 translate;
+    virtual void Push(glm::mat4& mat) override
+    {
+        mat = glm::translate(mat, translate);
+    }
+};
+
+struct TransformStack::RotateCmd : public TransformStack::Cmd {
+    RotateCmd(float radian, glm::vec3 axis)
+        : radian(radian)
+        , axis(axis) {};
+    virtual ~RotateCmd() = default;
+    float radian;
+    glm::vec3 axis;
+    virtual void Push(glm::mat4& mat) override
+    {
+        mat = glm::rotate(mat, radian, axis);
+    }
+};
+
+struct TransformStack::ScaleCmd : public TransformStack::Cmd {
+    ScaleCmd(glm::vec3 scale)
+        : scale(scale) {};
+    virtual ~ScaleCmd() = default;
+    glm::vec3 scale;
+    virtual void Push(glm::mat4& mat) override
+    {
+        mat = glm::scale(mat, scale);
+    }
+};
+
 TransformStack::TransformStack()
-    : stack(glm::mat4(1.0f))
 {
 }
 
 void TransformStack::PushScale(glm::vec3 scale)
 {
-    stack = glm::scale(stack, scale);
+    m_cmdStack.push_back(std::make_unique<ScaleCmd>(scale));
 }
 
 void TransformStack::PushTranslate(glm::vec3 translate)
 {
-    stack = glm::translate(stack, translate);
+    m_cmdStack.push_back(std::make_unique<TranslateCmd>(translate));
 }
 
 void TransformStack::PushRotate(float radian, glm::vec3 axis)
 {
-    stack = glm::rotate(stack, radian, axis);
+    m_cmdStack.push_back(std::make_unique<RotateCmd>(radian, axis));
 }
 
 void TransformStack::PushScale(float x, float y, float z)
@@ -34,26 +67,33 @@ void TransformStack::PushTranslate(float x, float y, float z)
     TransformStack::PushTranslate(glm::vec3(x, y, z));
 }
 
-void TransformStack::Apply(EditableMesh& mesh)
+void TransformStack::Apply(std::vector<glm::vec3>& positions)
 {
-    for (auto& p : mesh.positions) {
-        p = glm::vec3(stack * glm::vec4(p, 1.0f));
+    auto mat = GenerateMatrix();
+    for (auto& p : positions) {
+        p = glm::vec3(mat * glm::vec4(p, 1.0f));
     }
 }
 
-void TransformStack::Apply(std::vector<glm::vec3>& positions)
+void TransformStack::Pop()
 {
-    for (auto& p : positions) {
-        p = glm::vec3(stack * glm::vec4(p, 1.0f));
+    if (m_cmdStack.empty()) {
+        return;
     }
+
+    m_cmdStack.pop_back();
 }
 
 void TransformStack::Clear()
 {
-    stack = glm::mat4(1.0f);
+    m_cmdStack.clear();
 }
 
-glm::mat4 TransformStack::GetMatrix()
+glm::mat4 TransformStack::GenerateMatrix()
 {
-    return stack;
+    glm::mat4 st(1.0f);
+    for (auto const& cmd : m_cmdStack) {
+        cmd->Push(st);
+    }
+    return st;
 }
