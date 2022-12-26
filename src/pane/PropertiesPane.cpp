@@ -24,7 +24,7 @@ PropertiesPane::PropertiesPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
     , m_project(project)
 {
-    auto* transform = AddGroup("Transform", 9);
+    auto* transform = AddGroup("Transform", 10);
     m_transform.location.x = transform->AddInputText("Location X", "0");
     m_transform.location.y = transform->AddInputText("         Y", "0");
     m_transform.location.z = transform->AddInputText("         Z", "0");
