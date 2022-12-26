@@ -43,8 +43,6 @@ private:
     void InitFrame(Graphics& gfx);
 
     bool m_isGLLoaded;
-    float m_rateMove;
-    float m_rateRotate;
     int m_dirHorizontal;
     std::tuple<int, int, float, float> m_originRotate;
     std::tuple<float, float, glm::vec3> m_originTranslate;

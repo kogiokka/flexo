@@ -61,8 +61,6 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
                                      wxPoint const& pos, wxSize const& size, WatermarkingProject& project)
     : wxGLCanvas(parent, dispAttrs, id, pos, size)
     , m_isGLLoaded(false)
-    , m_rateMove(0.005f)
-    , m_rateRotate(0.005f)
     , m_dirHorizontal(1)
     , m_context(nullptr)
     , m_project(project)
@@ -229,13 +227,18 @@ void SceneViewportPane::OnMouseMotion(wxMouseEvent& event)
 
     if (event.LeftIsDown()) {
         auto const& [oX, oY, oTarget] = m_originTranslate;
-        cam.center = oTarget + (-(x - oX) * cam.basis.sideway + (y - oY) * cam.basis.up) * m_rateMove;
+        float radius = cam.perspCoord->r;
+        float dx = 0.001f * radius * -(x - oX);
+        float dy = 0.001f * radius * (y - oY);
+        cam.center = oTarget + (dx * cam.basis.sideway + dy * cam.basis.up);
         cam.UpdateViewCoord();
     }
     if (event.RightIsDown()) {
         auto const& [oX, oY, oPhi, oTheta] = m_originRotate;
-        float phi = RoundGuard(m_dirHorizontal * -(x - oX) * m_rateRotate + oPhi);
-        float theta = RoundGuard(-(y - oY) * m_rateRotate + oTheta);
+        float dx = 0.003f * -(x - oX);
+        float dy = 0.003f * (y - oY);
+        float phi = RoundGuard(m_dirHorizontal * dx + oPhi);
+        float theta = RoundGuard(-dy + oTheta);
         cam.orthoCoord->phi = phi;
         cam.orthoCoord->theta = theta;
         cam.perspCoord->phi = phi;
@@ -269,7 +272,7 @@ Camera SceneViewportPane::CreateDefaultCamera() const
 {
     Camera camera;
     wxSize const size = GetClientSize() * GetContentScaleFactor();
-    camera.aspectRatio = static_cast<float>(size.x)/static_cast<float>(size.y);
+    camera.aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
 
     return camera;
 }

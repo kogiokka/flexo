@@ -58,17 +58,6 @@ void Camera::Zoom(int diff)
     perspCoord->r += diff * (perspCoord->r / 10.0f);
     zoom += diff * (zoom / 10.0f);
     UpdateViewCoord();
-    return;
-    // switch (projmode) {
-    // case ProjectionMode::Perspective: {
-    //     coord.r += diff * (coord.r / 10.0f);
-    //     tmpRadius = coord.r;
-    // } break;
-    // case ProjectionMode::Orthogonal: {
-    //     zoom += diff * (zoom / 10.0f);
-    // } break;
-    // }
-    // UpdateViewCoord();
 }
 
 glm::mat4 Camera::ProjectionMatrix() const
