@@ -13,7 +13,6 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "TransformStack.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
 #include "World.hpp"
@@ -70,11 +69,10 @@ void WatermarkingProject::CreateScene()
     auto& objlist = ObjectList::Get(*this);
     auto& renderer = Renderer::Get(*this);
 
-    TransformStack ts;
-    ts.PushTranslate(0.0f, 5.0f, 0.0f);
-    ts.PushScale(0.2f, 0.2f, 0.2f);
     auto light = std::make_shared<Sphere>();
-    light->SetTransform(ts);
+    light->SetLocation(0.0f, 5.0f, 0.0f);
+    light->SetScale(0.2f, 0.2f, 0.2f);
+    light->ApplyTransform();
 
     auto cube = std::make_shared<Cube>();
     cube->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
@@ -185,11 +183,9 @@ void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
         glm::vec3 const center = (max + min) * 0.5f;
 
         auto sphere = std::make_shared<Sphere>(60, 60);
-
-        TransformStack ts;
-        ts.PushTranslate(center);
-        ts.PushScale(radius, radius, radius);
-        sphere->SetTransform(ts);
+        sphere->SetScale(radius, radius, radius);
+        sphere->SetLocation(center.x, center.y, center.z);
+        sphere->ApplyTransform();
 
         auto& objlist = ObjectList::Get(*this);
         objlist.Add(ObjectType_Sphere, sphere);

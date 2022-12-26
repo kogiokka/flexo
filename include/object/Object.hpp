@@ -6,6 +6,7 @@
 #include <vector>
 
 #include "Mesh.hpp"
+#include "TransformStack.hpp"
 #include "Wireframe.hpp"
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/bindable/TextureManager.hpp"
@@ -15,6 +16,7 @@
 #include "gfx/drawable/WireDrawable.hpp"
 
 class Graphics;
+struct TransformStack;
 
 typedef int ObjectViewFlag;
 
@@ -29,6 +31,18 @@ enum ObjectViewFlag_ {
 class Object
 {
 public:
+    struct Transform {
+        Transform()
+        {
+            location = glm::vec3(0.0f, 0.0f, 0.0f);
+            rotation = glm::vec3(0.0f, 0.0f, 0.0f);
+            scale = glm::vec3(1.0f, 1.0f, 1.0f);
+        }
+        glm::vec3 location;
+        glm::vec3 rotation;
+        glm::vec3 scale;
+    };
+
     using DrawList = std::vector<std::shared_ptr<DrawableBase>>;
 
     Object();
@@ -47,8 +61,17 @@ public:
 
     virtual Mesh GenerateMesh() const = 0;
     virtual Wireframe GenerateWireMesh() const = 0;
+    virtual void ApplyTransform() = 0;
+
+    void SetLocation(float x, float y, float z);
+    void SetRotation(float x, float y, float z);
+    void SetScale(float x, float y, float z);
+
+    Transform GetTransform() const;
 
 protected:
+    TransformStack GenerateTransformStack();
+
     std::string m_id;
     std::shared_ptr<Bind::Texture2D> m_texture;
     ObjectViewFlag m_flags;
@@ -57,6 +80,8 @@ protected:
     std::shared_ptr<TexturedDrawable> m_textured;
     std::shared_ptr<WireDrawable> m_wire;
     DrawList m_drawlist;
+
+    Transform m_transform;
 };
 
 #endif

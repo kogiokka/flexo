@@ -84,3 +84,13 @@ Wireframe Guides::GenerateWireMesh() const
 {
     return {};
 }
+
+void Guides::ApplyTransform()
+{
+    auto st = GenerateTransformStack();
+    st.Apply(m_grid);
+    st.Apply(m_xAxis);
+    st.Apply(m_yAxis);
+
+    m_transform = Transform();
+}

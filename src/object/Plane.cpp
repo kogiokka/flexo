@@ -14,3 +14,10 @@ Wireframe Plane::GenerateWireMesh() const
 {
     return m_mesh.GenerateWireframe();
 }
+
+void Plane::ApplyTransform()
+{
+    auto st = GenerateTransformStack();
+    st.Apply(m_mesh);
+    m_transform = Transform();
+}

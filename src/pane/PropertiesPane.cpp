@@ -1,3 +1,5 @@
+#include <wx/valnum.h>
+
 #include "pane/PropertiesPane.hpp"
 
 #include "Project.hpp"
@@ -22,10 +24,56 @@ PropertiesPane::PropertiesPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
     , m_project(project)
 {
-    auto* group = AddGroup("Viewport Display", 2);
+    auto* transform = AddGroup("Transform", 9);
+    m_transform.location.x = transform->AddInputText("Location X", "0");
+    m_transform.location.y = transform->AddInputText("         Y", "0");
+    m_transform.location.z = transform->AddInputText("         Z", "0");
+    m_transform.rotation.x = transform->AddInputText("Rotoation X", "0");
+    m_transform.rotation.y = transform->AddInputText("          Y", "0");
+    m_transform.rotation.z = transform->AddInputText("          Z", "0");
+    m_transform.scale.x = transform->AddInputText("Scale X", "1.0");
+    m_transform.scale.y = transform->AddInputText("      Y", "1.0");
+    m_transform.scale.z = transform->AddInputText("      Z", "1.0");
 
-    m_chkWire = group->AddCheckBoxWithHeading("Show", "Wireframe", false);
-    m_combo = group->AddComboBox("Display As");
+    m_transform.location.x->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformLocation, this);
+    m_transform.location.y->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformLocation, this);
+    m_transform.location.z->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformLocation, this);
+    m_transform.rotation.x->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformRotation, this);
+    m_transform.rotation.y->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformRotation, this);
+    m_transform.rotation.z->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformRotation, this);
+    m_transform.scale.x->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformScale, this);
+    m_transform.scale.y->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformScale, this);
+    m_transform.scale.z->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformScale, this);
+
+    auto* btnApply = transform->AddButton("Apply");
+    btnApply->SetToolTip("Apply Object Transform");
+    btnApply->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
+        m_obj->ApplyTransform();
+        m_obj->GenerateDrawables(Graphics::Get(m_project));
+        ObjectList::Get(m_project).Submit(Renderer::Get(m_project));
+        m_transform.location.x->Clear();
+        m_transform.location.y->Clear();
+        m_transform.location.z->Clear();
+        m_transform.rotation.x->Clear();
+        m_transform.rotation.y->Clear();
+        m_transform.rotation.z->Clear();
+        m_transform.scale.x->Clear();
+        m_transform.scale.y->Clear();
+        m_transform.scale.z->Clear();
+        *m_transform.location.x << 0.0f;
+        *m_transform.location.y << 0.0f;
+        *m_transform.location.z << 0.0f;
+        *m_transform.rotation.x << 0.0f;
+        *m_transform.rotation.y << 0.0f;
+        *m_transform.rotation.z << 0.0f;
+        *m_transform.scale.x << 1.0;
+        *m_transform.scale.y << 1.0;
+        *m_transform.scale.z << 1.0;
+    });
+
+    auto* viewport = AddGroup("Viewport Display", 2);
+    m_chkWire = viewport->AddCheckBoxWithHeading("Show", "Wireframe", false);
+    m_combo = viewport->AddComboBox("Display As");
 
     for (auto const& name : DisplayTypeNames) {
         m_combo->Append(name);
@@ -109,6 +157,33 @@ void PropertiesPane::OnCheckWireframe(wxCommandEvent&)
     objlist.Submit(renderer);
 }
 
+void PropertiesPane::OnTransformLocation(wxCommandEvent&)
+{
+    double x, y, z;
+    auto [xctrl, yctrl, zctrl] = m_transform.location;
+    if (xctrl->GetValue().ToDouble(&x) && yctrl->GetValue().ToDouble(&y) && zctrl->GetValue().ToDouble(&z)) {
+        m_obj->SetLocation(x, y, z);
+    }
+}
+
+void PropertiesPane::OnTransformRotation(wxCommandEvent&)
+{
+    double x, y, z;
+    auto [xctrl, yctrl, zctrl] = m_transform.rotation;
+    if (xctrl->GetValue().ToDouble(&x) && yctrl->GetValue().ToDouble(&y) && zctrl->GetValue().ToDouble(&z)) {
+        m_obj->SetRotation(glm::radians(x), glm::radians(y), glm::radians(z));
+    }
+}
+
+void PropertiesPane::OnTransformScale(wxCommandEvent&)
+{
+    double x, y, z;
+    auto [xctrl, yctrl, zctrl] = m_transform.scale;
+    if (xctrl->GetValue().ToDouble(&x) && yctrl->GetValue().ToDouble(&y) && zctrl->GetValue().ToDouble(&z)) {
+        m_obj->SetScale(x, y, z);
+    }
+}
+
 void PropertiesPane::GetObjectStatus(std::string const& id)
 {
     for (auto const& obj : ObjectList::Get(m_project)) {
@@ -142,4 +217,25 @@ void PropertiesPane::GetObjectStatus(std::string const& id)
     }
 
     m_chkWire->SetValue(m_hasWireframe);
+
+    // Transform
+    auto tf = m_obj->GetTransform();
+    m_transform.location.x->Clear();
+    m_transform.location.y->Clear();
+    m_transform.location.z->Clear();
+    m_transform.rotation.x->Clear();
+    m_transform.rotation.y->Clear();
+    m_transform.rotation.z->Clear();
+    m_transform.scale.x->Clear();
+    m_transform.scale.y->Clear();
+    m_transform.scale.z->Clear();
+    *m_transform.location.x << tf.location.x;
+    *m_transform.location.y << tf.location.y;
+    *m_transform.location.z << tf.location.z;
+    *m_transform.rotation.x << tf.rotation.x;
+    *m_transform.rotation.y << tf.rotation.y;
+    *m_transform.rotation.z << tf.rotation.z;
+    *m_transform.scale.x << tf.scale.x;
+    *m_transform.scale.y << tf.scale.y;
+    *m_transform.scale.z << tf.scale.z;
 }

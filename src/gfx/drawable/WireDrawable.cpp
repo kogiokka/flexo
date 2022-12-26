@@ -33,7 +33,7 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     m_ubs["color"].FinalizeLayout();
     m_ubs["color"].SetBIndex(1);
 
-    m_ubs["transform"].Assign("model", glm::mat4(1.0f));
+    m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["color"].Assign("color", glm::vec3(0.7f, 0.7f, 0.7f));
 
@@ -72,5 +72,6 @@ void WireDrawable::SetColor(float r, float g, float b)
 
 void WireDrawable::Update(Graphics& gfx)
 {
+    m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
 }

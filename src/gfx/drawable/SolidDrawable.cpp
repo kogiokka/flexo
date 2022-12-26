@@ -32,7 +32,7 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
     m_ubs["material"].FinalizeLayout();
     m_ubs["viewPos"].FinalizeLayout();
 
-    m_ubs["transform"].Assign("model", glm::mat4(1.0f));
+    m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
     m_ubs["light"].Assign("ambient", glm::vec3(0.8f, 0.8f, 0.8f));
@@ -81,6 +81,7 @@ SolidDrawable::~SolidDrawable()
 
 void SolidDrawable::Update(Graphics& gfx)
 {
+    m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["viewPos"].Assign("viewPos", gfx.GetCameraPosition());
     m_ubs["light"].Assign("position", gfx.GetCameraPosition());
