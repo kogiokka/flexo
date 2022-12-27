@@ -95,7 +95,9 @@ void WatermarkingProject::CreateProject()
 {
     assert(world.theDataset);
 
-    m_model->SetViewFlags(ObjectViewFlag_Solid);
+    if (m_model) {
+        m_model->SetViewFlags(ObjectViewFlag_Solid);
+    }
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
 
     SelfOrganizingMap::Get(*this).CreateProcedure(world.theMap, world.theDataset);
@@ -127,6 +129,12 @@ wxWindow* WatermarkingProject::GetPanel()
 
 void WatermarkingProject::DoWatermark()
 {
+    if (!m_model) {
+        wxMessageDialog dlg(&ProjectWindow::Get(*this), "No volumetric model!", "Error", wxCENTER | wxICON_ERROR);
+        dlg.ShowModal();
+        return;
+    }
+
     float progress;
     auto status = m_model->Parameterize(*world.theMap, progress);
 
