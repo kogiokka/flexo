@@ -34,6 +34,7 @@ PRIVATE
     "src/ProjectSettings.cpp"
     "src/Project.cpp"
     "src/ProjectWindow.cpp"
+    "src/AddDialog.cpp"
 
     "src/pane/ControlsPaneBase.cpp"
     "src/pane/ControlsGroup.cpp"

@@ -1,8 +1,8 @@
 #include "object/Cube.hpp"
 
-Cube::Cube()
+Cube::Cube(float size)
 {
-    m_mesh = ConstructCube();
+    m_mesh = ConstructCube(size);
 }
 
 Mesh Cube::GenerateMesh() const

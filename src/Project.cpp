@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
+#include "AddDialog.hpp"
 #include "EditableMesh.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
@@ -25,8 +26,10 @@
 #include "gfx/drawable/WireDrawable.hpp"
 #include "object/Cube.hpp"
 #include "object/Guides.hpp"
+#include "object/Plane.hpp"
 #include "object/Sphere.hpp"
 #include "object/SurfaceVoxels.hpp"
+#include "object/Torus.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 #include "util/Logger.h"
 
@@ -36,7 +39,11 @@ WatermarkingProject::WatermarkingProject()
     , m_model(nullptr)
 {
     m_imageFile = "res/images/mandala.png";
-    Bind(EVT_ADD_UV_SPHERE, &WatermarkingProject::OnMenuAddModel, this);
+
+#define X(evt, name) Bind(evt, &WatermarkingProject::OnMenuAdd, this);
+    MENU_ADD_LIST
+#undef X
+
     Bind(EVT_SOM_PANE_MAP_CHANGED, &WatermarkingProject::OnSOMPaneMapChanged, this);
 
     Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
@@ -165,30 +172,102 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     objlist.Submit(Renderer::Get(*this));
 }
 
-void WatermarkingProject::OnMenuAddModel(wxCommandEvent& event)
+void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
 {
-    if (world.theDataset == nullptr) {
-        wxMessageDialog dialog(&ProjectWindow::Get(*this), "Please import a model from the File menu first.", "Error",
-                               wxCENTER | wxICON_ERROR);
-        dialog.ShowModal();
+    auto* projwin = &ProjectWindow::Get(*this);
+    auto& objlist = ObjectList::Get(*this);
+
+    auto const id = event.GetId();
+    std::shared_ptr<Object> obj;
+    ObjectType type;
+
+    if (id == EVT_MENU_ADD_PLANE) {
+        AddDialog dlg(projwin, "Add Plane", 1);
+        double size = 2.0f;
+        auto* sizeCtrl = dlg.AddInputFloat("Size", size);
+        if (dlg.ShowModal() == wxID_OK) {
+            if (!sizeCtrl->GetValue().ToDouble(&size)) {
+                wxMessageDialog dlg(projwin, "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
+                dlg.ShowModal();
+                return;
+            }
+            log_info("Add Plane (size: %.3f)", size);
+
+            obj = std::make_shared<Plane>(size);
+            type = ObjectType_Plane;
+        } else {
+            return;
+        }
+    } else if (id == EVT_MENU_ADD_CUBE) {
+        AddDialog dlg(projwin, "Add Cube", 1);
+        double size = 2.0f;
+        auto* sizeCtrl = dlg.AddInputFloat("Size", size);
+        if (dlg.ShowModal() == wxID_OK) {
+            if (!sizeCtrl->GetValue().ToDouble(&size)) {
+                wxMessageDialog dlg(projwin, "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
+                dlg.ShowModal();
+                return;
+            }
+            log_info("Add Cube (size: %.3f)", size);
+
+            obj = std::make_shared<Cube>(size);
+            type = ObjectType_Cube;
+        } else {
+            return;
+        }
+    } else if (id == EVT_MENU_ADD_UV_SPHERE) {
+        AddDialog dlg(projwin, "Add UV Sphere", 3);
+        long segs = 32;
+        long rings = 16;
+        double radius = 1.0;
+        auto* segCtrl = dlg.AddInputInteger("Segments", segs);
+        auto* ringCtrl = dlg.AddInputInteger("Rings", rings);
+        auto* radCtrl = dlg.AddInputFloat("Radius", radius);
+        if (dlg.ShowModal() == wxID_OK) {
+            if (!segCtrl->GetValue().ToLong(&segs) || !ringCtrl->GetValue().ToLong(&rings)
+                || !radCtrl->GetValue().ToDouble(&radius) || segs < 3 || rings < 3) {
+                wxMessageDialog dlg(projwin, "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
+                dlg.ShowModal();
+                return;
+            }
+            log_info("Add UV Sphere (segments: %lu, rings: %lu, radius: %.3f)", segs, rings, radius);
+
+            obj = std::make_shared<Sphere>(segs, rings, radius);
+            type = ObjectType_Sphere;
+        } else {
+            return;
+        }
+    } else if (id == EVT_MENU_ADD_TORUS) {
+        AddDialog dlg(projwin, "Add UV Sphere", 2);
+        long mjSeg = 48;
+        long mnSeg = 12;
+        double mjRad = 1.0;
+        double mnRad = 0.25;
+        auto* mjSegCtrl = dlg.AddInputInteger("Major Segments", mjSeg);
+        auto* mnSegCtrl = dlg.AddInputInteger("Minor Segments", mnSeg);
+        auto* mjRadCtrl = dlg.AddInputFloat("Major Radius", mjRad);
+        auto* mnRadCtrl = dlg.AddInputFloat("Minor Radius", mnRad);
+
+        if (dlg.ShowModal() == wxID_OK) {
+            if (!mjSegCtrl->GetValue().ToLong(&mjSeg) || !mnSegCtrl->GetValue().ToLong(&mnSeg)
+                || !mjRadCtrl->GetValue().ToDouble(&mjRad) || !mnRadCtrl->GetValue().ToDouble(&mnRad) || mjSeg < 3
+                || mnSeg < 3) {
+                wxMessageDialog dlg(projwin, "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
+                dlg.ShowModal();
+                return;
+            }
+            log_info("Add Torus: (major segments: %lu, minor segments: %lu, major radius: %.3f, minor radius: %.3f)",
+                     mjSeg, mnSeg, mjRad, mnRad);
+
+            obj = std::make_shared<Torus>(mjSeg, mnSeg, mjRad, mnRad);
+            type = ObjectType_Torus;
+        } else {
+            return;
+        }
+    } else {
         return;
     }
 
-    // FIXME Better way to get the bounding box
-    BoundingBox const bbox = world.theDataset->GetBoundingBox();
-
-    if (event.GetId() == EVT_ADD_UV_SPHERE) {
-        auto const& [max, min] = bbox;
-        float const radius = glm::length((max - min) * 0.5f);
-        glm::vec3 const center = (max + min) * 0.5f;
-
-        auto sphere = std::make_shared<Sphere>(60, 60);
-        sphere->SetScale(radius, radius, radius);
-        sphere->SetLocation(center.x, center.y, center.z);
-        sphere->ApplyTransform();
-
-        auto& objlist = ObjectList::Get(*this);
-        objlist.Add(ObjectType_Sphere, sphere);
-        objlist.Submit(Renderer::Get(*this));
-    }
+    objlist.Add(type, obj);
+    objlist.Submit(Renderer::Get(*this));
 }

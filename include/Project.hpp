@@ -36,7 +36,7 @@ public:
 
 private:
     void OnSOMPaneMapChanged(wxCommandEvent& event);
-    void OnMenuAddModel(wxCommandEvent& event);
+    void OnMenuAdd(wxCommandEvent& event);
 
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;

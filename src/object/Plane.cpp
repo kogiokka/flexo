@@ -1,8 +1,8 @@
 #include "object/Plane.hpp"
 
-Plane::Plane()
+Plane::Plane(float size)
 {
-    m_mesh = ConstructPlane();
+    m_mesh = ConstructPlane(size);
 }
 
 Mesh Plane::GenerateMesh() const

@@ -7,7 +7,7 @@
 class Cube : public Object
 {
 public:
-    Cube();
+    Cube(float size = 2.0f);
     virtual ~Cube() = default;
 
     Mesh GenerateMesh() const override;

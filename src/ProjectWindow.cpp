@@ -12,9 +12,12 @@
 
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
-wxDEFINE_EVENT(EVT_ADD_UV_SPHERE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
+
+#define X(evt, name) wxDEFINE_EVENT(evt, wxCommandEvent);
+MENU_ADD_LIST
+#undef X
 
 wxDEFINE_EVENT(EVT_MENU_CAMERA_PERSPECTIVE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_MENU_CAMERA_ORTHOGONAL, wxCommandEvent);
@@ -106,7 +109,9 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
         wxID_REFRESH);
 
     auto addMenu = new wxMenu;
-    addMenu->Append(EVT_ADD_UV_SPHERE, "UV Sphere");
+#define X(evt, name) addMenu->Append(evt, name);
+    MENU_ADD_LIST
+#undef X
 
     auto* screenshotMenu = new wxMenu;
     auto* itemScreenshotViewport = new wxMenuItem(screenshotMenu, EVT_SCREENSHOT, "Screenshot 3D Viewport", "");
@@ -125,14 +130,19 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenModelFile, this, EVT_OPEN_MODEL);
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenImageFile, this, EVT_OPEN_IMAGE);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
-    Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent&) {
-            wxCommandEvent event(EVT_ADD_UV_SPHERE);
-            event.SetId(EVT_ADD_UV_SPHERE);
-            m_project.ProcessEvent(event);
-        },
-        EVT_ADD_UV_SPHERE);
+
+#define X(evt, name)                                                                                                   \
+    Bind(                                                                                                              \
+        wxEVT_MENU,                                                                                                    \
+        [this](wxCommandEvent&) {                                                                                      \
+            wxCommandEvent event(evt);                                                                                 \
+            event.SetId(evt);                                                                                          \
+            m_project.ProcessEvent(event);                                                                             \
+        },                                                                                                             \
+        evt);
+    MENU_ADD_LIST
+#undef X
+
     Bind(
         wxEVT_MENU,
         [this](wxCommandEvent&) {

@@ -7,7 +7,7 @@
 class Sphere : public Object
 {
 public:
-    Sphere(int numSegments = 32, int numRings = 16);
+    Sphere(int numSegments = 32, int numRings = 16, float radius = 1.0f);
     virtual ~Sphere() = default;
 
     Mesh GenerateMesh() const override;

@@ -1,9 +1,9 @@
 #include "object/Sphere.hpp"
 #include "util/Logger.h"
 
-Sphere::Sphere(int numSegments, int numRings)
+Sphere::Sphere(int numSegments, int numRings, float radius)
 {
-    m_mesh = ConstructSphere(numSegments, numRings);
+    m_mesh = ConstructSphere(numSegments, numRings, radius);
 }
 
 Mesh Sphere::GenerateMesh() const

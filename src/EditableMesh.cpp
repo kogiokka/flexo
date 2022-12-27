@@ -15,15 +15,15 @@ bool EditableMesh::HasTextureCoords() const
     return !textureCoords.empty();
 }
 
-EditableMesh ConstructPlane()
+EditableMesh ConstructPlane(float size)
 {
     EditableMesh mesh;
     mesh.positions = {
         // 0
-        { -1.0f, -1.0f, 0.0f },
-        { 1.0f, -1.0f, 0.0f },
-        { 1.0f, 1.0f, 0.0f },
-        { -1.0f, 1.0f, 0.0f },
+        0.5f * size * glm::vec3(-1.0f, -1.0f, 0.0f),
+        0.5f * size * glm::vec3(+1.0f, -1.0f, 0.0f),
+        0.5f * size * glm::vec3(+1.0f, +1.0f, 0.0f),
+        0.5f * size * glm::vec3(-1.0f, +1.0f, 0.0f),
     };
 
     mesh.faces = {
@@ -36,20 +36,20 @@ EditableMesh ConstructPlane()
     return mesh;
 }
 
-EditableMesh ConstructCube()
+EditableMesh ConstructCube(float size)
 {
     EditableMesh mesh;
     mesh.positions = {
         // 0
-        { -1.0f, -1.0f, -1.0f },
-        { 1.0f, -1.0f, -1.0f },
-        { 1.0f, 1.0f, -1.0f },
-        { -1.0f, 1.0f, -1.0f },
+        0.5f * size * glm::vec3(-1.0f, -1.0f, -1.0f),
+        0.5f * size * glm::vec3(+1.0f, -1.0f, -1.0f),
+        0.5f * size * glm::vec3(+1.0f, +1.0f, -1.0f),
+        0.5f * size * glm::vec3(-1.0f, +1.0f, -1.0f),
         // 4
-        { -1.0f, -1.0f, 1.0f },
-        { 1.0f, -1.0f, 1.0f },
-        { 1.0f, 1.0f, 1.0f },
-        { -1.0f, 1.0f, 1.0f },
+        0.5f * size * glm::vec3(-1.0f, -1.0f, +1.0f),
+        0.5f * size * glm::vec3(+1.0f, -1.0f, +1.0f),
+        0.5f * size * glm::vec3(+1.0f, +1.0f, +1.0f),
+        0.5f * size * glm::vec3(-1.0f, +1.0f, +1.0f),
     };
 
     mesh.faces = {
@@ -70,12 +70,11 @@ EditableMesh ConstructCube()
     return mesh;
 }
 
-EditableMesh ConstructSphere(int numSegments, int numRings)
+EditableMesh ConstructSphere(int numSegments, int numRings, float radius)
 {
     EditableMesh mesh;
 
     glm::vec3 center = { 0.0f, 0.0f, 0.0f };
-    float radius = 1.0f;
 
     float deltaLong = glm::radians(360.0f) / numSegments;
     float deltaLat = glm::radians(180.0f) / numRings;
