@@ -23,6 +23,7 @@ struct EditableMesh {
 EditableMesh ConstructPlane();
 EditableMesh ConstructCube();
 EditableMesh ConstructSphere(int numSegments, int numRings);
+EditableMesh ConstructTorus(int majorSeg, int minorSeg, float majorRad, float minorRad);
 EditableMesh ConstructGrid(int numXDiv = 10, int numYDiv = 10);
 
 #endif

@@ -21,7 +21,8 @@ class WatermarkingProject;
     X(ObjectType_Model, "Model")                                                                                       \
     X(ObjectType_Map, "Map")                                                                                           \
     X(ObjectType_Light, "Light")                                                                                       \
-    X(ObjectType_Sphere, "Sphere")
+    X(ObjectType_Sphere, "Sphere")                                                                                     \
+    X(ObjectType_Torus, "Torus")
 
 #define X(type, name) type,
 enum ObjectType : unsigned int { OBJECT_TYPES };

@@ -136,6 +136,45 @@ EditableMesh ConstructSphere(int numSegments, int numRings)
     return mesh;
 }
 
+EditableMesh ConstructTorus(int majorSeg, int minorSeg, float majorRad, float minorRad)
+{
+    EditableMesh mesh;
+
+    using std::cos, std::sin;
+    static float const pi = glm::radians(180.0f);
+
+    glm::vec3 center = { 0.0f, 0.0f, 0.0f };
+    float mjD = pi * 2.0f / majorSeg;
+    float mnD = pi * 2.0f / minorSeg;
+    for (int i = 0; i < majorSeg; i++) {
+        float phi = i * mjD;
+        float sP = sin(phi);
+        float cP = cos(phi);
+        glm::vec3 mnC = center + majorRad * glm::vec3(cP, sP, center.z);
+        for (int j = 0; j < minorSeg; j++) {
+            float theta = j * mnD;
+            float sT = sin(theta);
+            float cT = cos(theta);
+            mesh.positions.emplace_back(mnC + minorRad * glm::vec3(cT * cP, cT * sP, sT));
+        }
+    }
+
+    for (int i = 0; i < majorSeg; i++) {
+        for (int j = 0; j < minorSeg; j++) {
+            for (int k = 0; k < 2; k++) {
+                unsigned int i1, i2, i3, i4;
+                i1 = (i % majorSeg) * minorSeg + (j + k) % minorSeg;
+                i2 = ((i + 1) % majorSeg) * minorSeg + (j + k) % minorSeg;
+                i3 = ((i + 1) % majorSeg) * minorSeg + (j + 1 + k) % minorSeg;
+                i4 = (i % majorSeg) * minorSeg + (j + 1 + k) % minorSeg;
+                mesh.faces.push_back({ i1, i2, i3, i4 });
+            }
+        }
+    }
+
+    return mesh;
+}
+
 EditableMesh ConstructGrid(int numXDiv, int numYDiv)
 {
     EditableMesh mesh;

@@ -48,6 +48,7 @@ PRIVATE
     "src/object/Cube.cpp"
     "src/object/Map.cpp"
     "src/object/Sphere.cpp"
+    "src/object/Torus.cpp"
     "src/object/Guides.cpp"
     "src/object/SurfaceVoxels.cpp"
 
