@@ -92,7 +92,7 @@ EditableMesh ConstructSphere(int numSegments, int numRings, float radius)
     }
 
     // The last ring (bottom)
-    mesh.positions.back() = center + radius * glm::vec3(0.0f, 0.0f, -radius);
+    mesh.positions.back() = center + glm::vec3(0.0f, 0.0f, -radius);
     for (int j = 0; j < numSegments; j++) {
         unsigned int last = mesh.positions.size() - 1;
         unsigned int i1, i2, i3;
