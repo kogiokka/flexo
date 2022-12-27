@@ -174,14 +174,14 @@ EditableMesh ConstructTorus(int majorSeg, int minorSeg, float majorRad, float mi
     return mesh;
 }
 
-EditableMesh ConstructGrid(int numXDiv, int numYDiv)
+EditableMesh ConstructGrid(int numXDiv, int numYDiv, float size)
 {
     EditableMesh mesh;
 
-    float ox = -1.0f;
-    float oy = -1.0f;
-    float dx = 2.0f / static_cast<float>(numXDiv);
-    float dy = 2.0f / static_cast<float>(numYDiv);
+    float ox = 0.5f * -size;
+    float oy = 0.5f * -size;
+    float dx = size / static_cast<float>(numXDiv);
+    float dy = size / static_cast<float>(numYDiv);
 
     for (int y = 0; y < numYDiv; y++) {
         for (int x = 0; x < numXDiv; x++) {

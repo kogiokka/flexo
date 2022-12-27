@@ -12,6 +12,7 @@ class WatermarkingProject;
 
 #define MENU_ADD_LIST                                                                                                  \
     X(EVT_MENU_ADD_PLANE, "Plane")                                                                                     \
+    X(EVT_MENU_ADD_GRID, "Grid")                                                                                       \
     X(EVT_MENU_ADD_CUBE, "Cube")                                                                                       \
     X(EVT_MENU_ADD_UV_SPHERE, "UV Sphere")                                                                             \
     X(EVT_MENU_ADD_TORUS, "Torus")

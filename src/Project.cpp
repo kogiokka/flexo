@@ -25,6 +25,7 @@
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "gfx/drawable/WireDrawable.hpp"
 #include "object/Cube.hpp"
+#include "object/Grid.hpp"
 #include "object/Guides.hpp"
 #include "object/Plane.hpp"
 #include "object/Sphere.hpp"
@@ -195,6 +196,29 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
 
             obj = std::make_shared<Plane>(size);
             type = ObjectType_Plane;
+        } else {
+            return;
+        }
+
+    } else if (id == EVT_MENU_ADD_GRID) {
+        AddDialog dlg(projwin, "Add Grid", 3);
+        long xdiv = 10;
+        long ydiv = 10;
+        double size = 2.0f;
+        auto* xdivCtrl = dlg.AddInputInteger("X Divisions", xdiv);
+        auto* ydivCtrl = dlg.AddInputInteger("Y Divisions", ydiv);
+        auto* sizeCtrl = dlg.AddInputFloat("Size", size);
+        if (dlg.ShowModal() == wxID_OK) {
+            if (!xdivCtrl->GetValue().ToLong(&xdiv) || !ydivCtrl->GetValue().ToLong(&ydiv)
+                || !sizeCtrl->GetValue().ToDouble(&size)) {
+                wxMessageDialog dlg(projwin, "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
+                dlg.ShowModal();
+                return;
+            }
+            log_info("Add Grid (X-div: %ld, Y-div: %ld, size: %.3f)", size);
+
+            obj = std::make_shared<Grid>(xdiv, ydiv, size);
+            type = ObjectType_Grid;
         } else {
             return;
         }
