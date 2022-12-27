@@ -262,7 +262,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
             return;
         }
     } else if (id == EVT_MENU_ADD_TORUS) {
-        AddDialog dlg(projwin, "Add UV Sphere", 2);
+        AddDialog dlg(projwin, "Add UV Sphere", 4);
         long mjSeg = 48;
         long mnSeg = 12;
         double mjRad = 1.0;
