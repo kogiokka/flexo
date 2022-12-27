@@ -5,12 +5,14 @@
 
 #include <wx/msgdlg.h>
 #include <wx/progdlg.h>
+#include <wx/valnum.h>
 
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
 #include "AddDialog.hpp"
 #include "EditableMesh.hpp"
+#include "Map32List.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
@@ -44,8 +46,6 @@ WatermarkingProject::WatermarkingProject()
 #define X(evt, name) Bind(evt, &WatermarkingProject::OnMenuAdd, this);
     MENU_ADD_LIST
 #undef X
-
-    Bind(EVT_SOM_PANE_MAP_CHANGED, &WatermarkingProject::OnSOMPaneMapChanged, this);
 
     Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
         m_imageFile = event.GetString().ToStdString();
@@ -150,17 +150,6 @@ void WatermarkingProject::DoWatermark()
 
     m_model->SetViewFlags(ObjectViewFlag_Textured);
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
-}
-
-void WatermarkingProject::OnSOMPaneMapChanged(wxCommandEvent&)
-{
-    auto& gfx = Graphics::Get(*this);
-    auto& objlist = ObjectList::Get(*this);
-
-    world.theMap->SetTexture(Bind::TextureManager::Resolve(gfx, m_imageFile.c_str(), 0));
-    world.theMap->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
-    objlist.Add(ObjectType_Map, world.theMap);
-    objlist.Submit(Renderer::Get(*this));
 }
 
 void WatermarkingProject::ImportVolumetricModel(wxString const& path)
@@ -296,6 +285,66 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
         } else {
             return;
         }
+    } else if (id == EVT_MENU_ADD_MAP) {
+        AddDialog dlg(projwin, "Add Map (3 to 2)", 6);
+        long width = 32;
+        long height = 32;
+        bool isCyclicX = false;
+        bool isCyclicY = false;
+        MapFlags flags = MapFlags_CyclicNone;
+        MapInitState state = MapInitState_Random;
+
+        auto* widthCtrl = dlg.AddInputInteger("Width", width);
+        auto* heightCtrl = dlg.AddInputInteger("Height", height);
+        auto* chkCyclicX = dlg.AddCheckBoxWithHeading("Cyclic on", "X", isCyclicX);
+        auto* chkCyclicY = dlg.AddCheckBox("Y", isCyclicY);
+        auto* initStatePlane = dlg.AddRadioButtonWithHeading("Initialize Method", "Plane", true);
+        dlg.AddRadioButton("Random", false);
+
+        wxIntegerValidator<int> validDimen;
+        validDimen.SetRange(1, 512);
+        widthCtrl->SetValidator(validDimen);
+        heightCtrl->SetValidator(validDimen);
+
+        auto& maplist = MapList<3, 2>::Get(*this);
+        if (dlg.ShowModal() == wxID_OK) {
+            isCyclicX = chkCyclicX->GetValue();
+            isCyclicY = chkCyclicY->GetValue();
+            if (isCyclicX) {
+                flags |= MapFlags_CyclicX;
+            }
+            if (isCyclicY) {
+                flags |= MapFlags_CyclicY;
+            }
+            if (widthCtrl->GetValue().ToLong(&width) && heightCtrl->GetValue().ToLong(&height)) {
+                if (initStatePlane->GetValue()) {
+                    state = MapInitState_Plane;
+                }
+                if (world.theDataset) {
+                    maplist.Add(Vec2i(width, height), flags, state, world.theDataset->GetBoundingBox());
+                } else {
+                    maplist.Add(Vec2i(width, height), flags, state);
+                }
+                wxCommandEvent evt(EVT_SOM_PANE_MAP_CHANGED);
+                ProcessEvent(evt);
+            }
+
+            if (!widthCtrl->GetValue().ToLong(&width) || !heightCtrl->GetValue().ToLong(&height) || width < 3
+                || height < 3) {
+                wxMessageDialog dlg(projwin, "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
+                dlg.ShowModal();
+                return;
+            }
+            log_info("Add Map: (width: %ld, height: %ld)", width, height);
+
+            obj = maplist.back();
+            obj->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
+            obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
+            type = ObjectType_Map;
+        } else {
+            return;
+        }
+
     } else {
         return;
     }

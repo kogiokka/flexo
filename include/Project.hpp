@@ -35,7 +35,6 @@ public:
     void ImportVolumetricModel(wxString const& path);
 
 private:
-    void OnSOMPaneMapChanged(wxCommandEvent& event);
     void OnMenuAdd(wxCommandEvent& event);
 
     wxWeakRef<wxFrame> m_frame;

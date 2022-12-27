@@ -11,6 +11,7 @@
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
+#include "gfx/ObjectList.hpp"
 #include "object/Map.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
@@ -37,19 +38,10 @@ void SelfOrganizingMapPane::PopulateMapPanel()
     auto* group = AddGroup("Map", 8);
 
     auto* comboBox = group->AddBitmapComboBox("Instances");
-    auto* widthText = group->AddInputText("Map Width");
-    auto* heightText = group->AddInputText("Map Height");
-    auto* cyclicX = group->AddCheckBoxWithHeading("Cyclic", "X", false);
-    auto* cyclicY = group->AddCheckBox("Y", false);
-    auto* initStatePlane = group->AddRadioButtonWithHeading("Initialize Method", "Plane", true);
-    group->AddRadioButton("Random", false);
-    auto* addBtn = group->AddButton("Add");
-
-    wxIntegerValidator<int> validDimen;
-    validDimen.SetRange(1, 512);
-    widthText->SetValidator(validDimen);
-    heightText->SetValidator(validDimen);
-
+    m_project.Bind(EVT_SOM_PANE_MAP_CHANGED, [this, comboBox](wxCommandEvent&) {
+        comboBox->Append(wxString::Format("Map.00%zu", MapList<3, 2>::Get(m_project).size()),
+                         wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
+    });
     comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
         auto map = MapList<3, 2>::Get(m_project)[event.GetSelection()];
         world.theMap = map;
@@ -59,37 +51,10 @@ void SelfOrganizingMapPane::PopulateMapPanel()
         float const radius = 0.5f * diagLen;
         ProjectSettings::Get(m_project).SetNeighborhood(radius);
         SetupNeighborhoodRadiusSlider(diagLen, radius);
-
-        wxCommandEvent evt(EVT_SOM_PANE_MAP_CHANGED);
-        m_project.ProcessEvent(evt);
+        auto& objlist = ObjectList::Get(m_project);
+        objlist.Add(ObjectType_Map, map);
+        objlist.Submit(Renderer::Get(m_project));
     });
-
-    addBtn->Bind(wxEVT_BUTTON,
-                 [this, widthText, heightText, cyclicX, cyclicY, comboBox, initStatePlane](wxCommandEvent&) {
-                     long width;
-                     long height;
-                     MapFlags flags = MapFlags_CyclicNone;
-                     if (cyclicX->GetValue()) {
-                         flags |= MapFlags_CyclicX;
-                     }
-                     if (cyclicY->GetValue()) {
-                         flags |= MapFlags_CyclicY;
-                     }
-                     if (widthText->GetValue().ToLong(&width) && heightText->GetValue().ToLong(&height)) {
-                         MapInitState state = MapInitState_Random;
-                         if (initStatePlane->GetValue()) {
-                             state = MapInitState_Plane;
-                         }
-                         if (world.theDataset) {
-                             MapList<3, 2>::Get(m_project).Add(Vec2i(width, height), flags, state,
-                                                               world.theDataset->GetBoundingBox());
-                         } else {
-                             MapList<3, 2>::Get(m_project).Add(Vec2i(width, height), flags, state);
-                         }
-                         comboBox->Append(wxString::Format("Map.00%zu", MapList<3, 2>::Get(m_project).size()),
-                                          wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
-                     }
-                 });
 
     group->Bind(wxEVT_UPDATE_UI,
                 [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });

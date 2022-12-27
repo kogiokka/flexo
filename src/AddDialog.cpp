@@ -76,3 +76,31 @@ wxTextCtrl* AddDialog::AddInputFloat(wxString const& label, float value)
 
     return text;
 }
+
+wxCheckBox* AddDialog::AddCheckBoxWithHeading(wxString const& heading, wxString const& label, bool value)
+{
+    wxCheckBox* checkbox = new wxCheckBox(this, wxID_ANY, label);
+    checkbox->SetValue(value);
+    checkbox->SetFont(m_widgetFont);
+    AppendControl(heading, checkbox);
+    return checkbox;
+}
+
+wxCheckBox* AddDialog::AddCheckBox(wxString const& label, bool value)
+{
+    return AddCheckBoxWithHeading("", label, value);
+}
+
+wxRadioButton* AddDialog::AddRadioButtonWithHeading(wxString const& heading, wxString const& label, bool value)
+{
+    wxRadioButton* radiobtn = new wxRadioButton(this, wxID_ANY, label);
+    radiobtn->SetValue(value);
+    radiobtn->SetFont(m_widgetFont);
+    AppendControl(heading, radiobtn);
+    return radiobtn;
+}
+
+wxRadioButton* AddDialog::AddRadioButton(wxString const& label, bool value)
+{
+    return AddRadioButtonWithHeading("", label, value);
+}
