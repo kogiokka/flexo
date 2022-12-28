@@ -23,11 +23,6 @@ void Object::GenerateDrawables(Graphics& gfx)
     m_solid = std::make_shared<SolidDrawable>(gfx, GenerateMesh());
     m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
     m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
-
-    auto modelMat = GenerateTransformStack().GenerateMatrix();
-    m_solid->SetTransform(modelMat);
-    m_textured->SetTransform(modelMat);
-    m_wire->SetTransform(modelMat);
 }
 
 std::vector<glm::vec3>
@@ -68,8 +63,10 @@ Object::DrawList const& Object::GetDrawList()
     } break;
     }
 
+    auto modelMat = GenerateTransformStack().GenerateMatrix();
     for (auto& d : list) {
         d->SetVisible(m_isVisible);
+        d->SetTransform(modelMat);
     }
 
     m_drawlist = list;
