@@ -251,7 +251,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 dlg.ShowModal();
                 return;
             }
-            log_info("Add UV Sphere (segments: %lu, rings: %lu, radius: %.3f)", segs, rings, radius);
+            log_info("Add UV Sphere (segments: %ld, rings: %ld, radius: %.3f)", segs, rings, radius);
 
             obj = std::make_shared<Sphere>(segs, rings, radius);
             type = ObjectType_Sphere;
@@ -277,7 +277,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 dlg.ShowModal();
                 return;
             }
-            log_info("Add Torus: (major segments: %lu, minor segments: %lu, major radius: %.3f, minor radius: %.3f)",
+            log_info("Add Torus: (major segments: %ld, minor segments: %ld, major radius: %.3f, minor radius: %.3f)",
                      mjSeg, mnSeg, mjRad, mnRad);
 
             obj = std::make_shared<Torus>(mjSeg, mnSeg, mjRad, mnRad);
