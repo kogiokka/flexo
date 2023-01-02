@@ -291,15 +291,18 @@ glm::vec3 Trianglemeter::NearestVertex(glm::vec3 point)
 
 glm::vec3 Trianglemeter::Barycentric(glm::vec3 point)
 {
+    using glm::dot, glm::cross;
+
+    // The vertices are in counter-clockwise order.
     auto const& [A, B, C] = m_verts;
-    glm::vec3 PA = A - point;
-    glm::vec3 PB = B - point;
-    glm::vec3 PC = C - point;
-    float BCP = glm::length(glm::cross(PB, PC));
-    float CAP = glm::length(glm::cross(PC, PA));
-    float ABP = glm::length(glm::cross(PA, PB));
-    float total = glm::length(glm::cross(B - A, C - A));
-    glm::vec3 weights = { BCP / total, CAP / total, ABP / total };
+
+    // Calculate the area ratios
+    float oppA = dot(m_normal, cross(B - point, C - point));
+    float oppB = dot(m_normal, cross(C - point, A - point));
+    float total = dot(m_normal, cross(B - A, C - A));
+    float u = oppA / total;
+    float v = oppB / total;
+    glm::vec3 weights = { u, v, 1 - u - v };
     return weights;
 }
 
