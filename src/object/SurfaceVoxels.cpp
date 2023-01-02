@@ -61,6 +61,8 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
     const unsigned char modelValue = 255;
     const unsigned char air = 0;
 
+    glm::vec3 origin = -0.5f * glm::vec3 { (n.x - 1), (n.y - 1), (0 - 1) };
+
     for (int i = 0; i < n.z; i++) {
         for (int j = 0; j < n.y; j++) {
             for (int k = 0; k < n.x; k++) {
@@ -88,7 +90,7 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
                     }
 
                     if (vis != VoxelVis_None) {
-                        m_voxels.emplace_back(offset * m_scale, glm::vec2(0.0f, 0.0f), vis);
+                        m_voxels.emplace_back((origin + offset) * m_scale, glm::vec2(0.0f, 0.0f), vis);
                     }
                 }
             }
