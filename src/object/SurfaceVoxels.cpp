@@ -15,23 +15,34 @@
 class Trianglemeter
 {
 public:
-    using Edge = Vec2i;
-    using Result = std::pair<glm::vec3, bool>;
-
-    Trianglemeter(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3);
+    Trianglemeter(glm::vec3 A, glm::vec3 B, glm::vec3 C);
     glm::vec3 NearestPoint(glm::vec3 point);
     glm::vec3 Barycentric(glm::vec3 point);
 
 private:
-    Result NearestOnFace(glm::vec3 point);
-    Result NearestOnEdge(glm::vec3 point, Trianglemeter::Edge edge);
-    glm::vec3 NearestVertex(glm::vec3 point);
+    using Vertex = glm::vec3;
+    class Edge
+    {
+    public:
+        Edge(glm::vec3 const& tail, glm::vec3 const& head)
+            : tail(tail)
+            , head(head)
+        {
+        }
 
-    Vec3<glm::vec3> m_verts;
-    Vec3<Edge> m_edges;
+        glm::vec3 const& tail;
+        glm::vec3 const& head;
+    };
 
-public:
+    glm::vec3 NearestOnEdge(glm::vec3 point, Trianglemeter::Edge const& edge);
+
     glm::vec3 m_normal;
+    Vertex A;
+    Vertex B;
+    Vertex C;
+    Edge BC;
+    Edge CA;
+    Edge AB;
 };
 
 void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale);
@@ -197,106 +208,63 @@ std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progr
         mesh, faces);
 }
 
-Trianglemeter::Trianglemeter(glm::vec3 v1, glm::vec3 v2, glm::vec3 v3)
-    : m_edges { Vec2i(0, 1), Vec2i(1, 2), Vec2i(2, 0) }
+Trianglemeter::Trianglemeter(glm::vec3 A, glm::vec3 B, glm::vec3 C)
+    : A(A)
+    , B(B)
+    , C(C)
+    , BC(B, C)
+    , CA(C, A)
+    , AB(A, B)
 {
-    m_verts = { v1, v2, v3 };
-    m_normal = glm::normalize(glm::cross(v2 - v1, v3 - v1));
+    m_normal = glm::normalize(glm::cross(B - A, C - A));
 }
 
 glm::vec3 Trianglemeter::NearestPoint(glm::vec3 point)
 {
-    glm::vec3 nearest;
-    bool success = false;
+    using glm::dot;
 
-    std::tie(nearest, success) = NearestOnFace(point);
+    glm::vec3 P = point + -m_normal * dot(point - A, m_normal);
+    glm::vec3 weights = Barycentric(P);
 
-    if (success) {
-        return nearest;
+    // BC, CA, AB
+    if (weights.x < 0.0f) {
+        return NearestOnEdge(P, BC);
+    } else if (weights.y < 0.0f) {
+        return NearestOnEdge(P, CA);
+    } else if (weights.z < 0.0f) {
+        return NearestOnEdge(P, AB);
     }
 
-    // Test if the position is on any of the edges
-    float minDist = std::numeric_limits<float>::max();
-
-    for (int i = 0; i < 3; i++) {
-        glm::vec3 tmp;
-        std::tie(tmp, success) = NearestOnEdge(point, m_edges[i]);
-        if (success) {
-            float dist = SquaredDistance(point, tmp);
-            if (minDist > dist) {
-                minDist = dist;
-                nearest = tmp;
-            }
-        }
-    }
-
-    if (success) {
-        return nearest;
-    }
-
-    return NearestVertex(point);
+    return P;
 }
 
-Trianglemeter::Result Trianglemeter::NearestOnFace(glm::vec3 point)
+glm::vec3 Trianglemeter::NearestOnEdge(glm::vec3 point, Trianglemeter::Edge const& edge)
 {
-    auto const& [A, B, C] = m_verts;
+    using glm::dot;
 
-    glm::vec3 P = point + -m_normal * glm::dot(point - A, m_normal);
-
-    glm::vec3 AP = A - P;
-    glm::vec3 BP = B - P;
-    glm::vec3 CP = C - P;
-    bool res1 = glm::dot(glm::cross(AP, BP), m_normal) < 0.0f;
-    bool res2 = glm::dot(glm::cross(BP, CP), m_normal) < 0.0f;
-    bool res3 = glm::dot(glm::cross(CP, AP), m_normal) < 0.0f;
-
-    return { P, (res1 == res2) && (res2 == res3) };
-}
-
-Trianglemeter::Result Trianglemeter::NearestOnEdge(glm::vec3 point, Trianglemeter::Edge edge)
-{
-    glm::vec3 nearest;
-
-    glm::vec3 v1 = m_verts[edge.x];
-    glm::vec3 v2 = m_verts[edge.y];
+    glm::vec3 vec = edge.head - edge.tail;
+    float len = dot(vec, vec);
 
     float portion = -1.0f;
-    float len = SquaredDistance(v1, v2);
-    glm::vec3 vec = v2 - v1;
-
     if (len != 0.0f) {
-        portion = glm::dot(point - v1, vec) / len;
-        nearest = v1 + portion * vec;
+        portion = dot(point - edge.tail, vec) / len;
     }
 
-    return { nearest, ((portion >= 0.0f) && (portion <= 1.0f)) };
-}
-
-glm::vec3 Trianglemeter::NearestVertex(glm::vec3 point)
-{
-    glm::vec3 nearest;
-
-    float minDist = std::numeric_limits<float>::max();
-
-    for (int i = 0; i < 3; i++) {
-        float dist = SquaredDistance(point, m_verts[i]);
-        if (minDist > dist) {
-            minDist = dist;
-            nearest = m_verts[i];
-        }
+    if (portion > 1.0f) {
+        return edge.head;
+    } else if (portion < 0.0f) {
+        return edge.tail;
+    } else {
+        return edge.tail + portion * vec;
     }
-
-    return nearest;
 }
 
 glm::vec3 Trianglemeter::Barycentric(glm::vec3 point)
 {
     using glm::dot, glm::cross;
 
-    // The vertices are in counter-clockwise order.
-    auto const& [A, B, C] = m_verts;
-
     // Calculate the area ratios
+    // The vertices are in counter-clockwise order.
     float oppA = dot(m_normal, cross(B - point, C - point));
     float oppB = dot(m_normal, cross(C - point, A - point));
     float total = dot(m_normal, cross(B - A, C - A));
