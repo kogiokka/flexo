@@ -286,47 +286,47 @@ void ConstructVoxelMesh()
     TransformStack ts;
 
     // +X
-    ts.PushTranslate(1.0f, 0.0f, 0.0f);
+    ts.PushTranslate(0.5f, 0.0f, 0.0f);
     ts.PushRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    plane = ConstructPlane();
+    plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
     VOXEL_MESH[0] = plane.GenerateMesh();
 
     // -X
     ts.Clear();
-    ts.PushTranslate(-1.0f, 0.0f, 0.0f);
+    ts.PushTranslate(-0.5f, 0.0f, 0.0f);
     ts.PushRotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
-    plane = ConstructPlane();
+    plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
     VOXEL_MESH[1] = plane.GenerateMesh();
 
     // +Y
     ts.Clear();
-    ts.PushTranslate(0.0f, 1.0f, 0.0f);
+    ts.PushTranslate(0.0f, 0.5f, 0.0f);
     ts.PushRotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    plane = ConstructPlane();
+    plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
     VOXEL_MESH[2] = plane.GenerateMesh();
 
     // -Y
     ts.Clear();
-    ts.PushTranslate(0.0f, -1.0f, 0.0f);
+    ts.PushTranslate(0.0f, -0.5f, 0.0f);
     ts.PushRotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-    plane = ConstructPlane();
+    plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
     VOXEL_MESH[3] = plane.GenerateMesh();
 
     // +Z
     ts.Clear();
-    ts.PushTranslate(0.0f, 0.0f, 1.0f);
-    plane = ConstructPlane();
+    ts.PushTranslate(0.0f, 0.0f, 0.5f);
+    plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
     VOXEL_MESH[4] = plane.GenerateMesh();
 
     // -Z
     ts.Clear();
-    ts.PushTranslate(0.0f, 0.0f, -1.0f);
-    plane = ConstructPlane();
+    ts.PushTranslate(0.0f, 0.0f, -0.5f);
+    plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
     VOXEL_MESH[5] = plane.GenerateMesh();
 }
