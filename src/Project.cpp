@@ -352,7 +352,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 map->size.y = height;
                 map->flags = flags;
 
-                theMap = map;
+                obj = map;
             }
 
             if (!widthCtrl->GetValue().ToLong(&width) || !heightCtrl->GetValue().ToLong(&height) || width < 3
@@ -363,7 +363,6 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Map: (width: %ld, height: %ld)", width, height);
 
-            obj = theMap;
             obj->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
             type = ObjectType_Map;
