@@ -43,7 +43,7 @@ public:
     SelfOrganizingMap& operator=(SelfOrganizingMap const&) = delete;
 
     /**
-     * Setup SOM thraining
+     * Setup SOM training
      *
      * Set the hyperparameters for SOM and create the worker thread for training.
      *
