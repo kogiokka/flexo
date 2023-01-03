@@ -320,11 +320,47 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 if (initStatePlane->GetValue()) {
                     state = MapInitState_Plane;
                 }
+
+                BoundingBox box = { { 5.0f, 5.0f, 5.0f }, { -5.0f, -5.0f, -5.0f } };
                 if (world.theDataset) {
-                    maplist.Add(Vec2i(width, height), flags, state, world.theDataset->GetBoundingBox());
-                } else {
-                    maplist.Add(Vec2i(width, height), flags, state);
+                    box = world.theDataset->GetBoundingBox();
                 }
+
+                auto map = std::make_shared<Map<3, 2>>();
+                float const w = static_cast<float>(width - 1);
+                float const h = static_cast<float>(height - 1);
+
+                if (state == MapInitState_Random) {
+                    RandomRealNumber<float> xRng(box.min.x, box.max.x);
+                    RandomRealNumber<float> yRng(box.min.y, box.max.y);
+                    RandomRealNumber<float> zRng(box.min.z, box.max.z);
+
+                    for (int j = 0; j < height; ++j) {
+                        for (int i = 0; i < width; ++i) {
+                            map->nodes.emplace_back(Vec3f { xRng.scalar(), yRng.scalar(), zRng.scalar() },
+                                                    Vec2f { static_cast<float>(i), static_cast<float>(j) },
+                                                    Vec2f { i / w, j / h });
+                        }
+                    }
+                } else if (state == MapInitState_Plane) {
+                    float dx = (box.max.x - box.min.x) / static_cast<float>(width);
+                    float dy = (box.max.y - box.min.y) / static_cast<float>(height);
+
+                    for (int j = 0; j < height; ++j) {
+                        for (int i = 0; i < width; ++i) {
+                            map->nodes.emplace_back(Vec3f { box.min.x + i * dx, box.min.y + j * dy, box.max.z },
+                                                    Vec2f { static_cast<float>(i), static_cast<float>(j) },
+                                                    Vec2f { i / w, j / h });
+                        }
+                    }
+                }
+
+                map->size.x = width;
+                map->size.y = height;
+                map->flags = flags;
+
+                MapList<3, 2>::Get(*this).emplace_back(map);
+
                 wxCommandEvent evt(EVT_SOM_PANE_MAP_CHANGED);
                 ProcessEvent(evt);
             }
