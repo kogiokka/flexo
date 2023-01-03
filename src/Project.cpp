@@ -359,6 +359,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 map->size.y = height;
                 map->flags = flags;
 
+                world.theMap = map;
                 MapList<3, 2>::Get(*this).emplace_back(map);
 
                 wxCommandEvent evt(EVT_SOM_PANE_MAP_CHANGED);
