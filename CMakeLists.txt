@@ -55,7 +55,6 @@ PRIVATE
     "src/object/SurfaceVoxels.cpp"
 
     "src/Camera.cpp"
-    "src/Map32List.cpp"
     "src/Mesh.cpp"
     "src/EditableMesh.cpp"
     "src/TransformStack.cpp"

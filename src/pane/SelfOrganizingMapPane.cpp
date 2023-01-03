@@ -1,3 +1,5 @@
+#include <memory>
+
 #include <wx/artprov.h>
 #include <wx/msgdlg.h>
 #include <wx/sizer.h>
@@ -7,7 +9,6 @@
 #include <wx/textctrl.h>
 #include <wx/valnum.h>
 
-#include "Map32List.hpp"
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "World.hpp"
@@ -16,6 +17,8 @@
 #include "pane/SelfOrganizingMapPane.hpp"
 
 wxDEFINE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_SOM_PANE_MAP_ADDED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_SOM_PANE_MAP_DELETED, wxCommandEvent);
 
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
@@ -36,25 +39,11 @@ bool SelfOrganizingMapPane::IsProjectStopped() const
 void SelfOrganizingMapPane::PopulateMapPanel()
 {
     auto* group = AddGroup("Map", 8);
+    m_mapCombo = group->AddBitmapComboBox("Instances");
+    m_mapCombo->Bind(wxEVT_COMBOBOX, &SelfOrganizingMapPane::OnComboBox, this);
 
-    auto* comboBox = group->AddBitmapComboBox("Instances");
-    m_project.Bind(EVT_SOM_PANE_MAP_CHANGED, [this, comboBox](wxCommandEvent&) {
-        comboBox->Append(wxString::Format("Map.00%zu", MapList<3, 2>::Get(m_project).size()),
-                         wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
-    });
-    comboBox->Bind(wxEVT_COMBOBOX, [this](wxCommandEvent& event) {
-        auto map = MapList<3, 2>::Get(m_project)[event.GetSelection()];
-        world.theMap = map;
-        int const width = map->size.x;
-        int const height = map->size.y;
-        float const diagLen = sqrt(width * width + height * height);
-        float const radius = 0.5f * diagLen;
-        ProjectSettings::Get(m_project).SetNeighborhood(radius);
-        SetupNeighborhoodRadiusSlider(diagLen, radius);
-        auto& objlist = ObjectList::Get(m_project);
-        objlist.Add(ObjectType_Map, map);
-        objlist.Submit(Renderer::Get(m_project));
-    });
+    m_project.Bind(EVT_SOM_PANE_MAP_ADDED, &SelfOrganizingMapPane::OnMapAdded, this);
+    m_project.Bind(EVT_SOM_PANE_MAP_DELETED, &SelfOrganizingMapPane::OnMapDeleted, this);
 
     group->Bind(wxEVT_UPDATE_UI,
                 [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
@@ -145,15 +134,15 @@ void SelfOrganizingMapPane::PopulateControlPanel()
 
 void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
 {
-    if (!world.theDataset) {
-        wxMessageDialog dialog(this, "Please import a model from the File menu first.", "Error",
-                               wxCENTER | wxICON_ERROR);
+    if (!world.theMap) {
+        wxMessageDialog dialog(this, "Please add and select a map first!", "Error", wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
         return;
     }
 
-    if (!world.theMap) {
-        wxMessageDialog dialog(this, "Please create and select a map first!", "Error", wxCENTER | wxICON_ERROR);
+    if (!world.theDataset) {
+        wxMessageDialog dialog(this, "Please generate the dataset from the outliner first!", "Error",
+                               wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
         return;
     }
@@ -198,6 +187,38 @@ void SelfOrganizingMapPane::OnInitialLearningRate(wxCommandEvent& event)
     if (event.GetString().ToDouble(&tmp)) {
         ProjectSettings::Get(m_project).SetLearningRate(tmp);
     }
+}
+
+void SelfOrganizingMapPane::OnMapAdded(wxCommandEvent& event)
+{
+    m_mapCombo->Append(event.GetString(), wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
+}
+
+void SelfOrganizingMapPane::OnMapDeleted(wxCommandEvent& event)
+{
+    auto ret = m_mapCombo->FindString(event.GetString());
+    if (ret == wxNOT_FOUND) {
+        log_error("Map \"%s\" does not exist.", event.GetString().ToStdString().c_str());
+        return;
+    }
+    m_mapCombo->Clear();
+    m_mapCombo->Delete(ret);
+    world.theMap = nullptr;
+}
+
+void SelfOrganizingMapPane::OnComboBox(wxCommandEvent&)
+{
+    for (auto const& obj : ObjectList::Get(m_project)) {
+        if (obj->GetID() == m_mapCombo->GetValue()) {
+            world.theMap = std::dynamic_pointer_cast<Map<3, 2>>(obj);
+        }
+    }
+    int const width = world.theMap->size.x;
+    int const height = world.theMap->size.y;
+    float const diagLen = sqrt(width * width + height * height);
+    float const radius = 0.5f * diagLen;
+    ProjectSettings::Get(m_project).SetNeighborhood(radius);
+    SetupNeighborhoodRadiusSlider(diagLen, radius);
 }
 
 void SelfOrganizingMapPane::SetupNeighborhoodRadiusSlider(float maxValue, float value)

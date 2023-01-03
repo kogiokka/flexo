@@ -7,6 +7,7 @@
 #include "gfx/Graphics.hpp"
 #include "gfx/ObjectList.hpp"
 #include "pane/SceneOutlinerPane.hpp"
+#include "pane/SelfOrganizingMapPane.hpp"
 
 #define X(type, name) name,
 static std::string ObjectTypeNames[] = { OBJECT_TYPES };
@@ -39,11 +40,7 @@ ObjectList::ObjectList(WatermarkingProject& project)
 
 void ObjectList::Add(enum ObjectType type, std::shared_ptr<Object> object)
 {
-    // FIXME
-    std::string id = ObjectTypeNames[type];
-    Remove(id);
-
-    /* auto it = m_typeCount.find(type);
+    auto it = m_typeCount.find(type);
 
     std::string id;
     if (it == m_typeCount.end()) {
@@ -54,29 +51,19 @@ void ObjectList::Add(enum ObjectType type, std::shared_ptr<Object> object)
         char buf[4];
         snprintf(buf, 4, "%03u", it->second);
         id = ObjectTypeNames[type] + "." + std::string(buf);
-    }*/
+    }
 
     object->SetID(id);
     object->GenerateDrawables(Graphics::Get(m_project));
     m_list.push_back(object);
 
-    wxCommandEvent event(EVT_OUTLINER_ADD_OBJECT);
-    event.SetString(id);
-    m_project.ProcessEvent(event);
-}
-
-void ObjectList::Remove(std::string id)
-{
-    for (auto it = m_list.begin(); it != m_list.end();) {
-        if ((*it)->GetID() == id) {
-            m_list.erase(it);
-            break;
-        } else {
-            it++;
-        }
+    if (type == ObjectType_Map) {
+        wxCommandEvent evt(EVT_SOM_PANE_MAP_ADDED);
+        evt.SetString(id);
+        m_project.ProcessEvent(evt);
     }
 
-    wxCommandEvent event(EVT_OUTLINER_DELETE_OBJECT);
+    wxCommandEvent event(EVT_OUTLINER_ADD_OBJECT);
     event.SetString(id);
     m_project.ProcessEvent(event);
 }
@@ -84,8 +71,14 @@ void ObjectList::Remove(std::string id)
 void ObjectList::OnDeleteObject(wxCommandEvent& event)
 {
     for (auto it = m_list.begin(); it != m_list.end();) {
-        if ((*it)->GetID() == event.GetString()) {
+        auto id = wxString((*it)->GetID());
+        if (id == event.GetString()) {
             m_list.erase(it);
+            if (id.StartsWith("Map")) { // FIXME
+                wxCommandEvent evt(EVT_SOM_PANE_MAP_DELETED);
+                evt.SetString(id);
+                m_project.ProcessEvent(evt);
+            }
             break;
         } else {
             it++;

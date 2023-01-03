@@ -12,9 +12,9 @@
 
 #include "AddDialog.hpp"
 #include "EditableMesh.hpp"
-#include "Map32List.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "RandomRealNumber.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
@@ -33,7 +33,6 @@
 #include "object/Sphere.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "object/Torus.hpp"
-#include "pane/SelfOrganizingMapPane.hpp"
 #include "util/Logger.h"
 
 WatermarkingProject::WatermarkingProject()
@@ -162,8 +161,6 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     m_model->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
 
     log_info("%lu voxels will be rendered.", m_model->Voxels().size());
-
-    world.theDataset = std::make_shared<Dataset<3>>(m_model->GetPositions());
 
     auto& objlist = ObjectList::Get(*this);
     objlist.Add(ObjectType_Model, m_model);
@@ -306,7 +303,6 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
         widthCtrl->SetValidator(validDimen);
         heightCtrl->SetValidator(validDimen);
 
-        auto& maplist = MapList<3, 2>::Get(*this);
         if (dlg.ShowModal() == wxID_OK) {
             isCyclicX = chkCyclicX->GetValue();
             isCyclicY = chkCyclicY->GetValue();
@@ -360,10 +356,6 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 map->flags = flags;
 
                 world.theMap = map;
-                MapList<3, 2>::Get(*this).emplace_back(map);
-
-                wxCommandEvent evt(EVT_SOM_PANE_MAP_CHANGED);
-                ProcessEvent(evt);
             }
 
             if (!widthCtrl->GetValue().ToLong(&width) || !heightCtrl->GetValue().ToLong(&height) || width < 3
@@ -374,7 +366,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Map: (width: %ld, height: %ld)", width, height);
 
-            obj = maplist.back();
+            obj = world.theMap;
             obj->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
             type = ObjectType_Map;

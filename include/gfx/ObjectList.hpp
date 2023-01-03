@@ -53,7 +53,6 @@ public:
     size_type size() const;
 
 private:
-    void Remove(std::string id);
     void OnDeleteObject(wxCommandEvent& event);
 
     bool m_showHandle;
