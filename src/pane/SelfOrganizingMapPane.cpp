@@ -200,9 +200,13 @@ void SelfOrganizingMapPane::OnMapDeleted(wxCommandEvent& event)
         log_error("Map \"%s\" does not exist.", event.GetString().ToStdString().c_str());
         return;
     }
-    m_mapCombo->Clear();
+
+    if (ret == m_mapCombo->GetSelection()) {
+        m_mapCombo->SetValue("");
+        m_project.theMap = nullptr;
+    }
+
     m_mapCombo->Delete(ret);
-    m_project.theMap = nullptr;
 }
 
 void SelfOrganizingMapPane::OnComboBox(wxCommandEvent&)
