@@ -44,11 +44,11 @@ private:
     Edge AB;
 };
 
-void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale);
-float SquaredDistance(glm::vec3 p1, glm::vec3 p2);
-void ConstructVoxelMesh();
+using VoxelFaceList = std::array<EditableMesh, 6>;
+static VoxelFaceList ConstructVoxelFaceList();
+static void AddFace(EditableMesh& mesh, EditableMesh const& voxelFace, glm::vec3 position, glm::vec3 scale);
 
-std::array<Mesh, 6> VOXEL_MESH;
+float SquaredDistance(glm::vec3 p1, glm::vec3 p2);
 
 SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
 {
@@ -96,7 +96,34 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
         }
     }
 
-    ConstructVoxelMesh();
+    static VoxelFaceList vxFaceList = ConstructVoxelFaceList();
+
+    for (auto const& vx : m_voxels) {
+        if (vx.vis & VoxelVis_XPos) {
+            AddFace(m_mesh, vxFaceList[0], vx.pos, m_scale);
+            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
+        }
+        if (vx.vis & VoxelVis_XNeg) {
+            AddFace(m_mesh, vxFaceList[1], vx.pos, m_scale);
+            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
+        }
+        if (vx.vis & VoxelVis_YPos) {
+            AddFace(m_mesh, vxFaceList[2], vx.pos, m_scale);
+            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
+        }
+        if (vx.vis & VoxelVis_YNeg) {
+            AddFace(m_mesh, vxFaceList[3], vx.pos, m_scale);
+            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
+        }
+        if (vx.vis & VoxelVis_ZPos) {
+            AddFace(m_mesh, vxFaceList[4], vx.pos, m_scale);
+            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
+        }
+        if (vx.vis & VoxelVis_ZNeg) {
+            AddFace(m_mesh, vxFaceList[5], vx.pos, m_scale);
+            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
+        }
+    }
 }
 
 std::vector<Voxel> const& SurfaceVoxels::Voxels() const
@@ -116,36 +143,7 @@ void SurfaceVoxels::ApplyTransform()
 
 Mesh SurfaceVoxels::GenerateMesh() const
 {
-    Mesh mesh;
-
-    for (auto const& vx : m_voxels) {
-        if (vx.vis & VoxelVis_XPos) {
-            AddFace(mesh, VOXEL_MESH[0], vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_XNeg) {
-            AddFace(mesh, VOXEL_MESH[1], vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_YPos) {
-            AddFace(mesh, VOXEL_MESH[2], vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_YNeg) {
-            AddFace(mesh, VOXEL_MESH[3], vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_ZPos) {
-            AddFace(mesh, VOXEL_MESH[4], vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_ZNeg) {
-            AddFace(mesh, VOXEL_MESH[5], vx.pos, m_scale);
-            mesh.textureCoords.insert(mesh.textureCoords.end(), 6, vx.uv);
-        }
-    }
-
-    return mesh;
+    return m_mesh.GenerateMesh();
 }
 
 Wireframe SurfaceVoxels::GenerateWireMesh() const
@@ -281,8 +279,10 @@ float SquaredDistance(glm::vec3 p1, glm::vec3 p2)
     return glm::dot(v, v);
 }
 
-void ConstructVoxelMesh()
+VoxelFaceList ConstructVoxelFaceList()
 {
+    VoxelFaceList list;
+
     EditableMesh plane;
     TransformStack ts;
 
@@ -291,7 +291,7 @@ void ConstructVoxelMesh()
     ts.PushRotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
-    VOXEL_MESH[0] = plane.GenerateMesh();
+    list[0] = plane;
 
     // -X
     ts.Clear();
@@ -299,7 +299,7 @@ void ConstructVoxelMesh()
     ts.PushRotate(glm::radians(-90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
     plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
-    VOXEL_MESH[1] = plane.GenerateMesh();
+    list[1] = plane;
 
     // +Y
     ts.Clear();
@@ -307,7 +307,7 @@ void ConstructVoxelMesh()
     ts.PushRotate(glm::radians(-90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
-    VOXEL_MESH[2] = plane.GenerateMesh();
+    list[2] = plane;
 
     // -Y
     ts.Clear();
@@ -315,27 +315,37 @@ void ConstructVoxelMesh()
     ts.PushRotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f));
     plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
-    VOXEL_MESH[3] = plane.GenerateMesh();
+    list[3] = plane;
 
     // +Z
     ts.Clear();
     ts.PushTranslate(0.0f, 0.0f, 0.5f);
     plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
-    VOXEL_MESH[4] = plane.GenerateMesh();
+    list[4] = plane;
 
     // -Z
     ts.Clear();
     ts.PushTranslate(0.0f, 0.0f, -0.5f);
     plane = ConstructPlane(1.0f);
     ts.Apply(plane.positions);
-    VOXEL_MESH[5] = plane.GenerateMesh();
+    list[5] = plane;
+
+    return list;
 }
 
-void AddFace(Mesh& mesh, Mesh const& face, glm::vec3 offset, glm::vec3 scale)
+void AddFace(EditableMesh& mesh, EditableMesh const& voxelFace, glm::vec3 position, glm::vec3 scale)
 {
-    for (auto const& pos : face.positions) {
-        mesh.positions.emplace_back(pos * scale + offset);
+    unsigned int offset = mesh.positions.size();
+
+    for (auto const& pos : voxelFace.positions) {
+        mesh.positions.emplace_back(pos * scale + position);
     }
-    mesh.normals.insert(mesh.normals.end(), face.normals.begin(), face.normals.end());
+
+    for (auto face : voxelFace.faces) {
+        for (auto& idx : face) {
+            idx += offset;
+        }
+        mesh.faces.push_back(std::move(face));
+    }
 }
