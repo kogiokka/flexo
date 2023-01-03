@@ -11,7 +11,6 @@
 
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "World.hpp"
 #include "gfx/ObjectList.hpp"
 #include "object/Map.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
@@ -134,13 +133,13 @@ void SelfOrganizingMapPane::PopulateControlPanel()
 
 void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
 {
-    if (!world.theMap) {
+    if (!m_project.theMap) {
         wxMessageDialog dialog(this, "Please add and select a map first!", "Error", wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
         return;
     }
 
-    if (!world.theDataset) {
+    if (!m_project.theDataset) {
         wxMessageDialog dialog(this, "Please generate the dataset from the outliner first!", "Error",
                                wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
@@ -203,18 +202,18 @@ void SelfOrganizingMapPane::OnMapDeleted(wxCommandEvent& event)
     }
     m_mapCombo->Clear();
     m_mapCombo->Delete(ret);
-    world.theMap = nullptr;
+    m_project.theMap = nullptr;
 }
 
 void SelfOrganizingMapPane::OnComboBox(wxCommandEvent&)
 {
     for (auto const& obj : ObjectList::Get(m_project)) {
         if (obj->GetID() == m_mapCombo->GetValue()) {
-            world.theMap = std::dynamic_pointer_cast<Map<3, 2>>(obj);
+            m_project.theMap = std::dynamic_pointer_cast<Map<3, 2>>(obj);
         }
     }
-    int const width = world.theMap->size.x;
-    int const height = world.theMap->size.y;
+    int const width = m_project.theMap->size.x;
+    int const height = m_project.theMap->size.y;
     float const diagLen = sqrt(width * width + height * height);
     float const radius = 0.5f * diagLen;
     ProjectSettings::Get(m_project).SetNeighborhood(radius);

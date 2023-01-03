@@ -18,7 +18,6 @@
 #include "SelfOrganizingMap.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
-#include "World.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
@@ -59,9 +58,9 @@ WatermarkingProject::WatermarkingProject()
             objlist.Submit(Renderer::Get(*this));
         }
 
-        if (world.theMap) {
-            world.theMap->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-            objlist.Add(ObjectType_Map, world.theMap);
+        if (theMap) {
+            theMap->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
+            objlist.Add(ObjectType_Map, theMap);
             objlist.Submit(Renderer::Get(*this));
         }
     });
@@ -92,14 +91,12 @@ void WatermarkingProject::CreateScene()
 
 void WatermarkingProject::CreateProject()
 {
-    assert(world.theDataset);
-
     if (m_model) {
         m_model->SetViewFlags(ObjectViewFlag_Solid);
     }
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
 
-    SelfOrganizingMap::Get(*this).CreateProcedure(world.theMap, world.theDataset);
+    SelfOrganizingMap::Get(*this).CreateProcedure(theMap, theDataset);
 }
 
 void WatermarkingProject::StopProject()
@@ -135,7 +132,7 @@ void WatermarkingProject::DoWatermark()
     }
 
     float progress;
-    auto status = m_model->Parameterize(*world.theMap, progress);
+    auto status = m_model->Parameterize(*theMap, progress);
 
     wxProgressDialog dialog("Texture Mapping", "Please wait...", 100, &ProjectWindow::Get(*this),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
@@ -318,8 +315,8 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 }
 
                 BoundingBox box = { { 5.0f, 5.0f, 5.0f }, { -5.0f, -5.0f, -5.0f } };
-                if (world.theDataset) {
-                    box = world.theDataset->GetBoundingBox();
+                if (theDataset) {
+                    box = theDataset->GetBoundingBox();
                 }
 
                 auto map = std::make_shared<Map<3, 2>>();
@@ -355,7 +352,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 map->size.y = height;
                 map->flags = flags;
 
-                world.theMap = map;
+                theMap = map;
             }
 
             if (!widthCtrl->GetValue().ToLong(&width) || !heightCtrl->GetValue().ToLong(&height) || width < 3
@@ -366,7 +363,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Map: (width: %ld, height: %ld)", width, height);
 
-            obj = world.theMap;
+            obj = theMap;
             obj->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
             type = ObjectType_Map;

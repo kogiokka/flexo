@@ -7,7 +7,6 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "World.hpp"
 #include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
@@ -66,7 +65,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
             for (auto const& obj : ObjectList::Get(m_project)) {
                 if (obj->GetID() == id) {
                     auto const& pos = obj->GetPositions();
-                    world.theDataset = std::make_shared<Dataset<3>>(pos);
+                    m_project.theDataset = std::make_shared<Dataset<3>>(pos);
                     log_info("Dataset count: %lu", pos.size());
                     break;
                 }

@@ -1,7 +1,6 @@
 #include <utility>
 #include <vector>
 
-#include "World.hpp"
 #include "gfx/BindStep.hpp"
 #include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"

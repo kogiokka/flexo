@@ -3,7 +3,6 @@
 #include <vector>
 
 #include "Wireframe.hpp"
-#include "World.hpp"
 #include "gfx/DrawTask.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"

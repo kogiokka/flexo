@@ -3,7 +3,6 @@
 #include <glm/gtx/string_cast.hpp>
 
 #include "Project.hpp"
-#include "World.hpp"
 #include "gfx/Renderer.hpp"
 #include "util/Logger.h"
 

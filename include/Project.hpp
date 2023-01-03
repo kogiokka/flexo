@@ -10,6 +10,8 @@
 #include <wx/weakref.h>
 
 #include "Attachable.hpp"
+#include "Dataset.hpp"
+#include "object/Map.hpp"
 
 class WatermarkingProject;
 class SurfaceVoxels;
@@ -41,6 +43,10 @@ private:
     wxWeakRef<wxWindow> m_panel;
     std::shared_ptr<SurfaceVoxels> m_model;
     std::string m_imageFile;
+
+public:
+    std::shared_ptr<Dataset<3>> theDataset;
+    std::shared_ptr<Map<3, 2>> theMap;
 };
 
 #endif

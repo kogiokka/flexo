@@ -7,7 +7,6 @@
 #include "TransformStack.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
-#include "World.hpp"
 #include "object/Map.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "util/Logger.h"

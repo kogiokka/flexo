@@ -1,5 +1,4 @@
 #include "gfx/drawable/TexturedDrawable.hpp"
-#include "World.hpp"
 #include "gfx/BindStep.hpp"
 #include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"

@@ -3,7 +3,6 @@
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "WatermarkingApp.hpp"
-#include "World.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "pane/PropertiesPane.hpp"

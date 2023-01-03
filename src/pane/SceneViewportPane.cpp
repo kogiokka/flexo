@@ -11,7 +11,6 @@
 #include "Camera.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "World.hpp"
 #include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
@@ -97,8 +96,8 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
     auto& renderer = Renderer::Get(m_project);
-    if (world.theMap) {
-        world.theMap->GenerateDrawables(gfx);
+    if (m_project.theMap) {
+        m_project.theMap->GenerateDrawables(gfx);
         ObjectList::Get(m_project).Submit(renderer);
     }
 
