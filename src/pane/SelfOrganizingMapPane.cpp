@@ -11,8 +11,8 @@
 
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "gfx/ObjectList.hpp"
 #include "object/Map.hpp"
+#include "object/ObjectList.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
 wxDEFINE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);

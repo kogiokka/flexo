@@ -5,7 +5,7 @@
 
 #include "Project.hpp"
 #include "gfx/Graphics.hpp"
-#include "gfx/ObjectList.hpp"
+#include "object/ObjectList.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 

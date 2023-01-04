@@ -11,7 +11,7 @@
 #include "Camera.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "gfx/ObjectList.hpp"
+#include "object/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "util/Logger.h"

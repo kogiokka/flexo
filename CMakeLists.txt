@@ -45,6 +45,7 @@ PRIVATE
     "src/pane/SceneViewportPane.cpp"
 
     "src/object/Object.cpp"
+    "src/object/ObjectList.cpp"
     "src/object/Plane.cpp"
     "src/object/Cube.cpp"
     "src/object/Grid.cpp"
@@ -69,7 +70,6 @@ PRIVATE
     "src/gfx/Renderer.cpp"
     "src/gfx/BindStep.cpp"
     "src/gfx/DrawTask.cpp"
-    "src/gfx/ObjectList.cpp"
     "src/gfx/glwr/IGLWRState.cpp"
     "src/gfx/glwr/IGLWRBuffer.cpp"
     "src/gfx/glwr/IGLWRInputLayout.cpp"

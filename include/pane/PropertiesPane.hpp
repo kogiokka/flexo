@@ -8,7 +8,7 @@
 #include <wx/event.h>
 #include <wx/textctrl.h>
 
-#include "gfx/ObjectList.hpp"
+#include "object/ObjectList.hpp"
 #include "pane/ControlsPaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_CHANGED, wxCommandEvent);

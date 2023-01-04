@@ -7,9 +7,9 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "gfx/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/drawable/DrawableBase.hpp"
+#include "object/ObjectList.hpp"
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "util/Logger.h"
