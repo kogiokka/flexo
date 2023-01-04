@@ -1,0 +1,30 @@
+= Flexo
+
+Flexo is a voxel-based model editor based on Self-Organizing Map.
+
+Flexo is still in early development stage, and not yet ready for production.
+
+== Building
+
+The program requires C++17 and uses CMake as its build system.
+
+=== Dependencies
+
+ * wxWidgets 3.2.1 (bundled)
+ * glm 0.9.9.8 (bundled)
+ * glad (bundled)
+ * librvl (bundled)
+
+=== CLI
+
+[source,sh]
+----
+# Configure and generate build scripts
+cmake -S <path-to-source-tree> -B <path-to-build-tree> -D CMAKE_BUILD_TYPE=Release
+
+# Compile the program
+cmake --build <path-to-build-tree>
+
+# Run the program
+cd <path-to-build-tree>; ./flexo
+----
