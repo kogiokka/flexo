@@ -31,7 +31,7 @@ public:
     void CreateScene();
     void CreateProject();
     void StopProject();
-    void DoWatermark();
+    void DoParameterization();
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
     wxWindow* GetPanel();

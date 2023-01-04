@@ -4,14 +4,14 @@
 
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "pane/WatermarkingPane.hpp"
+#include "pane/TextureMappingPane.hpp"
 
-WatermarkingPane::WatermarkingPane(wxWindow* parent, WatermarkingProject& project)
+TextureMappingPane::TextureMappingPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
     auto* group = AddGroup("Control", 1);
-    auto* btn = group->AddButton("Watermark");
+    auto* btn = group->AddButton("Parameterize");
 
     Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(SelfOrganizingMap::Get(m_project).IsDone()); });
-    btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_project.DoWatermark(); });
+    btn->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_project.DoParameterization(); });
 }

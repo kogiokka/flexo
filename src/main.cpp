@@ -9,7 +9,7 @@
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
-#include "pane/WatermarkingPane.hpp"
+#include "pane/TextureMappingPane.hpp"
 #include "util/Logger.h"
 
 wxIMPLEMENT_APP(WatermarkingApp);
@@ -51,9 +51,9 @@ bool WatermarkingApp::OnInit()
 
     auto* outliner = new SceneOutlinerPane(page, project);
     auto* som = new SelfOrganizingMapPane(page, project);
-    auto* watermarking = new WatermarkingPane(page, project);
+    auto* mapping = new TextureMappingPane(page, project);
     auto* properties = new PropertiesPane(page, project);
-    watermarking->Disable();
+    mapping->Disable();
 
     wxSize const minSize = page->FromDIP(wxSize(450, 20));
     mgr.AddPane(&viewport,
@@ -86,10 +86,10 @@ bool WatermarkingApp::OnInit()
         som,
         wxAuiPaneInfo().Name("som").Caption("SOM").Right().Layer(1).CloseButton(true).MaximizeButton(true).MinSize(
             minSize));
-    mgr.AddPane(watermarking,
+    mgr.AddPane(mapping,
                 wxAuiPaneInfo()
-                    .Name("watermarking")
-                    .Caption("Watermarking")
+                    .Name("mapping")
+                    .Caption("Texture Mapping")
                     .Right()
                     .Layer(1)
                     .CloseButton(true)
@@ -104,4 +104,3 @@ bool WatermarkingApp::OnInit()
 
     return true;
 }
-

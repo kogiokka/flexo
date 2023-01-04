@@ -124,7 +124,7 @@ wxWindow* WatermarkingProject::GetPanel()
     return m_panel;
 }
 
-void WatermarkingProject::DoWatermark()
+void WatermarkingProject::DoParameterization()
 {
     auto model = std::dynamic_pointer_cast<SurfaceVoxels>(theModel.lock());
     if (!model) {
@@ -136,7 +136,7 @@ void WatermarkingProject::DoWatermark()
     float progress;
     auto status = model->Parameterize(*(theMap.lock()), progress);
 
-    wxProgressDialog dialog("Texture Mapping", "Please wait...", 100, &ProjectWindow::Get(*this),
+    wxProgressDialog dialog("Parameterizing", "Please wait...", 100, &ProjectWindow::Get(*this),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
 
     while (status.wait_for(std::chrono::milliseconds(16)) != std::future_status::ready) {

@@ -41,8 +41,8 @@ PRIVATE
     "src/pane/SceneOutlinerPane.cpp"
     "src/pane/PropertiesPane.cpp"
     "src/pane/SelfOrganizingMapPane.cpp"
-    "src/pane/WatermarkingPane.cpp"
     "src/pane/SceneViewportPane.cpp"
+    "src/pane/TextureMappingPane.cpp"
 
     "src/object/Object.cpp"
     "src/object/ObjectList.cpp"
