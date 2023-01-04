@@ -11,8 +11,8 @@
 #include "Camera.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "object/ObjectList.hpp"
 #include "gfx/Renderer.hpp"
+#include "object/ObjectList.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "util/Logger.h"
 
@@ -96,9 +96,9 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
     auto& renderer = Renderer::Get(m_project);
-    if (m_project.theMap) {
-        m_project.theMap->GenerateMesh();
-        m_project.theMap->GenerateDrawables(gfx);
+    if (auto it = m_project.theMap.lock()) {
+        it->GenerateMesh();
+        it->GenerateDrawables(gfx);
         ObjectList::Get(m_project).Submit(renderer);
     }
 

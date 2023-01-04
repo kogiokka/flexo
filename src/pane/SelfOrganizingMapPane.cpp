@@ -133,13 +133,13 @@ void SelfOrganizingMapPane::PopulateControlPanel()
 
 void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
 {
-    if (!m_project.theMap) {
+    if (m_project.theMap.expired()) {
         wxMessageDialog dialog(this, "Please add and select a map first!", "Error", wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
         return;
     }
 
-    if (!m_project.theModel || !m_project.theDataset) {
+    if (m_project.theModel.expired() || !m_project.theDataset) {
         wxMessageDialog dialog(this, "Please select the target from the outliner first!", "Error",
                                wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
@@ -203,7 +203,6 @@ void SelfOrganizingMapPane::OnMapDeleted(wxCommandEvent& event)
 
     if (ret == m_mapCombo->GetSelection()) {
         m_mapCombo->SetValue("");
-        m_project.theMap = nullptr;
     }
 
     m_mapCombo->Delete(ret);
@@ -216,8 +215,9 @@ void SelfOrganizingMapPane::OnComboBox(wxCommandEvent&)
             m_project.theMap = std::dynamic_pointer_cast<Map<3, 2>>(obj);
         }
     }
-    int const width = m_project.theMap->size.x;
-    int const height = m_project.theMap->size.y;
+    auto map = m_project.theMap.lock();
+    int const width = map->size.x;
+    int const height = map->size.y;
     float const diagLen = sqrt(width * width + height * height);
     float const radius = 0.5f * diagLen;
     ProjectSettings::Get(m_project).SetNeighborhood(radius);

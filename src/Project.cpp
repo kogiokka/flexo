@@ -37,7 +37,9 @@
 WatermarkingProject::WatermarkingProject()
     : m_frame {}
     , m_panel {}
-    , theModel(nullptr)
+    , theDataset(nullptr)
+    , theMap()
+    , theModel()
 {
     m_imageFile = "res/images/mandala.png";
 
@@ -52,13 +54,13 @@ WatermarkingProject::WatermarkingProject()
         auto& objlist = ObjectList::Get(*this);
         std::string const filename = event.GetString().ToStdString();
 
-        for (auto const& obj : objlist) {
-            auto id = wxString(obj->GetID());
-            // FIXME
-            if (id.StartsWith("Model") || id.StartsWith("Map")) {
-                obj->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-                obj->GenerateDrawables(gfx);
-            }
+        if (auto map = theMap.lock()) {
+            map->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
+            map->GenerateDrawables(gfx);
+        }
+        if (auto model = theModel.lock()) {
+            model->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
+            model->GenerateDrawables(gfx);
         }
 
         objlist.Submit(Renderer::Get(*this));
@@ -90,12 +92,12 @@ void WatermarkingProject::CreateScene()
 
 void WatermarkingProject::CreateProject()
 {
-    if (theModel) {
-        theModel->SetViewFlags(ObjectViewFlag_Solid);
+    if (auto it = theModel.lock()) {
+        it->SetViewFlags(ObjectViewFlag_Solid);
     }
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
 
-    SelfOrganizingMap::Get(*this).CreateProcedure(theMap, theDataset);
+    SelfOrganizingMap::Get(*this).CreateProcedure(theMap.lock(), theDataset);
 }
 
 void WatermarkingProject::StopProject()
@@ -124,7 +126,7 @@ wxWindow* WatermarkingProject::GetPanel()
 
 void WatermarkingProject::DoWatermark()
 {
-    auto model = std::dynamic_pointer_cast<SurfaceVoxels>(theModel);
+    auto model = std::dynamic_pointer_cast<SurfaceVoxels>(theModel.lock());
     if (!model) {
         wxMessageDialog dlg(&ProjectWindow::Get(*this), "Not a volumetric model!", "Error", wxCENTER | wxICON_ERROR);
         dlg.ShowModal();
@@ -132,7 +134,7 @@ void WatermarkingProject::DoWatermark()
     }
 
     float progress;
-    auto status = model->Parameterize(*theMap, progress);
+    auto status = model->Parameterize(*(theMap.lock()), progress);
 
     wxProgressDialog dialog("Texture Mapping", "Please wait...", 100, &ProjectWindow::Get(*this),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
@@ -162,7 +164,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     theModel = model;
 
     auto& objlist = ObjectList::Get(*this);
-    objlist.Add(ObjectType_Model, theModel);
+    objlist.Add(ObjectType_Model, theModel.lock());
     objlist.Submit(Renderer::Get(*this));
 }
 
@@ -317,8 +319,8 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 }
 
                 BoundingBox box = { { 5.0f, 5.0f, 5.0f }, { -5.0f, -5.0f, -5.0f } };
-                if (theDataset) {
-                    box = theDataset->GetBoundingBox();
+                if (auto it = theDataset) {
+                    box = it->GetBoundingBox();
                 }
 
                 auto map = std::make_shared<Map<3, 2>>();

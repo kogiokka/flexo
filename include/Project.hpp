@@ -46,8 +46,8 @@ private:
 
 public:
     std::shared_ptr<Dataset<3>> theDataset;
-    std::shared_ptr<Map<3, 2>> theMap;
-    std::shared_ptr<Object> theModel;
+    std::weak_ptr<Map<3, 2>> theMap;
+    std::weak_ptr<Object> theModel;
 };
 
 #endif

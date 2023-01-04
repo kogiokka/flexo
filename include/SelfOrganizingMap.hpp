@@ -51,7 +51,7 @@ public:
      * @param dataset Dataset as the input space of SOM
      */
     template <int InDim, int OutDim>
-    void CreateProcedure(std::shared_ptr<Map<InDim, OutDim>>& map, std::shared_ptr<Dataset<InDim>> dataset);
+    void CreateProcedure(std::shared_ptr<Map<InDim, OutDim>> map, std::shared_ptr<Dataset<InDim>> dataset);
 
     void ToggleTraining();
     bool IsDone() const;
@@ -108,7 +108,7 @@ private:
 };
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::CreateProcedure(std::shared_ptr<Map<InDim, OutDim>>& map,
+void SelfOrganizingMap::CreateProcedure(std::shared_ptr<Map<InDim, OutDim>> map,
                                         std::shared_ptr<Dataset<InDim>> dataset)
 {
     {
