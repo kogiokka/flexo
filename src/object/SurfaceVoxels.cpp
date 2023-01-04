@@ -95,40 +95,55 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
             }
         }
     }
-
-    static VoxelFaceList vxFaceList = ConstructVoxelFaceList();
-
-    for (auto const& vx : m_voxels) {
-        if (vx.vis & VoxelVis_XPos) {
-            AddFace(m_mesh, vxFaceList[0], vx.pos, m_scale);
-            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_XNeg) {
-            AddFace(m_mesh, vxFaceList[1], vx.pos, m_scale);
-            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_YPos) {
-            AddFace(m_mesh, vxFaceList[2], vx.pos, m_scale);
-            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_YNeg) {
-            AddFace(m_mesh, vxFaceList[3], vx.pos, m_scale);
-            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_ZPos) {
-            AddFace(m_mesh, vxFaceList[4], vx.pos, m_scale);
-            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
-        }
-        if (vx.vis & VoxelVis_ZNeg) {
-            AddFace(m_mesh, vxFaceList[5], vx.pos, m_scale);
-            m_mesh.textureCoords.insert(m_mesh.textureCoords.end(), 6, vx.uv);
-        }
-    }
 }
 
 std::vector<Voxel> const& SurfaceVoxels::Voxels() const
 {
     return m_voxels;
+}
+
+void SurfaceVoxels::GenerateDrawables(Graphics& gfx)
+{
+    static VoxelFaceList faces = ConstructVoxelFaceList();
+
+    EditableMesh mesh;
+
+    for (auto const& vx : m_voxels) {
+        if (vx.vis & VoxelVis_XPos) {
+            AddFace(mesh, faces[0], vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), faces[0].positions.size(), vx.uv);
+        }
+        if (vx.vis & VoxelVis_XNeg) {
+            AddFace(mesh, faces[1], vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), faces[1].positions.size(), vx.uv);
+        }
+        if (vx.vis & VoxelVis_YPos) {
+            AddFace(mesh, faces[2], vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), faces[2].positions.size(), vx.uv);
+        }
+        if (vx.vis & VoxelVis_YNeg) {
+            AddFace(mesh, faces[3], vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), faces[3].positions.size(), vx.uv);
+        }
+        if (vx.vis & VoxelVis_ZPos) {
+            AddFace(mesh, faces[4], vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), faces[4].positions.size(), vx.uv);
+        }
+        if (vx.vis & VoxelVis_ZNeg) {
+            AddFace(mesh, faces[5], vx.pos, m_scale);
+            mesh.textureCoords.insert(mesh.textureCoords.end(), faces[5].positions.size(), vx.uv);
+        }
+    }
+    m_mesh = mesh;
+
+    // FIXME
+    if (!m_texture) {
+        m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
+    }
+
+    m_solid = std::make_shared<SolidDrawable>(gfx, GenerateMesh());
+    m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
+    m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
 }
 
 void SurfaceVoxels::ApplyTransform()
