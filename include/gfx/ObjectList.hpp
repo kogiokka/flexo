@@ -55,7 +55,6 @@ public:
 private:
     void OnDeleteObject(wxCommandEvent& event);
 
-    bool m_showHandle;
     std::vector<std::shared_ptr<Object>> m_list;
     std::unordered_map<enum ObjectType, unsigned int> m_typeCount;
     WatermarkingProject& m_project;
