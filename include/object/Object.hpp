@@ -48,8 +48,6 @@ public:
 
     Object();
     ~Object();
-    virtual void GenerateDrawables(Graphics& gfx);
-    virtual DrawList const& GetDrawList();
 
     void SetID(std::string id);
     void SetViewFlags(ObjectViewFlag flags);
@@ -60,8 +58,8 @@ public:
     void SetVisible(bool visible);
     bool IsVisible() const;
 
-    virtual Mesh GenerateMesh() const = 0;
-    virtual Wireframe GenerateWireMesh() const = 0;
+    virtual void GenerateDrawables(Graphics& gfx);
+    virtual DrawList const& GetDrawList();
     virtual std::vector<glm::vec3> GetPositions() const;
     virtual void ApplyTransform() = 0;
 

@@ -10,8 +10,6 @@ public:
     Grid(int numXDiv, int numYDiv, float size);
     virtual ~Grid() = default;
 
-    Mesh GenerateMesh() const override;
-    Wireframe GenerateWireMesh() const override;
     void ApplyTransform() override;
 };
 

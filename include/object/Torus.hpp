@@ -10,8 +10,6 @@ public:
     Torus(int majorSeg = 48, int minorSeg = 12, float majorRad = 1.0f, float minorRad = 0.25f);
     virtual ~Torus() = default;
 
-    Mesh GenerateMesh() const override;
-    Wireframe GenerateWireMesh() const override;
     void ApplyTransform() override;
 };
 

@@ -10,8 +10,6 @@ public:
     Cube(float size = 2.0f);
     virtual ~Cube() = default;
 
-    Mesh GenerateMesh() const override;
-    Wireframe GenerateWireMesh() const override;
     void ApplyTransform() override;
 };
 

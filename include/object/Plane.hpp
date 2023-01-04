@@ -10,8 +10,6 @@ public:
     Plane(float size = 2.0f);
     virtual ~Plane() = default;
 
-    Mesh GenerateMesh() const override;
-    Wireframe GenerateWireMesh() const override;
     void ApplyTransform() override;
 };
 

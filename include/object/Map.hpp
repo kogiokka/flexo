@@ -23,7 +23,7 @@ typedef enum {
     MapInitState_Random,
 } MapInitState;
 
-struct Mesh;
+class Graphics;
 
 template <int InDim, int OutDim>
 struct Map : public Object {
@@ -34,24 +34,22 @@ struct Map : public Object {
     MapFlags flags;
 
     void ApplyTransform() override;
-
-private:
-    Mesh GenerateMesh() const override;
-    Wireframe GenerateWireMesh() const override;
+    virtual void GenerateDrawables(Graphics& gfx) override;
 };
 
 EditableMesh GenMapEditableMesh(Map<3, 2> const& map);
 
 template <int InDim, int OutDim>
-Mesh Map<InDim, OutDim>::GenerateMesh() const
+void Map<InDim, OutDim>::GenerateDrawables(Graphics& gfx)
 {
-    return GenMapEditableMesh(*this).GenerateMesh();
-}
+    m_mesh = GenMapEditableMesh(*this);
 
-template <int InDim, int OutDim>
-Wireframe Map<InDim, OutDim>::GenerateWireMesh() const
-{
-    return GenMapEditableMesh(*this).GenerateWireframe();
+    if (!m_texture) {
+        m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
+    }
+    m_solid = std::make_shared<SolidDrawable>(gfx, m_mesh.GenerateMesh());
+    m_textured = std::make_shared<TexturedDrawable>(gfx, m_mesh.GenerateMesh(), m_texture);
+    m_wire = std::make_shared<WireDrawable>(gfx, m_mesh.GenerateWireframe());
 }
 
 template <int InDim, int OutDim>

@@ -142,6 +142,7 @@ void WatermarkingProject::DoWatermark()
     }
 
     // After the parametrization done, regenerate the drawables to update texture coordinates.
+    m_model->GenerateMesh();
     m_model->GenerateDrawables(Graphics::Get(*this));
 
     m_model->SetViewFlags(ObjectViewFlag_Textured);

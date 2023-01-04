@@ -19,14 +19,12 @@ void Object::GenerateDrawables(Graphics& gfx)
     if (!m_texture) {
         m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
     }
-
-    m_solid = std::make_shared<SolidDrawable>(gfx, GenerateMesh());
-    m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
-    m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
+    m_solid = std::make_shared<SolidDrawable>(gfx, m_mesh.GenerateMesh());
+    m_textured = std::make_shared<TexturedDrawable>(gfx, m_mesh.GenerateMesh(), m_texture);
+    m_wire = std::make_shared<WireDrawable>(gfx, m_mesh.GenerateWireframe());
 }
 
-std::vector<glm::vec3>
-Object::GetPositions() const
+std::vector<glm::vec3> Object::GetPositions() const
 {
     return m_mesh.positions;
 }
@@ -64,12 +62,15 @@ Object::DrawList const& Object::GetDrawList()
     }
 
     auto modelMat = GenerateTransformStack().GenerateMatrix();
-    for (auto& d : list) {
-        d->SetVisible(m_isVisible);
-        d->SetTransform(modelMat);
-    }
 
-    m_drawlist = list;
+    m_drawlist.clear();
+    for (auto& d : list) {
+        if (d) {
+            d->SetVisible(m_isVisible);
+            d->SetTransform(modelMat);
+            m_drawlist.push_back(d);
+        }
+    }
 
     return m_drawlist;
 }
@@ -158,3 +159,5 @@ TransformStack Object::GenerateTransformStack()
     st.PushScale(m_transform.scale);
     return st;
 }
+
+

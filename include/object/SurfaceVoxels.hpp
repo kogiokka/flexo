@@ -12,7 +12,6 @@
 #include "Voxel.hpp"
 
 class VolumetricModelData;
-class Graphics;
 
 class SurfaceVoxels : public Object
 {
@@ -22,12 +21,11 @@ public:
     std::vector<Voxel> const& Voxels() const;
     virtual std::vector<glm::vec3> GetPositions() const override;
     std::future<void> Parameterize(Map<3, 2> const& map, float& progress);
-    virtual void GenerateDrawables(Graphics& gfx) override;
+    void GenerateMesh();
 
 private:
     void ApplyTransform() override;
-    virtual Mesh GenerateMesh() const override;
-    virtual Wireframe GenerateWireMesh() const override;
+    void GenEditableMesh();
 
     glm::vec3 m_scale;
     std::vector<Voxel> m_voxels;

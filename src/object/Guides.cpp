@@ -88,18 +88,7 @@ void Guides::GenerateDrawables(Graphics& gfx)
 
 Object::DrawList const& Guides::GetDrawList()
 {
-
     return m_drawlist;
-}
-
-Mesh Guides::GenerateMesh() const
-{
-    return {};
-}
-
-Wireframe Guides::GenerateWireMesh() const
-{
-    return {};
 }
 
 void Guides::ApplyTransform()

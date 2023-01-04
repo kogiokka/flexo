@@ -95,6 +95,8 @@ SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
             }
         }
     }
+
+    GenerateMesh();
 }
 
 std::vector<Voxel> const& SurfaceVoxels::Voxels() const
@@ -102,7 +104,7 @@ std::vector<Voxel> const& SurfaceVoxels::Voxels() const
     return m_voxels;
 }
 
-void SurfaceVoxels::GenerateDrawables(Graphics& gfx)
+void SurfaceVoxels::GenerateMesh()
 {
     static VoxelFaceList faces = ConstructVoxelFaceList();
 
@@ -134,16 +136,8 @@ void SurfaceVoxels::GenerateDrawables(Graphics& gfx)
             mesh.textureCoords.insert(mesh.textureCoords.end(), faces[5].positions.size(), vx.uv);
         }
     }
+
     m_mesh = mesh;
-
-    // FIXME
-    if (!m_texture) {
-        m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
-    }
-
-    m_solid = std::make_shared<SolidDrawable>(gfx, GenerateMesh());
-    m_textured = std::make_shared<TexturedDrawable>(gfx, GenerateMesh(), m_texture);
-    m_wire = std::make_shared<WireDrawable>(gfx, GenerateWireMesh());
 }
 
 void SurfaceVoxels::ApplyTransform()
@@ -154,19 +148,6 @@ void SurfaceVoxels::ApplyTransform()
         vx.pos = glm::vec3(mat * glm::vec4(vx.pos, 1.0f));
     }
     m_transform = Transform();
-}
-
-Mesh SurfaceVoxels::GenerateMesh() const
-{
-    return m_mesh.GenerateMesh();
-}
-
-Wireframe SurfaceVoxels::GenerateWireMesh() const
-{
-    Wireframe wire;
-
-    // TODO;
-    return wire;
 }
 
 std::vector<glm::vec3> SurfaceVoxels::GetPositions() const
