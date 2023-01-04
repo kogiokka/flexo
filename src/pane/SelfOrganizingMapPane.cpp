@@ -139,8 +139,8 @@ void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
         return;
     }
 
-    if (!m_project.theDataset) {
-        wxMessageDialog dialog(this, "Please generate the dataset from the outliner first!", "Error",
+    if (!m_project.theModel || !m_project.theDataset) {
+        wxMessageDialog dialog(this, "Please select the target from the outliner first!", "Error",
                                wxCENTER | wxICON_ERROR);
         dialog.ShowModal();
         return;

@@ -37,7 +37,7 @@
 WatermarkingProject::WatermarkingProject()
     : m_frame {}
     , m_panel {}
-    , m_model(nullptr)
+    , theModel(nullptr)
 {
     m_imageFile = "res/images/mandala.png";
 
@@ -90,8 +90,8 @@ void WatermarkingProject::CreateScene()
 
 void WatermarkingProject::CreateProject()
 {
-    if (m_model) {
-        m_model->SetViewFlags(ObjectViewFlag_Solid);
+    if (theModel) {
+        theModel->SetViewFlags(ObjectViewFlag_Solid);
     }
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
 
@@ -124,14 +124,15 @@ wxWindow* WatermarkingProject::GetPanel()
 
 void WatermarkingProject::DoWatermark()
 {
-    if (!m_model) {
-        wxMessageDialog dlg(&ProjectWindow::Get(*this), "No volumetric model!", "Error", wxCENTER | wxICON_ERROR);
+    auto model = std::dynamic_pointer_cast<SurfaceVoxels>(theModel);
+    if (!model) {
+        wxMessageDialog dlg(&ProjectWindow::Get(*this), "Not a volumetric model!", "Error", wxCENTER | wxICON_ERROR);
         dlg.ShowModal();
         return;
     }
 
     float progress;
-    auto status = m_model->Parameterize(*theMap, progress);
+    auto status = model->Parameterize(*theMap, progress);
 
     wxProgressDialog dialog("Texture Mapping", "Please wait...", 100, &ProjectWindow::Get(*this),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
@@ -141,10 +142,9 @@ void WatermarkingProject::DoWatermark()
     }
 
     // After the parametrization done, regenerate the drawables to update texture coordinates.
-    m_model->GenerateMesh();
-    m_model->GenerateDrawables(Graphics::Get(*this));
-
-    m_model->SetViewFlags(ObjectViewFlag_Textured);
+    model->SetViewFlags(ObjectViewFlag_Textured);
+    model->GenerateMesh();
+    model->GenerateDrawables(Graphics::Get(*this));
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
 }
 
@@ -153,14 +153,16 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     VolumetricModelData data;
     data.Read(path.ToStdString().c_str());
 
-    m_model = std::make_shared<SurfaceVoxels>(data);
-    m_model->SetViewFlags(ObjectViewFlag_Solid);
-    m_model->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
+    auto model = std::make_shared<SurfaceVoxels>(data);
+    model->SetViewFlags(ObjectViewFlag_Solid);
+    model->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
 
-    log_info("%lu voxels will be rendered.", m_model->Voxels().size());
+    log_info("%lu voxels will be rendered.", model->Voxels().size());
+
+    theModel = model;
 
     auto& objlist = ObjectList::Get(*this);
-    objlist.Add(ObjectType_Model, m_model);
+    objlist.Add(ObjectType_Model, theModel);
     objlist.Submit(Renderer::Get(*this));
 }
 

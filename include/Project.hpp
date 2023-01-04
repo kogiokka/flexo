@@ -12,6 +12,7 @@
 #include "Attachable.hpp"
 #include "Dataset.hpp"
 #include "object/Map.hpp"
+#include "object/Object.hpp"
 
 class WatermarkingProject;
 class SurfaceVoxels;
@@ -41,12 +42,12 @@ private:
 
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-    std::shared_ptr<SurfaceVoxels> m_model;
     std::string m_imageFile;
 
 public:
     std::shared_ptr<Dataset<3>> theDataset;
     std::shared_ptr<Map<3, 2>> theMap;
+    std::shared_ptr<Object> theModel;
 };
 
 #endif
