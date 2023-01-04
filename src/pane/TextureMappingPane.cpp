@@ -6,7 +6,7 @@
 #include "SelfOrganizingMap.hpp"
 #include "pane/TextureMappingPane.hpp"
 
-TextureMappingPane::TextureMappingPane(wxWindow* parent, WatermarkingProject& project)
+TextureMappingPane::TextureMappingPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
 {
     auto* group = AddGroup("Control", 1);

@@ -5,21 +5,21 @@
 
 #include "Attachable.hpp"
 
-class WatermarkingProject;
+class FlexoProject;
 
 wxDECLARE_EVENT(EVT_PROJECT_SETTINGS_CHANGED, wxCommandEvent);
 
 class ProjectSettings : public AttachableBase
 {
 public:
-    static ProjectSettings& Get(WatermarkingProject& project);
-    static ProjectSettings const& Get(WatermarkingProject const& project);
+    static ProjectSettings& Get(FlexoProject& project);
+    static ProjectSettings const& Get(FlexoProject const& project);
 
     enum EventCode : int {
         EventCode_ProcedureChanged,
     };
 
-    explicit ProjectSettings(WatermarkingProject& project);
+    explicit ProjectSettings(FlexoProject& project);
     virtual ~ProjectSettings() {};
     ProjectSettings(ProjectSettings const&) = delete;
     ProjectSettings& operator=(ProjectSettings const&) = delete;
@@ -32,7 +32,7 @@ public:
     float GetLearningRate() const;
 
 private:
-    WatermarkingProject& m_project;
+    FlexoProject& m_project;
     float m_learningRate;
     long int m_maxIterations;
     float m_neighborhood;

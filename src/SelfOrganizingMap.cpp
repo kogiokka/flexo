@@ -5,23 +5,21 @@
 #include "util/Logger.h"
 
 // Register factory: SelfOrganizingMap
-static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> SharedPtr<SelfOrganizingMap> {
-        return std::make_shared<SelfOrganizingMap>(project);
-    }
+static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {
+    [](FlexoProject& project) -> SharedPtr<SelfOrganizingMap> { return std::make_shared<SelfOrganizingMap>(project); }
 };
 
-SelfOrganizingMap& SelfOrganizingMap::Get(WatermarkingProject& project)
+SelfOrganizingMap& SelfOrganizingMap::Get(FlexoProject& project)
 {
     return project.AttachedObjects::Get<SelfOrganizingMap>(factoryKey);
 }
 
-SelfOrganizingMap const& SelfOrganizingMap::Get(WatermarkingProject const& project)
+SelfOrganizingMap const& SelfOrganizingMap::Get(FlexoProject const& project)
 {
-    return Get(const_cast<WatermarkingProject&>(project));
+    return Get(const_cast<FlexoProject&>(project));
 }
 
-SelfOrganizingMap::SelfOrganizingMap(WatermarkingProject& project)
+SelfOrganizingMap::SelfOrganizingMap(FlexoProject& project)
     : m_isDone(false)
     , m_isTraining(false)
     , m_worker()
@@ -117,4 +115,3 @@ void SelfOrganizingMap::StopWorker()
         log_info("The SOM worker joined successfully");
     }
 }
-

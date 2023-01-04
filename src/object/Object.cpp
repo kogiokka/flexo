@@ -159,5 +159,3 @@ TransformStack Object::GenerateTransformStack()
     st.PushScale(m_transform.scale);
     return st;
 }
-
-

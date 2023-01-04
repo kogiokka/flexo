@@ -8,7 +8,7 @@
 #include <wx/sizer.h>
 #include <wx/timer.h>
 
-class WatermarkingProject;
+class FlexoProject;
 
 #define MENU_ADD_LIST                                                                                                  \
     X(EVT_MENU_ADD_PLANE, "Plane")                                                                                     \
@@ -33,20 +33,20 @@ wxDECLARE_EVENT(EVT_MENU_CAMERA_ORTHOGONAL, wxCommandEvent);
 class ProjectWindow final : public wxFrame
 {
 public:
-    static ProjectWindow& Get(WatermarkingProject& project);
-    static ProjectWindow const& Get(WatermarkingProject const& project);
+    static ProjectWindow& Get(FlexoProject& project);
+    static ProjectWindow const& Get(FlexoProject const& project);
     explicit ProjectWindow(wxWindow* parent, wxWindowID id, wxPoint const& pos, wxSize const& size,
-                           WatermarkingProject& project);
+                           FlexoProject& project);
     ~ProjectWindow() override;
 
     wxAuiManager& GetPaneManager();
     wxWindow* GetMainPage();
 
-    WatermarkingProject& GetProject();
-    WatermarkingProject const& GetProject() const;
+    FlexoProject& GetProject();
+    FlexoProject const& GetProject() const;
 
 private:
-    WatermarkingProject& m_project;
+    FlexoProject& m_project;
     wxWindow* m_mainPage;
     wxPanel* m_mainPanel;
     wxTimer* m_updateUITimer;

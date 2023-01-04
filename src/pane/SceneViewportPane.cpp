@@ -34,8 +34,8 @@ float static constexpr MATH_PI = 3.14159265f;
 float static constexpr MATH_2_MUL_PI = 2.0f * MATH_PI;
 
 // Register factory: OpenGLCanvas
-static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
+static FlexoProject::AttachedWindows::RegisteredFactory const factoryKey {
+    [](FlexoProject& project) -> wxWeakRef<wxWindow> {
         auto& window = ProjectWindow::Get(project);
         wxWindow* mainPage = window.GetMainPage();
         wxASSERT(mainPage != nullptr);
@@ -46,18 +46,18 @@ static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey 
     }
 };
 
-SceneViewportPane& SceneViewportPane::Get(WatermarkingProject& project)
+SceneViewportPane& SceneViewportPane::Get(FlexoProject& project)
 {
     return project.AttachedWindows::Get<SceneViewportPane>(factoryKey);
 }
 
-SceneViewportPane const& SceneViewportPane::Get(WatermarkingProject const& project)
+SceneViewportPane const& SceneViewportPane::Get(FlexoProject const& project)
 {
-    return Get(const_cast<WatermarkingProject&>(project));
+    return Get(const_cast<FlexoProject&>(project));
 }
 
 SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id,
-                                     wxPoint const& pos, wxSize const& size, WatermarkingProject& project)
+                                     wxPoint const& pos, wxSize const& size, FlexoProject& project)
     : wxGLCanvas(parent, dispAttrs, id, pos, size)
     , m_isGLLoaded(false)
     , m_dirHorizontal(1)

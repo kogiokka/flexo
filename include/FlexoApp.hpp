@@ -1,5 +1,5 @@
-#ifndef WATERMARKING_APP_H
-#define WATERMARKING_APP_H
+#ifndef FLEXO_APP_H
+#define FLEXO_APP_H
 
 #include <vector>
 
@@ -8,16 +8,16 @@
 
 #include "Project.hpp"
 
-class WatermarkingApp : public wxApp
+class FlexoApp : public wxApp
 {
 public:
-    WatermarkingApp();
+    FlexoApp();
     virtual bool OnInit() override;
     virtual int OnExit() override;
     virtual void OnUnhandledException() override;
 
 private:
-    std::shared_ptr<WatermarkingProject> m_project;
+    std::shared_ptr<FlexoProject> m_project;
 };
 
 #endif

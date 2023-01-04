@@ -1,8 +1,8 @@
 #include <memory>
 
+#include "FlexoApp.hpp"
 #include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
-#include "WatermarkingApp.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
 #include "pane/PropertiesPane.hpp"
@@ -12,31 +12,31 @@
 #include "pane/TextureMappingPane.hpp"
 #include "util/Logger.h"
 
-wxIMPLEMENT_APP(WatermarkingApp);
+wxIMPLEMENT_APP(FlexoApp);
 
-WatermarkingApp::WatermarkingApp()
+FlexoApp::FlexoApp()
     : m_project(nullptr)
 {
 }
 
-void WatermarkingApp::OnUnhandledException()
+void FlexoApp::OnUnhandledException()
 {
     throw;
 }
 
-int WatermarkingApp::OnExit()
+int FlexoApp::OnExit()
 {
     SelfOrganizingMap::Get(*m_project).StopWorker();
     return wxApp::OnExit();
 }
 
-bool WatermarkingApp::OnInit()
+bool FlexoApp::OnInit()
 {
     if (!wxApp::OnInit()) {
         return false;
     }
 
-    m_project = std::make_shared<WatermarkingProject>();
+    m_project = std::make_shared<FlexoProject>();
     auto& project = *m_project;
     auto& window = ProjectWindow::Get(project);
     auto& viewport = SceneViewportPane::Get(project);

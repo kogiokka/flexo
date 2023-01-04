@@ -32,8 +32,8 @@ enum {
 };
 
 // Register factory: ProjectWindow
-static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
+static FlexoProject::AttachedWindows::RegisteredFactory const factoryKey {
+    [](FlexoProject& project) -> wxWeakRef<wxWindow> {
         auto window = new ProjectWindow(nullptr, wxID_ANY, wxDefaultPosition, wxSize(1200, 800), project);
         window->SetMinSize(wxSize(800, 600));
         window->Center();
@@ -42,19 +42,19 @@ static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey 
     }
 };
 
-ProjectWindow& ProjectWindow::Get(WatermarkingProject& project)
+ProjectWindow& ProjectWindow::Get(FlexoProject& project)
 {
     return project.AttachedWindows::Get<ProjectWindow>(factoryKey);
 }
 
-ProjectWindow const& ProjectWindow::Get(WatermarkingProject const& project)
+ProjectWindow const& ProjectWindow::Get(FlexoProject const& project)
 {
-    return Get(const_cast<WatermarkingProject&>(project));
+    return Get(const_cast<FlexoProject&>(project));
 }
 
 ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos, const wxSize& size,
-                             WatermarkingProject& project)
-    : wxFrame(parent, id, "Self-organizing Map Demo", pos, size)
+                             FlexoProject& project)
+    : wxFrame(parent, id, "Flexo", pos, size)
     , m_project(project)
 {
     m_project.SetFrame(this);
@@ -172,12 +172,12 @@ wxAuiManager& ProjectWindow::GetPaneManager()
     return m_mgr;
 }
 
-WatermarkingProject& ProjectWindow::GetProject()
+FlexoProject& ProjectWindow::GetProject()
 {
     return m_project;
 }
 
-WatermarkingProject const& ProjectWindow::GetProject() const
+FlexoProject const& ProjectWindow::GetProject() const
 {
     return m_project;
 }

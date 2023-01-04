@@ -8,7 +8,7 @@
 class TextureMappingPane : public ControlsPaneBase
 {
 public:
-    TextureMappingPane(wxWindow* parent, WatermarkingProject& project);
+    TextureMappingPane(wxWindow* parent, FlexoProject& project);
 };
 
 #endif

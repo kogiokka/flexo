@@ -14,10 +14,10 @@ wxDECLARE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);
 class SceneOutlinerPane : public ControlsPaneBase, public AttachableBase
 {
 public:
-    static SceneOutlinerPane& Get(WatermarkingProject& project);
-    static SceneOutlinerPane const& Get(WatermarkingProject const& project);
+    static SceneOutlinerPane& Get(FlexoProject& project);
+    static SceneOutlinerPane const& Get(FlexoProject const& project);
 
-    SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project);
+    SceneOutlinerPane(wxWindow* parent, FlexoProject& project);
 
 private:
     wxTreeListCtrl* CreateSceneTree();

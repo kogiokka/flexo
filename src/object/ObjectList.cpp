@@ -14,23 +14,23 @@ static std::string ObjectTypeNames[] = { OBJECT_TYPES };
 #undef X
 
 // Register factory: ObjectList
-static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> SharedPtr<ObjectList> { return std::make_shared<ObjectList>(project); }
+static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {
+    [](FlexoProject& project) -> SharedPtr<ObjectList> { return std::make_shared<ObjectList>(project); }
 };
 
 wxDEFINE_EVENT(EVT_OBJECTLIST_DELETE_OBJECT, wxCommandEvent);
 
-ObjectList& ObjectList::Get(WatermarkingProject& project)
+ObjectList& ObjectList::Get(FlexoProject& project)
 {
     return project.AttachedObjects::Get<ObjectList>(factoryKey);
 }
 
-ObjectList const& ObjectList::Get(WatermarkingProject const& project)
+ObjectList const& ObjectList::Get(FlexoProject const& project)
 {
-    return Get(const_cast<WatermarkingProject&>(project));
+    return Get(const_cast<FlexoProject&>(project));
 }
 
-ObjectList::ObjectList(WatermarkingProject& project)
+ObjectList::ObjectList(FlexoProject& project)
     : m_list()
     , m_project(project)
 {

@@ -35,12 +35,12 @@ struct TransformCtrl {
     ScaleCtrl scale;
 };
 
-class WatermarkingProject;
+class FlexoProject;
 
 class PropertiesPane : public ControlsPaneBase
 {
 public:
-    PropertiesPane(wxWindow* parent, WatermarkingProject& project);
+    PropertiesPane(wxWindow* parent, FlexoProject& project);
 
 private:
     void OnObjectChanged(wxCommandEvent& event);
@@ -56,7 +56,7 @@ private:
     wxCheckBox* m_chkWire;
     wxComboBox* m_combo;
     TransformCtrl m_transform;
-    WatermarkingProject& m_project;
+    FlexoProject& m_project;
 };
 
 #endif

@@ -34,7 +34,7 @@
 #include "object/Torus.hpp"
 #include "util/Logger.h"
 
-WatermarkingProject::WatermarkingProject()
+FlexoProject::FlexoProject()
     : m_frame {}
     , m_panel {}
     , theDataset(nullptr)
@@ -43,7 +43,7 @@ WatermarkingProject::WatermarkingProject()
 {
     m_imageFile = "res/images/mandala.png";
 
-#define X(evt, name) Bind(evt, &WatermarkingProject::OnMenuAdd, this);
+#define X(evt, name) Bind(evt, &FlexoProject::OnMenuAdd, this);
     MENU_ADD_LIST
 #undef X
 
@@ -67,11 +67,11 @@ WatermarkingProject::WatermarkingProject()
     });
 }
 
-WatermarkingProject::~WatermarkingProject()
+FlexoProject::~FlexoProject()
 {
 }
 
-void WatermarkingProject::CreateScene()
+void FlexoProject::CreateScene()
 {
     auto& objlist = ObjectList::Get(*this);
     auto& renderer = Renderer::Get(*this);
@@ -90,7 +90,7 @@ void WatermarkingProject::CreateScene()
     objlist.Submit(renderer);
 }
 
-void WatermarkingProject::CreateProject()
+void FlexoProject::CreateProject()
 {
     if (auto it = theModel.lock()) {
         it->SetViewFlags(ObjectViewFlag_Solid);
@@ -100,7 +100,7 @@ void WatermarkingProject::CreateProject()
     SelfOrganizingMap::Get(*this).CreateProcedure(theMap.lock(), theDataset);
 }
 
-void WatermarkingProject::StopProject()
+void FlexoProject::StopProject()
 {
     auto& som = SelfOrganizingMap::Get(*this);
     if (som.IsTraining()) {
@@ -109,22 +109,22 @@ void WatermarkingProject::StopProject()
     som.StopWorker();
 }
 
-void WatermarkingProject::SetFrame(wxFrame* frame)
+void FlexoProject::SetFrame(wxFrame* frame)
 {
     m_frame = frame;
 }
 
-void WatermarkingProject::SetPanel(wxWindow* panel)
+void FlexoProject::SetPanel(wxWindow* panel)
 {
     m_panel = panel;
 }
 
-wxWindow* WatermarkingProject::GetPanel()
+wxWindow* FlexoProject::GetPanel()
 {
     return m_panel;
 }
 
-void WatermarkingProject::DoParameterization()
+void FlexoProject::DoParameterization()
 {
     auto model = std::dynamic_pointer_cast<SurfaceVoxels>(theModel.lock());
     if (!model) {
@@ -150,7 +150,7 @@ void WatermarkingProject::DoParameterization()
     ObjectList::Get(*this).Submit(Renderer::Get(*this));
 }
 
-void WatermarkingProject::ImportVolumetricModel(wxString const& path)
+void FlexoProject::ImportVolumetricModel(wxString const& path)
 {
     VolumetricModelData data;
     data.Read(path.ToStdString().c_str());
@@ -168,7 +168,7 @@ void WatermarkingProject::ImportVolumetricModel(wxString const& path)
     objlist.Submit(Renderer::Get(*this));
 }
 
-void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
+void FlexoProject::OnMenuAdd(wxCommandEvent& event)
 {
     auto* projwin = &ProjectWindow::Get(*this);
     auto& objlist = ObjectList::Get(*this);

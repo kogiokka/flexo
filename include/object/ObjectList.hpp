@@ -12,7 +12,7 @@
 #include "gfx/Renderer.hpp"
 #include "object/Object.hpp"
 
-class WatermarkingProject;
+class FlexoProject;
 
 #define OBJECT_TYPES                                                                                                   \
     X(ObjectType_Plane, "Plane")                                                                                       \
@@ -34,9 +34,9 @@ wxDECLARE_EVENT(EVT_OBJECTLIST_DELETE_OBJECT, wxCommandEvent);
 class ObjectList : public AttachableBase
 {
 public:
-    static ObjectList& Get(WatermarkingProject& project);
-    static ObjectList const& Get(WatermarkingProject const& project);
-    ObjectList(WatermarkingProject& project);
+    static ObjectList& Get(FlexoProject& project);
+    static ObjectList const& Get(FlexoProject const& project);
+    ObjectList(FlexoProject& project);
     void Add(enum ObjectType type, std::shared_ptr<Object> object);
     void Submit(Renderer& renderer) const;
 
@@ -57,7 +57,7 @@ private:
 
     std::vector<std::shared_ptr<Object>> m_list;
     std::unordered_map<enum ObjectType, unsigned int> m_typeCount;
-    WatermarkingProject& m_project;
+    FlexoProject& m_project;
 };
 
 #endif

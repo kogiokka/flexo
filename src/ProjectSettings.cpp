@@ -5,31 +5,31 @@
 wxDEFINE_EVENT(EVT_PROJECT_SETTINGS_CHANGED, wxCommandEvent);
 
 // Register factory: ProjectSettings
-static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> SharedPtr<ProjectSettings> {
+static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {
+    [](FlexoProject& project) -> SharedPtr<ProjectSettings> {
         auto result = std::make_shared<ProjectSettings>(project);
         return result;
     }
 };
 
-void Notify(WatermarkingProject& project, ProjectSettings::EventCode code)
+void Notify(FlexoProject& project, ProjectSettings::EventCode code)
 {
     wxCommandEvent event(EVT_PROJECT_SETTINGS_CHANGED);
     event.SetInt(static_cast<int>(code));
     project.ProcessEvent(event);
 }
 
-ProjectSettings& ProjectSettings::Get(WatermarkingProject& project)
+ProjectSettings& ProjectSettings::Get(FlexoProject& project)
 {
     return project.AttachedObjects::Get<ProjectSettings>(factoryKey);
 }
 
-ProjectSettings const& ProjectSettings::Get(WatermarkingProject const& project)
+ProjectSettings const& ProjectSettings::Get(FlexoProject const& project)
 {
-    return Get(const_cast<WatermarkingProject&>(project));
+    return Get(const_cast<FlexoProject&>(project));
 }
 
-ProjectSettings::ProjectSettings(WatermarkingProject& project)
+ProjectSettings::ProjectSettings(FlexoProject& project)
     : m_project(project)
 {
     m_maxIterations = 50000;

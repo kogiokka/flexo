@@ -19,7 +19,7 @@
 #include "object/Map.hpp"
 #include "util/Logger.h"
 
-class WatermarkingProject;
+class FlexoProject;
 
 class SelfOrganizingMap : public AttachableBase
 {
@@ -35,9 +35,9 @@ class SelfOrganizingMap : public AttachableBase
     std::condition_variable m_cv;
 
 public:
-    static SelfOrganizingMap& Get(WatermarkingProject& project);
-    static SelfOrganizingMap const& Get(WatermarkingProject const& project);
-    explicit SelfOrganizingMap(WatermarkingProject& project);
+    static SelfOrganizingMap& Get(FlexoProject& project);
+    static SelfOrganizingMap const& Get(FlexoProject const& project);
+    explicit SelfOrganizingMap(FlexoProject& project);
     ~SelfOrganizingMap();
     SelfOrganizingMap(SelfOrganizingMap const&) = delete;
     SelfOrganizingMap& operator=(SelfOrganizingMap const&) = delete;
@@ -104,7 +104,7 @@ private:
     void UpdateNeighborhood(Map<InDim, OutDim>& map, Vec<InDim> input, Node<InDim, OutDim> const& bmu,
                             LearningRate learnRate, Neighborhood neighborhood);
 
-    WatermarkingProject& m_project;
+    FlexoProject& m_project;
 };
 
 template <int InDim, int OutDim>

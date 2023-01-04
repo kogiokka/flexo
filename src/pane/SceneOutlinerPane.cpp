@@ -19,8 +19,8 @@ wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);
 
 // Register factory: SceneOutlinerPane
-static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey {
-    [](WatermarkingProject& project) -> wxWeakRef<wxWindow> {
+static FlexoProject::AttachedWindows::RegisteredFactory const factoryKey {
+    [](FlexoProject& project) -> wxWeakRef<wxWindow> {
         auto& window = ProjectWindow::Get(project);
         wxWindow* mainPage = window.GetMainPage();
         wxASSERT(mainPage != nullptr);
@@ -29,17 +29,17 @@ static WatermarkingProject::AttachedWindows::RegisteredFactory const factoryKey 
     }
 };
 
-SceneOutlinerPane& SceneOutlinerPane::Get(WatermarkingProject& project)
+SceneOutlinerPane& SceneOutlinerPane::Get(FlexoProject& project)
 {
     return project.AttachedWindows::Get<SceneOutlinerPane>(factoryKey);
 }
 
-SceneOutlinerPane const& SceneOutlinerPane::Get(WatermarkingProject const& project)
+SceneOutlinerPane const& SceneOutlinerPane::Get(FlexoProject const& project)
 {
-    return Get(const_cast<WatermarkingProject&>(project));
+    return Get(const_cast<FlexoProject&>(project));
 }
 
-SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& project)
+SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
 {
     m_sceneTree = CreateSceneTree();

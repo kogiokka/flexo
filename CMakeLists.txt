@@ -1,8 +1,8 @@
 cmake_minimum_required(VERSION 3.12 FATAL_ERROR)
 
-project("SOM Demo"
-    VERSION 1.0.3
-    DESCRIPTION "A Self-Organizing Map Demo"
+project("Flexo"
+    VERSION 0.1.0
+    DESCRIPTION "Texture Mapping for Voxel-based Models"
     LANGUAGES C CXX
 )
 
@@ -10,9 +10,9 @@ find_package(OpenGL REQUIRED)
 find_package(OpenMP)
 include("cmake/ExternalProjects.cmake")
 
-add_executable(som-demo)
+add_executable(flexo)
 
-set_target_properties(som-demo
+set_target_properties(flexo
     PROPERTIES
         CXX_STANDARD 17
         CXX_STANDARD_REQUIRED ON
@@ -20,15 +20,15 @@ set_target_properties(som-demo
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors -ggdb)
-    target_compile_definitions(som-demo PRIVATE $<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
+    target_compile_options(flexo PRIVATE -Wall -Wextra --pedantic-errors -ggdb)
+    target_compile_definitions(flexo PRIVATE $<$<CONFIG:Debug>:_GLIBCXX_DEBUG>)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(som-demo PRIVATE -Wall -Wextra --pedantic-errors)
+    target_compile_options(flexo PRIVATE -Wall -Wextra --pedantic-errors)
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    target_link_options(som-demo PUBLIC /SUBSYSTEM:WINDOWS)
+    target_link_options(flexo PUBLIC /SUBSYSTEM:WINDOWS)
 endif()
 
-target_sources(som-demo
+target_sources(flexo
 PRIVATE
     "src/main.cpp"
     "src/ProjectSettings.cpp"
@@ -106,12 +106,12 @@ PRIVATE
     "src/SelfOrganizingMap.cpp"
 )
 
-target_include_directories(som-demo
+target_include_directories(flexo
 PRIVATE
     "include/"
 )
 
-target_link_libraries(som-demo PRIVATE
+target_link_libraries(flexo PRIVATE
     rvl::rvl
     glad
     stb_image
@@ -123,10 +123,10 @@ target_link_libraries(som-demo PRIVATE
 )
 
 if(OpenMP_CXX_FOUND)
-    target_link_libraries(som-demo PRIVATE OpenMP::OpenMP_CXX)
+    target_link_libraries(flexo PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
-add_custom_command(TARGET som-demo POST_BUILD
+add_custom_command(TARGET flexo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E create_symlink
         "${CMAKE_SOURCE_DIR}/res"
         "${CMAKE_BINARY_DIR}/res"

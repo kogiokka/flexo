@@ -26,7 +26,7 @@ class SelfOrganizingMapPane : public ControlsPaneBase
     bool m_isStopped;
 
 public:
-    SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project);
+    SelfOrganizingMapPane(wxWindow* parent, FlexoProject& project);
     bool IsProjectStopped() const;
 
 private:

@@ -20,7 +20,7 @@ enum DisplayType : unsigned int { DISPLAY_TYPE_LIST };
 static std::string DisplayTypeNames[] = { DISPLAY_TYPE_LIST };
 #undef X
 
-PropertiesPane::PropertiesPane(wxWindow* parent, WatermarkingProject& project)
+PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
     , m_project(project)
 {

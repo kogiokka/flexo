@@ -186,7 +186,7 @@ struct GLWRViewport {
     double farDepth;
 };
 
-class WatermarkingProject;
+class FlexoProject;
 
 class Graphics : public AttachableBase
 {
@@ -217,8 +217,8 @@ class Graphics : public AttachableBase
     Camera m_camera;
 
 public:
-    static Graphics& Get(WatermarkingProject& project);
-    static Graphics const& Get(WatermarkingProject const& project);
+    static Graphics& Get(FlexoProject& project);
+    static Graphics const& Get(FlexoProject const& project);
 
     Graphics();
     ~Graphics();

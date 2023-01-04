@@ -11,4 +11,3 @@ void Plane::ApplyTransform()
     st.Apply(m_mesh.positions);
     m_transform = Transform();
 }
-

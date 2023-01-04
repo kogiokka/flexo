@@ -1,5 +1,5 @@
-#ifndef WATERMARKING_PROJECT_H
-#define WATERMARKING_PROJECT_H
+#ifndef FLEXO_PROJECT_H
+#define FLEXO_PROJECT_H
 
 #include <memory>
 #include <string>
@@ -14,20 +14,20 @@
 #include "object/Map.hpp"
 #include "object/Object.hpp"
 
-class WatermarkingProject;
+class FlexoProject;
 class SurfaceVoxels;
 
-using AttachedProjectObjects = HostBase<WatermarkingProject, AttachableBase, SharedPtr>;
-using AttacheProjectWindows = HostBase<WatermarkingProject, wxWindow, BarePtr>;
+using AttachedProjectObjects = HostBase<FlexoProject, AttachableBase, SharedPtr>;
+using AttacheProjectWindows = HostBase<FlexoProject, wxWindow, BarePtr>;
 
-class WatermarkingProject : public wxEvtHandler, public AttachedProjectObjects, public AttacheProjectWindows
+class FlexoProject : public wxEvtHandler, public AttachedProjectObjects, public AttacheProjectWindows
 {
 public:
     using AttachedObjects = ::AttachedProjectObjects;
     using AttachedWindows = ::AttacheProjectWindows;
 
-    WatermarkingProject();
-    ~WatermarkingProject();
+    FlexoProject();
+    ~FlexoProject();
     void CreateScene();
     void CreateProject();
     void StopProject();

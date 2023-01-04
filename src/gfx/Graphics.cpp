@@ -8,18 +8,18 @@
 #include "util/Logger.h"
 
 // Register factory: Graphics
-static WatermarkingProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](WatermarkingProject&) -> SharedPtr<Graphics> { return std::make_shared<Graphics>(); }
-};
+static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey { [](FlexoProject&) -> SharedPtr<Graphics> {
+    return std::make_shared<Graphics>();
+} };
 
-Graphics& Graphics::Get(WatermarkingProject& project)
+Graphics& Graphics::Get(FlexoProject& project)
 {
     return project.AttachedObjects::Get<Graphics>(factoryKey);
 }
 
-Graphics const& Graphics::Get(WatermarkingProject const& project)
+Graphics const& Graphics::Get(FlexoProject const& project)
 {
-    return Get(const_cast<WatermarkingProject&>(project));
+    return Get(const_cast<FlexoProject&>(project));
 }
 
 Graphics::Graphics()
@@ -782,4 +782,3 @@ Graphics::GLAttribFormat Graphics::Enum::Resolve(GLWRFormat const format)
         break;
     }
 }
-

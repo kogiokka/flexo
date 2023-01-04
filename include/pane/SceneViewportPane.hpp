@@ -15,16 +15,16 @@
 
 #include "gfx/Graphics.hpp"
 
-class WatermarkingProject;
+class FlexoProject;
 
 class SceneViewportPane : public wxGLCanvas
 {
 public:
-    static SceneViewportPane& Get(WatermarkingProject& project);
-    static SceneViewportPane const& Get(WatermarkingProject const& project);
+    static SceneViewportPane& Get(FlexoProject& project);
+    static SceneViewportPane const& Get(FlexoProject const& project);
 
     SceneViewportPane(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
-                      wxSize const& size, WatermarkingProject& project);
+                      wxSize const& size, FlexoProject& project);
     ~SceneViewportPane();
     void InitGL();
     void ResetCamera();
@@ -49,7 +49,7 @@ private:
     GLWRPtr<IGLWRRenderTargetView> m_rtv;
     GLWRPtr<IGLWRDepthStencilView> m_dsv;
     std::unique_ptr<wxGLContext> m_context;
-    WatermarkingProject& m_project;
+    FlexoProject& m_project;
 
     wxDECLARE_EVENT_TABLE();
 };

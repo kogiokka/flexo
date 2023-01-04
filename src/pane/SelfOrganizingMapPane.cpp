@@ -19,7 +19,7 @@ wxDEFINE_EVENT(EVT_SOM_PANE_TARGET_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SOM_PANE_MAP_ADDED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SOM_PANE_MAP_DELETED, wxCommandEvent);
 
-SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
+SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
 {
     PopulateConfigPanel();

@@ -3,7 +3,7 @@
 #include "Project.hpp"
 #include "pane/ControlsPaneBase.hpp"
 
-ControlsPaneBase::ControlsPaneBase(wxWindow* parent, WatermarkingProject& project)
+ControlsPaneBase::ControlsPaneBase(wxWindow* parent, FlexoProject& project)
     : wxScrolledWindow(parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxVSCROLL)
     , m_project(project)
 {

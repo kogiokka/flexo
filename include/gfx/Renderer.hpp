@@ -9,22 +9,22 @@
 #include "Mesh.hpp"
 #include "gfx/Graphics.hpp"
 
-class WatermarkingProject;
+class FlexoProject;
 
 class Renderer : public AttachableBase
 {
 public:
-    static Renderer& Get(WatermarkingProject& project);
-    static Renderer const& Get(WatermarkingProject const& project);
+    static Renderer& Get(FlexoProject& project);
+    static Renderer const& Get(FlexoProject const& project);
 
-    Renderer(WatermarkingProject& project);
+    Renderer(FlexoProject& project);
     void Render(Graphics& gfx);
     void Accept(DrawTask task);
     void Clear();
 
 private:
     std::vector<DrawTask> m_tasks;
-    WatermarkingProject& m_project;
+    FlexoProject& m_project;
 };
 
 #endif
