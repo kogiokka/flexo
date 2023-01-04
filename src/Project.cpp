@@ -52,17 +52,16 @@ WatermarkingProject::WatermarkingProject()
         auto& objlist = ObjectList::Get(*this);
         std::string const filename = event.GetString().ToStdString();
 
-        if (m_model) {
-            m_model->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-            objlist.Add(ObjectType_Model, m_model);
-            objlist.Submit(Renderer::Get(*this));
+        for (auto const& obj : objlist) {
+            auto id = wxString(obj->GetID());
+            // FIXME
+            if (id.StartsWith("Model") || id.StartsWith("Map")) {
+                obj->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
+                obj->GenerateDrawables(gfx);
+            }
         }
 
-        if (theMap) {
-            theMap->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-            objlist.Add(ObjectType_Map, theMap);
-            objlist.Submit(Renderer::Get(*this));
-        }
+        objlist.Submit(Renderer::Get(*this));
     });
 }
 
