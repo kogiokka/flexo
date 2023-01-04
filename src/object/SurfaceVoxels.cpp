@@ -148,6 +148,7 @@ void SurfaceVoxels::ApplyTransform()
         vx.pos = glm::vec3(mat * glm::vec4(vx.pos, 1.0f));
     }
     m_transform = Transform();
+    GenerateMesh();
 }
 
 std::vector<glm::vec3> SurfaceVoxels::GetPositions() const
