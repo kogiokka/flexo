@@ -15,17 +15,20 @@
 #include "object/ObjectList.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
-wxDEFINE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_SOM_PANE_TARGET_CHANGED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SOM_PANE_MAP_ADDED, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SOM_PANE_MAP_DELETED, wxCommandEvent);
 
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, WatermarkingProject& project)
     : ControlsPaneBase(parent, project)
 {
-    PopulateMapPanel();
-    PopulateParametersPanel();
+    PopulateConfigPanel();
     PopulateDisplayPanel();
     PopulateControlPanel();
+
+    m_project.Bind(EVT_SOM_PANE_MAP_ADDED, &SelfOrganizingMapPane::OnMapAdded, this);
+    m_project.Bind(EVT_SOM_PANE_MAP_DELETED, &SelfOrganizingMapPane::OnMapDeleted, this);
+    m_project.Bind(EVT_SOM_PANE_TARGET_CHANGED, &SelfOrganizingMapPane::OnTargetChanged, this);
 
     m_isStopped = true;
 }
@@ -35,22 +38,13 @@ bool SelfOrganizingMapPane::IsProjectStopped() const
     return m_isStopped;
 }
 
-void SelfOrganizingMapPane::PopulateMapPanel()
+void SelfOrganizingMapPane::PopulateConfigPanel()
 {
-    auto* group = AddGroup("Map", 8);
-    m_mapCombo = group->AddBitmapComboBox("Instances");
+    auto* group = AddGroup("Configuration", 5);
+
+    m_target = group->AddReadOnlyText("Target");
+    m_mapCombo = group->AddBitmapComboBox("Map");
     m_mapCombo->Bind(wxEVT_COMBOBOX, &SelfOrganizingMapPane::OnComboBox, this);
-
-    m_project.Bind(EVT_SOM_PANE_MAP_ADDED, &SelfOrganizingMapPane::OnMapAdded, this);
-    m_project.Bind(EVT_SOM_PANE_MAP_DELETED, &SelfOrganizingMapPane::OnMapDeleted, this);
-
-    group->Bind(wxEVT_UPDATE_UI,
-                [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
-}
-
-void SelfOrganizingMapPane::PopulateParametersPanel()
-{
-    auto* group = AddGroup("Hyperparameters", 3);
 
     wxIntegerValidator<int> validMaxIter;
     wxFloatingPointValidator<float> validLearnRate(6, nullptr);
@@ -73,6 +67,9 @@ void SelfOrganizingMapPane::PopulateParametersPanel()
     m_sldrNbhdRadius->Bind(EVT_SLIDER_FLOAT, [this](SliderFloatEvent& event) {
         ProjectSettings::Get(m_project).SetNeighborhood(event.GetValue());
     });
+
+    group->Bind(wxEVT_UPDATE_UI,
+                [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
 }
 
 void SelfOrganizingMapPane::PopulateDisplayPanel()
@@ -206,6 +203,12 @@ void SelfOrganizingMapPane::OnMapDeleted(wxCommandEvent& event)
     }
 
     m_mapCombo->Delete(ret);
+}
+
+void SelfOrganizingMapPane::OnTargetChanged(wxCommandEvent& event)
+{
+    m_target->Clear();
+    *m_target << event.GetString();
 }
 
 void SelfOrganizingMapPane::OnComboBox(wxCommandEvent&)

@@ -12,6 +12,7 @@
 #include "object/ObjectList.hpp"
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
+#include "pane/SelfOrganizingMapPane.hpp"
 #include "util/Logger.h"
 
 wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
@@ -68,6 +69,9 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, WatermarkingProject& proj
                     m_project.theModel = obj;
                     m_project.theDataset = std::make_shared<Dataset<3>>(pos);
                     log_info("Dataset count: %lu", pos.size());
+                    wxCommandEvent event(EVT_SOM_PANE_TARGET_CHANGED);
+                    event.SetString(id);
+                    m_project.ProcessEvent(event);
                     break;
                 }
             }

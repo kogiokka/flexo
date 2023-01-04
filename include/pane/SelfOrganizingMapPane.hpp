@@ -11,7 +11,7 @@
 
 #include "pane/ControlsPaneBase.hpp"
 
-wxDECLARE_EVENT(EVT_SOM_PANE_MAP_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_SOM_PANE_TARGET_CHANGED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SOM_PANE_MAP_ADDED, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SOM_PANE_MAP_DELETED, wxCommandEvent);
 
@@ -20,6 +20,7 @@ class SelfOrganizingMapPane : public ControlsPaneBase
     wxButton* m_btnCreate;
     wxButton* m_btnStop;
     wxButton* m_btnRun;
+    wxTextCtrl* m_target;
     wxBitmapComboBox* m_mapCombo;
     wxSlider* m_sldrNbhdRadius;
     bool m_isStopped;
@@ -29,8 +30,7 @@ public:
     bool IsProjectStopped() const;
 
 private:
-    void PopulateMapPanel();
-    void PopulateParametersPanel();
+    void PopulateConfigPanel();
     void PopulateDisplayPanel();
     void PopulateControlPanel();
     void OnCreate(wxCommandEvent& event);
@@ -40,6 +40,7 @@ private:
     void OnInitialLearningRate(wxCommandEvent& event);
     void OnMapAdded(wxCommandEvent& event);
     void OnMapDeleted(wxCommandEvent& event);
+    void OnTargetChanged(wxCommandEvent& event);
     void OnComboBox(wxCommandEvent& event);
     void SetupNeighborhoodRadiusSlider(float maxValue, float value);
 };
