@@ -352,6 +352,7 @@ void WatermarkingProject::OnMenuAdd(wxCommandEvent& event)
                 map->size.y = height;
                 map->flags = flags;
 
+                map->GenerateMesh();
                 obj = map;
             }
 

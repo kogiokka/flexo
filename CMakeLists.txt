@@ -49,7 +49,6 @@ PRIVATE
     "src/object/Plane.cpp"
     "src/object/Cube.cpp"
     "src/object/Grid.cpp"
-    "src/object/Map.cpp"
     "src/object/Sphere.cpp"
     "src/object/Torus.cpp"
     "src/object/Guides.cpp"

@@ -165,7 +165,7 @@ std::future<void> SurfaceVoxels::Parameterize(Map<3, 2> const& map, float& progr
 {
     progress = 0.0f;
 
-    auto mesh = GenMapEditableMesh(map);
+    auto const& mesh = map.GetMesh();
     auto const& faces = mesh.GenerateTriangularFaces();
 
     return std::async(
