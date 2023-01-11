@@ -37,7 +37,9 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
 
     m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
-    m_ubs["light"].Assign("position", gfx.GetCameraPosition());
+
+    auto const& cam = gfx.GetCamera();
+    m_ubs["light"].Assign("position", cam.position + 3.0f * (-cam.basis.sideway + cam.basis.up));
     m_ubs["light"].Assign("ambient", glm::vec3(0.8f, 0.8f, 0.8f));
     m_ubs["light"].Assign("diffusion", glm::vec3(0.8f, 0.8f, 0.8f));
     m_ubs["light"].Assign("specular", glm::vec3(0.8f, 0.8f, 0.8f));
@@ -101,6 +103,8 @@ void TexturedDrawable::Update(Graphics& gfx)
 {
     m_ubs["transform"].Assign("model", m_transform);
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
-    m_ubs["light"].Assign("position", gfx.GetCameraPosition());
     m_ubs["viewPos"].Assign("viewPos", gfx.GetCameraPosition());
+
+    auto const& cam = gfx.GetCamera();
+    m_ubs["light"].Assign("position", cam.position + 3.0f * (-cam.basis.sideway + cam.basis.up));
 }
