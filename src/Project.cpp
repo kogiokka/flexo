@@ -340,12 +340,12 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
                         }
                     }
                 } else if (state == MapInitState_Plane) {
-                    float dx = (box.max.x - box.min.x) / static_cast<float>(width);
-                    float dy = (box.max.y - box.min.y) / static_cast<float>(height);
+                    float dx = 2.0f / static_cast<float>(width - 1);
+                    float dy = 2.0f / static_cast<float>(height - 1);
 
                     for (int j = 0; j < height; ++j) {
                         for (int i = 0; i < width; ++i) {
-                            map->nodes.emplace_back(Vec3f { box.min.x + i * dx, box.min.y + j * dy, box.max.z },
+                            map->nodes.emplace_back(Vec3f { -1.0f + i * dx, -1.0f + j * dy, 0.005f },
                                                     Vec2f { static_cast<float>(i), static_cast<float>(j) },
                                                     Vec2f { i / w, j / h });
                         }
@@ -360,8 +360,8 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
                 obj = map;
             }
 
-            if (!widthCtrl->GetValue().ToLong(&width) || !heightCtrl->GetValue().ToLong(&height) || width < 3
-                || height < 3) {
+            if (!widthCtrl->GetValue().ToLong(&width) || !heightCtrl->GetValue().ToLong(&height) || width < 2
+                || height < 2) {
                 wxMessageDialog dlg(projwin, "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
                 dlg.ShowModal();
                 return;
