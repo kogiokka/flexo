@@ -4,7 +4,7 @@
 #include <wx/stattext.h>
 #include <wx/valnum.h>
 
-#include "AddDialog.hpp"
+#include "dialog/AddDialog.hpp"
 
 AddDialog::AddDialog(wxWindow* parent, wxString const& title, int numRows)
     : wxDialog(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)

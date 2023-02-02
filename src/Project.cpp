@@ -10,7 +10,6 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "AddDialog.hpp"
 #include "EditableMesh.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
@@ -18,6 +17,7 @@
 #include "SelfOrganizingMap.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
+#include "dialog/AddDialog.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
 #include "gfx/bindable/TextureManager.hpp"
