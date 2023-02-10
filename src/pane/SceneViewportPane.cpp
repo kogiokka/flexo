@@ -62,6 +62,7 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
     , m_isGLLoaded(false)
     , m_dirHorizontal(1)
     , m_context(nullptr)
+    , m_bgColor { 0.2157f, 0.2157f, 0.2157f, 1.0f }
     , m_project(project)
 {
     wxGLContextAttrs attrs;
@@ -78,6 +79,14 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
         auto& cam = Graphics::Get(m_project).GetCamera();
         cam.SetProjectionMode(Camera::ProjectionMode::Orthogonal);
     });
+
+    m_project.Bind(EVT_MENU_BACKGROUND_DARK, [this](wxCommandEvent&) {
+        m_bgColor = { 0.2157f, 0.2157f, 0.2157f, 1.0f };
+    });
+
+    m_project.Bind(EVT_MENU_BACKGROUND_LIGHT, [this](wxCommandEvent&) {
+        m_bgColor = { 0.8588, 0.8588, 0.8588, 1.0f };
+    });
 }
 
 SceneViewportPane::~SceneViewportPane()
@@ -91,8 +100,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
 
     auto& gfx = Graphics::Get(m_project);
 
-    float bgColor[4] = { 0.2157f, 0.2157f, 0.2157f, 1.0f };
-    gfx.ClearRenderTargetView(m_rtv.Get(), bgColor);
+    gfx.ClearRenderTargetView(m_rtv.Get(), m_bgColor.data());
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
     auto& renderer = Renderer::Get(m_project);

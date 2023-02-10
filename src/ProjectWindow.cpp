@@ -21,6 +21,8 @@ MENU_ADD_LIST
 
 wxDEFINE_EVENT(EVT_MENU_CAMERA_PERSPECTIVE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_MENU_CAMERA_ORTHOGONAL, wxCommandEvent);
+wxDEFINE_EVENT(EVT_MENU_BACKGROUND_DARK, wxCommandEvent);
+wxDEFINE_EVENT(EVT_MENU_BACKGROUND_LIGHT, wxCommandEvent);
 
 enum {
     TIMER_UPDATE_UI = wxID_HIGHEST + 1,
@@ -113,6 +115,24 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     MENU_ADD_LIST
 #undef X
 
+    auto bgMenu = new wxMenu;
+    bgMenu->AppendRadioItem(EVT_MENU_BACKGROUND_DARK, "Dark")->Check();
+    bgMenu->AppendRadioItem(EVT_MENU_BACKGROUND_LIGHT, "Light");
+    bgMenu->Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent&) {
+            wxCommandEvent event(EVT_MENU_BACKGROUND_DARK);
+            m_project.ProcessEvent(event);
+        },
+        EVT_MENU_BACKGROUND_DARK);
+    bgMenu->Bind(
+        wxEVT_MENU,
+        [this](wxCommandEvent&) {
+            wxCommandEvent event(EVT_MENU_BACKGROUND_LIGHT);
+            m_project.ProcessEvent(event);
+        },
+        EVT_MENU_BACKGROUND_LIGHT);
+
     auto* screenshotMenu = new wxMenu;
     auto* itemScreenshotViewport = new wxMenuItem(screenshotMenu, EVT_SCREENSHOT, "Screenshot 3D Viewport", "");
     itemScreenshotViewport->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE));
@@ -124,6 +144,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     menubar->Append(cameraMenu, "&Camera");
     menubar->Append(addMenu, "&Add");
     menubar->Append(screenshotMenu, "&Screeenshot");
+    menubar->Append(bgMenu, "&Background");
 
     this->SetMenuBar(menubar);
 

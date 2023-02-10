@@ -1,6 +1,7 @@
 #ifndef SCENE_VIEWPORT_PANE_H
 #define SCENE_VIEWPORT_PANE_H
 
+#include <array>
 #include <memory>
 #include <tuple>
 
@@ -49,6 +50,7 @@ private:
     GLWRPtr<IGLWRRenderTargetView> m_rtv;
     GLWRPtr<IGLWRDepthStencilView> m_dsv;
     std::unique_ptr<wxGLContext> m_context;
+    std::array<float, 4> m_bgColor;
     FlexoProject& m_project;
 
     wxDECLARE_EVENT_TABLE();
