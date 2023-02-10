@@ -143,7 +143,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     menubar->Append(m_viewMenu, "&View");
     menubar->Append(cameraMenu, "&Camera");
     menubar->Append(addMenu, "&Add");
-    menubar->Append(screenshotMenu, "&Screeenshot");
+    // menubar->Append(screenshotMenu, "&Screeenshot");
     menubar->Append(bgMenu, "&Background");
 
     this->SetMenuBar(menubar);
