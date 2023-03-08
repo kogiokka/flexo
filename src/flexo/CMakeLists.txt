@@ -131,3 +131,18 @@ add_custom_command(TARGET flexo POST_BUILD
     COMMENT "Copying resources to build tree..."
     VERBATIM
 )
+
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+    add_custom_command(TARGET flexo POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                "$<TARGET_FILE:wx::base>"
+                "$<TARGET_FILE:wx::core>"
+                "$<TARGET_FILE:wx::gl>"
+                "$<TARGET_FILE:wx::aui>"
+                "$<TARGET_FILE:rvl::rvl>"
+
+                "$<TARGET_FILE_DIR:flexo>"
+
+        COMMENT "Copying dynamic libraries to the build tree..."
+    )
+endif()
