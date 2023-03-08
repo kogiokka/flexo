@@ -27,7 +27,7 @@ void DrawableBase::Submit(Renderer& renderer)
     for (auto& step : m_steps) {
         step.Submit(renderer, *this);
     }
-};
+}
 
 void DrawableBase::SetTransform(glm::mat4 transform)
 {
