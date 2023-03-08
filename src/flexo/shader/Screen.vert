@@ -7,6 +7,10 @@ out VertOut {
     vec2 textureCoord;
 } outData;
 
+out gl_PerVertex
+{
+    vec4 gl_Position;
+};
 
 void main()
 {

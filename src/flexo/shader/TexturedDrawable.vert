@@ -15,6 +15,11 @@ out VertOut {
     vec2 textureCoord;
 } outData;
 
+out gl_PerVertex
+{
+    vec4 gl_Position;
+};
+
 void main()
 {
     gl_Position = mx.viewProj * mx.model * vec4(position, 1.0);
