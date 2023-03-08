@@ -116,7 +116,6 @@ target_link_libraries(flexo PRIVATE
     rvl::rvl
     glad
     stb_image
-    tomlplusplus
     glm::glm
     OpenGL::GL
     ${wxWidgets_LIBRARIES}
