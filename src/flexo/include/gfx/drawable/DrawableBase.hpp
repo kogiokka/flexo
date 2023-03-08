@@ -17,7 +17,7 @@ class Graphics;
 namespace Bind
 {
     class Bindable;
-};
+}
 
 class DrawableBase
 {
