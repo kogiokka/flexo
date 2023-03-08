@@ -9,9 +9,8 @@ project("Flexo"
 find_package(OpenGL REQUIRED)
 find_package(OpenMP QUIET)
 find_package(glm QUIET)
-find_package(wxWidgets COMPONENTS base gl core aui QUIET)
+find_package(wxWidgets CONFIG COMPONENTS base core gl aui QUIET)
 
-set(wxWidgets_LIBRARIES "")
 add_subdirectory("extern")
 add_subdirectory("src")
 

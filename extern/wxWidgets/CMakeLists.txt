@@ -1,3 +1,7 @@
+if (wxWidgets_FOUND)
+    return()
+endif()
+
 FetchContent_Declare(
     wxWidgets
     URL "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.1/wxWidgets-3.2.1.7z"
