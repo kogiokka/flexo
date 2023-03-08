@@ -17,7 +17,7 @@ void Object::GenerateDrawables(Graphics& gfx)
 {
     // FIXME
     if (!m_texture) {
-        m_texture = Bind::TextureManager::Resolve(gfx, "res/images/blank.png", 0);
+        m_texture = Bind::TextureManager::Resolve(gfx, "images/blank.png", 0);
     }
     m_solid = std::make_shared<SolidDrawable>(gfx, m_mesh.GenerateMesh());
     m_textured = std::make_shared<TexturedDrawable>(gfx, m_mesh.GenerateMesh(), m_texture);

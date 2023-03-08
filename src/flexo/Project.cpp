@@ -41,7 +41,7 @@ FlexoProject::FlexoProject()
     , theMap()
     , theModel()
 {
-    m_imageFile = "res/images/mandala.png";
+    m_imageFile = "images/mandala.png";
 
 #define X(evt, name) Bind(evt, &FlexoProject::OnMenuAdd, this);
     MENU_ADD_LIST
