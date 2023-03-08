@@ -1,5 +1,3 @@
-#include <wx/valnum.h>
-
 #include "pane/PropertiesPane.hpp"
 
 #include "Project.hpp"
