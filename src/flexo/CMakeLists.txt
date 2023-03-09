@@ -115,7 +115,7 @@ PRIVATE
     ${CMAKE_DL_LIBS}
 )
 
-if(OpenMP_CXX_FOUND)
+if(OpenMP_CXX_FOUND AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
     target_link_libraries(flexo PRIVATE OpenMP::OpenMP_CXX)
 endif()
 
