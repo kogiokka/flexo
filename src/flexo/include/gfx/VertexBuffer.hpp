@@ -43,7 +43,7 @@ VertexBuffer::VertexBuffer(std::vector<T> const& data)
 
     unsigned int offset = 0;
     for (unsigned int i = 0; i < data.size(); i++) {
-        mempcpy(m_data + offset, &data[i][0], stride);
+        memcpy(m_data + offset, &data[i][0], stride);
         offset += stride;
     }
 

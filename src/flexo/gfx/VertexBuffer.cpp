@@ -32,15 +32,15 @@ VertexBuffer::VertexBuffer(Mesh const& mesh)
     unsigned int offset = 0;
     for (unsigned int i = 0; i < mesh.positions.size(); i++) {
         if (mesh.HasPositions()) {
-            mempcpy(m_data + offset, &mesh.positions[i][0], szp);
+            memcpy(m_data + offset, &mesh.positions[i][0], szp);
             offset += szp;
         }
         if (mesh.HasNormals()) {
-            mempcpy(m_data + offset, &mesh.normals[i][0], szn);
+            memcpy(m_data + offset, &mesh.normals[i][0], szn);
             offset += szn;
         }
         if (mesh.HasTextureCoords()) {
-            mempcpy(m_data + offset, &mesh.textureCoords[i][0], szt);
+            memcpy(m_data + offset, &mesh.textureCoords[i][0], szt);
             offset += szt;
         }
     }
