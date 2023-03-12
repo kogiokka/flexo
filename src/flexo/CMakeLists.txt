@@ -96,6 +96,8 @@ PRIVATE
     "SelfOrganizingMap.cpp"
 )
 
+add_subdirectory("msw")
+
 target_include_directories(flexo
 PRIVATE
     "include/"
