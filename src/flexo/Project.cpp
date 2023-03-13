@@ -210,7 +210,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
                 dlg.ShowModal();
                 return;
             }
-            log_info("Add Grid (X-div: %ld, Y-div: %ld, size: %.3f)", size);
+            log_info("Add Grid (X-div: %ld, Y-div: %ld, size: %.3f)", xdiv, ydiv, size);
 
             obj = std::make_shared<Grid>(xdiv, ydiv, size);
             type = ObjectType_Grid;
