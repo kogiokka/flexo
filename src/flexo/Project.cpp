@@ -32,7 +32,7 @@
 #include "object/Sphere.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "object/Torus.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 FlexoProject::FlexoProject()
     : m_frame {}

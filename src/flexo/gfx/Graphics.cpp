@@ -5,7 +5,7 @@
 
 #include "Project.hpp"
 #include "gfx/Graphics.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 // Register factory: Graphics
 static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey { [](FlexoProject&) -> SharedPtr<Graphics> {

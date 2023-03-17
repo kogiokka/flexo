@@ -8,7 +8,7 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "pane/SceneViewportPane.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);

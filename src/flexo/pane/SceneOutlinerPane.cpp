@@ -13,7 +13,7 @@
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);

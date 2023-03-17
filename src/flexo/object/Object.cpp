@@ -1,6 +1,6 @@
 #include "object/Object.hpp"
 #include "gfx/Graphics.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 Object::Object()
     : m_texture(nullptr)

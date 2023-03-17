@@ -53,7 +53,6 @@ PRIVATE
     "assetlib/BaseImporter.cpp"
     "assetlib/OBJ/OBJImporter.cpp"
     "assetlib/STL/STLImporter.cpp"
-    "util/Logger.c"
 
     "gfx/Graphics.cpp"
     "gfx/Renderer.cpp"
@@ -114,6 +113,7 @@ PRIVATE
     wx::core
     wx::gl
     wx::aui
+    log::log
     ${CMAKE_DL_LIBS}
 )
 

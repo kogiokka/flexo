@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 // std140 layout rules
 #define UNIFORM_ELEMENT_TYPES                                                                                          \

@@ -1,5 +1,5 @@
 #include "object/Sphere.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 Sphere::Sphere(int numSegments, int numRings, float radius)
 {

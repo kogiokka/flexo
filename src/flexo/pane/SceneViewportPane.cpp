@@ -14,7 +14,7 @@
 #include "gfx/Renderer.hpp"
 #include "object/ObjectList.hpp"
 #include "pane/SceneViewportPane.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 enum {
     Pane_SceneViewport = wxID_HIGHEST + 1,

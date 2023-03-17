@@ -4,7 +4,7 @@
 
 #include "Project.hpp"
 #include "gfx/Renderer.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 // Register factory: Renderer
 static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {

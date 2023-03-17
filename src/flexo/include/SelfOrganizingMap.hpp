@@ -17,7 +17,7 @@
 #include "ProjectSettings.hpp"
 #include "Vec.hpp"
 #include "object/Map.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 class FlexoProject;
 

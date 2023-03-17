@@ -10,7 +10,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 #define LOG_LEVEL_LAST LOG_LEVEL_FATAL
 

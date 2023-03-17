@@ -1,7 +1,7 @@
 #include <cstdlib>
 
 #include "VolumetricModelData.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 VolumetricModelData::VolumetricModelData()
 {

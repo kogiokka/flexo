@@ -10,7 +10,7 @@
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 #include "pane/TextureMappingPane.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 wxIMPLEMENT_APP(FlexoApp);
 

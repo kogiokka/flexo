@@ -9,7 +9,7 @@
 #include "VolumetricModelData.hpp"
 #include "object/Map.hpp"
 #include "object/SurfaceVoxels.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 class Trianglemeter
 {

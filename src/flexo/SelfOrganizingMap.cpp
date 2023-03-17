@@ -2,7 +2,7 @@
 #include "Project.hpp"
 #include "ProjectSettings.hpp"
 #include "object/Map.hpp"
-#include "util/Logger.h"
+#include "log/Logger.h"
 
 // Register factory: SelfOrganizingMap
 static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {
