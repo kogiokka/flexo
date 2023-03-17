@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <ctime>
 #include <fstream>
-#include <iostream>
 
 #include <stb/image_write.h>
 
@@ -12,9 +11,9 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "gfx/Renderer.hpp"
+#include "log/Logger.h"
 #include "object/ObjectList.hpp"
 #include "pane/SceneViewportPane.hpp"
-#include "log/Logger.h"
 
 enum {
     Pane_SceneViewport = wxID_HIGHEST + 1,
@@ -45,6 +44,11 @@ static FlexoProject::AttachedWindows::RegisteredFactory const factoryKey {
         return new SceneViewportPane(mainPage, attrs, Pane_SceneViewport, wxDefaultPosition, wxDefaultSize, project);
     }
 };
+
+static void GLDebugProc(GLenum, GLenum type, GLuint, GLenum severity, GLsizei, GLchar const* message, void const*)
+{
+    log_debug("[Type: %X, Severity: %X] %s", type, severity, message);
+}
 
 SceneViewportPane& SceneViewportPane::Get(FlexoProject& project)
 {
@@ -127,19 +131,16 @@ void SceneViewportPane::InitGL()
     InitFrame(gfx);
 
 #ifndef NDEBUG
-    glDebugMessageCallback(
-        []([[maybe_unused]] GLenum source, [[maybe_unused]] GLenum type, [[maybe_unused]] GLuint id,
-           [[maybe_unused]] GLenum severity, [[maybe_unused]] GLsizei length, [[maybe_unused]] GLchar const* message,
-           [[maybe_unused]] void const* userParam) noexcept {
-            std::cerr << std::hex << "[Type " << type << "]"
-                      << "[Severity " << severity << "]"
-                      << " Message: " << message << "\n";
-        },
-        nullptr);
+    glDebugMessageCallback(GLDebugProc, nullptr);
     glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DEBUG_SEVERITY_HIGH, 0, nullptr, GL_TRUE);
     glEnable(GL_DEBUG_OUTPUT);
     glEnable(GL_DEBUG_OUTPUT_SYNCHRONOUS);
 #endif
+
+    log_info("Version: %s", glGetString(GL_VERSION));
+    log_info("Graphics: %s", glGetString(GL_RENDERER));
+    log_info("GLSL Version: %s", glGetString(GL_SHADING_LANGUAGE_VERSION));
+    log_info("Vendor: %s", glGetString(GL_VENDOR));
 
     GLWRBlendDesc blendDesc;
     blendDesc.enable = true;
@@ -153,12 +154,6 @@ void SceneViewportPane::InitGL()
     GLWRPtr<IGLWRBlendState> blend;
     gfx.CreateBlendState(&blendDesc, &blend);
     gfx.SetBlendState(blend.Get());
-
-    std::cout << "Version:      " << glGetString(GL_VERSION) << "\n"
-              << "Graphics:     " << glGetString(GL_RENDERER) << "\n"
-              << "GLSL Version: " << glGetString(GL_SHADING_LANGUAGE_VERSION) << "\n"
-              << "Vendor:       " << glGetString(GL_VENDOR) << std::endl;
-
     gfx.SetCamera(CreateDefaultCamera());
 }
 
