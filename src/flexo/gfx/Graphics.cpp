@@ -1,7 +1,7 @@
 #include <cstdlib>
 #include <fstream>
 
-#include <stb_image.h>
+#include <stb/image.h>
 
 #include "Project.hpp"
 #include "gfx/Graphics.hpp"

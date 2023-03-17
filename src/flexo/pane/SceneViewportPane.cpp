@@ -6,7 +6,7 @@
 #include <fstream>
 #include <iostream>
 
-#include <stb_image_write.h>
+#include <stb/image_write.h>
 
 #include "Camera.hpp"
 #include "Project.hpp"
