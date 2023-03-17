@@ -7,21 +7,6 @@
 #include "gfx/Graphics.hpp"
 #include "log/Logger.h"
 
-// Register factory: Graphics
-static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey { [](FlexoProject&) -> SharedPtr<Graphics> {
-    return std::make_shared<Graphics>();
-} };
-
-Graphics& Graphics::Get(FlexoProject& project)
-{
-    return project.AttachedObjects::Get<Graphics>(factoryKey);
-}
-
-Graphics const& Graphics::Get(FlexoProject const& project)
-{
-    return Get(const_cast<FlexoProject&>(project));
-}
-
 Graphics::Graphics()
 {
     glBindFramebuffer(GL_FRAMEBUFFER, 0); // Bind the Default framebuffer

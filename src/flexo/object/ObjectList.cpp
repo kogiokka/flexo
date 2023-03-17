@@ -4,8 +4,8 @@
 #include <string>
 
 #include "Project.hpp"
-#include "gfx/Graphics.hpp"
 #include "object/ObjectList.hpp"
+#include "pane/SceneViewportPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
@@ -53,7 +53,7 @@ void ObjectList::Add(enum ObjectType type, std::shared_ptr<Object> object)
     }
 
     object->SetID(id);
-    object->GenerateDrawables(Graphics::Get(m_project));
+    object->GenerateDrawables(SceneViewportPane::Get(m_project).GetGL());
     m_list.push_back(object);
 
     if (type == ObjectType_Map) {
@@ -83,8 +83,6 @@ void ObjectList::OnDeleteObject(wxCommandEvent& event)
             it++;
         }
     }
-
-    Submit(Renderer::Get(m_project));
 }
 
 void ObjectList::Submit(Renderer& renderer) const

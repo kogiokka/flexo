@@ -18,21 +18,19 @@
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
 #include "dialog/AddDialog.hpp"
-#include "gfx/Graphics.hpp"
-#include "gfx/Renderer.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "gfx/drawable/SolidDrawable.hpp"
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "gfx/drawable/WireDrawable.hpp"
+#include "log/Logger.h"
 #include "object/Cube.hpp"
 #include "object/Grid.hpp"
 #include "object/Guides.hpp"
-#include "object/ObjectList.hpp"
 #include "object/Plane.hpp"
 #include "object/Sphere.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "object/Torus.hpp"
-#include "log/Logger.h"
+#include "pane/SceneViewportPane.hpp"
 
 FlexoProject::FlexoProject()
     : m_frame {}
@@ -50,8 +48,7 @@ FlexoProject::FlexoProject()
     Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
         m_imageFile = event.GetString().ToStdString();
 
-        auto& gfx = Graphics::Get(*this);
-        auto& objlist = ObjectList::Get(*this);
+        auto& gfx = SceneViewportPane::Get(*this).GetGL();
         std::string const filename = event.GetString().ToStdString();
 
         if (auto map = theMap.lock()) {
@@ -62,8 +59,6 @@ FlexoProject::FlexoProject()
             model->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
             model->GenerateDrawables(gfx);
         }
-
-        objlist.Submit(Renderer::Get(*this));
     });
 }
 
@@ -73,8 +68,7 @@ FlexoProject::~FlexoProject()
 
 void FlexoProject::CreateScene()
 {
-    auto& objlist = ObjectList::Get(*this);
-    auto& renderer = Renderer::Get(*this);
+    auto& scene = SceneViewportPane::Get(*this);
 
     auto light = std::make_shared<Sphere>();
     light->SetLocation(0.0f, 5.0f, 0.0f);
@@ -82,12 +76,12 @@ void FlexoProject::CreateScene()
     light->ApplyTransform();
 
     auto cube = std::make_shared<Cube>();
-    cube->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
+    cube->SetTexture(Bind::TextureManager::Resolve(scene.GetGL(), m_imageFile.c_str(), 0));
     cube->SetViewFlags(ObjectViewFlag_Solid);
-    objlist.Add(ObjectType_Cube, cube);
-    objlist.Add(ObjectType_Light, light);
-    objlist.Add(ObjectType_Guides, std::make_shared<Guides>());
-    objlist.Submit(renderer);
+
+    scene.AcceptObject(ObjectType_Cube, cube);
+    scene.AcceptObject(ObjectType_Light, light);
+    scene.AcceptObject(ObjectType_Guides, std::make_shared<Guides>());
 }
 
 void FlexoProject::CreateProject()
@@ -95,7 +89,6 @@ void FlexoProject::CreateProject()
     if (auto it = theModel.lock()) {
         it->SetViewFlags(ObjectViewFlag_Solid);
     }
-    ObjectList::Get(*this).Submit(Renderer::Get(*this));
 
     SelfOrganizingMap::Get(*this).CreateProcedure(theMap.lock(), theDataset);
 }
@@ -146,8 +139,7 @@ void FlexoProject::DoParameterization()
     // After the parametrization done, regenerate the drawables to update texture coordinates.
     model->SetViewFlags(ObjectViewFlag_Textured);
     model->GenerateMesh();
-    model->GenerateDrawables(Graphics::Get(*this));
-    ObjectList::Get(*this).Submit(Renderer::Get(*this));
+    model->GenerateDrawables(SceneViewportPane::Get(*this).GetGL());
 }
 
 void FlexoProject::ImportVolumetricModel(wxString const& path)
@@ -157,21 +149,18 @@ void FlexoProject::ImportVolumetricModel(wxString const& path)
 
     auto model = std::make_shared<SurfaceVoxels>(data);
     model->SetViewFlags(ObjectViewFlag_Solid);
-    model->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
+    model->SetTexture(Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), m_imageFile.c_str(), 0));
 
     log_info("%lu voxels will be rendered.", model->Voxels().size());
 
     theModel = model;
 
-    auto& objlist = ObjectList::Get(*this);
-    objlist.Add(ObjectType_Model, theModel.lock());
-    objlist.Submit(Renderer::Get(*this));
+    SceneViewportPane::Get(*this).AcceptObject(ObjectType_Model, theModel.lock());
 }
 
 void FlexoProject::OnMenuAdd(wxCommandEvent& event)
 {
     auto* projwin = &ProjectWindow::Get(*this);
-    auto& objlist = ObjectList::Get(*this);
 
     auto const id = event.GetId();
     std::shared_ptr<Object> obj;
@@ -368,7 +357,8 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Map: (width: %ld, height: %ld)", width, height);
 
-            obj->SetTexture(Bind::TextureManager::Resolve(Graphics::Get(*this), m_imageFile.c_str(), 0));
+            obj->SetTexture(
+                Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), m_imageFile.c_str(), 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
             type = ObjectType_Map;
         } else {
@@ -379,6 +369,5 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
         return;
     }
 
-    objlist.Add(type, obj);
-    objlist.Submit(Renderer::Get(*this));
+    SceneViewportPane::Get(*this).AcceptObject(type, obj);
 }

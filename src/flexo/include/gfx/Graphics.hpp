@@ -8,7 +8,6 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 
-#include "Attachable.hpp"
 #include "Camera.hpp"
 #include "gfx/glwr/GLWRPtr.hpp"
 #include "gfx/glwr/IGLWRBuffer.hpp"
@@ -186,9 +185,7 @@ struct GLWRViewport {
     double farDepth;
 };
 
-class FlexoProject;
-
-class Graphics : public AttachableBase
+class Graphics
 {
     struct Context {
         GLenum primitive;
@@ -217,9 +214,6 @@ class Graphics : public AttachableBase
     Camera m_camera;
 
 public:
-    static Graphics& Get(FlexoProject& project);
-    static Graphics const& Get(FlexoProject const& project);
-
     Graphics();
     ~Graphics();
     void CreateRenderTargetView(IGLWRResource* pResource, GLWRRenderTargetViewDesc const* pDesc,

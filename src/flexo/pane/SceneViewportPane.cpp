@@ -12,7 +12,6 @@
 #include "ProjectWindow.hpp"
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
-#include "object/ObjectList.hpp"
 #include "pane/SceneViewportPane.hpp"
 
 enum {
@@ -76,11 +75,11 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
     m_project.Bind(EVT_SCREENSHOT, &SceneViewportPane::OnMenuScreenshot, this);
 
     m_project.Bind(EVT_MENU_CAMERA_PERSPECTIVE, [this](wxCommandEvent&) {
-        auto& cam = Graphics::Get(m_project).GetCamera();
+        auto& cam = m_gfx->GetCamera();
         cam.SetProjectionMode(Camera::ProjectionMode::Perspective);
     });
     m_project.Bind(EVT_MENU_CAMERA_ORTHOGONAL, [this](wxCommandEvent&) {
-        auto& cam = Graphics::Get(m_project).GetCamera();
+        auto& cam = m_gfx->GetCamera();
         cam.SetProjectionMode(Camera::ProjectionMode::Orthogonal);
     });
 
@@ -102,18 +101,17 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     wxPaintDC dc(this);
     SetCurrent(*m_context);
 
-    auto& gfx = Graphics::Get(m_project);
-
+    auto& gfx = *m_gfx;
     gfx.ClearRenderTargetView(m_rtv.Get(), m_bgColor.data());
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
-    auto& renderer = Renderer::Get(m_project);
+    auto& renderer = *m_renderer;
     if (auto it = m_project.theMap.lock()) {
         it->GenerateMesh();
         it->GenerateDrawables(gfx);
-        ObjectList::Get(m_project).Submit(renderer);
     }
 
+    ObjectList::Get(m_project).Submit(renderer);
     renderer.Render(gfx);
 
     gfx.Present();
@@ -127,8 +125,9 @@ void SceneViewportPane::InitGL()
     m_isGLLoaded = gladLoadGL();
     assert(m_isGLLoaded);
 
-    auto& gfx = Graphics::Get(m_project);
-    InitFrame(gfx);
+    m_renderer = std::make_shared<Renderer>();
+    m_gfx = std::make_shared<Graphics>();
+    InitFrame(*m_gfx);
 
 #ifndef NDEBUG
     glDebugMessageCallback(GLDebugProc, nullptr);
@@ -152,14 +151,24 @@ void SceneViewportPane::InitGL()
     blendDesc.eqAlpha = GLWRBlendEq_Add;
 
     GLWRPtr<IGLWRBlendState> blend;
-    gfx.CreateBlendState(&blendDesc, &blend);
-    gfx.SetBlendState(blend.Get());
-    gfx.SetCamera(CreateDefaultCamera());
+    m_gfx->CreateBlendState(&blendDesc, &blend);
+    m_gfx->SetBlendState(blend.Get());
+    m_gfx->SetCamera(CreateDefaultCamera());
+}
+
+void SceneViewportPane::AcceptObject(enum ObjectType type, std::shared_ptr<Object> object)
+{
+    ObjectList::Get(m_project).Add(type, object);
+}
+
+Graphics& SceneViewportPane::GetGL()
+{
+    return *m_gfx;
 }
 
 void SceneViewportPane::ResetCamera()
 {
-    Graphics::Get(m_project).SetCamera(CreateDefaultCamera());
+    m_gfx->SetCamera(CreateDefaultCamera());
 }
 
 void SceneViewportPane::OnSize(wxSizeEvent&)
@@ -172,13 +181,10 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
 
     wxSize const size = GetClientSize() * GetContentScaleFactor();
 
-    Graphics::Get(m_project).GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
+    m_gfx->GetCamera().aspectRatio = static_cast<float>(size.x) / static_cast<float>(size.y);
 
     SetCurrent(*m_context);
-
-    auto& gfx = Graphics::Get(m_project);
-
-    InitFrame(gfx);
+    InitFrame(*m_gfx);
 
     GLWRViewport v;
     v.x = 0.0f;
@@ -188,13 +194,13 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
     v.nearDepth = 0.0;
     v.farDepth = 1.0;
 
-    gfx.SetViewports(1, &v);
+    m_gfx->SetViewports(1, &v);
     ProjectWindow::Get(m_project).SetStatusText(wxString::Format("Viewport size: %dx%d", size.x, size.y));
 }
 
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
 {
-    auto& cam = Graphics::Get(m_project).GetCamera();
+    auto& cam = m_gfx->GetCamera();
     int const diff = -1 * event.GetWheelRotation() / 120;
     cam.Zoom(diff);
 }
@@ -203,14 +209,14 @@ void SceneViewportPane::OnMouseLeftDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    m_originTranslate = std::make_tuple(x, y, Graphics::Get(m_project).GetCamera().center);
+    m_originTranslate = std::make_tuple(x, y, m_gfx->GetCamera().center);
 }
 
 void SceneViewportPane::OnMouseRightDown(wxMouseEvent& event)
 {
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
-    auto coord = Graphics::Get(m_project).GetCamera().coord.lock();
+    auto coord = m_gfx->GetCamera().coord.lock();
     // Change rotating direction if the camera passes through the polars.
     // Theta is guaranteed to be on either [0, pi] or (pi, 2 * pi).
     if (coord->theta > MATH_PI)
@@ -226,7 +232,7 @@ void SceneViewportPane::OnMouseMotion(wxMouseEvent& event)
     wxCoord const x = event.GetX();
     wxCoord const y = event.GetY();
 
-    auto& cam = Graphics::Get(m_project).GetCamera();
+    auto& cam = m_gfx->GetCamera();
 
     if (event.LeftIsDown()) {
         auto const& [oX, oY, oTarget] = m_originTranslate;

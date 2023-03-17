@@ -15,6 +15,9 @@
 #include <wx/string.h>
 
 #include "gfx/Graphics.hpp"
+#include "gfx/Renderer.hpp"
+#include "object/Object.hpp"
+#include "object/ObjectList.hpp"
 
 class FlexoProject;
 
@@ -29,6 +32,8 @@ public:
     ~SceneViewportPane();
     void InitGL();
     void ResetCamera();
+    void AcceptObject(enum ObjectType type, std::shared_ptr<Object> object);
+    Graphics& GetGL();
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -51,6 +56,8 @@ private:
     GLWRPtr<IGLWRDepthStencilView> m_dsv;
     std::unique_ptr<wxGLContext> m_context;
     std::array<float, 4> m_bgColor;
+    std::shared_ptr<Graphics> m_gfx;
+    std::shared_ptr<Renderer> m_renderer;
     FlexoProject& m_project;
 
     wxDECLARE_EVENT_TABLE();

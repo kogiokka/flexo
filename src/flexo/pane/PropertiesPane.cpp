@@ -2,6 +2,7 @@
 
 #include "Project.hpp"
 #include "gfx/Renderer.hpp"
+#include "pane/SceneViewportPane.hpp"
 
 wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_CHANGED, wxCommandEvent);
 
@@ -47,8 +48,7 @@ PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
     btnApply->SetToolTip("Apply Object Transform");
     btnApply->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
         m_obj->ApplyTransform();
-        m_obj->GenerateDrawables(Graphics::Get(m_project));
-        ObjectList::Get(m_project).Submit(Renderer::Get(m_project));
+        m_obj->GenerateDrawables(SceneViewportPane::Get(m_project).GetGL());
         m_transform.location.x->Clear();
         m_transform.location.y->Clear();
         m_transform.location.z->Clear();
@@ -99,8 +99,6 @@ void PropertiesPane::OnObjectChanged(wxCommandEvent& event)
 void PropertiesPane::OnSelectDisplayType(wxCommandEvent& event)
 {
     auto selection = event.GetSelection();
-    auto& objlist = ObjectList::Get(m_project);
-    auto& renderer = Renderer::Get(m_project);
     log_trace("Changing ObjectViewFlags for \"%s\"", m_obj->GetID().c_str());
     switch (selection) {
     case DisplayType_Solid:
@@ -121,13 +119,10 @@ void PropertiesPane::OnSelectDisplayType(wxCommandEvent& event)
         m_obj->SetViewFlags(ObjectViewFlag_Wire);
         break;
     }
-    objlist.Submit(renderer);
 }
 
 void PropertiesPane::OnCheckWireframe(wxCommandEvent&)
 {
-    auto& objlist = ObjectList::Get(m_project);
-    auto& renderer = Renderer::Get(m_project);
     auto flags = m_obj->GetViewFlags();
 
     m_hasWireframe = m_chkWire->GetValue();
@@ -152,7 +147,6 @@ void PropertiesPane::OnCheckWireframe(wxCommandEvent&)
             break;
         }
     }
-    objlist.Submit(renderer);
 }
 
 void PropertiesPane::OnTransformLocation(wxCommandEvent&)

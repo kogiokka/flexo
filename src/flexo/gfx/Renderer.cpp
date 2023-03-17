@@ -2,27 +2,10 @@
 #include <glm/glm.hpp>
 #include <glm/gtx/string_cast.hpp>
 
-#include "Project.hpp"
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
 
-// Register factory: Renderer
-static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {
-    [](FlexoProject& project) -> SharedPtr<Renderer> { return std::make_shared<Renderer>(project); }
-};
-
-Renderer& Renderer::Get(FlexoProject& project)
-{
-    return project.AttachedObjects::Get<Renderer>(factoryKey);
-}
-
-Renderer const& Renderer::Get(FlexoProject const& project)
-{
-    return Get(const_cast<FlexoProject&>(project));
-}
-
-Renderer::Renderer(FlexoProject& project)
-    : m_project(project)
+Renderer::Renderer()
 {
 }
 
