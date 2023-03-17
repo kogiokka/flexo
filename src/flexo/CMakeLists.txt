@@ -105,8 +105,8 @@ PRIVATE
 target_link_libraries(flexo
 PRIVATE
     rvl::rvl
-    glad
-    stb_image
+    glad::glad
+    stb::image
     glm::glm
     OpenGL::GL
     wx::base

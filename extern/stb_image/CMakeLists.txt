@@ -7,3 +7,4 @@ PRIVATE
 )
 
 target_include_directories(stb_image PUBLIC ".")
+add_library(stb::image ALIAS stb_image)
