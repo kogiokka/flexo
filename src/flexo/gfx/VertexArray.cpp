@@ -1,3 +1,5 @@
+#include <cstdlib>
+
 #include "gfx/VertexArray.hpp"
 #include "log/Logger.h"
 
@@ -22,11 +24,12 @@ void VertexLayout::AddAttrib(std::string name, VertexLayout::AttribFormat format
     log_debug("Added vertex attribute: (name: %s, offset: %u, size: %u)", name.c_str(), offset, size);
 }
 
-int VertexLayout::GetOffset(std::string const& name) const
+unsigned int VertexLayout::GetOffset(std::string const& name) const
 {
-    auto it = m_attrs.find(name);
+    auto const& it = m_attrs.find(name);
     if (it == m_attrs.end()) {
-        return -1;
+        log_fatal("Vertex attribute \"%s\" does not exist.", name.c_str());
+        exit(EXIT_FAILURE);
     }
 
     return it->second.offset;
@@ -47,6 +50,11 @@ void VertexArray::PushBack()
 {
     m_array.insert(m_array.end(), m_buf.begin(), m_buf.end());
     m_count += 1;
+}
+
+VertexLayout const& VertexArray::GetLayout() const
+{
+    return m_layout;
 }
 
 unsigned int VertexArray::GetCount() const

@@ -26,7 +26,7 @@ public:
 
 public:
     void AddAttrib(std::string name, VertexLayout::AttribFormat format);
-    int GetOffset(std::string const& name) const;
+    unsigned int GetOffset(std::string const& name) const;
     unsigned int GetSize() const;
 
 private:
@@ -42,6 +42,7 @@ public:
     void Assign(std::string const& name, T const& value);
     void PushBack();
 
+    VertexLayout const& GetLayout() const;
     unsigned int GetStride() const;
     unsigned int GetCount() const;
     unsigned char const* GetData() const;

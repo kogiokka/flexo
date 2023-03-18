@@ -53,13 +53,15 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
     m_ubs["material"].SetBIndex(2);
     m_ubs["viewPos"].SetBIndex(3);
 
+    auto vertices = GenVertexArray(mesh);
+    VertexLayout layout = vertices.GetLayout();
+
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
-        { "normal", GLWRFormat_Float3, 0, 12, GLWRInputClassification_PerVertex, 0 },
-        { "textureCoord", GLWRFormat_Float2, 0, 24, GLWRInputClassification_PerVertex, 0 },
+        { "position", GLWRFormat_Float3, 0, layout.GetOffset("Position"), GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 0, layout.GetOffset("Normal"), GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 0, layout.GetOffset("TexCoord"), GLWRInputClassification_PerVertex, 0 },
     };
 
-    auto vertices = GenVertexArray(mesh);
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
     AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
 
