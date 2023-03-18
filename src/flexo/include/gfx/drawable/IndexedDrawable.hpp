@@ -1,13 +1,11 @@
 #ifndef INDEXED_DRAWABLE_H
 #define INDEXED_DRAWABLE_H
 
-#include <vector>
-
-#include "gfx/drawable/DrawableBase.hpp"
+#include "gfx/drawable/Drawable.hpp"
 
 class Graphics;
 
-class IndexedDrawable : public DrawableBase
+class IndexedDrawable : public Drawable
 {
 public:
     IndexedDrawable();

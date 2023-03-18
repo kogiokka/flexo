@@ -9,5 +9,14 @@ InstancedDrawable::InstancedDrawable()
 
 void InstancedDrawable::Draw(Graphics& gfx) const
 {
+    if (!IsVisible()) {
+        return;
+    }
+
+    UpdateUniformBuffers(gfx);
+    for (auto const& b : m_binds) {
+        b->Bind(gfx);
+    }
+
     gfx.DrawInstanced(m_vertexCountPerInstance, m_instanceCount);
 }

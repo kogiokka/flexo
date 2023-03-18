@@ -8,5 +8,14 @@ IndexedDrawable::IndexedDrawable()
 
 void IndexedDrawable::Draw(Graphics& gfx) const
 {
+    if (!IsVisible()) {
+        return;
+    }
+
+    UpdateUniformBuffers(gfx);
+    for (auto const& b : m_binds) {
+        b->Bind(gfx);
+    }
+
     gfx.DrawIndexed(m_indexCount);
 }

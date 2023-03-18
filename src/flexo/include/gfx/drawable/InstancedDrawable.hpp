@@ -1,11 +1,11 @@
 #ifndef INSTANCED_DRAWABLE_H
 #define INSTANCED_DRAWABLE_H
 
-#include "gfx/drawable/DrawableBase.hpp"
+#include "gfx/drawable/Drawable.hpp"
 
 class Graphics;
 
-class InstancedDrawable : public DrawableBase
+class InstancedDrawable : public Drawable
 {
 public:
     InstancedDrawable();

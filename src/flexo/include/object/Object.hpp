@@ -44,7 +44,7 @@ public:
         glm::vec3 scale;
     };
 
-    using DrawList = std::vector<std::shared_ptr<DrawableBase>>;
+    using DrawList = std::vector<std::shared_ptr<Drawable>>;
 
     Object();
     ~Object();
