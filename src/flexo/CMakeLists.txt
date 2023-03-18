@@ -54,6 +54,9 @@ PRIVATE
     "assetlib/OBJ/OBJImporter.cpp"
     "assetlib/STL/STLImporter.cpp"
 
+    "gfx/VertexArray.cpp"
+    "gfx/VertexLayout.cpp"
+    "gfx/UniformBlock.cpp"
     "gfx/Graphics.cpp"
     "gfx/Renderer.cpp"
     "gfx/BindStep.cpp"
@@ -70,8 +73,6 @@ PRIVATE
     "gfx/glwr/IGLWRRenderTargetView.cpp"
     "gfx/glwr/IGLWRDepthStencilView.cpp"
     "gfx/glwr/IGLWRShaderResourceView.cpp"
-    "gfx/VertexBuffer.cpp"
-    "gfx/UniformBlock.cpp"
     "gfx/bindable/Primitive.cpp"
     "gfx/bindable/InputLayout.cpp"
     "gfx/bindable/IndexBuffer.cpp"

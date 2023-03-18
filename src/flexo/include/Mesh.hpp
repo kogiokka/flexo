@@ -5,6 +5,9 @@
 #include <vector>
 
 #include "Vec.hpp"
+#include "gfx/VertexArray.hpp"
+
+class VertexBuffer;
 
 struct BoundingBox {
     glm::vec3 max;
@@ -24,5 +27,7 @@ struct Mesh {
     bool HasTextureCoords() const;
     bool HasFaces() const;
 };
+
+VertexArray GenVertexArray(Mesh const& mesh);
 
 #endif

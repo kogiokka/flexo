@@ -1,6 +1,5 @@
 #include "gfx/drawable/TexturedDrawable.hpp"
 #include "gfx/BindStep.hpp"
-#include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
@@ -54,16 +53,17 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
     m_ubs["material"].SetBIndex(2);
     m_ubs["viewPos"].SetBIndex(3);
 
-    VertexBuffer buf(mesh);
+    auto vertices = GenVertexArray(mesh);
+    VertexLayout layout = vertices.GetLayout();
 
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, buf.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
-        { "normal", GLWRFormat_Float3, 0, buf.OffsetOfNormal(), GLWRInputClassification_PerVertex, 0 },
-        { "textureCoord", GLWRFormat_Float2, 0, buf.OffsetOfTextureCoords(), GLWRInputClassification_PerVertex, 0 },
+        { "position", GLWRFormat_Float3, 0, layout.GetOffset("Position"), GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 0, layout.GetOffset("Normal"), GLWRInputClassification_PerVertex, 0 },
+        { "textureCoord", GLWRFormat_Float2, 0, layout.GetOffset("TexCoord"), GLWRInputClassification_PerVertex, 0 },
     };
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, buf));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
 
     BindStep step;
 
@@ -81,7 +81,7 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
 
     AddBindStep(step);
 
-    m_vertCount = buf.Count();
+    m_vertCount = vertices.GetCount();
 }
 
 TexturedDrawable::~TexturedDrawable()

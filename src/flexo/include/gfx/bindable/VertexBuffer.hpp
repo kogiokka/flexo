@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "gfx/Graphics.hpp"
-#include "gfx/VertexBuffer.hpp"
+#include "gfx/VertexArray.hpp"
 #include "gfx/bindable/Bindable.hpp"
 
 namespace Bind
@@ -19,10 +19,10 @@ namespace Bind
         unsigned int m_count;
 
     public:
-        VertexBuffer(Graphics& gfx, ::VertexBuffer const& buffer, unsigned int startAttrib = 0);
+        VertexBuffer(Graphics& gfx, VertexArray const& vertices, unsigned int startAttrib = 0);
         ~VertexBuffer();
         void Bind(Graphics& gfx) override;
-        void Update(Graphics& gfx, ::VertexBuffer const& buffer);
+        void Update(Graphics& gfx, VertexArray const& vertices);
         unsigned int GetStartAttrib() const;
         unsigned int GetCount() const;
     };
