@@ -82,7 +82,6 @@ PRIVATE
     "gfx/bindable/RasterizerState.cpp"
     "gfx/bindable/program/VertexShaderProgram.cpp"
     "gfx/bindable/program/FragmentShaderProgram.cpp"
-    "gfx/drawable/DrawableBase.cpp"
     "gfx/drawable/Drawable.cpp"
     "gfx/drawable/IndexedDrawable.cpp"
     "gfx/drawable/InstancedDrawable.cpp"
