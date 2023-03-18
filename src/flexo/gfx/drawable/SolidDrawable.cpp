@@ -2,6 +2,7 @@
 #include <vector>
 
 #include "gfx/BindStep.hpp"
+#include "gfx/VertexArray.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"

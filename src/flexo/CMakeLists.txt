@@ -55,6 +55,7 @@ PRIVATE
     "assetlib/STL/STLImporter.cpp"
 
     "gfx/VertexArray.cpp"
+    "gfx/VertexLayout.cpp"
     "gfx/UniformBlock.cpp"
     "gfx/Graphics.cpp"
     "gfx/Renderer.cpp"

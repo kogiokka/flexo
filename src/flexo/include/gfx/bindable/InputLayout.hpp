@@ -1,5 +1,5 @@
-#ifndef VERTEX_LAYOUT_H
-#define VERTEX_LAYOUT_H
+#ifndef INPUT_LAYOUT_H
+#define INPUT_LAYOUT_H
 
 #include <vector>
 

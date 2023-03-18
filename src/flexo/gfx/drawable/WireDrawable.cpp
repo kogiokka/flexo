@@ -5,6 +5,7 @@
 #include "Wireframe.hpp"
 #include "gfx/DrawTask.hpp"
 #include "gfx/Graphics.hpp"
+#include "gfx/VertexArray.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
@@ -46,7 +47,8 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     }
 
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, vertices.GetLayout().GetOffset("Position"), GLWRInputClassification_PerVertex, 0 },
+        { "position", GLWRFormat_Float3, 0, vertices.GetLayout().GetOffset("Position"),
+          GLWRInputClassification_PerVertex, 0 },
     };
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
