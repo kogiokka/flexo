@@ -5,6 +5,7 @@
 #include "Wireframe.hpp"
 #include "gfx/DrawTask.hpp"
 #include "gfx/Graphics.hpp"
+#include "gfx/Vertex.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
@@ -36,13 +37,22 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["color"].Assign("color", glm::vec3(0.7f, 0.7f, 0.7f));
 
-    VertexBuffer bufpos(wireframe.positions);
+    Vertex v;
+    v.AddAttrib("Position", Vertex::Format::vec3f32);
+    v.FinalizeLayout();
+
+    std::vector<Vertex> vertices;
+    for (auto const& p : wireframe.positions) {
+        v.Assign("Position", p);
+        vertices.push_back(v);
+    }
+
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, bufpos.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
+        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
     };
 
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_LINES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, bufpos));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
     AddBind(std::make_shared<Bind::IndexBuffer>(gfx, indices));
 
     BindStep step;

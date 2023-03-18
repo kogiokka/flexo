@@ -2,7 +2,6 @@
 #include <vector>
 
 #include "gfx/BindStep.hpp"
-#include "gfx/VertexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
@@ -50,13 +49,13 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
     m_ubs["material"].SetBIndex(2);
     m_ubs["viewPos"].SetBIndex(3);
 
-    VertexBuffer buf(mesh);
+    auto vertices = GenVertexArray(mesh);
     AddBind(std::make_shared<Bind::Primitive>(gfx, GL_TRIANGLES));
-    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, buf));
+    AddBind(std::make_shared<Bind::VertexBuffer>(gfx, vertices));
 
     std::vector<GLWRInputElementDesc> inputs = {
-        { "position", GLWRFormat_Float3, 0, buf.OffsetOfPosition(), GLWRInputClassification_PerVertex, 0 },
-        { "normal", GLWRFormat_Float3, 0, buf.OffsetOfNormal(), GLWRInputClassification_PerVertex, 0 },
+        { "position", GLWRFormat_Float3, 0, 0, GLWRInputClassification_PerVertex, 0 },
+        { "normal", GLWRFormat_Float3, 0, 12, GLWRInputClassification_PerVertex, 0 },
     };
 
     BindStep step;
@@ -73,7 +72,7 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
 
     AddBindStep(step);
 
-    m_vertCount = buf.Count();
+    m_vertCount = vertices.size();
 }
 
 SolidDrawable::~SolidDrawable()
