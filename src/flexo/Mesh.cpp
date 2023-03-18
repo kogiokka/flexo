@@ -22,13 +22,13 @@ VertexArray GenVertexArray(Mesh const& mesh)
 {
     VertexLayout layout;
     if (mesh.HasPositions()) {
-        layout.AddAttrib("Position", VertexLayout::Attrib::Format::vec3f32);
+        layout.AddAttrib("Position", VertexLayout::AttribFormat::Float3);
     }
     if (mesh.HasNormals()) {
-        layout.AddAttrib("Normal", VertexLayout::Attrib::Format::vec3f32);
+        layout.AddAttrib("Normal", VertexLayout::AttribFormat::Float3);
     }
     if (mesh.HasTextureCoords()) {
-        layout.AddAttrib("TexCoord", VertexLayout::Attrib::Format::vec2f32);
+        layout.AddAttrib("TexCoord", VertexLayout::AttribFormat::Float2);
     }
 
     VertexArray arr(layout);

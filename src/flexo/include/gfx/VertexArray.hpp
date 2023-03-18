@@ -9,24 +9,23 @@
 #include "log/Logger.h"
 
 #define VERTEX_ATTRIB_FORMAT                                                                                           \
-    X(f32, 4)                                                                                                          \
-    X(vec2f32, 8)                                                                                                      \
-    X(vec3f32, 12)                                                                                                     \
-    X(vec4f32, 16)
+    X(Float, 4)                                                                                                        \
+    X(Float2, 8)                                                                                                       \
+    X(Float3, 12)                                                                                                      \
+    X(Float4, 16)
 
 class VertexLayout
 {
 public:
-    struct Attrib {
 #define X(name, size) name,
-        enum Format { VERTEX_ATTRIB_FORMAT };
+    enum AttribFormat { VERTEX_ATTRIB_FORMAT };
 #undef X
-        Format format;
+    struct Attrib {
         unsigned int offset;
     };
 
 public:
-    void AddAttrib(std::string name, VertexLayout::Attrib::Format format);
+    void AddAttrib(std::string name, VertexLayout::AttribFormat format);
     int GetOffset(std::string const& name) const;
     unsigned int GetSize() const;
 

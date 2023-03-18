@@ -5,7 +5,7 @@
 static unsigned int AttribSize[] = { VERTEX_ATTRIB_FORMAT };
 #undef X
 
-void VertexLayout::AddAttrib(std::string name, VertexLayout::Attrib::Format format)
+void VertexLayout::AddAttrib(std::string name, VertexLayout::AttribFormat format)
 {
     auto it = m_attrs.find(name);
     if (it != m_attrs.end()) {
@@ -17,7 +17,7 @@ void VertexLayout::AddAttrib(std::string name, VertexLayout::Attrib::Format form
     unsigned int size = AttribSize[format];
 
     m_size += size;
-    m_attrs.emplace(name, Attrib { format, offset });
+    m_attrs.emplace(name, Attrib { offset });
 
     log_debug("Added vertex attribute: (name: %s, offset: %u, size: %u)", name.c_str(), offset, size);
 }

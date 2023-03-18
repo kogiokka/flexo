@@ -37,7 +37,7 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     m_ubs["color"].Assign("color", glm::vec3(0.7f, 0.7f, 0.7f));
 
     VertexLayout layout;
-    layout.AddAttrib("Position", VertexLayout::Attrib::Format::vec3f32);
+    layout.AddAttrib("Position", VertexLayout::AttribFormat::Float3);
 
     VertexArray vertices(layout);
     for (auto const& p : wireframe.positions) {
