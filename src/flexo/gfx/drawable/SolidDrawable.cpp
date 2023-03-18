@@ -72,7 +72,7 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
 
     AddBindStep(step);
 
-    m_vertCount = vertices.size();
+    m_vertCount = vertices.GetCount();
 }
 
 SolidDrawable::~SolidDrawable()

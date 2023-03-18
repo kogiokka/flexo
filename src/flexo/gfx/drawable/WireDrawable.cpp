@@ -5,7 +5,6 @@
 #include "Wireframe.hpp"
 #include "gfx/DrawTask.hpp"
 #include "gfx/Graphics.hpp"
-#include "gfx/Vertex.hpp"
 #include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
@@ -37,14 +36,13 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     m_ubs["transform"].Assign("viewProj", gfx.GetViewProjectionMatrix());
     m_ubs["color"].Assign("color", glm::vec3(0.7f, 0.7f, 0.7f));
 
-    Vertex v;
-    v.AddAttrib("Position", Vertex::Format::vec3f32);
-    v.FinalizeLayout();
+    VertexLayout layout;
+    layout.AddAttrib("Position", VertexLayout::Attrib::Format::vec3f32);
 
-    std::vector<Vertex> vertices;
+    VertexArray vertices(layout);
     for (auto const& p : wireframe.positions) {
-        v.Assign("Position", p);
-        vertices.push_back(v);
+        vertices.Assign("Position", p);
+        vertices.PushBack();
     }
 
     std::vector<GLWRInputElementDesc> inputs = {

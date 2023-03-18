@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "Vec.hpp"
-#include "gfx/Vertex.hpp"
+#include "gfx/VertexArray.hpp"
 
 class VertexBuffer;
 
@@ -28,6 +28,6 @@ struct Mesh {
     bool HasFaces() const;
 };
 
-std::vector<Vertex> GenVertexArray(Mesh const& mesh);
+VertexArray GenVertexArray(Mesh const& mesh);
 
 #endif

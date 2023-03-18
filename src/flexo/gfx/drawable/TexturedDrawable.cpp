@@ -79,7 +79,7 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
 
     AddBindStep(step);
 
-    m_vertCount = vertices.size();
+    m_vertCount = vertices.GetCount();
 }
 
 TexturedDrawable::~TexturedDrawable()
