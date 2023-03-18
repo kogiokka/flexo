@@ -9,7 +9,7 @@ void VertexLayout::AddAttrib(std::string name, VertexLayout::Attrib::Format form
 {
     auto it = m_attrs.find(name);
     if (it != m_attrs.end()) {
-        log_warn("Duplicate element: %s", name.c_str());
+        log_warn("Duplicate vertex attribute: %s", name.c_str());
         return;
     }
 
