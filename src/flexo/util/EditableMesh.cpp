@@ -3,7 +3,6 @@
 #include <glm/gtc/matrix_transform.hpp>
 
 #include "EditableMesh.hpp"
-#include "assetlib/STL/STLImporter.hpp"
 
 bool EditableMesh::HasPositions() const
 {

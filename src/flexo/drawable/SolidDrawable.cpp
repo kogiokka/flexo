@@ -1,8 +1,10 @@
 #include <utility>
 #include <vector>
 
+#include "SolidDrawable.hpp"
 #include "gfx/BindStep.hpp"
 #include "gfx/VertexArray.hpp"
+#include "gfx/bindable/IndexBuffer.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"
 #include "gfx/bindable/RasterizerState.hpp"
@@ -10,7 +12,6 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
-#include "gfx/drawable/SolidDrawable.hpp"
 
 SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
 {

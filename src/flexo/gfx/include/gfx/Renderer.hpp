@@ -5,7 +5,6 @@
 #include <vector>
 
 #include "DrawTask.hpp"
-#include "Mesh.hpp"
 #include "gfx/Graphics.hpp"
 
 class Renderer

@@ -7,9 +7,9 @@
 
 #include <stb/image_write.h>
 
-#include "Camera.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "gfx/Camera.hpp"
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
 #include "pane/SceneViewportPane.hpp"

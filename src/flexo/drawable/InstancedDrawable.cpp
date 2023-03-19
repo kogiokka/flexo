@@ -1,4 +1,4 @@
-#include "gfx/drawable/InstancedDrawable.hpp"
+#include "InstancedDrawable.hpp"
 #include "gfx/Graphics.hpp"
 
 InstancedDrawable::InstancedDrawable()

@@ -19,7 +19,8 @@ void Object::GenerateDrawables(Graphics& gfx)
     if (!m_texture) {
         m_texture = Bind::TextureManager::Resolve(gfx, "images/blank.png", 0);
     }
-    m_solid = std::make_shared<SolidDrawable>(gfx, m_mesh.GenerateMesh());
+    auto m = m_mesh.GenerateMesh();
+    m_solid = std::make_shared<SolidDrawable>(gfx, m);
     m_textured = std::make_shared<TexturedDrawable>(gfx, m_mesh.GenerateMesh(), m_texture);
     m_wire = std::make_shared<WireDrawable>(gfx, m_mesh.GenerateWireframe());
 }

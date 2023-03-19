@@ -1,8 +1,8 @@
 #include <utility>
 
+#include "Drawable.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/bindable/UniformBuffer.hpp"
-#include "gfx/drawable/Drawable.hpp"
 
 Drawable::Drawable()
     : m_isVisible(true)

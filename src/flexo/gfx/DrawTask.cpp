@@ -1,6 +1,6 @@
 #include "gfx/DrawTask.hpp"
+#include "gfx/DrawableBase.hpp"
 #include "gfx/Graphics.hpp"
-#include "gfx/drawable/DrawableBase.hpp"
 
 void DrawTask::Execute(Graphics& gfx)
 {

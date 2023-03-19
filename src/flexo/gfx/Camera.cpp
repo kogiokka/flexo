@@ -1,4 +1,4 @@
-#include "Camera.hpp"
+#include "gfx/Camera.hpp"
 
 #include <cassert>
 

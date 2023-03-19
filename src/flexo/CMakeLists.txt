@@ -44,9 +44,7 @@ PRIVATE
     "object/Guides.cpp"
     "object/SurfaceVoxels.cpp"
 
-    "Camera.cpp"
-    "Mesh.cpp"
-    "EditableMesh.cpp"
+
     "TransformStack.cpp"
     "VolumetricModelData.cpp"
     "Voxel.cpp"
@@ -54,66 +52,32 @@ PRIVATE
     "assetlib/OBJ/OBJImporter.cpp"
     "assetlib/STL/STLImporter.cpp"
 
-    "gfx/VertexArray.cpp"
-    "gfx/VertexLayout.cpp"
-    "gfx/UniformBlock.cpp"
-    "gfx/Graphics.cpp"
-    "gfx/Renderer.cpp"
-    "gfx/BindStep.cpp"
-    "gfx/DrawTask.cpp"
-    "gfx/glwr/IGLWRState.cpp"
-    "gfx/glwr/IGLWRBuffer.cpp"
-    "gfx/glwr/IGLWRInputLayout.cpp"
-    "gfx/glwr/IGLWRVertexShader.cpp"
-    "gfx/glwr/IGLWRFragmentShader.cpp"
-    "gfx/glwr/IGLWRSampler.cpp"
-    "gfx/glwr/IGLWRResource.cpp"
-    "gfx/glwr/IGLWRTexture2D.cpp"
-    "gfx/glwr/IGLWRRenderBuffer.cpp"
-    "gfx/glwr/IGLWRRenderTargetView.cpp"
-    "gfx/glwr/IGLWRDepthStencilView.cpp"
-    "gfx/glwr/IGLWRShaderResourceView.cpp"
-    "gfx/bindable/Primitive.cpp"
-    "gfx/bindable/InputLayout.cpp"
-    "gfx/bindable/IndexBuffer.cpp"
-    "gfx/bindable/UniformBuffer.cpp"
-    "gfx/bindable/VertexBuffer.cpp"
-    "gfx/bindable/Texture2D.cpp"
-    "gfx/bindable/Sampler.cpp"
-    "gfx/bindable/RasterizerState.cpp"
-    "gfx/bindable/program/VertexShaderProgram.cpp"
-    "gfx/bindable/program/FragmentShaderProgram.cpp"
-    "gfx/drawable/Drawable.cpp"
-    "gfx/drawable/IndexedDrawable.cpp"
-    "gfx/drawable/InstancedDrawable.cpp"
-    "gfx/drawable/SolidDrawable.cpp"
-    "gfx/drawable/WireDrawable.cpp"
-    "gfx/drawable/TexturedDrawable.cpp"
-
     "LearningRate.cpp"
     "Neighborhood.cpp"
     "SelfOrganizingMap.cpp"
 )
 
-add_subdirectory("msw")
+add_subdirectory(util)
+add_subdirectory(log)
+add_subdirectory(gfx)
+add_subdirectory(drawable)
+add_subdirectory(msw)
 
-target_include_directories(flexo
-PRIVATE
-    "include/"
-)
+target_include_directories(flexo PRIVATE include)
 
 target_link_libraries(flexo
 PRIVATE
     rvl::rvl
-    glad::glad
     stb::image
-    glm::glm
     OpenGL::GL
     wx::base
     wx::core
     wx::gl
     wx::aui
-    log::log
+    flexo::gfx
+    flexo::drawable
+    flexo::util
+    flexo::log
     ${CMAKE_DL_LIBS}
 )
 

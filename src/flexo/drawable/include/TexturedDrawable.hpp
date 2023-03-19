@@ -3,11 +3,11 @@
 
 #include <unordered_map>
 
+#include "Drawable.hpp"
 #include "Mesh.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/UniformBlock.hpp"
 #include "gfx/bindable/Texture2D.hpp"
-#include "gfx/drawable/Drawable.hpp"
 
 class TexturedDrawable : public Drawable
 {

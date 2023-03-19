@@ -3,7 +3,6 @@
 
 #include <stb/image.h>
 
-#include "Project.hpp"
 #include "gfx/Graphics.hpp"
 #include "log/Logger.h"
 

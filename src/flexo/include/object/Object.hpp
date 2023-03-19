@@ -7,14 +7,14 @@
 
 #include "EditableMesh.hpp"
 #include "Mesh.hpp"
+#include "SolidDrawable.hpp"
+#include "TexturedDrawable.hpp"
 #include "TransformStack.hpp"
+#include "WireDrawable.hpp"
 #include "Wireframe.hpp"
+#include "gfx/DrawableBase.hpp"
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/bindable/TextureManager.hpp"
-#include "gfx/drawable/DrawableBase.hpp"
-#include "gfx/drawable/SolidDrawable.hpp"
-#include "gfx/drawable/TexturedDrawable.hpp"
-#include "gfx/drawable/WireDrawable.hpp"
 
 class Graphics;
 struct TransformStack;

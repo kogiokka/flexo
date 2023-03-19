@@ -10,7 +10,7 @@
 
 #include "gfx/BindStep.hpp"
 #include "gfx/UniformBlock.hpp"
-#include "gfx/drawable/DrawableBase.hpp"
+#include "gfx/DrawableBase.hpp"
 
 class Graphics;
 

@@ -1,4 +1,4 @@
-#include "gfx/drawable/IndexedDrawable.hpp"
+#include "IndexedDrawable.hpp"
 #include "gfx/Graphics.hpp"
 
 IndexedDrawable::IndexedDrawable()

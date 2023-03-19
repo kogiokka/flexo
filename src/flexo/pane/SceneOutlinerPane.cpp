@@ -7,13 +7,13 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "gfx/DrawableBase.hpp"
 #include "gfx/Renderer.hpp"
-#include "gfx/drawable/DrawableBase.hpp"
+#include "log/Logger.h"
 #include "object/ObjectList.hpp"
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
-#include "log/Logger.h"
 
 wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);

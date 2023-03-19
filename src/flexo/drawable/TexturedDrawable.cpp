@@ -1,4 +1,4 @@
-#include "gfx/drawable/TexturedDrawable.hpp"
+#include "TexturedDrawable.hpp"
 #include "gfx/BindStep.hpp"
 #include "gfx/bindable/InputLayout.hpp"
 #include "gfx/bindable/Primitive.hpp"

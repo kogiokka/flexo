@@ -1,7 +1,7 @@
 #ifndef INDEXED_DRAWABLE_H
 #define INDEXED_DRAWABLE_H
 
-#include "gfx/drawable/Drawable.hpp"
+#include "Drawable.hpp"
 
 class Graphics;
 

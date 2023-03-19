@@ -1,8 +1,8 @@
 #include <memory>
 
 #include "TransformStack.hpp"
-#include "gfx/drawable/DrawableBase.hpp"
-#include "gfx/drawable/WireDrawable.hpp"
+#include "WireDrawable.hpp"
+#include "gfx/DrawableBase.hpp"
 #include "object/Guides.hpp"
 
 static EditableMesh ConstructGuides(int numCell, int numBlock, float size = 2.0f);

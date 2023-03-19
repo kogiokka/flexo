@@ -2,6 +2,7 @@
 #include <utility>
 #include <vector>
 
+#include "WireDrawable.hpp"
 #include "Wireframe.hpp"
 #include "gfx/DrawTask.hpp"
 #include "gfx/Graphics.hpp"
@@ -14,7 +15,6 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
-#include "gfx/drawable/WireDrawable.hpp"
 
 WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
 {

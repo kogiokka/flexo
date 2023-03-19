@@ -1,7 +1,7 @@
 #ifndef WIRE_DRAWABLE_H
 #define WIRE_DRAWABLE_H
 
-#include "gfx/drawable/IndexedDrawable.hpp"
+#include "IndexedDrawable.hpp"
 
 class Graphics;
 struct Wireframe;
