@@ -100,6 +100,7 @@ add_custom_command(TARGET flexo POST_BUILD
 )
 
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+    target_link_libraries(flexo PRIVATE flexo::msw)
     add_custom_command(TARGET flexo POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
                 "$<TARGET_FILE:wx::base>"
