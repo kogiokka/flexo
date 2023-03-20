@@ -51,6 +51,6 @@ target_sources(gfx
 
 target_include_directories(gfx PUBLIC include)
 target_link_libraries(gfx PUBLIC glad::glad)
-target_link_libraries(gfx PRIVATE stb::image flexo::log)
+target_link_libraries(gfx PRIVATE stb::image glm::glm flexo::log)
 
 add_library(flexo::gfx ALIAS gfx)
