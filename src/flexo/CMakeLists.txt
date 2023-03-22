@@ -62,6 +62,7 @@ add_subdirectory(log)
 add_subdirectory(gfx)
 add_subdirectory(drawable)
 add_subdirectory(msw)
+add_subdirectory(shader)
 
 target_include_directories(flexo PRIVATE include)
 
@@ -81,6 +82,8 @@ PRIVATE
     ${CMAKE_DL_LIBS}
 )
 
+add_dependencies(flexo shader)
+
 if(OpenMP_CXX_FOUND AND NOT (CMAKE_CXX_COMPILER_ID MATCHES "MSVC"))
     target_link_libraries(flexo PRIVATE OpenMP::OpenMP_CXX)
 endif()
@@ -92,9 +95,6 @@ add_custom_command(TARGET flexo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/images"
         "$<TARGET_FILE_DIR:flexo>/images"
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_CURRENT_SOURCE_DIR}/shader"
-        "$<TARGET_FILE_DIR:flexo>/shader"
     COMMENT "Copying resources to build tree..."
     VERBATIM
 )
