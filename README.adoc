@@ -10,10 +10,14 @@ The program requires C++17 and uses CMake as its build system.
 
 === Dependencies
 
- * wxWidgets 3.2.1 (bundled)
- * glm 0.9.9.8 (bundled)
+ * wxWidgets 3.2.2.1
+ * glm 0.9.9.8
  * glad (bundled)
  * librvl (bundled)
+
+There are FetchContent scripts to download and build the dependencies
+automatically, so you should be able to compile the project without any
+prerequisite.
 
 === CLI
 
@@ -26,5 +30,5 @@ cmake -S <path-to-source-tree> -B <path-to-build-tree> -D CMAKE_BUILD_TYPE=Relea
 cmake --build <path-to-build-tree>
 
 # Run the program
-cd <path-to-build-tree>; ./flexo
+cd <path-to-build-tree>/bin; ./flexo
 ----
