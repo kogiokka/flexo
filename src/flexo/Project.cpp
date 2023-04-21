@@ -32,6 +32,8 @@
 #include "object/Torus.hpp"
 #include "pane/SceneViewportPane.hpp"
 
+constexpr auto PI = 3.14159265358979323846;
+
 FlexoProject::FlexoProject()
     : m_frame {}
     , m_panel {}
@@ -279,13 +281,21 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
         bool isCyclicX = false;
         bool isCyclicY = false;
         MapFlags flags = MapFlags_CyclicNone;
-        MapInitState state = MapInitState_Random;
+
+        enum MapInitState {
+            MapInitState_Plane = 0,
+            MapInitState_Cylinder,
+            MapInitState_Random,
+        };
+
+        int state = 0;
 
         auto* widthCtrl = dlg.AddInputInteger("Width", width);
         auto* heightCtrl = dlg.AddInputInteger("Height", height);
         auto* chkCyclicX = dlg.AddCheckBoxWithHeading("Cyclic on", "X", isCyclicX);
         auto* chkCyclicY = dlg.AddCheckBox("Y", isCyclicY);
         auto* initStatePlane = dlg.AddRadioButtonWithHeading("Initialize Method", "Plane", true);
+        dlg.AddRadioButton("Cylinder", false);
         dlg.AddRadioButton("Random", false);
 
         wxIntegerValidator<int> validDimen;
@@ -302,9 +312,14 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             if (isCyclicY) {
                 flags |= MapFlags_CyclicY;
             }
+
             if (widthCtrl->GetValue().ToLong(&width) && heightCtrl->GetValue().ToLong(&height)) {
-                if (initStatePlane->GetValue()) {
-                    state = MapInitState_Plane;
+
+                for (auto* btn = initStatePlane->GetFirstInGroup(); btn != nullptr; btn = btn->GetNextInGroup()) {
+                    if (btn->GetValue()) {
+                        break;
+                    }
+                    ++state;
                 }
 
                 BoundingBox box = { { 5.0f, 5.0f, 5.0f }, { -5.0f, -5.0f, -5.0f } };
@@ -316,7 +331,9 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
                 float const w = static_cast<float>(width - 1);
                 float const h = static_cast<float>(height - 1);
 
-                if (state == MapInitState_Random) {
+                switch (static_cast<MapInitState>(state)) {
+                default:
+                case MapInitState_Random: {
                     RandomRealNumber<float> xRng(box.min.x, box.max.x);
                     RandomRealNumber<float> yRng(box.min.y, box.max.y);
                     RandomRealNumber<float> zRng(box.min.z, box.max.z);
@@ -328,7 +345,8 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
                                                     Vec2f { i / w, j / h });
                         }
                     }
-                } else if (state == MapInitState_Plane) {
+                } break;
+                case MapInitState_Plane: {
                     float dx = 2.0f / static_cast<float>(width - 1);
                     float dy = 2.0f / static_cast<float>(height - 1);
 
@@ -339,6 +357,20 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
                                                     Vec2f { i / w, j / h });
                         }
                     }
+                } break;
+                case MapInitState_Cylinder: {
+                    float dr = glm::radians(360.0f) / static_cast<float>(width - 1);
+                    float dz = 2.0f * PI * 1.0f / static_cast<float>(height - 1);
+
+                    for (int j = 0; j < height; ++j) {
+                        for (int i = 0; i < width; ++i) {
+                            auto rad = i * dr;
+                            map->nodes.emplace_back(Vec3f { cos(rad), sin(rad), j * dz },
+                                                    Vec2f { static_cast<float>(i), static_cast<float>(j) },
+                                                    Vec2f { i / w, j / h });
+                        }
+                    }
+                } break;
                 }
 
                 map->size.x = width;

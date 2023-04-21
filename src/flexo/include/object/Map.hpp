@@ -15,11 +15,6 @@ enum MapFlags_ : int {
     MapFlags_CyclicY = 1 << 2,
 };
 
-typedef enum {
-    MapInitState_Plane,
-    MapInitState_Random,
-} MapInitState;
-
 class Graphics;
 struct EditableMesh;
 
