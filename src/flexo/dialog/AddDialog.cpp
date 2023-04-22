@@ -16,19 +16,20 @@ AddDialog::AddDialog(wxWindow* parent, wxString const& title, int numRows)
     m_grid->AddGrowableCol(0, 4);
     m_grid->AddGrowableCol(1, 5);
 
-    wxSizer* paneSizer = new wxBoxSizer(wxVERTICAL);
-    paneSizer->Add(m_grid, wxSizerFlags().Expand().Border(wxALL, 16));
-
     wxFont font = GetFont();
     font.SetPointSize(font.GetPointSize() - 1);
     m_widgetFont = font;
     m_widgetLabelFont = font;
 
-    paneSizer->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), wxSizerFlags().Right().Border());
+    m_defaultSize = GetSize();
+    m_topSizer = new wxBoxSizer(wxVERTICAL);
+    m_topSizer->Add(m_grid, wxSizerFlags().Expand().Border(wxALL, 16));
+    m_topSizer->Add(CreateStdDialogButtonSizer(wxOK | wxCANCEL), wxSizerFlags().Right().Border(wxALL, 16));
 
-    SetSizer(paneSizer);
+    SetAutoLayout(true);
+    SetSizer(m_topSizer);
 
-    CenterOnScreen();
+    CenterOnParent();
 }
 
 wxTextCtrl* AddDialog::CreateLabel(wxString const& text)
@@ -45,6 +46,8 @@ void AddDialog::AppendControl(wxString const& labelText, wxControl* control)
 {
     m_grid->Add(CreateLabel(labelText), m_labelFlags);
     m_grid->Add(control, m_ctrlFlags);
+    m_topSizer->SetSizeHints(this);
+    m_topSizer->SetMinSize(m_defaultSize);
 }
 
 wxTextCtrl* AddDialog::AddInputInteger(wxString const& label, int value)

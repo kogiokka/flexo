@@ -23,11 +23,13 @@ protected:
     void AppendControl(wxString const& labelText, wxControl* control);
     wxTextCtrl* CreateLabel(wxString const& text);
 
+    wxSizer* m_topSizer;
     wxFlexGridSizer* m_grid;
     wxSizerFlags m_labelFlags;
     wxSizerFlags m_ctrlFlags;
     wxFont m_widgetFont;
     wxFont m_widgetLabelFont;
+    wxSize m_defaultSize;
 
     wxDECLARE_NO_COPY_CLASS(AddDialog);
 };
