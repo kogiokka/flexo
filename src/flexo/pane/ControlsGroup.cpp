@@ -1,8 +1,7 @@
 #include <wx/stattext.h>
 
+#include "event/SliderFloatEvent.hpp"
 #include "pane/ControlsGroup.hpp"
-
-wxDEFINE_EVENT(EVT_SLIDER_FLOAT, SliderFloatEvent);
 
 ControlsGroup::ControlsGroup(wxWindow* parent, wxString const& title, int numRows)
     : wxCollapsiblePane(parent, wxID_ANY, title, wxDefaultPosition, wxDefaultSize)

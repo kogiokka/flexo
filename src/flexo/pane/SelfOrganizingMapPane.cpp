@@ -11,6 +11,7 @@
 
 #include "Project.hpp"
 #include "SelfOrganizingMap.hpp"
+#include "event/SliderFloatEvent.hpp"
 #include "object/Map.hpp"
 #include "object/ObjectList.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"

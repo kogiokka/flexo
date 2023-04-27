@@ -15,31 +15,6 @@
 #include <wx/textctrl.h>
 #include <wx/window.h>
 
-class SliderFloatEvent : public wxEvent
-{
-public:
-    SliderFloatEvent(wxEventType eventType, int winid, float value)
-        : wxEvent(winid, eventType)
-        , m_value(value)
-    {
-    }
-    float GetValue() const
-    {
-        return m_value;
-    }
-    virtual wxEvent* Clone() const
-    {
-        return new SliderFloatEvent(*this);
-    }
-
-private:
-    float m_value;
-};
-
-wxDECLARE_EVENT(EVT_SLIDER_FLOAT, SliderFloatEvent);
-typedef void (wxEvtHandler::*SliderFloatEventFunction)(SliderFloatEvent&);
-#define SliderFloatEventHandler(func) (&func)
-
 class ControlsGroup : public wxCollapsiblePane
 {
     wxFlexGridSizer* m_grid;
