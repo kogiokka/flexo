@@ -72,17 +72,11 @@ void FlexoProject::CreateScene()
 {
     auto& scene = SceneViewportPane::Get(*this);
 
-    auto light = std::make_shared<Sphere>();
-    light->SetLocation(0.0f, 5.0f, 0.0f);
-    light->SetScale(0.2f, 0.2f, 0.2f);
-    light->ApplyTransform();
-
     auto cube = std::make_shared<Cube>();
     cube->SetTexture(Bind::TextureManager::Resolve(scene.GetGL(), m_imageFile.c_str(), 0));
     cube->SetViewFlags(ObjectViewFlag_Solid);
 
     scene.AcceptObject(ObjectType_Cube, cube);
-    scene.AcceptObject(ObjectType_Light, light);
     scene.AcceptObject(ObjectType_Guides, std::make_shared<Guides>());
 }
 
