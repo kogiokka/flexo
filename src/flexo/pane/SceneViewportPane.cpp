@@ -156,9 +156,9 @@ void SceneViewportPane::InitGL()
     m_gfx->SetCamera(CreateDefaultCamera());
 }
 
-void SceneViewportPane::AcceptObject(enum ObjectType type, std::shared_ptr<Object> object)
+void SceneViewportPane::AcceptObject(std::shared_ptr<Object> object)
 {
-    ObjectList::Get(m_project).Add(type, object);
+    ObjectList::Get(m_project).Add(object);
 }
 
 Graphics& SceneViewportPane::GetGL()

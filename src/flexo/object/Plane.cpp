@@ -1,6 +1,7 @@
 #include "object/Plane.hpp"
 
 Plane::Plane(float size)
+    : Object(ObjectType_Plane)
 {
     m_mesh = ConstructPlane(size);
 }

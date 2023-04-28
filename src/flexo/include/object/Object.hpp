@@ -16,6 +16,21 @@
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 
+#define OBJECT_TYPES                                                                                                   \
+    X(ObjectType_Plane, "Plane")                                                                                       \
+    X(ObjectType_Grid, "Grid")                                                                                         \
+    X(ObjectType_Cube, "Cube")                                                                                         \
+    X(ObjectType_Guides, "Guides")                                                                                     \
+    X(ObjectType_Model, "Model")                                                                                       \
+    X(ObjectType_Map, "Map")                                                                                           \
+    X(ObjectType_Light, "Light")                                                                                       \
+    X(ObjectType_Sphere, "Sphere")                                                                                     \
+    X(ObjectType_Torus, "Torus")
+
+#define X(type, name) type,
+enum ObjectType : unsigned int { OBJECT_TYPES };
+#undef X
+
 class Graphics;
 struct TransformStack;
 
@@ -46,8 +61,7 @@ public:
 
     using DrawList = std::vector<std::shared_ptr<Drawable>>;
 
-    Object();
-    ~Object();
+    Object(ObjectType type);
 
     void SetID(std::string id);
     void SetViewFlags(ObjectViewFlag flags);
@@ -55,6 +69,7 @@ public:
     void SetTexture(std::shared_ptr<Bind::Texture2D> texture);
 
     std::string GetID() const;
+    ObjectType GetType() const;
     void SetVisible(bool visible);
     bool IsVisible() const;
 
@@ -72,6 +87,7 @@ public:
 protected:
     TransformStack GenerateTransformStack();
 
+    ObjectType m_type;
     std::string m_id;
     std::shared_ptr<Bind::Texture2D> m_texture;
     ObjectViewFlag m_flags;

@@ -76,8 +76,8 @@ void FlexoProject::CreateScene()
     cube->SetTexture(Bind::TextureManager::Resolve(scene.GetGL(), m_imageFile.c_str(), 0));
     cube->SetViewFlags(ObjectViewFlag_Solid);
 
-    scene.AcceptObject(ObjectType_Cube, cube);
-    scene.AcceptObject(ObjectType_Guides, std::make_shared<Guides>());
+    scene.AcceptObject(cube);
+    scene.AcceptObject(std::make_shared<Guides>());
 }
 
 void FlexoProject::CreateProject()
@@ -151,7 +151,7 @@ void FlexoProject::ImportVolumetricModel(wxString const& path)
 
     theModel = model;
 
-    SceneViewportPane::Get(*this).AcceptObject(ObjectType_Model, theModel.lock());
+    SceneViewportPane::Get(*this).AcceptObject(theModel.lock());
 }
 
 void FlexoProject::OnMenuAdd(wxCommandEvent& event)
@@ -160,7 +160,6 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
 
     auto const id = event.GetId();
     std::shared_ptr<Object> obj;
-    ObjectType type;
 
     if (id == EVT_MENU_ADD_PLANE) {
         AddDialog dlg(projwin, "Add Plane", 1);
@@ -175,7 +174,6 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             log_info("Add Plane (size: %.3f)", size);
 
             obj = std::make_shared<Plane>(size);
-            type = ObjectType_Plane;
         } else {
             return;
         }
@@ -198,7 +196,6 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             log_info("Add Grid (X-div: %ld, Y-div: %ld, size: %.3f)", xdiv, ydiv, size);
 
             obj = std::make_shared<Grid>(xdiv, ydiv, size);
-            type = ObjectType_Grid;
         } else {
             return;
         }
@@ -215,7 +212,6 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             log_info("Add Cube (size: %.3f)", size);
 
             obj = std::make_shared<Cube>(size);
-            type = ObjectType_Cube;
         } else {
             return;
         }
@@ -237,7 +233,6 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             log_info("Add UV Sphere (segments: %ld, rings: %ld, radius: %.3f)", segs, rings, radius);
 
             obj = std::make_shared<Sphere>(segs, rings, radius);
-            type = ObjectType_Sphere;
         } else {
             return;
         }
@@ -264,7 +259,6 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
                      mjSeg, mnSeg, mjRad, mnRad);
 
             obj = std::make_shared<Torus>(mjSeg, mnSeg, mjRad, mnRad);
-            type = ObjectType_Torus;
         } else {
             return;
         }
@@ -386,7 +380,6 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             obj->SetTexture(
                 Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), m_imageFile.c_str(), 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
-            type = ObjectType_Map;
         } else {
             return;
         }
@@ -395,5 +388,5 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
         return;
     }
 
-    SceneViewportPane::Get(*this).AcceptObject(type, obj);
+    SceneViewportPane::Get(*this).AcceptObject(obj);
 }

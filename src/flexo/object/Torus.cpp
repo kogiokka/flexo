@@ -1,6 +1,7 @@
 #include "object/Torus.hpp"
 
 Torus::Torus(int majorSeg, int minorSeg, float majorRad, float minorRad)
+    : Object(ObjectType_Torus)
 {
     m_mesh = ConstructTorus(majorSeg, minorSeg, majorRad, minorRad);
 }

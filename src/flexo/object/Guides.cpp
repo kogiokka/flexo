@@ -8,6 +8,7 @@
 static EditableMesh ConstructGuides(int numCell, int numBlock, float size = 2.0f);
 
 Guides::Guides()
+    : Object(ObjectType_Guides)
 {
     SetViewFlags(ObjectViewFlag_Wire);
 

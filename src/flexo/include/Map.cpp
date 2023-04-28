@@ -9,6 +9,12 @@ EditableMesh const& Map<InDim, OutDim>::GetMesh() const
 }
 
 template <int InDim, int OutDim>
+Map<InDim, OutDim>::Map()
+    : Object(ObjectType_Map)
+{
+}
+
+template <int InDim, int OutDim>
 void Map<InDim, OutDim>::GenerateMesh()
 {
     EditableMesh mesh;
