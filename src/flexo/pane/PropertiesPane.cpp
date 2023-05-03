@@ -4,7 +4,7 @@
 #include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
 
-wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_CHANGED, wxCommandEvent);
+wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
 
 #define DISPLAY_TYPE_LIST                                                                                              \
     X(DisplayType_Solid, "Solid")                                                                                      \
@@ -23,6 +23,8 @@ PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
     , m_project(project)
 {
+    m_project.Bind(EVT_PROPERTIES_PANE_OBJECT_SELECTED, &PropertiesPane::OnObjectSelected, this);
+
     auto* transform = AddGroup("Transform", 10);
     m_transform.location.x = transform->AddInputText("Location X", "0");
     m_transform.location.y = transform->AddInputText("         Y", "0");
@@ -80,7 +82,6 @@ PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
 
     m_combo->Bind(wxEVT_COMBOBOX, &PropertiesPane::OnSelectDisplayType, this);
     m_chkWire->Bind(wxEVT_CHECKBOX, &PropertiesPane::OnCheckWireframe, this);
-    m_project.Bind(EVT_PROPERTIES_PANE_OBJECT_CHANGED, &PropertiesPane::OnObjectChanged, this);
 
     Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent&) {
         if (m_obj) {
@@ -91,9 +92,9 @@ PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
     });
 }
 
-void PropertiesPane::OnObjectChanged(wxCommandEvent& event)
+void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
 {
-    GetObjectStatus(event.GetString().ToStdString());
+    GetObjectStatus(event.GetId());
 }
 
 void PropertiesPane::OnSelectDisplayType(wxCommandEvent& event)

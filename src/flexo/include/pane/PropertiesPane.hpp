@@ -8,10 +8,11 @@
 #include <wx/event.h>
 #include <wx/textctrl.h>
 
+#include "event/ObjectSelectEvent.hpp"
 #include "object/ObjectList.hpp"
 #include "pane/ControlsPaneBase.hpp"
 
-wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_CHANGED, wxCommandEvent);
+wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
 
 struct TransformCtrl {
     struct LocationCtrl {
@@ -43,7 +44,7 @@ public:
     PropertiesPane(wxWindow* parent, FlexoProject& project);
 
 private:
-    void OnObjectChanged(wxCommandEvent& event);
+    void OnObjectSelected(ObjectSelectEvent& event);
     void OnSelectDisplayType(wxCommandEvent& event);
     void OnCheckWireframe(wxCommandEvent& event);
     void GetObjectStatus(std::string const& id);
