@@ -9,32 +9,12 @@
 #include <wx/textctrl.h>
 
 #include "event/ObjectSelectEvent.hpp"
+#include "event/Vec3Event.hpp"
 #include "object/ObjectList.hpp"
 #include "pane/ControlsPaneBase.hpp"
+#include "pane/TransfromWidget.hpp"
 
 wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
-
-struct TransformCtrl {
-    struct LocationCtrl {
-        wxTextCtrl* x;
-        wxTextCtrl* y;
-        wxTextCtrl* z;
-    };
-    struct RotationCtrl {
-        wxTextCtrl* x;
-        wxTextCtrl* y;
-        wxTextCtrl* z;
-    };
-    struct ScaleCtrl {
-        wxTextCtrl* x;
-        wxTextCtrl* y;
-        wxTextCtrl* z;
-    };
-
-    LocationCtrl location;
-    RotationCtrl rotation;
-    ScaleCtrl scale;
-};
 
 class FlexoProject;
 
@@ -48,15 +28,17 @@ private:
     void OnSelectDisplayType(wxCommandEvent& event);
     void OnCheckWireframe(wxCommandEvent& event);
     void GetObjectStatus(std::string const& id);
-    void OnTransformLocation(wxCommandEvent& event);
-    void OnTransformRotation(wxCommandEvent& event);
-    void OnTransformScale(wxCommandEvent& event);
+
+    void OnTransformLocation(Vec3Event& event);
+    void OnTransformRotation(Vec3Event& event);
+    void OnTransformScale(Vec3Event& event);
+    void OnTransformApply(Vec3Event& event);
 
     bool m_hasWireframe;
     std::shared_ptr<Object> m_obj;
     wxCheckBox* m_chkWire;
     wxComboBox* m_combo;
-    TransformCtrl m_transform;
+    TransformWidget* m_transform;
     FlexoProject& m_project;
 };
 

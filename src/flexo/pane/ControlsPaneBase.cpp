@@ -19,3 +19,9 @@ ControlsGroup* ControlsPaneBase::AddGroup(wxString const& title, int numRows)
     GetSizer()->Add(group, wxSizerFlags(0).Expand().Border(wxLEFT | wxRIGHT, 15));
     return group;
 }
+
+void ControlsPaneBase::AddGroup(ControlsGroup* group)
+{
+    GetSizer()->AddSpacer(3);
+    GetSizer()->Add(group, wxSizerFlags(0).Expand().Border(wxLEFT | wxRIGHT, 15));
+}

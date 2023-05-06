@@ -33,6 +33,7 @@ PRIVATE
     "pane/SelfOrganizingMapPane.cpp"
     "pane/SceneViewportPane.cpp"
     "pane/TextureMappingPane.cpp"
+    "pane/TransformWidget.cpp"
     "event/SliderFloatEvent.cpp"
 
     "object/Object.cpp"

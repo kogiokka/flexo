@@ -16,6 +16,7 @@ public:
 
 protected:
     ControlsGroup* AddGroup(wxString const& title, int numRows);
+    void AddGroup(ControlsGroup* group);
 
     FlexoProject& m_project;
 };

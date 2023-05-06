@@ -3,6 +3,7 @@
 #include "Project.hpp"
 #include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
+#include "pane/TransfromWidget.hpp"
 
 wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
 
@@ -24,52 +25,16 @@ PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
     , m_project(project)
 {
     m_project.Bind(EVT_PROPERTIES_PANE_OBJECT_SELECTED, &PropertiesPane::OnObjectSelected, this);
-
-    auto* transform = AddGroup("Transform", 10);
-    m_transform.location.x = transform->AddInputText("Location X", "0");
-    m_transform.location.y = transform->AddInputText("         Y", "0");
-    m_transform.location.z = transform->AddInputText("         Z", "0");
-    m_transform.rotation.x = transform->AddInputText("Rotoation X", "0");
-    m_transform.rotation.y = transform->AddInputText("          Y", "0");
-    m_transform.rotation.z = transform->AddInputText("          Z", "0");
-    m_transform.scale.x = transform->AddInputText("Scale X", "1.0");
-    m_transform.scale.y = transform->AddInputText("      Y", "1.0");
-    m_transform.scale.z = transform->AddInputText("      Z", "1.0");
-
-    m_transform.location.x->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformLocation, this);
-    m_transform.location.y->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformLocation, this);
-    m_transform.location.z->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformLocation, this);
-    m_transform.rotation.x->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformRotation, this);
-    m_transform.rotation.y->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformRotation, this);
-    m_transform.rotation.z->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformRotation, this);
-    m_transform.scale.x->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformScale, this);
-    m_transform.scale.y->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformScale, this);
-    m_transform.scale.z->Bind(wxEVT_TEXT, &PropertiesPane::OnTransformScale, this);
-
-    auto* btnApply = transform->AddButton("Apply");
-    btnApply->SetToolTip("Apply Object Transform");
-    btnApply->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) {
+    m_project.Bind(EVT_TRANSFORM_WIDGET_LOCATION, &PropertiesPane::OnTransformLocation, this);
+    m_project.Bind(EVT_TRANSFORM_WIDGET_ROTATION, &PropertiesPane::OnTransformRotation, this);
+    m_project.Bind(EVT_TRANSFORM_WIDGET_SCALE, &PropertiesPane::OnTransformScale, this);
+    m_project.Bind(EVT_TRANSFORM_WIDGET_APPLY, [this](wxCommandEvent&) {
         m_obj->ApplyTransform();
         m_obj->GenerateDrawables(SceneViewportPane::Get(m_project).GetGL());
-        m_transform.location.x->Clear();
-        m_transform.location.y->Clear();
-        m_transform.location.z->Clear();
-        m_transform.rotation.x->Clear();
-        m_transform.rotation.y->Clear();
-        m_transform.rotation.z->Clear();
-        m_transform.scale.x->Clear();
-        m_transform.scale.y->Clear();
-        m_transform.scale.z->Clear();
-        *m_transform.location.x << 0.0f;
-        *m_transform.location.y << 0.0f;
-        *m_transform.location.z << 0.0f;
-        *m_transform.rotation.x << 0.0f;
-        *m_transform.rotation.y << 0.0f;
-        *m_transform.rotation.z << 0.0f;
-        *m_transform.scale.x << 1.0;
-        *m_transform.scale.y << 1.0;
-        *m_transform.scale.z << 1.0;
     });
+
+    m_transform = new TransformWidget(this, m_project);
+    AddGroup(m_transform);
 
     auto* viewport = AddGroup("Viewport Display", 2);
     m_chkWire = viewport->AddCheckBoxWithHeading("Show", "Wireframe", false);
@@ -150,31 +115,20 @@ void PropertiesPane::OnCheckWireframe(wxCommandEvent&)
     }
 }
 
-void PropertiesPane::OnTransformLocation(wxCommandEvent&)
+void PropertiesPane::OnTransformLocation(Vec3Event& event)
 {
-    double x, y, z;
-    auto [xctrl, yctrl, zctrl] = m_transform.location;
-    if (xctrl->GetValue().ToDouble(&x) && yctrl->GetValue().ToDouble(&y) && zctrl->GetValue().ToDouble(&z)) {
-        m_obj->SetLocation(x, y, z);
-    }
+    m_obj->SetLocation(event.GetX(), event.GetY(), event.GetZ());
 }
 
-void PropertiesPane::OnTransformRotation(wxCommandEvent&)
+void PropertiesPane::OnTransformRotation(Vec3Event& event)
 {
-    double x, y, z;
-    auto [xctrl, yctrl, zctrl] = m_transform.rotation;
-    if (xctrl->GetValue().ToDouble(&x) && yctrl->GetValue().ToDouble(&y) && zctrl->GetValue().ToDouble(&z)) {
-        m_obj->SetRotation(glm::radians(x), glm::radians(y), glm::radians(z));
-    }
+    using namespace glm;
+    m_obj->SetRotation(radians(event.GetX()), radians(event.GetY()), radians(event.GetZ()));
 }
 
-void PropertiesPane::OnTransformScale(wxCommandEvent&)
+void PropertiesPane::OnTransformScale(Vec3Event& event)
 {
-    double x, y, z;
-    auto [xctrl, yctrl, zctrl] = m_transform.scale;
-    if (xctrl->GetValue().ToDouble(&x) && yctrl->GetValue().ToDouble(&y) && zctrl->GetValue().ToDouble(&z)) {
-        m_obj->SetScale(x, y, z);
-    }
+    m_obj->SetScale(event.GetX(), event.GetY(), event.GetZ());
 }
 
 void PropertiesPane::GetObjectStatus(std::string const& id)
@@ -211,24 +165,8 @@ void PropertiesPane::GetObjectStatus(std::string const& id)
 
     m_chkWire->SetValue(m_hasWireframe);
 
-    // Transform
     auto tf = m_obj->GetTransform();
-    m_transform.location.x->Clear();
-    m_transform.location.y->Clear();
-    m_transform.location.z->Clear();
-    m_transform.rotation.x->Clear();
-    m_transform.rotation.y->Clear();
-    m_transform.rotation.z->Clear();
-    m_transform.scale.x->Clear();
-    m_transform.scale.y->Clear();
-    m_transform.scale.z->Clear();
-    *m_transform.location.x << tf.location.x;
-    *m_transform.location.y << tf.location.y;
-    *m_transform.location.z << tf.location.z;
-    *m_transform.rotation.x << tf.rotation.x;
-    *m_transform.rotation.y << tf.rotation.y;
-    *m_transform.rotation.z << tf.rotation.z;
-    *m_transform.scale.x << tf.scale.x;
-    *m_transform.scale.y << tf.scale.y;
-    *m_transform.scale.z << tf.scale.z;
+    m_transform->SetLocation(tf.location.x, tf.location.y, tf.location.z);
+    m_transform->SetRotation(tf.rotation.x, tf.rotation.y, tf.rotation.z);
+    m_transform->SetScale(tf.scale.x, tf.scale.y, tf.scale.z);
 }
