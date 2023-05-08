@@ -3,8 +3,6 @@
 
 #include <string>
 
-#include <wx/checkbox.h>
-#include <wx/combobox.h>
 #include <wx/event.h>
 #include <wx/textctrl.h>
 
@@ -13,6 +11,7 @@
 #include "object/ObjectList.hpp"
 #include "pane/ControlsPaneBase.hpp"
 #include "pane/TransfromWidget.hpp"
+#include "pane/ViewportDisplayWidget.hpp"
 
 wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
 
@@ -25,7 +24,7 @@ public:
 
 private:
     void OnObjectSelected(ObjectSelectEvent& event);
-    void OnSelectDisplayType(wxCommandEvent& event);
+    void OnSelectDisplay(wxCommandEvent& event);
     void OnCheckWireframe(wxCommandEvent& event);
     void GetObjectStatus(std::string const& id);
 
@@ -36,8 +35,7 @@ private:
 
     bool m_hasWireframe;
     std::shared_ptr<Object> m_obj;
-    wxCheckBox* m_chkWire;
-    wxComboBox* m_combo;
+    ViewportDisplayWidget* m_display;
     TransformWidget* m_transform;
     FlexoProject& m_project;
 };

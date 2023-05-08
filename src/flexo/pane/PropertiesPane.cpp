@@ -4,21 +4,9 @@
 #include "gfx/Renderer.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/TransfromWidget.hpp"
+#include "pane/ViewportDisplayWidget.hpp"
 
 wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
-
-#define DISPLAY_TYPE_LIST                                                                                              \
-    X(DisplayType_Solid, "Solid")                                                                                      \
-    X(DisplayType_Textured, "Textured")                                                                                \
-    X(DisplayType_Wire, "Wire")
-
-#define X(type, name) type,
-enum DisplayType : unsigned int { DISPLAY_TYPE_LIST };
-#undef X
-
-#define X(type, name) name,
-static std::string DisplayTypeNames[] = { DISPLAY_TYPE_LIST };
-#undef X
 
 PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
@@ -33,20 +21,14 @@ PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
         m_obj->GenerateDrawables(SceneViewportPane::Get(m_project).GetGL());
     });
 
+    m_project.Bind(EVT_VIEWPORT_DISPLAY_WIDGET_CHECK_WIREFRAME, &PropertiesPane::OnCheckWireframe, this);
+    m_project.Bind(EVT_VIEWPORT_DISPLAY_WIDGET_SELECT_DISPLAY, &PropertiesPane::OnSelectDisplay, this);
+
     m_transform = new TransformWidget(this, m_project);
+    m_display = new ViewportDisplayWidget(this, m_project);
+
     AddGroup(m_transform);
-
-    auto* viewport = AddGroup("Viewport Display", 2);
-    m_chkWire = viewport->AddCheckBoxWithHeading("Show", "Wireframe", false);
-    m_combo = viewport->AddComboBox("Display As");
-
-    for (auto const& name : DisplayTypeNames) {
-        m_combo->Append(name);
-    }
-    m_combo->SetSelection(DisplayType_Solid);
-
-    m_combo->Bind(wxEVT_COMBOBOX, &PropertiesPane::OnSelectDisplayType, this);
-    m_chkWire->Bind(wxEVT_CHECKBOX, &PropertiesPane::OnCheckWireframe, this);
+    AddGroup(m_display);
 
     Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent&) {
         if (m_obj) {
@@ -62,36 +44,36 @@ void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
     GetObjectStatus(event.GetId());
 }
 
-void PropertiesPane::OnSelectDisplayType(wxCommandEvent& event)
+void PropertiesPane::OnSelectDisplay(wxCommandEvent& event)
 {
     auto selection = event.GetSelection();
     log_trace("Changing ObjectViewFlags for \"%s\"", m_obj->GetID().c_str());
     switch (selection) {
-    case DisplayType_Solid:
+    case ViewportDisplay_Solid:
         if (m_hasWireframe) {
             m_obj->SetViewFlags(ObjectViewFlag_SolidWithWireframe);
         } else {
             m_obj->SetViewFlags(ObjectViewFlag_Solid);
         }
         break;
-    case DisplayType_Textured:
+    case ViewportDisplay_Textured:
         if (m_hasWireframe) {
             m_obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
         } else {
             m_obj->SetViewFlags(ObjectViewFlag_Textured);
         }
         break;
-    case DisplayType_Wire:
+    case ViewportDisplay_Wire:
         m_obj->SetViewFlags(ObjectViewFlag_Wire);
         break;
     }
 }
 
-void PropertiesPane::OnCheckWireframe(wxCommandEvent&)
+void PropertiesPane::OnCheckWireframe(wxCommandEvent& event)
 {
     auto flags = m_obj->GetViewFlags();
 
-    m_hasWireframe = m_chkWire->GetValue();
+    m_hasWireframe = event.GetInt();
 
     log_trace("Changing ObjectViewFlags for \"%s\"", m_obj->GetID().c_str());
     if (m_hasWireframe) {
@@ -145,25 +127,25 @@ void PropertiesPane::GetObjectStatus(std::string const& id)
     log_trace("Detecting ObjectViewFlags for \"%s\"", m_obj->GetID().c_str());
     switch (m_obj->GetViewFlags()) {
     case ObjectViewFlag_Solid:
-        m_combo->SetSelection(DisplayType_Solid);
+        m_display->SetDisplay(ViewportDisplay_Solid);
         break;
     case ObjectViewFlag_Textured:
-        m_combo->SetSelection(DisplayType_Textured);
+        m_display->SetDisplay(ViewportDisplay_Textured);
         break;
     case ObjectViewFlag_Wire:
-        m_combo->SetSelection(DisplayType_Wire);
+        m_display->SetDisplay(ViewportDisplay_Wire);
         break;
     case ObjectViewFlag_SolidWithWireframe:
-        m_combo->SetSelection(DisplayType_Solid);
+        m_display->SetDisplay(ViewportDisplay_Solid);
         m_hasWireframe = true;
         break;
     case ObjectViewFlag_TexturedWithWireframe:
-        m_combo->SetSelection(DisplayType_Textured);
+        m_display->SetDisplay(ViewportDisplay_Textured);
         m_hasWireframe = true;
         break;
     }
 
-    m_chkWire->SetValue(m_hasWireframe);
+    m_display->SetWireframe(m_hasWireframe);
 
     auto tf = m_obj->GetTransform();
     m_transform->SetLocation(tf.location.x, tf.location.y, tf.location.z);

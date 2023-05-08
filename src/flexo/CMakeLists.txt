@@ -34,6 +34,7 @@ PRIVATE
     "pane/SceneViewportPane.cpp"
     "pane/TextureMappingPane.cpp"
     "pane/TransformWidget.cpp"
+    "pane/ViewportDisplayWidget.cpp"
     "event/SliderFloatEvent.cpp"
 
     "object/Object.cpp"
