@@ -14,7 +14,6 @@ class ControlsPaneBase : public wxScrolledWindow
 public:
     ControlsPaneBase(wxWindow* parent, FlexoProject& project);
 
-protected:
     ControlsGroup* AddGroup(wxString const& title, int numRows);
     void AddGroup(ControlsGroup* group);
 
