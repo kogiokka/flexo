@@ -134,6 +134,10 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, FlexoProject& project)
     m_sceneTree->Bind(wxEVT_TREELIST_SELECTION_CHANGED, [this](wxTreeListEvent& event) {
         wxTreeListItem const item = event.GetItem();
         ObjectClientData const* data = dynamic_cast<ObjectClientData*>(m_sceneTree->GetItemData(item));
+        if (!data) {
+            return;
+        }
+
         wxString const id = m_sceneTree->GetItemText(item);
         ObjectSelectEvent evt(EVT_PROPERTIES_PANE_OBJECT_SELECTED, this->GetId(), data->GetId(), data->GetType());
         m_project.ProcessEvent(evt);
