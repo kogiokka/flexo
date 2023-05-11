@@ -10,11 +10,16 @@
 wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
 
 PropertiesPane::PropertiesPane(wxWindow* parent, FlexoProject& project)
-    : ControlsPaneBase(parent, project)
+    : wxScrolledWindow(parent)
     , m_props(nullptr)
+    , m_layout(nullptr)
     , m_project(project)
 {
     m_project.Bind(EVT_PROPERTIES_PANE_OBJECT_SELECTED, &PropertiesPane::OnObjectSelected, this);
+
+    m_layout = new wxBoxSizer(wxVERTICAL);
+    SetSizer(m_layout);
+    SetScrollRate(10, 10);
 }
 
 void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
@@ -22,16 +27,22 @@ void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
     auto id = event.GetId();
     auto type = event.GetType();
 
-    if (type == ObjectType_Guides) {
-        m_props = std::make_shared<GuidesPropertiesPane>();
-    } else {
-        m_props = std::make_shared<MeshObjectPropertiesPane>(*this, m_project);
+    if (m_props) {
+        m_props->Destroy();
+    }
 
-        for (auto const& obj : ObjectList::Get(m_project)) {
-            if (obj->GetID() == id) {
-                m_props->BindObject(obj);
-                break;
-            }
+    if (type == ObjectType_Guides) {
+        m_props = new GuidesPropertiesPane(this, m_project);
+    } else {
+        m_props = new MeshObjectPropertiesPane(this, m_project);
+    }
+
+    for (auto const& obj : ObjectList::Get(m_project)) {
+        if (obj->GetID() == id) {
+            m_props->BindObject(obj);
+            break;
         }
     }
+
+    m_layout->Add(m_props, wxSizerFlags(0).Expand());
 }

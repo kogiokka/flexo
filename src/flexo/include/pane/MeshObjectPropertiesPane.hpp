@@ -8,13 +8,11 @@
 #include "pane/TransfromWidget.hpp"
 #include "pane/ViewportDisplayWidget.hpp"
 
-class FlexoProject;
-class PropertiesPane;
 
 class MeshObjectPropertiesPane : public ObjectPropertiesPane
 {
 public:
-    MeshObjectPropertiesPane(PropertiesPane& m_parent, FlexoProject& project);
+    MeshObjectPropertiesPane(wxWindow* parent, FlexoProject& project);
     virtual ~MeshObjectPropertiesPane();
     virtual void BindObject(std::shared_ptr<Object> obj) override;
 
@@ -29,8 +27,6 @@ private:
     bool m_hasWireframe;
     ViewportDisplayWidget* m_display;
     TransformWidget* m_transform;
-    PropertiesPane& m_parent;
-    FlexoProject& m_project;
 };
 
 #endif

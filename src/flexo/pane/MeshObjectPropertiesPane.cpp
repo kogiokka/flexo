@@ -3,9 +3,8 @@
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 
-MeshObjectPropertiesPane::MeshObjectPropertiesPane(PropertiesPane& m_parent, FlexoProject& project)
-    : m_parent(m_parent)
-    , m_project(project)
+MeshObjectPropertiesPane::MeshObjectPropertiesPane(wxWindow* parent, FlexoProject& project)
+    : ObjectPropertiesPane(parent, project)
 {
     m_project.Bind(EVT_TRANSFORM_WIDGET_LOCATION, &MeshObjectPropertiesPane::OnTransformLocation, this);
     m_project.Bind(EVT_TRANSFORM_WIDGET_ROTATION, &MeshObjectPropertiesPane::OnTransformRotation, this);
@@ -18,17 +17,20 @@ MeshObjectPropertiesPane::MeshObjectPropertiesPane(PropertiesPane& m_parent, Fle
     m_project.Bind(EVT_VIEWPORT_DISPLAY_WIDGET_CHECK_WIREFRAME, &MeshObjectPropertiesPane::OnCheckWireframe, this);
     m_project.Bind(EVT_VIEWPORT_DISPLAY_WIDGET_SELECT_DISPLAY, &MeshObjectPropertiesPane::OnSelectDisplay, this);
 
-    m_transform = new TransformWidget(&m_parent, m_project);
-    m_display = new ViewportDisplayWidget(&m_parent, m_project);
+    m_transform = new TransformWidget(this, m_project);
+    m_display = new ViewportDisplayWidget(this, m_project);
 
-    m_parent.AddGroup(m_transform);
-    m_parent.AddGroup(m_display);
+    auto* sizer = new wxBoxSizer(wxVERTICAL);
+
+    sizer->Add(m_transform, wxSizerFlags(0).Expand().Border(wxLEFT | wxRIGHT, 15));
+    sizer->AddSpacer(3);
+    sizer->Add(m_display, wxSizerFlags(0).Expand().Border(wxLEFT | wxRIGHT, 15));
+
+    SetSizer(sizer);
 }
 
 MeshObjectPropertiesPane::~MeshObjectPropertiesPane()
 {
-    delete m_transform;
-    delete m_display;
 }
 
 void MeshObjectPropertiesPane::BindObject(std::shared_ptr<Object> obj)

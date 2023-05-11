@@ -2,9 +2,11 @@
 #define PROPERTIES_PANE_H
 
 #include <memory>
-#include <string>
 
 #include <wx/event.h>
+#include <wx/scrolwin.h>
+#include <wx/sizer.h>
+#include <wx/weakref.h>
 
 #include "event/ObjectSelectEvent.hpp"
 #include "pane/ControlsPaneBase.hpp"
@@ -14,7 +16,7 @@ wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
 
 class FlexoProject;
 
-class PropertiesPane : public ControlsPaneBase
+class PropertiesPane : public wxScrolledWindow
 {
 public:
     PropertiesPane(wxWindow* parent, FlexoProject& project);
@@ -22,7 +24,8 @@ public:
 private:
     void OnObjectSelected(ObjectSelectEvent& event);
 
-    std::shared_ptr<ObjectPropertiesPane> m_props;
+    wxWeakRef<ObjectPropertiesPane> m_props;
+    wxSizer* m_layout;
     FlexoProject& m_project;
 };
 

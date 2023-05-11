@@ -1,4 +1,10 @@
 #include "pane/GuidesPropertiesPane.hpp"
+#include "Project.hpp"
+
+GuidesPropertiesPane::GuidesPropertiesPane(wxWindow* parent, FlexoProject& project)
+    : ObjectPropertiesPane(parent, project)
+{
+}
 
 GuidesPropertiesPane::~GuidesPropertiesPane()
 {
