@@ -127,8 +127,7 @@ void MeshObjectPropertiesPane::OnTransformLocation(Vec3Event& event)
 
 void MeshObjectPropertiesPane::OnTransformRotation(Vec3Event& event)
 {
-    using namespace glm;
-    m_obj->SetRotation(radians(event.GetX()), radians(event.GetY()), radians(event.GetZ()));
+    m_obj->SetRotation(event.GetX(), event.GetY(), event.GetZ());
 }
 
 void MeshObjectPropertiesPane::OnTransformScale(Vec3Event& event)

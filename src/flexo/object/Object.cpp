@@ -154,11 +154,12 @@ Object::Transform Object::GetTransform() const
 
 TransformStack Object::GenerateTransformStack()
 {
+    using namespace glm;
     TransformStack st;
     st.PushTranslate(m_transform.location);
-    st.PushRotate(m_transform.rotation.x, glm::vec3(1.0f, 0.0f, 0.0f));
-    st.PushRotate(m_transform.rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
-    st.PushRotate(m_transform.rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
+    st.PushRotate(radians(m_transform.rotation.x), vec3(1.0f, 0.0f, 0.0f));
+    st.PushRotate(radians(m_transform.rotation.y), vec3(0.0f, 1.0f, 0.0f));
+    st.PushRotate(radians(m_transform.rotation.z), vec3(0.0f, 0.0f, 1.0f));
     st.PushScale(m_transform.scale);
     return st;
 }
