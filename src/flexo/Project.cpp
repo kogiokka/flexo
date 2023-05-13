@@ -263,7 +263,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             return;
         }
     } else if (id == EVT_MENU_ADD_MAP) {
-        AddDialog dlg(projwin, "Add Map (3 to 2)", 6);
+        AddDialog dlg(projwin, "Add Map (3 to 2)", 7);
         long width = 32;
         long height = 32;
         bool isCyclicX = false;
