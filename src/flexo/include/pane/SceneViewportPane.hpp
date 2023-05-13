@@ -32,7 +32,7 @@ public:
     ~SceneViewportPane();
     void InitGL();
     void ResetCamera();
-    void AcceptObject(enum ObjectType type, std::shared_ptr<Object> object);
+    void AcceptObject(std::shared_ptr<Object> object);
     Graphics& GetGL();
 
 private:

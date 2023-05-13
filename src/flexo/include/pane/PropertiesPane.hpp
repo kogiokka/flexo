@@ -1,61 +1,31 @@
 #ifndef PROPERTIES_PANE_H
 #define PROPERTIES_PANE_H
 
-#include <string>
+#include <memory>
 
-#include <wx/checkbox.h>
-#include <wx/combobox.h>
 #include <wx/event.h>
-#include <wx/textctrl.h>
+#include <wx/scrolwin.h>
+#include <wx/sizer.h>
+#include <wx/weakref.h>
 
-#include "object/ObjectList.hpp"
+#include "event/ObjectSelectEvent.hpp"
 #include "pane/ControlsPaneBase.hpp"
+#include "pane/ObjectPropertiesPane.hpp"
 
-wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_CHANGED, wxCommandEvent);
-
-struct TransformCtrl {
-    struct LocationCtrl {
-        wxTextCtrl* x;
-        wxTextCtrl* y;
-        wxTextCtrl* z;
-    };
-    struct RotationCtrl {
-        wxTextCtrl* x;
-        wxTextCtrl* y;
-        wxTextCtrl* z;
-    };
-    struct ScaleCtrl {
-        wxTextCtrl* x;
-        wxTextCtrl* y;
-        wxTextCtrl* z;
-    };
-
-    LocationCtrl location;
-    RotationCtrl rotation;
-    ScaleCtrl scale;
-};
+wxDECLARE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
 
 class FlexoProject;
 
-class PropertiesPane : public ControlsPaneBase
+class PropertiesPane : public wxScrolledWindow
 {
 public:
     PropertiesPane(wxWindow* parent, FlexoProject& project);
 
 private:
-    void OnObjectChanged(wxCommandEvent& event);
-    void OnSelectDisplayType(wxCommandEvent& event);
-    void OnCheckWireframe(wxCommandEvent& event);
-    void GetObjectStatus(std::string const& id);
-    void OnTransformLocation(wxCommandEvent& event);
-    void OnTransformRotation(wxCommandEvent& event);
-    void OnTransformScale(wxCommandEvent& event);
+    void OnObjectSelected(ObjectSelectEvent& event);
 
-    bool m_hasWireframe;
-    std::shared_ptr<Object> m_obj;
-    wxCheckBox* m_chkWire;
-    wxComboBox* m_combo;
-    TransformCtrl m_transform;
+    wxWeakRef<ObjectPropertiesPane> m_props;
+    wxSizer* m_layout;
     FlexoProject& m_project;
 };
 

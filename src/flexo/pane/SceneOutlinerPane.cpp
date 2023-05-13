@@ -7,6 +7,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "event/ObjectSelectEvent.hpp"
 #include "gfx/DrawableBase.hpp"
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
@@ -14,6 +15,29 @@
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
+#include <wx/object.h>
+
+class ObjectClientData : public wxClientData
+{
+public:
+    ObjectClientData(std::string id, ObjectType type)
+        : m_id(id)
+        , m_type(type) {};
+
+    std::string GetId() const
+    {
+        return m_id;
+    }
+
+    ObjectType GetType() const
+    {
+        return m_type;
+    }
+
+private:
+    std::string m_id;
+    ObjectType m_type;
+};
 
 wxDEFINE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OUTLINER_DELETE_OBJECT, wxCommandEvent);
@@ -109,9 +133,13 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, FlexoProject& project)
 
     m_sceneTree->Bind(wxEVT_TREELIST_SELECTION_CHANGED, [this](wxTreeListEvent& event) {
         wxTreeListItem const item = event.GetItem();
+        ObjectClientData const* data = dynamic_cast<ObjectClientData*>(m_sceneTree->GetItemData(item));
+        if (!data) {
+            return;
+        }
+
         wxString const id = m_sceneTree->GetItemText(item);
-        wxCommandEvent evt(EVT_PROPERTIES_PANE_OBJECT_CHANGED);
-        evt.SetString(id);
+        ObjectSelectEvent evt(EVT_PROPERTIES_PANE_OBJECT_SELECTED, this->GetId(), data->GetId(), data->GetType());
         m_project.ProcessEvent(evt);
     });
 }
@@ -133,6 +161,7 @@ void SceneOutlinerPane::OnAddObject(wxCommandEvent& event)
     for (auto const& obj : ObjectList::Get(m_project)) {
         if (event.GetString() == obj->GetID()) {
             auto item = m_sceneTree->AppendItem(m_sceneTree->GetRootItem(), obj->GetID());
+            m_sceneTree->SetItemData(item, new ObjectClientData(obj->GetID(), obj->GetType()));
             m_sceneTree->CheckItem(item, obj->IsVisible() ? wxCHK_CHECKED : wxCHK_UNCHECKED);
             break;
         }

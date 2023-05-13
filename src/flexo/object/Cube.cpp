@@ -1,6 +1,7 @@
 #include "object/Cube.hpp"
 
 Cube::Cube(float size)
+    : Object(ObjectType_Cube)
 {
     m_mesh = ConstructCube(size);
 }

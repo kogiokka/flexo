@@ -2,14 +2,11 @@
 #include "gfx/Graphics.hpp"
 #include "log/Logger.h"
 
-Object::Object()
-    : m_texture(nullptr)
+Object::Object(ObjectType type)
+    : m_type(type)
+    , m_texture(nullptr)
     , m_flags(ObjectViewFlag_Solid)
     , m_isVisible(true)
-{
-}
-
-Object::~Object()
 {
 }
 
@@ -94,6 +91,11 @@ void Object::SetID(std::string id)
 void Object::SetTexture(std::shared_ptr<Bind::Texture2D> texture)
 {
     m_texture = texture;
+}
+
+ObjectType Object::GetType() const
+{
+    return m_type;
 }
 
 std::string Object::GetID() const

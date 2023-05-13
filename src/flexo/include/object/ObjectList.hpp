@@ -14,21 +14,6 @@
 
 class FlexoProject;
 
-#define OBJECT_TYPES                                                                                                   \
-    X(ObjectType_Plane, "Plane")                                                                                       \
-    X(ObjectType_Grid, "Grid")                                                                                         \
-    X(ObjectType_Cube, "Cube")                                                                                         \
-    X(ObjectType_Guides, "Guides")                                                                                     \
-    X(ObjectType_Model, "Model")                                                                                       \
-    X(ObjectType_Map, "Map")                                                                                           \
-    X(ObjectType_Light, "Light")                                                                                       \
-    X(ObjectType_Sphere, "Sphere")                                                                                     \
-    X(ObjectType_Torus, "Torus")
-
-#define X(type, name) type,
-enum ObjectType : unsigned int { OBJECT_TYPES };
-#undef X
-
 wxDECLARE_EVENT(EVT_OBJECTLIST_DELETE_OBJECT, wxCommandEvent);
 
 class ObjectList : public AttachableBase
@@ -37,7 +22,7 @@ public:
     static ObjectList& Get(FlexoProject& project);
     static ObjectList const& Get(FlexoProject const& project);
     ObjectList(FlexoProject& project);
-    void Add(enum ObjectType type, std::shared_ptr<Object> object);
+    void Add(std::shared_ptr<Object> object);
     void Submit(Renderer& renderer) const;
 
 public:

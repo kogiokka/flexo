@@ -20,7 +20,7 @@ struct EditableMesh;
 
 template <int InDim, int OutDim>
 struct Map : public Object {
-    Map() = default;
+    Map();
     virtual ~Map() = default;
     Vec<OutDim, int> size;
     std::vector<Node<InDim, OutDim>> nodes;

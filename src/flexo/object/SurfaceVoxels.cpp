@@ -7,9 +7,9 @@
 #include "TransformStack.hpp"
 #include "VecUtil.hpp"
 #include "VolumetricModelData.hpp"
+#include "log/Logger.h"
 #include "object/Map.hpp"
 #include "object/SurfaceVoxels.hpp"
-#include "log/Logger.h"
 
 class Trianglemeter
 {
@@ -51,6 +51,7 @@ static void AddFace(EditableMesh& mesh, EditableMesh const& voxelFace, glm::vec3
 float SquaredDistance(glm::vec3 p1, glm::vec3 p2);
 
 SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
+    : Object(ObjectType_Model)
 {
     glm::ivec3 n = modelData.GetResolution();
     m_scale = modelData.GetVoxelDims();

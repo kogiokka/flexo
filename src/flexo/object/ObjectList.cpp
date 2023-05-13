@@ -37,8 +37,9 @@ ObjectList::ObjectList(FlexoProject& project)
     m_project.Bind(EVT_OBJECTLIST_DELETE_OBJECT, &ObjectList::OnDeleteObject, this);
 }
 
-void ObjectList::Add(enum ObjectType type, std::shared_ptr<Object> object)
+void ObjectList::Add(std::shared_ptr<Object> object)
 {
+    auto type = object->GetType();
     auto it = m_typeCount.find(type);
 
     std::string id;

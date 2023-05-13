@@ -2,6 +2,7 @@
 #include "log/Logger.h"
 
 Sphere::Sphere(int numSegments, int numRings, float radius)
+    : Object(ObjectType_Sphere)
 {
     m_mesh = ConstructSphere(numSegments, numRings, radius);
 }
