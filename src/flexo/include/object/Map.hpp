@@ -5,6 +5,7 @@
 #include "Vec.hpp"
 #include "object/Object.hpp"
 
+#include <string>
 #include <vector>
 
 using MapFlags = int;
@@ -25,6 +26,7 @@ struct Map : public Object {
     Vec<OutDim, int> size;
     std::vector<Node<InDim, OutDim>> nodes;
     MapFlags flags;
+    std::string textureName;
 
     EditableMesh const& GetMesh() const;
     void GenerateMesh();

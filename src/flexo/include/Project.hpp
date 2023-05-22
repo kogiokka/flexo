@@ -42,7 +42,6 @@ private:
 
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
-    std::string m_imageFile;
 
 public:
     std::shared_ptr<Dataset<3>> theDataset;

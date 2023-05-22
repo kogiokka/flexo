@@ -37,6 +37,8 @@ PRIVATE
     "pane/ViewportDisplayWidget.cpp"
     "pane/MeshObjectPropertiesPane.cpp"
     "pane/GuidesPropertiesPane.cpp"
+    "pane/TextureWidget.cpp"
+    "pane/MapPropertiesPane.cpp"
     "event/SliderFloatEvent.cpp"
 
     "object/Object.cpp"
