@@ -93,6 +93,11 @@ void Object::SetTexture(std::shared_ptr<Bind::Texture2D> texture)
     m_texture = texture;
 }
 
+Bind::Texture2D const& Object::GetTexture() const
+{
+    return *m_texture;
+}
+
 ObjectType Object::GetType() const
 {
     return m_type;

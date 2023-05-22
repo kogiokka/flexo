@@ -16,6 +16,12 @@ TextureWidget::TextureWidget(wxWindow* parent, FlexoProject& project)
     m_open->Bind(wxEVT_BUTTON, &TextureWidget::OnOpenImage, this);
 }
 
+void TextureWidget::SetTextureName(std::string name)
+{
+    m_text->Clear();
+    *m_text << name;
+}
+
 void TextureWidget::OnOpenImage(wxCommandEvent&)
 {
     namespace fs = std::filesystem;

@@ -15,11 +15,13 @@ namespace Bind
         Texture2D(Graphics& gfx, std::string const& filename, GLuint unit);
         ~Texture2D() override;
         void Bind(Graphics& gfx) override;
+        std::string const& GetName() const;
         static std::string GenerateUID(std::string const& filename, GLuint unit);
 
     protected:
         GLWRPtr<IGLWRShaderResourceView> m_resource;
         GLuint m_unit;
+        std::string m_name;
     };
 }
 

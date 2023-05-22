@@ -18,4 +18,5 @@ MapPropertiesPane::~MapPropertiesPane()
 void MapPropertiesPane::BindObject(std::shared_ptr<Object> obj)
 {
     MeshObjectPropertiesPane::BindObject(obj);
+    m_texture->SetTextureName(obj->GetTexture().GetName());
 }

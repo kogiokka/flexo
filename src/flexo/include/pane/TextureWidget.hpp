@@ -1,6 +1,7 @@
 #ifndef TEXTURE_WIDGET_H
 #define TEXTURE_WIDGET_H
 
+#include <string>
 #include <wx/button.h>
 #include <wx/event.h>
 #include <wx/textctrl.h>
@@ -15,6 +16,7 @@ class TextureWidget : public ControlsGroup
 {
 public:
     TextureWidget(wxWindow* parent, FlexoProject& project);
+    void SetTextureName(std::string name);
 
 private:
     void OnOpenImage(wxCommandEvent& event);
