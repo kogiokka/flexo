@@ -19,7 +19,6 @@ class FlexoProject;
     X(EVT_MENU_ADD_MAP, "Map (3 to 2)")
 
 wxDECLARE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
-wxDECLARE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDECLARE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
@@ -56,7 +55,6 @@ private:
     wxAuiManager m_mgr;
 
     void OnOpenModelFile(wxCommandEvent& event);
-    void OnOpenImageFile(wxCommandEvent& event);
     void OnExit(wxCommandEvent&);
     void OnTimerUpdateUI(wxTimerEvent& event);
     void OnTogglePane(wxCommandEvent& event);

@@ -11,7 +11,6 @@
 #include "pane/SceneViewportPane.hpp"
 
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
-wxDEFINE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
@@ -68,11 +67,8 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     auto fileMenu = new wxMenu;
     auto* openModelItem = new wxMenuItem(fileMenu, EVT_OPEN_MODEL, "Open model", "");
-    auto* openImageItem = new wxMenuItem(fileMenu, EVT_OPEN_IMAGE, "Open image", "");
     openModelItem->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN));
-    openImageItem->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN));
     fileMenu->Append(openModelItem);
-    fileMenu->Append(openImageItem);
     fileMenu->Append(wxID_EXIT, "Exit");
 
     m_viewMenu = new wxMenu();
@@ -147,7 +143,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     this->SetMenuBar(menubar);
 
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenModelFile, this, EVT_OPEN_MODEL);
-    Bind(wxEVT_MENU, &ProjectWindow::OnOpenImageFile, this, EVT_OPEN_IMAGE);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
 
 #define X(evt, name)                                                                                                   \
@@ -221,27 +216,6 @@ void ProjectWindow::OnOpenModelFile(wxCommandEvent&)
     defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
 
     m_project.ImportVolumetricModel(filepath);
-}
-
-void ProjectWindow::OnOpenImageFile(wxCommandEvent&)
-{
-    namespace fs = std::filesystem;
-    static wxString defaultDir = "";
-    wxFileDialog dialog(this, "Open Image", defaultDir, "", "PNG or JPG Images|*.png;*.jpg",
-                        wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
-    dialog.CenterOnParent();
-
-    wxBusyCursor wait;
-    if (dialog.ShowModal() == wxID_CANCEL) {
-        defaultDir = fs::path(dialog.GetPath().ToStdString()).parent_path().string();
-        return;
-    }
-    wxString const filepath = dialog.GetPath();
-    defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
-
-    wxCommandEvent event(EVT_OPEN_IMAGE);
-    event.SetString(filepath);
-    m_project.ProcessEvent(event);
 }
 
 void ProjectWindow::OnExit(wxCommandEvent&)
