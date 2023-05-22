@@ -32,7 +32,6 @@ PRIVATE
     "pane/PropertiesPane.cpp"
     "pane/SelfOrganizingMapPane.cpp"
     "pane/SceneViewportPane.cpp"
-    "pane/TextureMappingPane.cpp"
     "pane/TransformWidget.cpp"
     "pane/ViewportDisplayWidget.cpp"
     "pane/MeshObjectPropertiesPane.cpp"

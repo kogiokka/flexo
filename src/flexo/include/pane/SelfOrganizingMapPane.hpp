@@ -20,6 +20,7 @@ class SelfOrganizingMapPane : public ControlsPaneBase
     wxButton* m_btnCreate;
     wxButton* m_btnStop;
     wxButton* m_btnRun;
+    wxButton* m_btnTexmap;
     wxTextCtrl* m_target;
     wxBitmapComboBox* m_mapCombo;
     wxSlider* m_sldrNbhdRadius;

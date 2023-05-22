@@ -7,8 +7,8 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "pane/SceneViewportPane.hpp"
 #include "log/Logger.h"
+#include "pane/SceneViewportPane.hpp"
 
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
@@ -29,7 +29,6 @@ enum {
     EVT_VIEW_MENU_SCENE_VIEWPORT,
     EVT_VIEW_MENU_SOM,
     EVT_VIEW_MENU_PROPERTIES,
-    EVT_VIEW_MENU_TEXTURE_MAPPING,
     EVT_VIEW_MENU_SCENE_OUTLINER,
 };
 
@@ -80,7 +79,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_VIEWPORT, "Toggle 3D Viewport");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SOM, "Toggle SOM Pane");
-    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_TEXTURE_MAPPING, "Toggle Texture Mapping Pane");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_PROPERTIES, "Toggle Properties Pane");
 
     auto cameraMenu = new wxMenu;
@@ -174,7 +172,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SOM);
-    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_TEXTURE_MAPPING);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_PROPERTIES);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
 
@@ -263,7 +260,6 @@ void ProjectWindow::OnTimerUpdateUI(wxTimerEvent&)
     m_viewMenu->Check(EVT_VIEW_MENU_SCENE_OUTLINER, m_mgr.GetPane("outliner").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_SOM, m_mgr.GetPane("som").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_PROPERTIES, m_mgr.GetPane("properties").IsShown());
-    m_viewMenu->Check(EVT_VIEW_MENU_TEXTURE_MAPPING, m_mgr.GetPane("mapping").IsShown());
 
     UpdateWindowUI();
 }
@@ -276,8 +272,6 @@ void ProjectWindow::OnTogglePane(wxCommandEvent& event)
     // FIXME
     if (id == EVT_VIEW_MENU_SOM) {
         name = "som";
-    } else if (id == EVT_VIEW_MENU_TEXTURE_MAPPING) {
-        name = "mapping";
     } else if (id == EVT_VIEW_MENU_SCENE_OUTLINER) {
         name = "outliner";
     } else if (id == EVT_VIEW_MENU_SCENE_VIEWPORT) {
