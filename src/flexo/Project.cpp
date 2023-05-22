@@ -45,20 +45,6 @@ FlexoProject::FlexoProject()
 #define X(evt, name) Bind(evt, &FlexoProject::OnMenuAdd, this);
     MENU_ADD_LIST
 #undef X
-
-    Bind(EVT_TEXTURE_WIDGET_OPEN_IMAGE, [this](wxCommandEvent& event) {
-        auto& gfx = SceneViewportPane::Get(*this).GetGL();
-        std::string const filename = event.GetString().ToStdString();
-
-        if (auto map = theMap.lock()) {
-            map->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-            map->GenerateDrawables(gfx);
-        }
-        if (auto model = theModel.lock()) {
-            model->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-            model->GenerateDrawables(gfx);
-        }
-    });
 }
 
 FlexoProject::~FlexoProject()
@@ -127,6 +113,10 @@ void FlexoProject::DoParameterization()
 
     while (status.wait_for(std::chrono::milliseconds(16)) != std::future_status::ready) {
         dialog.Update(static_cast<int>(progress));
+    }
+
+    if (auto map = theMap.lock()) {
+        model->SetTexture(map->GetTexture());
     }
 
     // After the parametrization done, regenerate the drawables to update texture coordinates.
@@ -374,7 +364,8 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Map: (width: %ld, height: %ld)", width, height);
 
-            obj->SetTexture(Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), "images/blank.png", 0));
+            obj->SetTexture(
+                Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), "images/blank.png", 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
         } else {
             return;

@@ -17,6 +17,8 @@ public:
     virtual void BindObject(std::shared_ptr<Object> obj) override;
 
 private:
+    void OnOpenImage(wxCommandEvent& event);
+
     TextureWidget* m_texture;
 };
 
