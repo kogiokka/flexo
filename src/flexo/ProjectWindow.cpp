@@ -7,11 +7,10 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "pane/SceneViewportPane.hpp"
 #include "log/Logger.h"
+#include "pane/SceneViewportPane.hpp"
 
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
-wxDEFINE_EVENT(EVT_OPEN_IMAGE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
 
@@ -29,7 +28,6 @@ enum {
     EVT_VIEW_MENU_SCENE_VIEWPORT,
     EVT_VIEW_MENU_SOM,
     EVT_VIEW_MENU_PROPERTIES,
-    EVT_VIEW_MENU_TEXTURE_MAPPING,
     EVT_VIEW_MENU_SCENE_OUTLINER,
 };
 
@@ -69,18 +67,14 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     auto fileMenu = new wxMenu;
     auto* openModelItem = new wxMenuItem(fileMenu, EVT_OPEN_MODEL, "Open model", "");
-    auto* openImageItem = new wxMenuItem(fileMenu, EVT_OPEN_IMAGE, "Open image", "");
     openModelItem->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN));
-    openImageItem->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_OPEN));
     fileMenu->Append(openModelItem);
-    fileMenu->Append(openImageItem);
     fileMenu->Append(wxID_EXIT, "Exit");
 
     m_viewMenu = new wxMenu();
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_VIEWPORT, "Toggle 3D Viewport");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SOM, "Toggle SOM Pane");
-    m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_TEXTURE_MAPPING, "Toggle Texture Mapping Pane");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_PROPERTIES, "Toggle Properties Pane");
 
     auto cameraMenu = new wxMenu;
@@ -149,7 +143,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     this->SetMenuBar(menubar);
 
     Bind(wxEVT_MENU, &ProjectWindow::OnOpenModelFile, this, EVT_OPEN_MODEL);
-    Bind(wxEVT_MENU, &ProjectWindow::OnOpenImageFile, this, EVT_OPEN_IMAGE);
     Bind(wxEVT_MENU, &ProjectWindow::OnExit, this, wxID_EXIT);
 
 #define X(evt, name)                                                                                                   \
@@ -174,7 +167,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_VIEWPORT);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SOM);
-    Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_TEXTURE_MAPPING);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_PROPERTIES);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
 
@@ -226,27 +218,6 @@ void ProjectWindow::OnOpenModelFile(wxCommandEvent&)
     m_project.ImportVolumetricModel(filepath);
 }
 
-void ProjectWindow::OnOpenImageFile(wxCommandEvent&)
-{
-    namespace fs = std::filesystem;
-    static wxString defaultDir = "";
-    wxFileDialog dialog(this, "Open Image", defaultDir, "", "PNG or JPG Images|*.png;*.jpg",
-                        wxFD_OPEN | wxFD_FILE_MUST_EXIST | wxFD_PREVIEW);
-    dialog.CenterOnParent();
-
-    wxBusyCursor wait;
-    if (dialog.ShowModal() == wxID_CANCEL) {
-        defaultDir = fs::path(dialog.GetPath().ToStdString()).parent_path().string();
-        return;
-    }
-    wxString const filepath = dialog.GetPath();
-    defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
-
-    wxCommandEvent event(EVT_OPEN_IMAGE);
-    event.SetString(filepath);
-    m_project.ProcessEvent(event);
-}
-
 void ProjectWindow::OnExit(wxCommandEvent&)
 {
     Close(true);
@@ -263,7 +234,6 @@ void ProjectWindow::OnTimerUpdateUI(wxTimerEvent&)
     m_viewMenu->Check(EVT_VIEW_MENU_SCENE_OUTLINER, m_mgr.GetPane("outliner").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_SOM, m_mgr.GetPane("som").IsShown());
     m_viewMenu->Check(EVT_VIEW_MENU_PROPERTIES, m_mgr.GetPane("properties").IsShown());
-    m_viewMenu->Check(EVT_VIEW_MENU_TEXTURE_MAPPING, m_mgr.GetPane("mapping").IsShown());
 
     UpdateWindowUI();
 }
@@ -276,8 +246,6 @@ void ProjectWindow::OnTogglePane(wxCommandEvent& event)
     // FIXME
     if (id == EVT_VIEW_MENU_SOM) {
         name = "som";
-    } else if (id == EVT_VIEW_MENU_TEXTURE_MAPPING) {
-        name = "mapping";
     } else if (id == EVT_VIEW_MENU_SCENE_OUTLINER) {
         name = "outliner";
     } else if (id == EVT_VIEW_MENU_SCENE_VIEWPORT) {

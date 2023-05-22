@@ -31,6 +31,7 @@
 #include "object/SurfaceVoxels.hpp"
 #include "object/Torus.hpp"
 #include "pane/SceneViewportPane.hpp"
+#include "pane/TextureWidget.hpp"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -41,27 +42,9 @@ FlexoProject::FlexoProject()
     , theMap()
     , theModel()
 {
-    m_imageFile = "images/mandala.png";
-
 #define X(evt, name) Bind(evt, &FlexoProject::OnMenuAdd, this);
     MENU_ADD_LIST
 #undef X
-
-    Bind(EVT_OPEN_IMAGE, [this](wxCommandEvent& event) {
-        m_imageFile = event.GetString().ToStdString();
-
-        auto& gfx = SceneViewportPane::Get(*this).GetGL();
-        std::string const filename = event.GetString().ToStdString();
-
-        if (auto map = theMap.lock()) {
-            map->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-            map->GenerateDrawables(gfx);
-        }
-        if (auto model = theModel.lock()) {
-            model->SetTexture(Bind::TextureManager::Resolve(gfx, filename.c_str(), 0));
-            model->GenerateDrawables(gfx);
-        }
-    });
 }
 
 FlexoProject::~FlexoProject()
@@ -73,7 +56,7 @@ void FlexoProject::CreateScene()
     auto& scene = SceneViewportPane::Get(*this);
 
     auto cube = std::make_shared<Cube>();
-    cube->SetTexture(Bind::TextureManager::Resolve(scene.GetGL(), m_imageFile.c_str(), 0));
+    cube->SetTexture(Bind::TextureManager::Resolve(scene.GetGL(), "images/blank.png", 0));
     cube->SetViewFlags(ObjectViewFlag_Solid);
 
     scene.AcceptObject(cube);
@@ -132,6 +115,10 @@ void FlexoProject::DoParameterization()
         dialog.Update(static_cast<int>(progress));
     }
 
+    if (auto map = theMap.lock()) {
+        model->SetTexture(map->GetTexture());
+    }
+
     // After the parametrization done, regenerate the drawables to update texture coordinates.
     model->SetViewFlags(ObjectViewFlag_Textured);
     model->GenerateMesh();
@@ -145,7 +132,7 @@ void FlexoProject::ImportVolumetricModel(wxString const& path)
 
     auto model = std::make_shared<SurfaceVoxels>(data);
     model->SetViewFlags(ObjectViewFlag_Solid);
-    model->SetTexture(Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), m_imageFile.c_str(), 0));
+    model->SetTexture(Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), "images/blank.png", 0));
 
     log_info("%lu voxels will be rendered.", model->Voxels().size());
 
@@ -378,7 +365,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             log_info("Add Map: (width: %ld, height: %ld)", width, height);
 
             obj->SetTexture(
-                Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), m_imageFile.c_str(), 0));
+                Bind::TextureManager::Resolve(SceneViewportPane::Get(*this).GetGL(), "images/blank.png", 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
         } else {
             return;

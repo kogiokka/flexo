@@ -67,6 +67,7 @@ public:
     void SetViewFlags(ObjectViewFlag flags);
     ObjectViewFlag GetViewFlags() const;
     void SetTexture(std::shared_ptr<Bind::Texture2D> texture);
+    std::shared_ptr<Bind::Texture2D> GetTexture() const;
 
     std::string GetID() const;
     ObjectType GetType() const;

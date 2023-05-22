@@ -108,7 +108,7 @@ void SelfOrganizingMapPane::PopulateDisplayPanel()
 
 void SelfOrganizingMapPane::PopulateControlPanel()
 {
-    auto* group = AddGroup("Control", 3);
+    auto* group = AddGroup("Control", 4);
     m_btnCreate = group->AddButton("Create");
     m_btnStop = group->AddButton("Stop");
     m_btnRun = group->AddButton("Run");
@@ -127,6 +127,12 @@ void SelfOrganizingMapPane::PopulateControlPanel()
     m_btnCreate->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnCreate, this);
     m_btnStop->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnStop, this);
     m_btnRun->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnRun, this);
+
+    // Texture mapping for the model
+    m_btnTexmap = group->AddButton("Texture Mapping");
+    m_btnTexmap->Bind(wxEVT_UPDATE_UI,
+                      [this](wxUpdateUIEvent& event) { event.Enable(SelfOrganizingMap::Get(m_project).IsDone()); });
+    m_btnTexmap->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_project.DoParameterization(); });
 }
 
 void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)

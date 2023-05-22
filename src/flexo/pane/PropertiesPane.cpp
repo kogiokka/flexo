@@ -5,6 +5,7 @@
 #include "object/Object.hpp"
 #include "object/ObjectList.hpp"
 #include "pane/GuidesPropertiesPane.hpp"
+#include "pane/MapPropertiesPane.hpp"
 #include "pane/MeshObjectPropertiesPane.hpp"
 
 wxDEFINE_EVENT(EVT_PROPERTIES_PANE_OBJECT_SELECTED, ObjectSelectEvent);
@@ -33,6 +34,8 @@ void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
 
     if (type == ObjectType_Guides) {
         m_props = new GuidesPropertiesPane(this, m_project);
+    } else if (type == ObjectType_Map) {
+        m_props = new MapPropertiesPane(this, m_project);
     } else {
         m_props = new MeshObjectPropertiesPane(this, m_project);
     }

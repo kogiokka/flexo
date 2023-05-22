@@ -5,12 +5,11 @@
 #include "SelfOrganizingMap.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
+#include "log/Logger.h"
 #include "pane/PropertiesPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
-#include "pane/TextureMappingPane.hpp"
-#include "log/Logger.h"
 
 wxIMPLEMENT_APP(FlexoApp);
 
@@ -51,9 +50,7 @@ bool FlexoApp::OnInit()
 
     auto* outliner = new SceneOutlinerPane(page, project);
     auto* som = new SelfOrganizingMapPane(page, project);
-    auto* mapping = new TextureMappingPane(page, project);
     auto* properties = new PropertiesPane(page, project);
-    mapping->Disable();
 
     wxSize const minSize = page->FromDIP(wxSize(450, 20));
     mgr.AddPane(&viewport,
@@ -86,16 +83,6 @@ bool FlexoApp::OnInit()
         som,
         wxAuiPaneInfo().Name("som").Caption("SOM").Right().Layer(1).CloseButton(true).MaximizeButton(true).MinSize(
             minSize));
-    mgr.AddPane(mapping,
-                wxAuiPaneInfo()
-                    .Name("mapping")
-                    .Caption("Texture Mapping")
-                    .Right()
-                    .Layer(1)
-                    .CloseButton(true)
-                    .MaximizeButton(true)
-                    .MinSize(minSize)
-                    .Hide());
     mgr.Update();
 
     wxUpdateUIEvent::SetUpdateInterval(16);
