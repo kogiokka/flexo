@@ -10,110 +10,72 @@
 #include <wx/valnum.h>
 
 #include "Project.hpp"
+#include "ProjectWindow.hpp"
 #include "SelfOrganizingMap.hpp"
+#include "dialog/SelfOrganizingMapDialog.hpp"
 #include "event/SliderFloatEvent.hpp"
 #include "object/Map.hpp"
 #include "object/ObjectList.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
-wxDEFINE_EVENT(EVT_SOM_PANE_TARGET_CHANGED, wxCommandEvent);
-wxDEFINE_EVENT(EVT_SOM_PANE_MAP_ADDED, wxCommandEvent);
-wxDEFINE_EVENT(EVT_SOM_PANE_MAP_DELETED, wxCommandEvent);
+// FIXME Better solution
+static bool isSOMInitialized = false;
 
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
 {
-    PopulateConfigPanel();
-    PopulateDisplayPanel();
-    PopulateControlPanel();
-
-    m_project.Bind(EVT_SOM_PANE_MAP_ADDED, &SelfOrganizingMapPane::OnMapAdded, this);
-    m_project.Bind(EVT_SOM_PANE_MAP_DELETED, &SelfOrganizingMapPane::OnMapDeleted, this);
-    m_project.Bind(EVT_SOM_PANE_TARGET_CHANGED, &SelfOrganizingMapPane::OnTargetChanged, this);
-
-    m_isStopped = true;
+    PopulateConfigPane();
+    PopulateTrainingPane();
 }
 
-bool SelfOrganizingMapPane::IsProjectStopped() const
+void SelfOrganizingMapPane::PopulateConfigPane()
 {
-    return m_isStopped;
+    auto* group = AddGroup("Configuration", 6);
+    m_textModel = group->AddReadOnlyText("Model");
+    m_textMap = group->AddReadOnlyText("Map");
+    m_textIter = group->AddReadOnlyText("Max Iterations");
+    m_textRate = group->AddReadOnlyText("Initial Leanring Rate");
+    m_textRadius = group->AddReadOnlyText("Initial Neighborhood Radius");
+    m_btnConfig = group->AddButton("Configure");
+
+    m_btnConfig->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnConfigure, this);
 }
 
-void SelfOrganizingMapPane::PopulateConfigPanel()
+void SelfOrganizingMapPane::PopulateTrainingPane()
 {
-    auto* group = AddGroup("Configuration", 5);
-
-    m_target = group->AddReadOnlyText("Target");
-    m_mapCombo = group->AddBitmapComboBox("Map");
-    m_mapCombo->Bind(wxEVT_COMBOBOX, &SelfOrganizingMapPane::OnComboBox, this);
-
-    wxIntegerValidator<int> validMaxIter;
-    wxFloatingPointValidator<float> validLearnRate(6, nullptr);
-    validMaxIter.SetMin(0);
-    validLearnRate.SetRange(0.0f, 1.0f);
-
-    auto* maxIterations = group->AddInputText("Max Iterations");
-    auto* initLearnRate = group->AddInputText("Learning Rate");
-    m_sldrNbhdRadius = group->AddSliderFloat("Neighborhood Radius", 0.0f, 0.0f, 1.0f);
-
-    maxIterations->SetValidator(validMaxIter);
-    initLearnRate->SetValidator(validLearnRate);
-
-    *maxIterations << ProjectSettings::Get(m_project).GetMaxIterations();
-    *initLearnRate << ProjectSettings::Get(m_project).GetLearningRate();
-
-    maxIterations->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnMaxIterations, this);
-    initLearnRate->Bind(wxEVT_TEXT, &SelfOrganizingMapPane::OnInitialLearningRate, this);
-
-    m_sldrNbhdRadius->Bind(EVT_SLIDER_FLOAT, [this](SliderFloatEvent& event) {
-        ProjectSettings::Get(m_project).SetNeighborhood(event.GetValue());
-    });
-
-    group->Bind(wxEVT_UPDATE_UI,
-                [this](wxUpdateUIEvent& event) { event.Enable(!SelfOrganizingMap::Get(m_project).IsTraining()); });
-}
-
-void SelfOrganizingMapPane::PopulateDisplayPanel()
-{
-    auto* group = AddGroup("Display", 3);
+    auto* group = AddGroup("Training", 7);
 
     auto* currIterations = group->AddReadOnlyText("Iterations");
     auto* currNbhdRadius = group->AddReadOnlyText("Neighborhood Radius");
     auto* currLearnRate = group->AddReadOnlyText("Leanring Rate");
 
-    currIterations->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
-        if (m_isStopped) {
-            event.SetText("");
-        } else {
-            event.SetText(wxString::Format("%d", SelfOrganizingMap::Get(m_project).GetIterations()));
+    auto const& som = SelfOrganizingMap::Get(m_project);
+
+    currIterations->Bind(wxEVT_UPDATE_UI, [&som](wxUpdateUIEvent& event) {
+        if (isSOMInitialized) {
+            event.SetText(wxString::Format("%d", som.GetIterations()));
+            return;
         }
+        event.SetText("");
     });
 
-    currNbhdRadius->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
-        if (m_isStopped) {
-            event.SetText("");
-        } else {
-            event.SetText(wxString::Format("%.2f", SelfOrganizingMap::Get(m_project).GetNeighborhood()));
+    currNbhdRadius->Bind(wxEVT_UPDATE_UI, [&som](wxUpdateUIEvent& event) {
+        if (isSOMInitialized) {
+            event.SetText(wxString::Format("%.6f", som.GetNeighborhood()));
+            return;
         }
+        event.SetText("");
     });
 
-    currLearnRate->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
-        if (m_isStopped) {
-            event.SetText("");
-        } else {
-            event.SetText(wxString::Format("%.6f", SelfOrganizingMap::Get(m_project).GetLearningRate()));
+    currLearnRate->Bind(wxEVT_UPDATE_UI, [&som](wxUpdateUIEvent& event) {
+        if (isSOMInitialized) {
+            event.SetText(wxString::Format("%.6f", som.GetLearningRate()));
+            return;
         }
+        event.SetText("");
     });
-}
 
-void SelfOrganizingMapPane::PopulateControlPanel()
-{
-    auto* group = AddGroup("Control", 4);
-    m_btnCreate = group->AddButton("Create");
-    m_btnStop = group->AddButton("Stop");
     m_btnRun = group->AddButton("Run");
-
-    m_btnStop->Disable();
     m_btnRun->Disable();
 
     m_btnRun->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
@@ -124,8 +86,6 @@ void SelfOrganizingMapPane::PopulateControlPanel()
         }
     });
 
-    m_btnCreate->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnCreate, this);
-    m_btnStop->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnStop, this);
     m_btnRun->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnRun, this);
 
     // Texture mapping for the model
@@ -135,113 +95,57 @@ void SelfOrganizingMapPane::PopulateControlPanel()
     m_btnTexmap->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_project.DoParameterization(); });
 }
 
-void SelfOrganizingMapPane::OnCreate(wxCommandEvent&)
+void SelfOrganizingMapPane::OnConfigure(wxCommandEvent&)
 {
-    if (m_project.theMap.expired()) {
-        wxMessageDialog dialog(this, "Please add and select a map first!", "Error", wxCENTER | wxICON_ERROR);
-        dialog.ShowModal();
-        return;
+    SelfOrganizingMapDialog dlg(&ProjectWindow::Get(m_project), m_project);
+
+    if (dlg.ShowModal() == wxID_OK) {
+        auto const& modelID = dlg.GetModelID();
+        auto const& mapID = dlg.GetMapID();
+
+        for (auto const& o : ObjectList::Get(m_project)) {
+            auto const& id = o->GetID();
+            if (id == modelID) {
+                m_project.theModel = o;
+            }
+        }
+
+        if (auto it = m_project.theModel.lock()) {
+            auto const& pos = it->GetPositions();
+            m_project.theDataset = std::make_shared<Dataset<3>>(pos);
+            it->SetViewFlags(ObjectViewFlag_Solid);
+            log_info("Dataset count: %lu", pos.size());
+        } else {
+            log_fatal("Model is null");
+            exit(EXIT_FAILURE);
+        }
+
+        auto& som = SelfOrganizingMap::Get(m_project);
+        if (som.IsTraining()) {
+            som.ToggleTraining();
+        }
+        som.StopWorker();
+        som.CreateProcedure(m_project.theMap.lock(), m_project.theDataset);
+
+        auto const& settings = ProjectSettings::Get(m_project);
+        m_textModel->Clear();
+        m_textMap->Clear();
+        m_textIter->Clear();
+        m_textRate->Clear();
+        m_textRadius->Clear();
+        *m_textModel << modelID;
+        *m_textMap << mapID;
+        *m_textIter << settings.GetMaxIterations();
+        *m_textRate << settings.GetLearningRate();
+        *m_textRadius << settings.GetNeighborhood();
+
+        m_btnRun->Enable();
+
+        isSOMInitialized = true;
     }
-
-    if (m_project.theModel.expired() || !m_project.theDataset) {
-        wxMessageDialog dialog(this, "Please select the target from the outliner first!", "Error",
-                               wxCENTER | wxICON_ERROR);
-        dialog.ShowModal();
-        return;
-    }
-
-    m_btnCreate->Disable();
-    m_btnStop->Enable();
-    m_btnRun->Enable();
-
-    m_project.CreateProject();
-    m_isStopped = false;
-}
-
-void SelfOrganizingMapPane::OnStop(wxCommandEvent&)
-{
-    m_btnCreate->Enable();
-    m_btnStop->Disable();
-    m_btnRun->Disable();
-
-    m_project.StopProject();
-    m_isStopped = true;
 }
 
 void SelfOrganizingMapPane::OnRun(wxCommandEvent&)
 {
-    m_btnCreate->Disable();
-    m_btnStop->Enable();
-
     SelfOrganizingMap::Get(m_project).ToggleTraining();
-}
-
-void SelfOrganizingMapPane::OnMaxIterations(wxCommandEvent& event)
-{
-    long tmp;
-    if (event.GetString().ToLong(&tmp)) {
-        ProjectSettings::Get(m_project).SetMaxIterations(tmp);
-    }
-}
-
-void SelfOrganizingMapPane::OnInitialLearningRate(wxCommandEvent& event)
-{
-    double tmp;
-    if (event.GetString().ToDouble(&tmp)) {
-        ProjectSettings::Get(m_project).SetLearningRate(tmp);
-    }
-}
-
-void SelfOrganizingMapPane::OnMapAdded(wxCommandEvent& event)
-{
-    m_mapCombo->Append(event.GetString(), wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
-}
-
-void SelfOrganizingMapPane::OnMapDeleted(wxCommandEvent& event)
-{
-    auto ret = m_mapCombo->FindString(event.GetString());
-    if (ret == wxNOT_FOUND) {
-        log_error("Map \"%s\" does not exist.", event.GetString().ToStdString().c_str());
-        return;
-    }
-
-    if (ret == m_mapCombo->GetSelection()) {
-        m_mapCombo->SetValue("");
-    }
-
-    m_mapCombo->Delete(ret);
-}
-
-void SelfOrganizingMapPane::OnTargetChanged(wxCommandEvent& event)
-{
-    m_target->Clear();
-    *m_target << event.GetString();
-}
-
-void SelfOrganizingMapPane::OnComboBox(wxCommandEvent&)
-{
-    for (auto const& obj : ObjectList::Get(m_project)) {
-        if (obj->GetID() == m_mapCombo->GetValue()) {
-            m_project.theMap = std::dynamic_pointer_cast<Map<3, 2>>(obj);
-        }
-    }
-    auto map = m_project.theMap.lock();
-    int const width = map->size.x;
-    int const height = map->size.y;
-    float const diagLen = sqrt(width * width + height * height);
-    float const radius = 0.5f * diagLen;
-    ProjectSettings::Get(m_project).SetNeighborhood(radius);
-    SetupNeighborhoodRadiusSlider(diagLen, radius);
-}
-
-void SelfOrganizingMapPane::SetupNeighborhoodRadiusSlider(float maxValue, float value)
-{
-    m_sldrNbhdRadius->SetMax(static_cast<int>(maxValue * 100.0f));
-
-    int const pos = static_cast<int>(value * 100.0f);
-    m_sldrNbhdRadius->SetValue(pos);
-
-    wxCommandEvent sliderEvent(wxEVT_SLIDER);
-    sliderEvent.SetInt(pos);
-    m_sldrNbhdRadius->ProcessWindowEvent(sliderEvent);
 }

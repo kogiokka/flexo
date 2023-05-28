@@ -79,27 +79,10 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, FlexoProject& project)
     });
 
     m_sceneTree->Bind(wxEVT_COMMAND_TREELIST_ITEM_CONTEXT_MENU, [this](wxTreeListEvent& event) {
-        enum { ID_SelectTarget, ID_Delete };
+        enum { ID_Delete };
         wxMenu menu;
-        menu.Append(ID_SelectTarget, "&Select as target");
         menu.Append(ID_Delete, "&Delete");
         switch (m_sceneTree->GetPopupMenuSelectionFromUser(menu)) {
-        case ID_SelectTarget: {
-            auto item = event.GetItem();
-            auto id = m_sceneTree->GetItemText(item);
-            for (auto const& obj : ObjectList::Get(m_project)) {
-                if (obj->GetID() == id) {
-                    auto const& pos = obj->GetPositions();
-                    m_project.theModel = obj;
-                    m_project.theDataset = std::make_shared<Dataset<3>>(pos);
-                    log_info("Dataset count: %lu", pos.size());
-                    wxCommandEvent event(EVT_SOM_PANE_TARGET_CHANGED);
-                    event.SetString(id);
-                    m_project.ProcessEvent(event);
-                    break;
-                }
-            }
-        } break;
         case ID_Delete: {
             auto item = event.GetItem();
 

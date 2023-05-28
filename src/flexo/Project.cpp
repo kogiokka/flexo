@@ -14,7 +14,6 @@
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
 #include "RandomRealNumber.hpp"
-#include "SelfOrganizingMap.hpp"
 #include "SolidDrawable.hpp"
 #include "TexturedDrawable.hpp"
 #include "VecUtil.hpp"
@@ -61,24 +60,6 @@ void FlexoProject::CreateScene()
 
     scene.AcceptObject(cube);
     scene.AcceptObject(std::make_shared<Guides>());
-}
-
-void FlexoProject::CreateProject()
-{
-    if (auto it = theModel.lock()) {
-        it->SetViewFlags(ObjectViewFlag_Solid);
-    }
-
-    SelfOrganizingMap::Get(*this).CreateProcedure(theMap.lock(), theDataset);
-}
-
-void FlexoProject::StopProject()
-{
-    auto& som = SelfOrganizingMap::Get(*this);
-    if (som.IsTraining()) {
-        som.ToggleTraining();
-    }
-    som.StopWorker();
 }
 
 void FlexoProject::SetFrame(wxFrame* frame)

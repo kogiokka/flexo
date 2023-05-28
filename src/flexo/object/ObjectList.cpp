@@ -57,12 +57,6 @@ void ObjectList::Add(std::shared_ptr<Object> object)
     object->GenerateDrawables(SceneViewportPane::Get(m_project).GetGL());
     m_list.push_back(object);
 
-    if (type == ObjectType_Map) {
-        wxCommandEvent evt(EVT_SOM_PANE_MAP_ADDED);
-        evt.SetString(id);
-        m_project.ProcessEvent(evt);
-    }
-
     wxCommandEvent event(EVT_OUTLINER_ADD_OBJECT);
     event.SetString(id);
     m_project.ProcessEvent(event);
@@ -74,11 +68,6 @@ void ObjectList::OnDeleteObject(wxCommandEvent& event)
         auto id = wxString((*it)->GetID());
         if (id == event.GetString()) {
             m_list.erase(it);
-            if (id.StartsWith("Map")) { // FIXME
-                wxCommandEvent evt(EVT_SOM_PANE_MAP_DELETED);
-                evt.SetString(id);
-                m_project.ProcessEvent(evt);
-            }
             break;
         } else {
             it++;

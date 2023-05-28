@@ -29,8 +29,6 @@ public:
     FlexoProject();
     ~FlexoProject();
     void CreateScene();
-    void CreateProject();
-    void StopProject();
     void DoParameterization();
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);

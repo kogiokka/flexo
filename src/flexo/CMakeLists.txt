@@ -25,6 +25,7 @@ PRIVATE
     "ProjectWindow.cpp"
 
     "dialog/AddDialog.cpp"
+    "dialog/SelfOrganizingMapDialog.cpp"
 
     "pane/ControlsPaneBase.cpp"
     "pane/ControlsGroup.cpp"
