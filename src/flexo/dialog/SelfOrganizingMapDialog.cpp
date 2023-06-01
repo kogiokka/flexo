@@ -53,8 +53,8 @@ SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject&
     labelIter->SetBackgroundColour(bg);
     labelRate->SetBackgroundColour(bg);
     labelRadius->SetBackgroundColour(bg);
-    labelModel->SetCanFocus(bg);
-    labelMap->SetCanFocus(bg);
+    labelModel->SetCanFocus(false);
+    labelMap->SetCanFocus(false);
     labelIter->SetCanFocus(false);
     labelRate->SetCanFocus(false);
     labelRadius->SetCanFocus(false);
