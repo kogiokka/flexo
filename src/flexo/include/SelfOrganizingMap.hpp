@@ -14,14 +14,14 @@
 #include "LearningRate.hpp"
 #include "Neighborhood.hpp"
 #include "Node.hpp"
-#include "ProjectSettings.hpp"
+#include "SelfOrganizingMapModel.hpp"
 #include "Vec.hpp"
-#include "object/Map.hpp"
 #include "log/Logger.h"
+#include "object/Map.hpp"
 
 class FlexoProject;
 
-class SelfOrganizingMap : public AttachableBase
+class SelfOrganizingMap
 {
     bool m_isDone;
     bool m_isTraining;
@@ -35,33 +35,16 @@ class SelfOrganizingMap : public AttachableBase
     std::condition_variable m_cv;
 
 public:
-    static SelfOrganizingMap& Get(FlexoProject& project);
-    static SelfOrganizingMap const& Get(FlexoProject const& project);
-    explicit SelfOrganizingMap(FlexoProject& project);
+    template <int InDim, int OutDim>
+    SelfOrganizingMap(SelfOrganizingMapModel<InDim, OutDim>& model, FlexoProject& project);
     ~SelfOrganizingMap();
     SelfOrganizingMap(SelfOrganizingMap const&) = delete;
     SelfOrganizingMap& operator=(SelfOrganizingMap const&) = delete;
 
-    /**
-     * Setup SOM training
-     *
-     * Set the hyperparameters for SOM and create the worker thread for training.
-     *
-     * @param map Map we are training
-     * @param dataset Dataset as the input space of SOM
-     */
-    template <int InDim, int OutDim>
-    void CreateProcedure(std::shared_ptr<Map<InDim, OutDim>> map, std::shared_ptr<Dataset<InDim>> dataset);
-
     void ToggleTraining();
     bool IsDone() const;
     bool IsTraining() const;
-    void StopWorker();
-    void OnProjectSettingsChanged(wxCommandEvent& event);
 
-    void SetMaxIterations(int numIterations);
-    void SetLearningRate(float rate);
-    void SetInitialNeighborhood(float radius);
     int GetIterations() const;
     float GetNeighborhood() const;
     float GetInitialNeighborhood() const;
@@ -108,25 +91,32 @@ private:
 };
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::CreateProcedure(std::shared_ptr<Map<InDim, OutDim>> map,
-                                        std::shared_ptr<Dataset<InDim>> dataset)
+SelfOrganizingMap::SelfOrganizingMap(SelfOrganizingMapModel<InDim, OutDim>& model, FlexoProject& project)
+    : m_isDone(false)
+    , m_isTraining(false)
+    , m_worker()
+    , m_mut()
+    , m_cv()
+    , m_project(project)
 {
-    {
-        StopWorker();
-        m_isDone = false;
-        m_isTraining = false;
+    m_t = 0;
+    m_tmax = model.maxSteps;
+    m_learnRate = LearningRate(model.learningRate, m_tmax);
+    m_neighborhood = Neighborhood(NeighborhoodRadius(model.neighborhood, m_tmax));
+
+    if (!model.object) {
+        log_fatal("Model is null");
+        exit(EXIT_FAILURE);
     }
 
-    auto const& settings = ProjectSettings::Get(m_project);
-
-    m_t = 0;
-    m_tmax = settings.GetMaxIterations();
-    m_learnRate = LearningRate(ProjectSettings::Get(m_project).GetLearningRate(), m_tmax);
-    m_neighborhood = Neighborhood(NeighborhoodRadius(settings.GetNeighborhood(), m_tmax));
+    auto const& pos = model.object->GetPositions();
+    auto dataset = std::make_shared<Dataset<3>>(pos);
+    model.object->SetViewFlags(ObjectViewFlag_Solid);
+    log_info("Dataset count: %lu", pos.size());
 
     void (SelfOrganizingMap::*Train)(std::shared_ptr<Map<InDim, OutDim>>, std::shared_ptr<Dataset<InDim>>)
         = &SelfOrganizingMap::Train;
-    m_worker = std::thread(Train, std::ref(*this), map, dataset);
+    m_worker = std::thread(Train, std::ref(*this), model.map, dataset);
 
     log_info("SOM worker created.");
 }

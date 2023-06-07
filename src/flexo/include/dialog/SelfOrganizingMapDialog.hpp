@@ -1,7 +1,8 @@
 #ifndef SOM_PROJECT_DIALOG
 #define SOM_PROJECT_DIALOG
 
-#include <string>
+#include <memory>
+
 #include <wx/checkbox.h>
 #include <wx/dialog.h>
 #include <wx/sizer.h>
@@ -9,14 +10,17 @@
 #include <wx/stattext.h>
 #include <wx/textctrl.h>
 
+#include "SelfOrganizingMap.hpp"
+#include "object/Map.hpp"
+#include "object/Object.hpp"
+
 class FlexoProject;
 
 class SelfOrganizingMapDialog : public wxDialog
 {
 public:
     SelfOrganizingMapDialog(wxWindow* parent, FlexoProject& project);
-    std::string GetModelID() const;
-    std::string GetMapID() const;
+    SelfOrganizingMapModel<3, 2> GetConfig() const;
 
 protected:
     void OnModelSelected(wxCommandEvent& event);
@@ -27,8 +31,11 @@ protected:
     void SetupNeighborhoodRadiusSlider(float maxValue, float value);
 
     // SOM properties
-    std::string m_modelID;
-    std::string m_mapID;
+    std::weak_ptr<Map<3, 2>> m_map;
+    std::weak_ptr<Object> m_object;
+    long int m_maxIterations;
+    float m_leanringRate;
+    float m_neighborhood;
 
     // Widgets
     wxSizer* m_topLayout;

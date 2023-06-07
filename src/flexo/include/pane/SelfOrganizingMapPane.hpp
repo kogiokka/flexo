@@ -1,10 +1,13 @@
 #ifndef SELF_ORGANIZING_MAP_PANE_H
 #define SELF_ORGANIZING_MAP_PANE_H
 
+#include <memory>
+
 #include <wx/button.h>
 #include <wx/textctrl.h>
 
 #include "pane/ControlsPaneBase.hpp"
+#include "SelfOrganizingMap.hpp"
 
 class SelfOrganizingMapPane : public ControlsPaneBase
 {
@@ -25,6 +28,8 @@ private:
     wxTextCtrl* m_textIter;
     wxTextCtrl* m_textRate;
     wxTextCtrl* m_textRadius;
+
+    std::unique_ptr<SelfOrganizingMap> m_som;
 };
 
 #endif

@@ -20,7 +20,6 @@ endif()
 target_sources(flexo
 PRIVATE
     "main.cpp"
-    "ProjectSettings.cpp"
     "Project.cpp"
     "ProjectWindow.cpp"
 

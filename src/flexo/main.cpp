@@ -25,7 +25,6 @@ void FlexoApp::OnUnhandledException()
 
 int FlexoApp::OnExit()
 {
-    SelfOrganizingMap::Get(*m_project).StopWorker();
     return wxApp::OnExit();
 }
 

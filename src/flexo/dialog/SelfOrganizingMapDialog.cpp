@@ -1,6 +1,5 @@
 #include "dialog/SelfOrganizingMapDialog.hpp"
 #include "Project.hpp"
-#include "ProjectSettings.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "event/SliderFloatEvent.hpp"
 #include "object/ObjectList.hpp"
@@ -16,6 +15,9 @@
 SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject& project)
     : wxDialog(parent, wxID_ANY, "Create SOM Project", wxDefaultPosition, wxDefaultSize,
                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
+    , m_maxIterations(0)
+    , m_leanringRate(0.0f)
+    , m_neighborhood(0.0f)
     , m_project(project)
 {
     wxTextCtrl *labelModel, *labelMap, *labelIter, *labelRate, *labelRadius;
@@ -59,8 +61,11 @@ SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject&
     labelRate->SetCanFocus(false);
     labelRadius->SetCanFocus(false);
 
-    *textIter << ProjectSettings::Get(m_project).GetMaxIterations();
-    *textRate << ProjectSettings::Get(m_project).GetLearningRate();
+    // Default values
+    m_maxIterations = 150000;
+    m_leanringRate = 0.05f;
+    *textIter << m_maxIterations;
+    *textRate << m_leanringRate;
 
     for (auto& o : ObjectList::Get(m_project)) {
         auto const type = o->GetType();
@@ -96,8 +101,7 @@ SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject&
     sliderRadius->Bind(wxEVT_SLIDER, &SelfOrganizingMapDialog::OnInitialNeighborhoodChanged, this);
 
     auto* btnOK = stdbtn->GetAffirmativeButton();
-    btnOK->Bind(wxEVT_UPDATE_UI,
-                [this](wxUpdateUIEvent& event) { event.Enable(!(GetMapID().empty() || GetModelID().empty())); });
+    btnOK->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(m_map.lock() || m_object.lock()); });
 
     // Set members
     m_sliderRadius = sliderRadius;
@@ -134,29 +138,39 @@ SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject&
     CenterOnParent();
 }
 
-std::string SelfOrganizingMapDialog::GetModelID() const
+SelfOrganizingMapModel<3, 2> SelfOrganizingMapDialog::GetConfig() const
 {
-    return m_modelID;
-}
+    SelfOrganizingMapModel<3, 2> model;
+    model.map = m_map.lock();
+    model.object = m_object.lock();
+    model.learningRate = m_leanringRate;
+    model.maxSteps = m_maxIterations;
+    model.neighborhood = m_neighborhood;
 
-std::string SelfOrganizingMapDialog::GetMapID() const
-{
-    return m_mapID;
+    return model;
 }
 
 void SelfOrganizingMapDialog::OnModelSelected(wxCommandEvent& event)
 {
-    m_modelID = event.GetString();
+    auto modelID = event.GetString();
+    for (auto const& o : ObjectList::Get(m_project)) {
+        auto const& id = o->GetID();
+        if (id == modelID) {
+            m_object = o;
+            m_project.theModel = o;
+        }
+    }
 }
 
 void SelfOrganizingMapDialog::OnMapSelected(wxCommandEvent& event)
 {
-    m_mapID = event.GetString();
+    auto mapID = event.GetString();
 
     for (auto const& o : ObjectList::Get(m_project)) {
         auto const& id = o->GetID();
-        if (id == m_mapID) {
-            m_project.theMap = std::dynamic_pointer_cast<Map<3, 2>>(o);
+        if (id == mapID) {
+            m_map = std::dynamic_pointer_cast<Map<3, 2>>(o);
+            m_project.theMap = m_map;
         }
     }
 
@@ -165,7 +179,7 @@ void SelfOrganizingMapDialog::OnMapSelected(wxCommandEvent& event)
     int const height = map->size.y;
     float const diagLen = sqrt(width * width + height * height);
     float const radius = 0.5f * diagLen;
-    ProjectSettings::Get(m_project).SetNeighborhood(radius);
+    m_neighborhood = radius;
     SetupNeighborhoodRadiusSlider(diagLen, radius);
 }
 
@@ -173,7 +187,7 @@ void SelfOrganizingMapDialog::OnMaxIterationChanged(wxCommandEvent& event)
 {
     long tmp;
     if (event.GetString().ToLong(&tmp)) {
-        ProjectSettings::Get(m_project).SetMaxIterations(tmp);
+        m_maxIterations = tmp;
     }
 }
 
@@ -181,7 +195,7 @@ void SelfOrganizingMapDialog::OnInitialRateChanged(wxCommandEvent& event)
 {
     double tmp;
     if (event.GetString().ToDouble(&tmp)) {
-        ProjectSettings::Get(m_project).SetLearningRate(tmp);
+        m_leanringRate = tmp;
     }
 }
 
@@ -189,7 +203,7 @@ void SelfOrganizingMapDialog::OnInitialNeighborhoodChanged(wxCommandEvent& event
 {
     float const value = event.GetInt() * 0.01f;
     m_textRadius->SetLabelText(wxString::Format("%.2f", value));
-    ProjectSettings::Get(m_project).SetNeighborhood(value);
+    m_neighborhood = value;
 }
 
 void SelfOrganizingMapDialog::SetupNeighborhoodRadiusSlider(float maxValue, float value)

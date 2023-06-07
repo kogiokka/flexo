@@ -18,9 +18,6 @@
 #include "object/ObjectList.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
-// FIXME Better solution
-static bool isSOMInitialized = false;
-
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, FlexoProject& project)
     : ControlsPaneBase(parent, project)
 {
@@ -49,37 +46,40 @@ void SelfOrganizingMapPane::PopulateTrainingPane()
     auto* currNbhdRadius = group->AddReadOnlyText("Neighborhood Radius");
     auto* currLearnRate = group->AddReadOnlyText("Leanring Rate");
 
-    auto const& som = SelfOrganizingMap::Get(m_project);
-
-    currIterations->Bind(wxEVT_UPDATE_UI, [&som](wxUpdateUIEvent& event) {
-        if (isSOMInitialized) {
-            event.SetText(wxString::Format("%d", som.GetIterations()));
+    currIterations->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+        if (m_som) {
+            event.SetText(wxString::Format("%d", m_som->GetIterations()));
             return;
         }
         event.SetText("");
     });
 
-    currNbhdRadius->Bind(wxEVT_UPDATE_UI, [&som](wxUpdateUIEvent& event) {
-        if (isSOMInitialized) {
-            event.SetText(wxString::Format("%.6f", som.GetNeighborhood()));
+    currNbhdRadius->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+        if (m_som) {
+            event.SetText(wxString::Format("%.6f", m_som->GetNeighborhood()));
             return;
         }
         event.SetText("");
     });
 
-    currLearnRate->Bind(wxEVT_UPDATE_UI, [&som](wxUpdateUIEvent& event) {
-        if (isSOMInitialized) {
-            event.SetText(wxString::Format("%.6f", som.GetLearningRate()));
+    currLearnRate->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
+        if (m_som) {
+            event.SetText(wxString::Format("%.6f", m_som->GetLearningRate()));
             return;
         }
         event.SetText("");
     });
 
     m_btnRun = group->AddButton("Run");
-    m_btnRun->Disable();
 
     m_btnRun->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) {
-        if (SelfOrganizingMap::Get(m_project).IsTraining()) {
+        if (!m_som) {
+            return;
+        }
+        if (m_som->IsDone()) {
+            event.SetText("Run");
+            event.Enable(false);
+        } else if (m_som->IsTraining()) {
             event.SetText("Pause");
         } else {
             event.SetText("Run");
@@ -90,8 +90,7 @@ void SelfOrganizingMapPane::PopulateTrainingPane()
 
     // Texture mapping for the model
     m_btnTexmap = group->AddButton("Texture Mapping");
-    m_btnTexmap->Bind(wxEVT_UPDATE_UI,
-                      [this](wxUpdateUIEvent& event) { event.Enable(SelfOrganizingMap::Get(m_project).IsDone()); });
+    m_btnTexmap->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(m_som && m_som->IsDone()); });
     m_btnTexmap->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_project.DoParameterization(); });
 }
 
@@ -100,52 +99,29 @@ void SelfOrganizingMapPane::OnConfigure(wxCommandEvent&)
     SelfOrganizingMapDialog dlg(&ProjectWindow::Get(m_project), m_project);
 
     if (dlg.ShowModal() == wxID_OK) {
-        auto const& modelID = dlg.GetModelID();
-        auto const& mapID = dlg.GetMapID();
+        auto model = dlg.GetConfig();
 
-        for (auto const& o : ObjectList::Get(m_project)) {
-            auto const& id = o->GetID();
-            if (id == modelID) {
-                m_project.theModel = o;
-            }
-        }
-
-        if (auto it = m_project.theModel.lock()) {
-            auto const& pos = it->GetPositions();
-            m_project.theDataset = std::make_shared<Dataset<3>>(pos);
-            it->SetViewFlags(ObjectViewFlag_Solid);
-            log_info("Dataset count: %lu", pos.size());
-        } else {
-            log_fatal("Model is null");
-            exit(EXIT_FAILURE);
-        }
-
-        auto& som = SelfOrganizingMap::Get(m_project);
-        if (som.IsTraining()) {
-            som.ToggleTraining();
-        }
-        som.StopWorker();
-        som.CreateProcedure(m_project.theMap.lock(), m_project.theDataset);
-
-        auto const& settings = ProjectSettings::Get(m_project);
         m_textModel->Clear();
         m_textMap->Clear();
         m_textIter->Clear();
         m_textRate->Clear();
         m_textRadius->Clear();
-        *m_textModel << modelID;
-        *m_textMap << mapID;
-        *m_textIter << settings.GetMaxIterations();
-        *m_textRate << settings.GetLearningRate();
-        *m_textRadius << settings.GetNeighborhood();
+        *m_textModel << model.object->GetID();
+        *m_textMap << model.map->GetID();
+        *m_textIter << static_cast<long int>(model.maxSteps);
+        *m_textRate << model.learningRate;
+        *m_textRadius << model.neighborhood;
 
-        m_btnRun->Enable();
-
-        isSOMInitialized = true;
+        m_som = std::make_unique<SelfOrganizingMap>(model, m_project);
+        m_btnRun->Enable(true);
     }
 }
 
 void SelfOrganizingMapPane::OnRun(wxCommandEvent&)
 {
-    SelfOrganizingMap::Get(m_project).ToggleTraining();
+    if (!m_som) {
+        return;
+    }
+
+    m_som->ToggleTraining();
 }
