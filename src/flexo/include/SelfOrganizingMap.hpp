@@ -70,7 +70,7 @@ private:
      * @param input   Input vector
      */
     template <int InDim, int OutDim>
-    glm::ivec2 FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> const& input) const;
+    Node<InDim, OutDim> const& FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> const& input) const;
 
     /**
      * Update the neighborhood of the BMU
@@ -84,8 +84,8 @@ private:
      * @param radius  Neighborhood radius
      */
     template <int InDim, int OutDim>
-    void UpdateNeighborhood(Map<InDim, OutDim>& map, Vec<InDim> input, Node<InDim, OutDim> const& bmu,
-                            LearningRate learnRate, Neighborhood neighborhood);
+    void UpdateNodes(Map<InDim, OutDim>& map, Vec<InDim> input, Node<InDim, OutDim> const& bmu, LearningRate learnRate,
+                     Neighborhood neighborhood);
 
     FlexoProject& m_project;
 };
@@ -124,10 +124,6 @@ SelfOrganizingMap::SelfOrganizingMap(SelfOrganizingMapModel<InDim, OutDim>& mode
 template <int InDim, int OutDim>
 void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shared_ptr<Dataset<InDim>> dataset)
 {
-    auto& nodes = map->nodes;
-    int const width = map->size.x;
-    int const height = map->size.y;
-
     while (m_t < m_tmax) {
         std::unique_lock lk(m_mut);
         m_cv.wait(lk, [this] { return m_isTraining || m_isDone; });
@@ -136,21 +132,8 @@ void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shar
         }
 
         Vec<InDim> const input = dataset->GetInput();
-        glm::ivec2 const index = FindBMU(*map, input);
-        auto const& bmu = nodes[index.x + index.y * width];
-        UpdateNeighborhood(*map, input, bmu, m_learnRate, m_neighborhood);
-
-        if (map->flags & MapFlags_CyclicX) {
-            for (int y = 0; y < height; y++) {
-                nodes[y * width + width - 1].weights = nodes[y * width + 0].weights;
-            }
-        }
-
-        if (map->flags & MapFlags_CyclicY) {
-            for (int x = 0; x < width; x++) {
-                nodes[(height - 1) * width + x].weights = nodes[0 * width + x].weights;
-            }
-        }
+        auto const& bmu = FindBMU(*map, input);
+        UpdateNodes(*map, input, bmu, m_learnRate, m_neighborhood);
 
         ++m_t;
     }
@@ -159,9 +142,9 @@ void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shar
 }
 
 template <int InDim, int OutDim>
-glm::ivec2 SelfOrganizingMap::FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> const& input) const
+Node<InDim, OutDim> const& SelfOrganizingMap::FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> const& input) const
 {
-    glm::ivec2 idx;
+    glm::ivec2 idx(0, 0);
     float distMin = std::numeric_limits<float>::max();
     for (int i = 0; i < map.size.x; i++) {
         for (int j = 0; j < map.size.y; j++) {
@@ -173,14 +156,15 @@ glm::ivec2 SelfOrganizingMap::FindBMU(Map<InDim, OutDim> const& map, Vec<InDim> 
             }
         }
     }
-    return idx;
+
+    return map.nodes[idx.x + idx.y * map.size.x];
 }
 
 template <int InDim, int OutDim>
-void SelfOrganizingMap::UpdateNeighborhood(Map<InDim, OutDim>& map, Vec<InDim> input, Node<InDim, OutDim> const& bmu,
-                                           LearningRate learnRate, Neighborhood neighborhood)
+void SelfOrganizingMap::UpdateNodes(Map<InDim, OutDim>& map, Vec<InDim> input, Node<InDim, OutDim> const& bmu,
+                                    LearningRate learnRate, Neighborhood neighborhood)
 {
-    auto& neurons = map.nodes;
+    auto& nodes = map.nodes;
     MapFlags const flags = map.flags;
     int const width = map.size.x;
     int const height = map.size.y;
@@ -210,11 +194,23 @@ void SelfOrganizingMap::UpdateNeighborhood(Map<InDim, OutDim>& map, Vec<InDim> i
             float const dy = bmu.Y() - y;
             float const distToBmuSqr = dx * dx + dy * dy;
             if (distToBmuSqr < radSqr) {
-                auto& node = neurons[modX + modY * width];
+                auto& node = nodes[modX + modY * width];
                 Vec<OutDim> const bmuCoord = bmu.coords;
                 Vec<OutDim> const nodeCoord(static_cast<float>(x), static_cast<float>(y));
                 node.weights += learnRate(m_t) * neighborhood(m_t, bmuCoord, nodeCoord) * (input - node.weights);
             }
+        }
+    }
+
+    if (map.flags & MapFlags_CyclicX) {
+        for (int y = 0; y < height; y++) {
+            nodes[y * width + width - 1].weights = nodes[y * width + 0].weights;
+        }
+    }
+
+    if (map.flags & MapFlags_CyclicY) {
+        for (int x = 0; x < width; x++) {
+            nodes[(height - 1) * width + x].weights = nodes[0 * width + x].weights;
         }
     }
 }
