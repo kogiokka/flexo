@@ -111,10 +111,15 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
         it->GenerateDrawables(gfx);
     }
 
-    ObjectList::Get(m_project).Submit(renderer);
-    renderer.Render(gfx);
+    for (auto const& obj : ObjectList::Get(m_project)) {
+        for (auto const& drawable : obj->GetDrawList()) {
+            drawable->Submit(renderer);
+        }
+    }
 
+    renderer.Render(gfx);
     gfx.Present();
+    renderer.Clear();
 
     SwapBuffers();
 }

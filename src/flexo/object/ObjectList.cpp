@@ -75,16 +75,6 @@ void ObjectList::OnDeleteObject(wxCommandEvent& event)
     }
 }
 
-void ObjectList::Submit(Renderer& renderer) const
-{
-    renderer.Clear();
-    for (auto const& obj : m_list) {
-        for (auto const& drawable : obj->GetDrawList()) {
-            drawable->Submit(renderer);
-        }
-    }
-}
-
 ObjectList::iterator ObjectList::begin()
 {
     return m_list.begin();

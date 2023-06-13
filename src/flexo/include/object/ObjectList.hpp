@@ -9,7 +9,6 @@
 #include <wx/event.h>
 
 #include "Attachable.hpp"
-#include "gfx/Renderer.hpp"
 #include "object/Object.hpp"
 
 class FlexoProject;
@@ -23,7 +22,6 @@ public:
     static ObjectList const& Get(FlexoProject const& project);
     ObjectList(FlexoProject& project);
     void Add(std::shared_ptr<Object> object);
-    void Submit(Renderer& renderer) const;
 
 public:
     // Forward the iterator functions
