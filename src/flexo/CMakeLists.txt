@@ -42,14 +42,8 @@ PRIVATE
 
     "object/Object.cpp"
     "object/ObjectList.cpp"
-    "object/Plane.cpp"
-    "object/Cube.cpp"
-    "object/Grid.cpp"
-    "object/Sphere.cpp"
-    "object/Torus.cpp"
     "object/Guides.cpp"
     "object/SurfaceVoxels.cpp"
-
 
     "TransformStack.cpp"
     "VolumetricModelData.cpp"

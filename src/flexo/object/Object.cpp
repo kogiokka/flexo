@@ -2,11 +2,12 @@
 #include "gfx/Graphics.hpp"
 #include "log/Logger.h"
 
-Object::Object(ObjectType type)
+Object::Object(ObjectType type, EditableMesh mesh)
     : m_type(type)
     , m_texture(nullptr)
     , m_flags(ObjectViewFlag_Solid)
     , m_isVisible(true)
+    , m_mesh(mesh)
 {
 }
 
@@ -71,6 +72,13 @@ Object::DrawList const& Object::GetDrawList()
     }
 
     return m_drawlist;
+}
+
+void Object::ApplyTransform()
+{
+    auto st = GenerateTransformStack();
+    st.Apply(m_mesh.positions);
+    m_transform = Transform();
 }
 
 void Object::SetViewFlags(ObjectViewFlag flags)

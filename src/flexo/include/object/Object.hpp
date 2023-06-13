@@ -61,7 +61,8 @@ public:
 
     using DrawList = std::vector<std::shared_ptr<Drawable>>;
 
-    Object(ObjectType type);
+    Object(ObjectType type, EditableMesh mesh = EditableMesh());
+    virtual ~Object() = default;
 
     void SetID(std::string id);
     void SetViewFlags(ObjectViewFlag flags);
@@ -77,7 +78,7 @@ public:
     virtual void GenerateDrawables(Graphics& gfx);
     virtual DrawList const& GetDrawList();
     virtual std::vector<glm::vec3> GetPositions() const;
-    virtual void ApplyTransform() = 0;
+    virtual void ApplyTransform();
 
     void SetLocation(float x, float y, float z);
     void SetRotation(float x, float y, float z);

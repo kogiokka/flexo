@@ -22,13 +22,8 @@
 #include "dialog/AddDialog.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "log/Logger.h"
-#include "object/Cube.hpp"
-#include "object/Grid.hpp"
 #include "object/Guides.hpp"
-#include "object/Plane.hpp"
-#include "object/Sphere.hpp"
 #include "object/SurfaceVoxels.hpp"
-#include "object/Torus.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/TextureWidget.hpp"
 
@@ -54,7 +49,8 @@ void FlexoProject::CreateScene()
 {
     auto& scene = SceneViewportPane::Get(*this);
 
-    auto cube = std::make_shared<Cube>();
+    auto cube = std::make_shared<Object>(ObjectType_Cube, ConstructCube());
+
     cube->SetTexture(Bind::TextureManager::Resolve(scene.GetGL(), "images/blank.png", 0));
     cube->SetViewFlags(ObjectViewFlag_Solid);
 
@@ -141,7 +137,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Plane (size: %.3f)", size);
 
-            obj = std::make_shared<Plane>(size);
+            obj = std::make_shared<Object>(ObjectType_Plane, ConstructPlane(size));
         } else {
             return;
         }
@@ -163,7 +159,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Grid (X-div: %ld, Y-div: %ld, size: %.3f)", xdiv, ydiv, size);
 
-            obj = std::make_shared<Grid>(xdiv, ydiv, size);
+            obj = std::make_shared<Object>(ObjectType_Grid, ConstructGrid(xdiv, ydiv, size));
         } else {
             return;
         }
@@ -179,7 +175,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add Cube (size: %.3f)", size);
 
-            obj = std::make_shared<Cube>(size);
+            obj = std::make_shared<Object>(ObjectType_Cube, ConstructCube(size));
         } else {
             return;
         }
@@ -200,7 +196,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             }
             log_info("Add UV Sphere (segments: %ld, rings: %ld, radius: %.3f)", segs, rings, radius);
 
-            obj = std::make_shared<Sphere>(segs, rings, radius);
+            obj = std::make_shared<Object>(ObjectType_Sphere, ConstructSphere(segs, rings, radius));
         } else {
             return;
         }
@@ -226,7 +222,7 @@ void FlexoProject::OnMenuAdd(wxCommandEvent& event)
             log_info("Add Torus: (major segments: %ld, minor segments: %ld, major radius: %.3f, minor radius: %.3f)",
                      mjSeg, mnSeg, mjRad, mnRad);
 
-            obj = std::make_shared<Torus>(mjSeg, mnSeg, mjRad, mnRad);
+            obj = std::make_shared<Object>(ObjectType_Torus, ConstructTorus(mjSeg, mnSeg, mjRad, mnRad));
         } else {
             return;
         }
