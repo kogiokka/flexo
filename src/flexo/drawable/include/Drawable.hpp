@@ -43,7 +43,6 @@ protected:
     std::vector<std::shared_ptr<Bind::Bindable>> m_binds;
     std::unordered_map<std::string, UniformBlock> m_ubs;
 
-    std::string m_id;
     unsigned int m_vertCount;
 };
 
