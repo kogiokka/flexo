@@ -24,6 +24,7 @@ target_sources(drawable
         "SolidDrawable.cpp"
         "WireDrawable.cpp"
         "TexturedDrawable.cpp"
+        "Overlays.cpp"
 )
 
 target_include_directories(drawable PUBLIC include)

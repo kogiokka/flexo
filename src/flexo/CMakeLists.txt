@@ -25,6 +25,7 @@ PRIVATE
 
     "dialog/AddDialog.cpp"
     "dialog/SelfOrganizingMapDialog.cpp"
+    "dialog/ViewportSettingsDialog.cpp"
 
     "pane/ControlsPaneBase.cpp"
     "pane/ControlsGroup.cpp"
@@ -35,17 +36,14 @@ PRIVATE
     "pane/TransformWidget.cpp"
     "pane/ViewportDisplayWidget.cpp"
     "pane/MeshObjectPropertiesPane.cpp"
-    "pane/GuidesPropertiesPane.cpp"
     "pane/TextureWidget.cpp"
     "pane/MapPropertiesPane.cpp"
     "event/SliderFloatEvent.cpp"
 
     "object/Object.cpp"
     "object/ObjectList.cpp"
-    "object/Guides.cpp"
     "object/SurfaceVoxels.cpp"
 
-    "TransformStack.cpp"
     "VolumetricModelData.cpp"
     "Voxel.cpp"
     "assetlib/BaseImporter.cpp"

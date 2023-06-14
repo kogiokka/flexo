@@ -20,7 +20,6 @@
     X(ObjectType_Plane, "Plane")                                                                                       \
     X(ObjectType_Grid, "Grid")                                                                                         \
     X(ObjectType_Cube, "Cube")                                                                                         \
-    X(ObjectType_Guides, "Guides")                                                                                     \
     X(ObjectType_Model, "Model")                                                                                       \
     X(ObjectType_Map, "Map")                                                                                           \
     X(ObjectType_Light, "Light")                                                                                       \

@@ -7,6 +7,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "dialog/ViewportSettingsDialog.hpp"
 #include "log/Logger.h"
 #include "pane/SceneViewportPane.hpp"
 
@@ -29,6 +30,7 @@ enum {
     EVT_VIEW_MENU_SOM,
     EVT_VIEW_MENU_PROPERTIES,
     EVT_VIEW_MENU_SCENE_OUTLINER,
+    EVT_VIEW_MENU_VIEWPORT_SETTINGS,
 };
 
 // Register factory: ProjectWindow
@@ -76,6 +78,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SOM, "Toggle SOM Pane");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_PROPERTIES, "Toggle Properties Pane");
+    m_viewMenu->Append(EVT_VIEW_MENU_VIEWPORT_SETTINGS, "Viewport Settings");
 
     auto cameraMenu = new wxMenu;
     auto perspItem = cameraMenu->AppendRadioItem(EVT_MENU_CAMERA_PERSPECTIVE, "Perspective");
@@ -170,6 +173,8 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_PROPERTIES);
     Bind(wxEVT_MENU, &ProjectWindow::OnTogglePane, this, EVT_VIEW_MENU_SCENE_OUTLINER);
 
+    Bind(wxEVT_MENU, &ProjectWindow::OnViewportSettings, this, EVT_VIEW_MENU_VIEWPORT_SETTINGS);
+
     m_updateUITimer = new wxTimer(this, TIMER_UPDATE_UI);
     m_updateUITimer->Start(16);
     Bind(wxEVT_TIMER, &ProjectWindow::OnTimerUpdateUI, this);
@@ -262,4 +267,10 @@ void ProjectWindow::OnTogglePane(wxCommandEvent& event)
     }
 
     m_mgr.Update();
+}
+
+void ProjectWindow::OnViewportSettings(wxCommandEvent&)
+{
+    ViewportSettingsDialog dlg(this, SceneViewportPane::Get(m_project).GetSettings(), m_project);
+    dlg.ShowModal();
 }

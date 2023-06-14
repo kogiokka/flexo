@@ -204,6 +204,32 @@ EditableMesh ConstructGrid(int numXDiv, int numYDiv, float size)
     return mesh;
 }
 
+EditableMesh ConstructIntervaledGrid(int numCell, int numBlock, float size)
+{
+    EditableMesh mesh;
+    float blkSize = numCell / numBlock;
+    float const cellSize = size / numCell;
+
+    unsigned int begin = 0;
+    unsigned int index = 0;
+    for (int i = 0; i < numBlock; i++) {
+        for (int j = 0; j < blkSize - 1; j++) {
+            // X
+            mesh.positions.emplace_back(+1.0f, -1.0f + (j + 1 + begin) * cellSize, 0.0f);
+            mesh.positions.emplace_back(-1.0f, -1.0f + (j + 1 + begin) * cellSize, 0.0f);
+            // Y
+            mesh.positions.emplace_back(-1.0f + (j + 1 + begin) * cellSize, +1.0f, 0.0f);
+            mesh.positions.emplace_back(-1.0f + (j + 1 + begin) * cellSize, -1.0f, 0.0f);
+
+            mesh.faces.push_back({ index + 0, index + 1 });
+            mesh.faces.push_back({ index + 2, index + 3 });
+            index += 4;
+        }
+        begin += blkSize;
+    }
+    return mesh;
+}
+
 std::vector<TriangularFace> EditableMesh::GenerateTriangularFaces() const
 {
     using VertexCount = unsigned int;

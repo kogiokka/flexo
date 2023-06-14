@@ -9,6 +9,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "dialog/ViewportSettingsDialog.hpp"
 #include "gfx/Camera.hpp"
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
@@ -90,6 +91,15 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
     m_project.Bind(EVT_MENU_BACKGROUND_LIGHT, [this](wxCommandEvent&) {
         m_bgColor = { 0.8588, 0.8588, 0.8588, 1.0f };
     });
+
+    m_project.Bind(EVT_VIEWPORT_SETTINGS_DISPLAY_GUIDES, [this](wxCommandEvent& event) {
+        OverlayFlags flags = 0;
+        if (event.GetInt()) {
+            flags = Overlays_GuidesAxisX | Overlays_GuidesAxisY | Overlays_GuidesGrid;
+        }
+        m_settings.overlayFlags = flags;
+        m_overlays->SetFlags(flags);
+    });
 }
 
 SceneViewportPane::~SceneViewportPane()
@@ -105,11 +115,13 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearRenderTargetView(m_rtv.Get(), m_bgColor.data());
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
-    auto& renderer = *m_renderer;
     if (auto it = m_project.theMap.lock()) {
         it->GenerateMesh();
         it->GenerateDrawables(gfx);
     }
+
+    auto& renderer = *m_renderer;
+    m_overlays->Submit(renderer);
 
     for (auto const& obj : ObjectList::Get(m_project)) {
         for (auto const& drawable : obj->GetDrawList()) {
@@ -159,6 +171,8 @@ void SceneViewportPane::InitGL()
     m_gfx->CreateBlendState(&blendDesc, &blend);
     m_gfx->SetBlendState(blend.Get());
     m_gfx->SetCamera(CreateDefaultCamera());
+
+    m_overlays = std::make_unique<Overlays>(*m_gfx);
 }
 
 void SceneViewportPane::AcceptObject(std::shared_ptr<Object> object)
@@ -169,6 +183,11 @@ void SceneViewportPane::AcceptObject(std::shared_ptr<Object> object)
 Graphics& SceneViewportPane::GetGL()
 {
     return *m_gfx;
+}
+
+SceneViewportPane::Settings SceneViewportPane::GetSettings() const
+{
+    return m_settings;
 }
 
 void SceneViewportPane::ResetCamera()

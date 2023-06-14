@@ -58,6 +58,7 @@ private:
     void OnExit(wxCommandEvent&);
     void OnTimerUpdateUI(wxTimerEvent& event);
     void OnTogglePane(wxCommandEvent& event);
+    void OnViewportSettings(wxCommandEvent& event);
 };
 
 #endif

@@ -4,7 +4,6 @@
 #include "gfx/Renderer.hpp"
 #include "object/Object.hpp"
 #include "object/ObjectList.hpp"
-#include "pane/GuidesPropertiesPane.hpp"
 #include "pane/MapPropertiesPane.hpp"
 #include "pane/MeshObjectPropertiesPane.hpp"
 
@@ -32,9 +31,7 @@ void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
         m_props->Destroy();
     }
 
-    if (type == ObjectType_Guides) {
-        m_props = new GuidesPropertiesPane(this, m_project);
-    } else if (type == ObjectType_Map) {
+    if (type == ObjectType_Map) {
         m_props = new MapPropertiesPane(this, m_project);
     } else {
         m_props = new MeshObjectPropertiesPane(this, m_project);

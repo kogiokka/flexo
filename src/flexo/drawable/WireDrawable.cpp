@@ -74,9 +74,9 @@ WireDrawable::~WireDrawable()
 {
 }
 
-void WireDrawable::SetColor(float r, float g, float b)
+void WireDrawable::SetColor(Color color)
 {
-    m_ubs["color"].Assign("color", glm::vec3(r, g, b));
+    m_ubs["color"].Assign("color", color);
 }
 
 void WireDrawable::Update(Graphics& gfx)

@@ -22,7 +22,6 @@
 #include "dialog/AddDialog.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "log/Logger.h"
-#include "object/Guides.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/TextureWidget.hpp"
@@ -55,7 +54,6 @@ void FlexoProject::CreateScene()
     cube->SetViewFlags(ObjectViewFlag_Solid);
 
     scene.AcceptObject(cube);
-    scene.AcceptObject(std::make_shared<Guides>());
 }
 
 void FlexoProject::SetFrame(wxFrame* frame)

@@ -14,6 +14,7 @@
 #include <wx/glcanvas.h>
 #include <wx/string.h>
 
+#include "Overlays.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
 #include "object/Object.hpp"
@@ -27,6 +28,10 @@ public:
     static SceneViewportPane& Get(FlexoProject& project);
     static SceneViewportPane const& Get(FlexoProject const& project);
 
+    struct Settings {
+        OverlayFlags overlayFlags;
+    };
+
     SceneViewportPane(wxWindow* parent, wxGLAttributes const& dispAttrs, wxWindowID id, wxPoint const& pos,
                       wxSize const& size, FlexoProject& project);
     ~SceneViewportPane();
@@ -34,6 +39,7 @@ public:
     void ResetCamera();
     void AcceptObject(std::shared_ptr<Object> object);
     Graphics& GetGL();
+    Settings GetSettings() const;
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -58,6 +64,10 @@ private:
     std::array<float, 4> m_bgColor;
     std::shared_ptr<Graphics> m_gfx;
     std::shared_ptr<Renderer> m_renderer;
+
+    std::unique_ptr<Overlays> m_overlays;
+    Settings m_settings;
+
     FlexoProject& m_project;
 
     wxDECLARE_EVENT_TABLE();

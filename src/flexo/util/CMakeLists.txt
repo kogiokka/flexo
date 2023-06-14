@@ -20,6 +20,8 @@ target_sources(util
     PRIVATE
         "EditableMesh.cpp"
         "Mesh.cpp"
+        "TransformStack.cpp"
+        "Colors.cpp"
 )
 
 target_include_directories(util PUBLIC include)
