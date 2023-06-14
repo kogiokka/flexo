@@ -78,6 +78,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SCENE_OUTLINER, "Toggle Scene Outliner");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_SOM, "Toggle SOM Pane");
     m_viewMenu->AppendCheckItem(EVT_VIEW_MENU_PROPERTIES, "Toggle Properties Pane");
+    m_viewMenu->AppendSeparator();
     m_viewMenu->Append(EVT_VIEW_MENU_VIEWPORT_SETTINGS, "Viewport Settings");
 
     auto cameraMenu = new wxMenu;
@@ -112,24 +113,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     MENU_ADD_LIST
 #undef X
 
-    auto bgMenu = new wxMenu;
-    bgMenu->AppendRadioItem(EVT_MENU_BACKGROUND_DARK, "Dark")->Check();
-    bgMenu->AppendRadioItem(EVT_MENU_BACKGROUND_LIGHT, "Light");
-    bgMenu->Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent&) {
-            wxCommandEvent event(EVT_MENU_BACKGROUND_DARK);
-            m_project.ProcessEvent(event);
-        },
-        EVT_MENU_BACKGROUND_DARK);
-    bgMenu->Bind(
-        wxEVT_MENU,
-        [this](wxCommandEvent&) {
-            wxCommandEvent event(EVT_MENU_BACKGROUND_LIGHT);
-            m_project.ProcessEvent(event);
-        },
-        EVT_MENU_BACKGROUND_LIGHT);
-
     auto* screenshotMenu = new wxMenu;
     auto* itemScreenshotViewport = new wxMenuItem(screenshotMenu, EVT_SCREENSHOT, "Screenshot 3D Viewport", "");
     itemScreenshotViewport->SetBitmap(wxArtProvider::GetBitmap(wxART_FILE_SAVE));
@@ -141,7 +124,6 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     menubar->Append(cameraMenu, "&Camera");
     menubar->Append(addMenu, "&Add");
     // menubar->Append(screenshotMenu, "&Screeenshot");
-    menubar->Append(bgMenu, "&Background");
 
     this->SetMenuBar(menubar);
 

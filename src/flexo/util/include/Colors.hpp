@@ -12,4 +12,7 @@ extern Color GREY;
 extern Color DARK_GREY;
 extern Color BLACK;
 
+extern Color BACKGROUND_DARK;
+extern Color BACKGROUND_LIGHT;
+
 #endif

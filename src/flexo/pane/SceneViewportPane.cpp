@@ -66,12 +66,14 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
     , m_isGLLoaded(false)
     , m_dirHorizontal(1)
     , m_context(nullptr)
-    , m_bgColor { 0.2157f, 0.2157f, 0.2157f, 1.0f }
     , m_project(project)
 {
     wxGLContextAttrs attrs;
     attrs.CoreProfile().OGLVersion(4, 3).Robust().EndList();
     m_context = std::make_unique<wxGLContext>(this, nullptr, &attrs);
+
+    m_settings.background = BACKGROUND_DARK;
+    m_settings.overlayFlags = Overlays_GuidesAxisX | Overlays_GuidesAxisY | Overlays_GuidesGrid;
 
     m_project.Bind(EVT_SCREENSHOT, &SceneViewportPane::OnMenuScreenshot, this);
 
@@ -84,15 +86,15 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
         cam.SetProjectionMode(Camera::ProjectionMode::Orthogonal);
     });
 
-    m_project.Bind(EVT_MENU_BACKGROUND_DARK, [this](wxCommandEvent&) {
-        m_bgColor = { 0.2157f, 0.2157f, 0.2157f, 1.0f };
+    m_project.Bind(EVT_VIEWPORT_SETTINGS_BACKGROUND_DARK, [this](wxCommandEvent&) {
+        m_settings.background = BACKGROUND_DARK;
     });
 
-    m_project.Bind(EVT_MENU_BACKGROUND_LIGHT, [this](wxCommandEvent&) {
-        m_bgColor = { 0.8588, 0.8588, 0.8588, 1.0f };
+    m_project.Bind(EVT_VIEWPORT_SETTINGS_BACKGROUND_LIGHT, [this](wxCommandEvent&) {
+        m_settings.background = BACKGROUND_LIGHT;
     });
 
-    m_project.Bind(EVT_VIEWPORT_SETTINGS_DISPLAY_GUIDES, [this](wxCommandEvent& event) {
+    m_project.Bind(EVT_VIEWPORT_SETTINGS_OVERLAY_GUIDES, [this](wxCommandEvent& event) {
         OverlayFlags flags = 0;
         if (event.GetInt()) {
             flags = Overlays_GuidesAxisX | Overlays_GuidesAxisY | Overlays_GuidesGrid;
@@ -112,7 +114,8 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     SetCurrent(*m_context);
 
     auto& gfx = *m_gfx;
-    gfx.ClearRenderTargetView(m_rtv.Get(), m_bgColor.data());
+    auto bg = glm::vec4(m_settings.background, 1.0f);
+    gfx.ClearRenderTargetView(m_rtv.Get(), &bg.x);
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
     if (auto it = m_project.theMap.lock()) {

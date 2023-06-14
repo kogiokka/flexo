@@ -29,6 +29,7 @@ public:
     static SceneViewportPane const& Get(FlexoProject const& project);
 
     struct Settings {
+        Color background;
         OverlayFlags overlayFlags;
     };
 
@@ -61,7 +62,6 @@ private:
     GLWRPtr<IGLWRRenderTargetView> m_rtv;
     GLWRPtr<IGLWRDepthStencilView> m_dsv;
     std::unique_ptr<wxGLContext> m_context;
-    std::array<float, 4> m_bgColor;
     std::shared_ptr<Graphics> m_gfx;
     std::shared_ptr<Renderer> m_renderer;
 
