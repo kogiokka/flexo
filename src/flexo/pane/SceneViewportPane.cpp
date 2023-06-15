@@ -218,7 +218,7 @@ void SceneViewportPane::OnSize(wxSizeEvent&)
     v.farDepth = 1.0;
 
     m_gfx->SetViewports(1, &v);
-    ProjectWindow::Get(m_project).SetStatusText(wxString::Format("Viewport size: %dx%d", size.x, size.y));
+    m_project.GetWindow()->SetStatusText(wxString::Format("Viewport size: %dx%d", size.x, size.y));
 }
 
 void SceneViewportPane::OnMouseWheel(wxMouseEvent& event)
@@ -292,7 +292,7 @@ void SceneViewportPane::OnMenuScreenshot(wxCommandEvent&)
     std::strftime(filename, sizeof(filename), "Screenshot_%Y%m%d_%H%M%S.png", &timeStruct);
     stbi_flip_vertically_on_write(1);
     stbi_write_png(filename, size.x, size.y, 4, image.data(), size.x * 4);
-    ProjectWindow::Get(m_project).SetStatusText(wxString::Format("The screenshot was saved as \"%s\"", filename));
+    m_project.GetWindow()->SetStatusText(wxString::Format("The screenshot was saved as \"%s\"", filename));
 }
 
 void SceneViewportPane::OnUpdateUI(wxUpdateUIEvent&)

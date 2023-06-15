@@ -56,7 +56,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
     : wxFrame(parent, id, "Flexo", pos, size)
     , m_project(project)
 {
-    m_project.SetFrame(this);
+    m_project.SetWindow(this);
 
     m_mainPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxNO_BORDER);
     m_mainPanel->SetSizer(new wxBoxSizer(wxHORIZONTAL));

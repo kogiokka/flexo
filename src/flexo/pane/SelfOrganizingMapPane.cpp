@@ -96,7 +96,7 @@ void SelfOrganizingMapPane::PopulateTrainingPane()
 
 void SelfOrganizingMapPane::OnConfigure(wxCommandEvent&)
 {
-    SelfOrganizingMapDialog dlg(&ProjectWindow::Get(m_project), m_project);
+    SelfOrganizingMapDialog dlg(m_project.GetWindow(), m_project);
 
     if (dlg.ShowModal() == wxID_OK) {
         auto model = dlg.GetConfig();

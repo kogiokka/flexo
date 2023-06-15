@@ -26,7 +26,6 @@
 
 FlexoProject::FlexoProject()
     : m_frame {}
-    , m_panel {}
     , theDataset(nullptr)
     , theMap()
     , theModel()
@@ -37,26 +36,21 @@ FlexoProject::~FlexoProject()
 {
 }
 
-void FlexoProject::SetFrame(wxFrame* frame)
+void FlexoProject::SetWindow(wxFrame* frame)
 {
     m_frame = frame;
 }
 
-void FlexoProject::SetPanel(wxWindow* panel)
+wxFrame* FlexoProject::GetWindow()
 {
-    m_panel = panel;
-}
-
-wxWindow* FlexoProject::GetPanel()
-{
-    return m_panel;
+    return m_frame;
 }
 
 void FlexoProject::DoParameterization()
 {
     auto model = std::dynamic_pointer_cast<SurfaceVoxels>(theModel.lock());
     if (!model) {
-        wxMessageDialog dlg(&ProjectWindow::Get(*this), "Not a volumetric model!", "Error", wxCENTER | wxICON_ERROR);
+        wxMessageDialog dlg(GetWindow(), "Not a volumetric model!", "Error", wxCENTER | wxICON_ERROR);
         dlg.ShowModal();
         return;
     }
@@ -64,7 +58,7 @@ void FlexoProject::DoParameterization()
     float progress;
     auto status = model->Parameterize(*(theMap.lock()), progress);
 
-    wxProgressDialog dialog("Parameterizing", "Please wait...", 100, &ProjectWindow::Get(*this),
+    wxProgressDialog dialog("Parameterizing", "Please wait...", 100, GetWindow(),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
 
     while (status.wait_for(std::chrono::milliseconds(16)) != std::future_status::ready) {
