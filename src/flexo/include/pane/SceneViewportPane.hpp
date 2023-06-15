@@ -16,6 +16,7 @@
 #include "Overlays.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
+#include "object/Map.hpp"
 
 class FlexoProject;
 

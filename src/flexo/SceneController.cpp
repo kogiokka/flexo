@@ -5,10 +5,12 @@
 #include "ProjectWindow.hpp"
 #include "RandomRealNumber.hpp"
 #include "SceneController.hpp"
+#include "VolumetricModelData.hpp"
 #include "dialog/AddDialog.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "object/Object.hpp"
 #include "object/ObjectList.hpp"
+#include "object/SurfaceVoxels.hpp"
 #include "pane/SceneViewportPane.hpp"
 
 constexpr auto PI = 3.14159265358979323846;
@@ -38,6 +40,8 @@ SceneController::SceneController(FlexoProject& project)
 #define X(evt, name) m_project.Bind(evt, &SceneController::OnAddObject, this);
     ADD_OBJECT_LIST
 #undef X
+
+    m_project.Bind(EVT_IMPORT_MODEL, &SceneController::OnImportModel, this);
 }
 
 void SceneController::CreateScene()
@@ -280,4 +284,18 @@ void SceneController::OnAddObject(wxCommandEvent& event)
     }
 
     AcceptObject(obj);
+}
+
+void SceneController::OnImportModel(wxCommandEvent& event)
+{
+    VolumetricModelData data;
+    data.Read(event.GetString().ToStdString().c_str());
+
+    auto model = std::make_shared<SurfaceVoxels>(data);
+    model->SetViewFlags(ObjectViewFlag_Solid);
+    model->SetTexture(Bind::TextureManager::Resolve(SceneViewportPane::Get(m_project).GetGL(), "images/blank.png", 0));
+
+    log_info("%lu voxels will be rendered.", model->Voxels().size());
+
+    AcceptObject(model);
 }

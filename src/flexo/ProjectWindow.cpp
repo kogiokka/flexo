@@ -199,7 +199,10 @@ void ProjectWindow::OnOpenModelFile(wxCommandEvent&)
     wxString const filepath = dialog.GetPath();
     defaultDir = fs::path(filepath.ToStdString()).parent_path().string();
 
-    m_project.ImportVolumetricModel(filepath);
+    wxCommandEvent event(EVT_IMPORT_MODEL);
+    event.SetString(filepath);
+    m_project.ProcessEvent(event);
+
 }
 
 void ProjectWindow::OnExit(wxCommandEvent&)
