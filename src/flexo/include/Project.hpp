@@ -15,7 +15,6 @@
 #include "object/Object.hpp"
 
 class FlexoProject;
-class SurfaceVoxels;
 
 using AttachedProjectObjects = HostBase<FlexoProject, AttachableBase, SharedPtr>;
 using AttacheProjectWindows = HostBase<FlexoProject, wxWindow, BarePtr>;
@@ -28,7 +27,6 @@ public:
 
     FlexoProject();
     ~FlexoProject();
-    void CreateScene();
     void DoParameterization();
     void SetFrame(wxFrame* frame);
     void SetPanel(wxWindow* panel);
@@ -36,8 +34,6 @@ public:
     void ImportVolumetricModel(wxString const& path);
 
 private:
-    void OnMenuAdd(wxCommandEvent& event);
-
     wxWeakRef<wxFrame> m_frame;
     wxWeakRef<wxWindow> m_panel;
 

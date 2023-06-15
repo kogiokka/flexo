@@ -22,6 +22,7 @@ PRIVATE
     "main.cpp"
     "Project.cpp"
     "ProjectWindow.cpp"
+    "SceneController.cpp"
 
     "dialog/AddDialog.cpp"
     "dialog/SelfOrganizingMapDialog.cpp"

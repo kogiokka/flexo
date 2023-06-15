@@ -2,6 +2,7 @@
 
 #include "FlexoApp.hpp"
 #include "ProjectWindow.hpp"
+#include "SceneController.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "assetlib/OBJ/OBJImporter.hpp"
 #include "assetlib/STL/STLImporter.hpp"
@@ -86,7 +87,7 @@ bool FlexoApp::OnInit()
 
     wxUpdateUIEvent::SetUpdateInterval(16);
 
-    m_project->CreateScene();
+    SceneController::Get(project).CreateScene();
 
     return true;
 }

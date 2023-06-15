@@ -17,8 +17,6 @@
 #include "Overlays.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/Renderer.hpp"
-#include "object/Object.hpp"
-#include "object/ObjectList.hpp"
 
 class FlexoProject;
 
@@ -38,7 +36,6 @@ public:
     ~SceneViewportPane();
     void InitGL();
     void ResetCamera();
-    void AcceptObject(std::shared_ptr<Object> object);
     Graphics& GetGL();
     Settings GetSettings() const;
 

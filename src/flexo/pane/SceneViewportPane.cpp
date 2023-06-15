@@ -14,6 +14,7 @@
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
 #include "pane/SceneViewportPane.hpp"
+#include "object/ObjectList.hpp"
 
 enum {
     Pane_SceneViewport = wxID_HIGHEST + 1,
@@ -176,11 +177,6 @@ void SceneViewportPane::InitGL()
     m_gfx->SetCamera(CreateDefaultCamera());
 
     m_overlays = std::make_unique<Overlays>(*m_gfx);
-}
-
-void SceneViewportPane::AcceptObject(std::shared_ptr<Object> object)
-{
-    ObjectList::Get(m_project).Add(object);
 }
 
 Graphics& SceneViewportPane::GetGL()

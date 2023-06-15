@@ -10,21 +10,9 @@
 
 class FlexoProject;
 
-#define MENU_ADD_LIST                                                                                                  \
-    X(EVT_MENU_ADD_PLANE, "Plane")                                                                                     \
-    X(EVT_MENU_ADD_GRID, "Grid")                                                                                       \
-    X(EVT_MENU_ADD_CUBE, "Cube")                                                                                       \
-    X(EVT_MENU_ADD_UV_SPHERE, "UV Sphere")                                                                             \
-    X(EVT_MENU_ADD_TORUS, "Torus")                                                                                     \
-    X(EVT_MENU_ADD_MAP, "Map (3 to 2)")
-
 wxDECLARE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
 wxDECLARE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDECLARE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
-
-#define X(evt, name) wxDECLARE_EVENT(evt, wxCommandEvent);
-MENU_ADD_LIST
-#undef X
 
 wxDECLARE_EVENT(EVT_MENU_CAMERA_PERSPECTIVE, wxCommandEvent);
 wxDECLARE_EVENT(EVT_MENU_CAMERA_ORTHOGONAL, wxCommandEvent);

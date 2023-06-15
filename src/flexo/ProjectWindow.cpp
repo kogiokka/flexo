@@ -7,6 +7,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "SceneController.hpp"
 #include "dialog/ViewportSettingsDialog.hpp"
 #include "log/Logger.h"
 #include "pane/SceneViewportPane.hpp"
@@ -14,10 +15,6 @@
 wxDEFINE_EVENT(EVT_OPEN_MODEL, wxCommandEvent);
 wxDEFINE_EVENT(EVT_SCREENSHOT, wxCommandEvent);
 wxDEFINE_EVENT(EVT_IMPORT_MODEL, wxCommandEvent);
-
-#define X(evt, name) wxDEFINE_EVENT(evt, wxCommandEvent);
-MENU_ADD_LIST
-#undef X
 
 wxDEFINE_EVENT(EVT_MENU_CAMERA_PERSPECTIVE, wxCommandEvent);
 wxDEFINE_EVENT(EVT_MENU_CAMERA_ORTHOGONAL, wxCommandEvent);
@@ -110,7 +107,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
 
     auto addMenu = new wxMenu;
 #define X(evt, name) addMenu->Append(evt, name);
-    MENU_ADD_LIST
+    ADD_OBJECT_LIST
 #undef X
 
     auto* screenshotMenu = new wxMenu;
@@ -139,7 +136,7 @@ ProjectWindow::ProjectWindow(wxWindow* parent, wxWindowID id, const wxPoint& pos
             m_project.ProcessEvent(event);                                                                             \
         },                                                                                                             \
         evt);
-    MENU_ADD_LIST
+    ADD_OBJECT_LIST
 #undef X
 
     Bind(

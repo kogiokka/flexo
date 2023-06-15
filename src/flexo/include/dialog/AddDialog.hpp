@@ -1,12 +1,16 @@
 #ifndef ADD_DIALOG_H
 #define ADD_DIALOG_H
 
+#include "log/Logger.h"
 #include <wx/checkbox.h>
 #include <wx/dialog.h>
 #include <wx/font.h>
+#include <wx/msgdlg.h>
 #include <wx/radiobut.h>
 #include <wx/sizer.h>
 #include <wx/textctrl.h>
+
+#include "SceneController.hpp"
 
 class AddDialog : public wxDialog
 {
@@ -32,6 +36,31 @@ protected:
     wxSize m_defaultSize;
 
     wxDECLARE_NO_COPY_CLASS(AddDialog);
+};
+
+class PlaneAddDialog : public AddDialog
+{
+public:
+    PlaneAddDialog(wxWindow* parent)
+        : AddDialog(parent, "Add Plane", 1)
+    {
+        double size = 2.0f;
+        m_ctrlSize = AddInputFloat("Size", size);
+    }
+
+    double GetSize() const
+    {
+        double value = 0.0f;
+        if (!m_ctrlSize->GetValue().ToDouble(&value)) {
+            wxMessageDialog dlg(GetParent(), "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
+            dlg.ShowModal();
+        }
+        log_info("Add Plane (size: %.3f)", value);
+        return value;
+    }
+
+private:
+    wxTextCtrl* m_ctrlSize;
 };
 
 #endif
