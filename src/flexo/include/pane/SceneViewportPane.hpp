@@ -1,7 +1,6 @@
 #ifndef SCENE_VIEWPORT_PANE_H
 #define SCENE_VIEWPORT_PANE_H
 
-#include <array>
 #include <memory>
 #include <tuple>
 
@@ -38,6 +37,7 @@ public:
     void ResetCamera();
     Graphics& GetGL();
     Settings GetSettings() const;
+    void SetCurrentMap(std::weak_ptr<Map<3, 2>> map);
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -64,6 +64,7 @@ private:
 
     std::unique_ptr<Overlays> m_overlays;
     Settings m_settings;
+    std::weak_ptr<Map<3, 2>> m_currMap;
 
     FlexoProject& m_project;
 

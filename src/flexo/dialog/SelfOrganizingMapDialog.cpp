@@ -157,7 +157,6 @@ void SelfOrganizingMapDialog::OnModelSelected(wxCommandEvent& event)
         auto const& id = o->GetID();
         if (id == modelID) {
             m_object = o;
-            m_project.theModel = o;
         }
     }
 }
@@ -170,17 +169,17 @@ void SelfOrganizingMapDialog::OnMapSelected(wxCommandEvent& event)
         auto const& id = o->GetID();
         if (id == mapID) {
             m_map = std::dynamic_pointer_cast<Map<3, 2>>(o);
-            m_project.theMap = m_map;
         }
     }
 
-    auto map = m_project.theMap.lock();
-    int const width = map->size.x;
-    int const height = map->size.y;
-    float const diagLen = sqrt(width * width + height * height);
-    float const radius = 0.5f * diagLen;
-    m_neighborhood = radius;
-    SetupNeighborhoodRadiusSlider(diagLen, radius);
+    if (auto map = m_map.lock()) {
+        int const width = map->size.x;
+        int const height = map->size.y;
+        float const diagLen = sqrt(width * width + height * height);
+        float const radius = 0.5f * diagLen;
+        m_neighborhood = radius;
+        SetupNeighborhoodRadiusSlider(diagLen, radius);
+    }
 }
 
 void SelfOrganizingMapDialog::OnMaxIterationChanged(wxCommandEvent& event)

@@ -205,9 +205,6 @@ void SceneController::OnAddObject(wxCommandEvent& event)
                 }
 
                 BoundingBox box = { { 5.0f, 5.0f, 5.0f }, { -5.0f, -5.0f, -5.0f } };
-                if (auto it = m_project.theDataset) {
-                    box = it->GetBoundingBox();
-                }
 
                 auto map = std::make_shared<Map<3, 2>>();
                 float const w = static_cast<float>(width - 1);

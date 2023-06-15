@@ -13,8 +13,8 @@
 #include "gfx/Camera.hpp"
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
-#include "pane/SceneViewportPane.hpp"
 #include "object/ObjectList.hpp"
+#include "pane/SceneViewportPane.hpp"
 
 enum {
     Pane_SceneViewport = wxID_HIGHEST + 1,
@@ -87,13 +87,11 @@ SceneViewportPane::SceneViewportPane(wxWindow* parent, wxGLAttributes const& dis
         cam.SetProjectionMode(Camera::ProjectionMode::Orthogonal);
     });
 
-    m_project.Bind(EVT_VIEWPORT_SETTINGS_BACKGROUND_DARK, [this](wxCommandEvent&) {
-        m_settings.background = BACKGROUND_DARK;
-    });
+    m_project.Bind(EVT_VIEWPORT_SETTINGS_BACKGROUND_DARK,
+                   [this](wxCommandEvent&) { m_settings.background = BACKGROUND_DARK; });
 
-    m_project.Bind(EVT_VIEWPORT_SETTINGS_BACKGROUND_LIGHT, [this](wxCommandEvent&) {
-        m_settings.background = BACKGROUND_LIGHT;
-    });
+    m_project.Bind(EVT_VIEWPORT_SETTINGS_BACKGROUND_LIGHT,
+                   [this](wxCommandEvent&) { m_settings.background = BACKGROUND_LIGHT; });
 
     m_project.Bind(EVT_VIEWPORT_SETTINGS_OVERLAY_GUIDES, [this](wxCommandEvent& event) {
         OverlayFlags flags = 0;
@@ -119,9 +117,9 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearRenderTargetView(m_rtv.Get(), &bg.x);
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
-    if (auto it = m_project.theMap.lock()) {
-        it->GenerateMesh();
-        it->GenerateDrawables(gfx);
+    if (auto map = m_currMap.lock()) {
+        map->GenerateMesh();
+        map->GenerateDrawables(gfx);
     }
 
     auto& renderer = *m_renderer;
@@ -177,6 +175,11 @@ void SceneViewportPane::InitGL()
     m_gfx->SetCamera(CreateDefaultCamera());
 
     m_overlays = std::make_unique<Overlays>(*m_gfx);
+}
+
+void SceneViewportPane::SetCurrentMap(std::weak_ptr<Map<3, 2>> map)
+{
+    m_currMap = map;
 }
 
 Graphics& SceneViewportPane::GetGL()

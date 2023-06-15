@@ -2,6 +2,7 @@
 
 #include <wx/artprov.h>
 #include <wx/msgdlg.h>
+#include <wx/progdlg.h>
 #include <wx/sizer.h>
 #include <wx/statline.h>
 #include <wx/stattext.h>
@@ -16,6 +17,8 @@
 #include "event/SliderFloatEvent.hpp"
 #include "object/Map.hpp"
 #include "object/ObjectList.hpp"
+#include "object/SurfaceVoxels.hpp"
+#include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
 SelfOrganizingMapPane::SelfOrganizingMapPane(wxWindow* parent, FlexoProject& project)
@@ -91,7 +94,7 @@ void SelfOrganizingMapPane::PopulateTrainingPane()
     // Texture mapping for the model
     m_btnTexmap = group->AddButton("Texture Mapping");
     m_btnTexmap->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(m_som && m_som->IsDone()); });
-    m_btnTexmap->Bind(wxEVT_BUTTON, [this](wxCommandEvent&) { m_project.DoParameterization(); });
+    m_btnTexmap->Bind(wxEVT_BUTTON, &SelfOrganizingMapPane::OnParameterization, this);
 }
 
 void SelfOrganizingMapPane::OnConfigure(wxCommandEvent&)
@@ -99,20 +102,23 @@ void SelfOrganizingMapPane::OnConfigure(wxCommandEvent&)
     SelfOrganizingMapDialog dlg(m_project.GetWindow(), m_project);
 
     if (dlg.ShowModal() == wxID_OK) {
-        auto model = dlg.GetConfig();
+        m_somModel = std::make_unique<SelfOrganizingMapModel<3, 2>>(dlg.GetConfig());
 
         m_textModel->Clear();
         m_textMap->Clear();
         m_textIter->Clear();
         m_textRate->Clear();
         m_textRadius->Clear();
-        *m_textModel << model.object->GetID();
-        *m_textMap << model.map->GetID();
-        *m_textIter << static_cast<long int>(model.maxSteps);
-        *m_textRate << model.learningRate;
-        *m_textRadius << model.neighborhood;
+        *m_textModel << m_somModel->object->GetID();
+        *m_textMap << m_somModel->map->GetID();
+        *m_textIter << static_cast<long int>(m_somModel->maxSteps);
+        *m_textRate << m_somModel->learningRate;
+        *m_textRadius << m_somModel->neighborhood;
 
-        m_som = std::make_unique<SelfOrganizingMap>(model, m_project);
+        m_som = std::make_unique<SelfOrganizingMap>(*m_somModel, m_project);
+
+        SceneViewportPane::Get(m_project).SetCurrentMap(m_somModel->map);
+
         m_btnRun->Enable(true);
     }
 }
@@ -124,4 +130,31 @@ void SelfOrganizingMapPane::OnRun(wxCommandEvent&)
     }
 
     m_som->ToggleTraining();
+}
+
+void SelfOrganizingMapPane::OnParameterization(wxCommandEvent&)
+{
+    auto model = std::dynamic_pointer_cast<SurfaceVoxels>(m_somModel->object);
+    if (!model) {
+        wxMessageDialog dlg(m_project.GetWindow(), "Not a volumetric model!", "Error", wxCENTER | wxICON_ERROR);
+        dlg.ShowModal();
+        return;
+    }
+
+    float progress;
+    auto status = model->Parameterize(*(m_somModel->map), progress);
+
+    wxProgressDialog dialog("Parameterizing", "Please wait...", 100, m_project.GetWindow(),
+                            wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
+
+    while (status.wait_for(std::chrono::milliseconds(16)) != std::future_status::ready) {
+        dialog.Update(static_cast<int>(progress));
+    }
+
+    model->SetTexture(m_somModel->map->GetTexture());
+
+    // After the parametrization done, regenerate the drawables to update texture coordinates.
+    model->SetViewFlags(ObjectViewFlag_Textured);
+    model->GenerateMesh();
+    model->GenerateDrawables(SceneViewportPane::Get(m_project).GetGL());
 }

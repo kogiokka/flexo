@@ -27,18 +27,12 @@ public:
 
     FlexoProject();
     ~FlexoProject();
-    void DoParameterization();
     void SetWindow(wxFrame* frame);
     wxFrame* GetWindow();
     void ImportVolumetricModel(wxString const& path);
 
 private:
     wxWeakRef<wxFrame> m_frame;
-
-public:
-    std::shared_ptr<Dataset<3>> theDataset;
-    std::weak_ptr<Map<3, 2>> theMap;
-    std::weak_ptr<Object> theModel;
 };
 
 #endif

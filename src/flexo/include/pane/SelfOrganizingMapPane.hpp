@@ -6,8 +6,9 @@
 #include <wx/button.h>
 #include <wx/textctrl.h>
 
-#include "pane/ControlsPaneBase.hpp"
 #include "SelfOrganizingMap.hpp"
+#include "SelfOrganizingMapModel.hpp"
+#include "pane/ControlsPaneBase.hpp"
 
 class SelfOrganizingMapPane : public ControlsPaneBase
 {
@@ -19,6 +20,7 @@ private:
     void PopulateTrainingPane();
     void OnConfigure(wxCommandEvent& event);
     void OnRun(wxCommandEvent& event);
+    void OnParameterization(wxCommandEvent& event);
 
     wxButton* m_btnConfig;
     wxButton* m_btnRun;
@@ -30,6 +32,7 @@ private:
     wxTextCtrl* m_textRadius;
 
     std::unique_ptr<SelfOrganizingMap> m_som;
+    std::unique_ptr<SelfOrganizingMapModel<3, 2>> m_somModel;
 };
 
 #endif
