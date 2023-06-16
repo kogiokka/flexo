@@ -101,7 +101,7 @@ SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject&
     sliderRadius->Bind(wxEVT_SLIDER, &SelfOrganizingMapDialog::OnInitialNeighborhoodChanged, this);
 
     auto* btnOK = stdbtn->GetAffirmativeButton();
-    btnOK->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(m_map.lock() || m_object.lock()); });
+    btnOK->Bind(wxEVT_UPDATE_UI, [this](wxUpdateUIEvent& event) { event.Enable(m_map.lock() && m_object.lock()); });
 
     // Set members
     m_sliderRadius = sliderRadius;
