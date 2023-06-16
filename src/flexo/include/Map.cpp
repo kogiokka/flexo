@@ -51,6 +51,20 @@ void Map<InDim, OutDim>::GenerateMesh()
 }
 
 template <int InDim, int OutDim>
+void Map<InDim, OutDim>::GenerateDrawables(Graphics& gfx)
+{
+    GenerateMesh();
+
+    if (!m_texture) {
+        m_texture = Bind::TextureManager::Resolve(gfx, "images/blank.png", 0);
+    }
+    auto m = m_mesh.GenerateMesh();
+    m_solid = std::make_shared<SolidDrawable>(gfx, m);
+    m_textured = std::make_shared<TexturedDrawable>(gfx, m_mesh.GenerateMesh(), m_texture);
+    m_wire = std::make_shared<WireDrawable>(gfx, m_mesh.GenerateWireframe());
+}
+
+template <int InDim, int OutDim>
 void Map<InDim, OutDim>::ApplyTransform()
 {
     auto mat = GenerateTransformStack().GenerateMatrix();
@@ -58,6 +72,4 @@ void Map<InDim, OutDim>::ApplyTransform()
         n.weights = VECCONV(glm::vec3(mat * glm::vec4(VECCONV(n.weights), 1.0f)));
     }
     m_transform = Transform();
-
-    GenerateMesh();
 }

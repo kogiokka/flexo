@@ -118,7 +118,6 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     gfx.ClearDepthStencilView(m_dsv.Get(), GLWRClearFlag_Depth);
 
     if (auto map = m_currMap.lock()) {
-        map->GenerateMesh();
         map->GenerateDrawables(gfx);
     }
 

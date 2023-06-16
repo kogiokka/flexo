@@ -29,8 +29,11 @@ struct Map : public Object {
     std::string textureName;
 
     EditableMesh const& GetMesh() const;
-    void GenerateMesh();
+    void GenerateDrawables(Graphics& gfx) override;
     void ApplyTransform() override;
+
+private:
+    void GenerateMesh();
 };
 
 #include "Map.cpp"

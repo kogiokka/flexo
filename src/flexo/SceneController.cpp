@@ -199,6 +199,8 @@ void SceneController::OnAddObject(wxCommandEvent& event)
                 flags |= MapFlags_CyclicY;
             }
 
+            auto& gfx = SceneViewportPane::Get(m_project).GetGL();
+
             if (widthCtrl->GetValue().ToLong(&width) && heightCtrl->GetValue().ToLong(&height)) {
 
                 for (auto* btn = initStatePlane->GetFirstInGroup(); btn != nullptr; btn = btn->GetNextInGroup()) {
@@ -260,7 +262,7 @@ void SceneController::OnAddObject(wxCommandEvent& event)
                 map->size.y = height;
                 map->flags = flags;
 
-                map->GenerateMesh();
+                map->GenerateDrawables(gfx);
                 obj = map;
             }
 
@@ -272,8 +274,7 @@ void SceneController::OnAddObject(wxCommandEvent& event)
             }
             log_info("Add Map: (width: %ld, height: %ld)", width, height);
 
-            obj->SetTexture(
-                Bind::TextureManager::Resolve(SceneViewportPane::Get(m_project).GetGL(), "images/blank.png", 0));
+            obj->SetTexture(Bind::TextureManager::Resolve(gfx, "images/blank.png", 0));
             obj->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
         } else {
             return;
