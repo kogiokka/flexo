@@ -104,13 +104,24 @@ void SelfOrganizingMapPane::OnConfigure(wxCommandEvent&)
     if (dlg.ShowModal() == wxID_OK) {
         m_somModel = std::make_unique<SelfOrganizingMapModel<3, 2>>(dlg.GetConfig());
 
+        auto object = m_somModel->object.lock();
+        auto map = m_somModel->map.lock();
+
+        if (!object || !map) {
+            wxMessageDialog dlg(m_project.GetWindow(),
+                                "SOM model is not complete. Please report this incident to the devs.", "Error",
+                                wxCENTER | wxICON_ERROR);
+            dlg.ShowModal();
+            return;
+        }
+
         m_textModel->Clear();
         m_textMap->Clear();
         m_textIter->Clear();
         m_textRate->Clear();
         m_textRadius->Clear();
-        *m_textModel << m_somModel->object->GetID();
-        *m_textMap << m_somModel->map->GetID();
+        *m_textModel << object->GetID();
+        *m_textMap << map->GetID();
         *m_textIter << static_cast<long int>(m_somModel->maxSteps);
         *m_textRate << m_somModel->learningRate;
         *m_textRadius << m_somModel->neighborhood;
@@ -134,24 +145,33 @@ void SelfOrganizingMapPane::OnRun(wxCommandEvent&)
 
 void SelfOrganizingMapPane::OnParameterization(wxCommandEvent&)
 {
-    auto model = std::dynamic_pointer_cast<SurfaceVoxels>(m_somModel->object);
+    auto object = m_somModel->object.lock();
+    auto map = m_somModel->map.lock();
+
+    if (!object || !map) {
+        wxMessageDialog dlg(m_project.GetWindow(),
+                            "SOM model is not complete. Please report this incident to the devs.", "Error",
+                            wxCENTER | wxICON_ERROR);
+        dlg.ShowModal();
+        return;
+    }
+
+    auto model = std::dynamic_pointer_cast<SurfaceVoxels>(object);
     if (!model) {
-        wxMessageDialog dlg(m_project.GetWindow(), "Not a volumetric model!", "Error", wxCENTER | wxICON_ERROR);
+        wxMessageDialog dlg(m_project.GetWindow(), "SOM model does not contain a volumetric model!",
+                            "Invalid Operation", wxCENTER | wxICON_ERROR);
         dlg.ShowModal();
         return;
     }
 
     float progress;
-    auto status = model->Parameterize(*(m_somModel->map), progress);
-
+    auto status = model->Parameterize(*map, progress);
     wxProgressDialog dialog("Parameterizing", "Please wait...", 100, m_project.GetWindow(),
                             wxPD_APP_MODAL | wxPD_ELAPSED_TIME | wxPD_SMOOTH | wxPD_ESTIMATED_TIME);
-
     while (status.wait_for(std::chrono::milliseconds(16)) != std::future_status::ready) {
         dialog.Update(static_cast<int>(progress));
     }
-
-    model->SetTexture(m_somModel->map->GetTexture());
+    model->SetTexture(map->GetTexture());
 
     // After the parametrization done, regenerate the drawables to update texture coordinates.
     model->SetViewFlags(ObjectViewFlag_Textured);

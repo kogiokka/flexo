@@ -104,19 +104,22 @@ SelfOrganizingMap::SelfOrganizingMap(SelfOrganizingMapModel<InDim, OutDim>& mode
     m_learnRate = LearningRate(model.learningRate, m_tmax);
     m_neighborhood = Neighborhood(NeighborhoodRadius(model.neighborhood, m_tmax));
 
-    if (!model.object) {
-        log_fatal("Model is null");
+    auto object = model.object.lock();
+    auto map = model.map.lock();
+
+    if (!object || !map) {
+        log_fatal("SOM Model is not complete.");
         exit(EXIT_FAILURE);
     }
 
-    auto const& pos = model.object->GetPositions();
+    auto const& pos = object->GetPositions();
     auto dataset = std::make_shared<Dataset<3>>(pos);
-    model.object->SetViewFlags(ObjectViewFlag_Solid);
+    object->SetViewFlags(ObjectViewFlag_Solid);
     log_info("Dataset count: %lu", pos.size());
 
     void (SelfOrganizingMap::*Train)(std::shared_ptr<Map<InDim, OutDim>>, std::shared_ptr<Dataset<InDim>>)
         = &SelfOrganizingMap::Train;
-    m_worker = std::thread(Train, std::ref(*this), model.map, dataset);
+    m_worker = std::thread(Train, std::ref(*this), map, dataset);
 
     log_info("SOM worker created.");
 }

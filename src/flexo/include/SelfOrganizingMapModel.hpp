@@ -6,8 +6,8 @@
 
 template <int InDim, int OutDim>
 struct SelfOrganizingMapModel {
-    std::shared_ptr<Map<InDim, OutDim>> map;
-    std::shared_ptr<Object> object;
+    std::weak_ptr<Map<InDim, OutDim>> map;
+    std::weak_ptr<Object> object;
     float learningRate;
     unsigned int maxSteps;
     float neighborhood;
