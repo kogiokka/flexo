@@ -38,29 +38,4 @@ protected:
     wxDECLARE_NO_COPY_CLASS(AddDialog);
 };
 
-class PlaneAddDialog : public AddDialog
-{
-public:
-    PlaneAddDialog(wxWindow* parent)
-        : AddDialog(parent, "Add Plane", 1)
-    {
-        double size = 2.0f;
-        m_ctrlSize = AddInputFloat("Size", size);
-    }
-
-    double GetSize() const
-    {
-        double value = 0.0f;
-        if (!m_ctrlSize->GetValue().ToDouble(&value)) {
-            wxMessageDialog dlg(GetParent(), "Invalid input(s)!", "Error", wxCENTER | wxICON_ERROR);
-            dlg.ShowModal();
-        }
-        log_info("Add Plane (size: %.3f)", value);
-        return value;
-    }
-
-private:
-    wxTextCtrl* m_ctrlSize;
-};
-
 #endif

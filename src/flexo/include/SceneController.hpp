@@ -33,8 +33,13 @@ public:
     void AcceptObject(std::shared_ptr<Object> object);
 
 private:
-    void OnAddObject(wxCommandEvent& event);
     void OnImportModel(wxCommandEvent& event);
+    void OnAddPlane(wxCommandEvent& event);
+    void OnAddGrid(wxCommandEvent& event);
+    void OnAddCube(wxCommandEvent& event);
+    void OnAddUVSphere(wxCommandEvent& event);
+    void OnAddTorus(wxCommandEvent& event);
+    void OnAddMap(wxCommandEvent& event);
 
     FlexoProject& m_project;
 };
