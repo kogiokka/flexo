@@ -5,8 +5,8 @@
 
 #include "Project.hpp"
 #include "object/ObjectList.hpp"
-#include "pane/SceneViewportPane.hpp"
 #include "pane/SceneOutlinerPane.hpp"
+#include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
 #define X(type, name) name,
@@ -17,8 +17,6 @@ static std::string ObjectTypeNames[] = { OBJECT_TYPES };
 static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {
     [](FlexoProject& project) -> SharedPtr<ObjectList> { return std::make_shared<ObjectList>(project); }
 };
-
-wxDEFINE_EVENT(EVT_OBJECTLIST_DELETE_OBJECT, wxCommandEvent);
 
 ObjectList& ObjectList::Get(FlexoProject& project)
 {
@@ -34,7 +32,6 @@ ObjectList::ObjectList(FlexoProject& project)
     : m_list()
     , m_project(project)
 {
-    m_project.Bind(EVT_OBJECTLIST_DELETE_OBJECT, &ObjectList::OnDeleteObject, this);
 }
 
 void ObjectList::Add(std::shared_ptr<Object> object)
@@ -62,11 +59,10 @@ void ObjectList::Add(std::shared_ptr<Object> object)
     m_project.ProcessEvent(event);
 }
 
-void ObjectList::OnDeleteObject(wxCommandEvent& event)
+void ObjectList::Delete(std::string const& id)
 {
     for (auto it = m_list.begin(); it != m_list.end();) {
-        auto id = wxString((*it)->GetID());
-        if (id == event.GetString()) {
+        if ((*it)->GetID() == id) {
             m_list.erase(it);
             break;
         } else {

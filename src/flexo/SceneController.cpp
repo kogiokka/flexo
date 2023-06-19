@@ -19,6 +19,8 @@ constexpr auto PI = 3.14159265358979323846;
 ADD_OBJECT_LIST
 #undef X
 
+wxDEFINE_EVENT(EVT_DELETE_OBJECT, wxCommandEvent);
+
 // Register factory: SceneController
 static FlexoProject::AttachedObjects::RegisteredFactory const factoryKey {
     [](FlexoProject& project) -> SharedPtr<SceneController> { return std::make_shared<SceneController>(project); }
@@ -45,6 +47,8 @@ SceneController::SceneController(FlexoProject& project)
     m_project.Bind(EVT_ADD_OBJECT_UV_SPHERE, &SceneController::OnAddUVSphere, this);
     m_project.Bind(EVT_ADD_OBJECT_TORUS, &SceneController::OnAddTorus, this);
     m_project.Bind(EVT_ADD_OBJECT_MAP, &SceneController::OnAddMap, this);
+
+    m_project.Bind(EVT_DELETE_OBJECT, &SceneController::OnDeleteObject, this);
 }
 
 void SceneController::CreateScene()
@@ -315,4 +319,9 @@ void SceneController::OnAddMap(wxCommandEvent&)
     AcceptObject(map);
 
     log_info("Added Map: (width: %ld, height: %ld)", width, height);
+}
+
+void SceneController::OnDeleteObject(wxCommandEvent& event)
+{
+    ObjectList::Get(m_project).Delete(event.GetString().ToStdString());
 }

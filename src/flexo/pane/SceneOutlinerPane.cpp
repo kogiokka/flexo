@@ -7,6 +7,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "SceneController.hpp"
 #include "event/ObjectSelectEvent.hpp"
 #include "gfx/DrawableBase.hpp"
 #include "gfx/Renderer.hpp"
@@ -86,7 +87,7 @@ SceneOutlinerPane::SceneOutlinerPane(wxWindow* parent, FlexoProject& project)
         case ID_Delete: {
             auto item = event.GetItem();
 
-            wxCommandEvent event(EVT_OBJECTLIST_DELETE_OBJECT);
+            wxCommandEvent event(EVT_DELETE_OBJECT);
             event.SetString(m_sceneTree->GetItemText(item).ToStdString());
             m_project.ProcessEvent(event);
 

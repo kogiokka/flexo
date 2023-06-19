@@ -20,6 +20,8 @@
 ADD_OBJECT_LIST
 #undef X
 
+wxDECLARE_EVENT(EVT_DELETE_OBJECT, wxCommandEvent);
+
 class FlexoProject;
 
 class SceneController : public AttachableBase
@@ -40,6 +42,7 @@ private:
     void OnAddUVSphere(wxCommandEvent& event);
     void OnAddTorus(wxCommandEvent& event);
     void OnAddMap(wxCommandEvent& event);
+    void OnDeleteObject(wxCommandEvent& event);
 
     FlexoProject& m_project;
 };

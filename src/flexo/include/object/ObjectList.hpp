@@ -13,8 +13,6 @@
 
 class FlexoProject;
 
-wxDECLARE_EVENT(EVT_OBJECTLIST_DELETE_OBJECT, wxCommandEvent);
-
 class ObjectList : public AttachableBase
 {
 public:
@@ -22,6 +20,7 @@ public:
     static ObjectList const& Get(FlexoProject const& project);
     ObjectList(FlexoProject& project);
     void Add(std::shared_ptr<Object> object);
+    void Delete(std::string const& id);
 
 public:
     // Forward the iterator functions
@@ -36,8 +35,6 @@ public:
     size_type size() const;
 
 private:
-    void OnDeleteObject(wxCommandEvent& event);
-
     std::vector<std::shared_ptr<Object>> m_list;
     std::unordered_map<enum ObjectType, unsigned int> m_typeCount;
     FlexoProject& m_project;
