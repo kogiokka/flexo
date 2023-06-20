@@ -47,6 +47,8 @@ PRIVATE
 
     "VolumetricModelData.cpp"
     "Voxel.cpp"
+    "Geometry.cpp"
+
     "assetlib/BaseImporter.cpp"
     "assetlib/OBJ/OBJImporter.cpp"
     "assetlib/STL/STLImporter.cpp"
