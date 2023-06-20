@@ -30,7 +30,7 @@ PRIVATE
 
     "pane/ControlsPaneBase.cpp"
     "pane/ControlsGroup.cpp"
-    "pane/SceneOutlinerPane.cpp"
+    "pane/OutlinerPane.cpp"
     "pane/PropertiesPane.cpp"
     "pane/SelfOrganizingMapPane.cpp"
     "pane/SceneViewportPane.cpp"

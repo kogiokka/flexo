@@ -5,7 +5,7 @@
 
 #include "Project.hpp"
 #include "object/ObjectList.hpp"
-#include "pane/SceneOutlinerPane.hpp"
+#include "pane/OutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
@@ -55,7 +55,7 @@ void ObjectList::Add(std::shared_ptr<Object> object)
     m_list.push_back(object);
 
     wxCommandEvent event(EVT_OUTLINER_ADD_OBJECT);
-    event.SetString(id);
+    event.SetClientData(new OutlinerItemData(object));
     m_project.ProcessEvent(event);
 }
 

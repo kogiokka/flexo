@@ -8,7 +8,7 @@
 #include "assetlib/STL/STLImporter.hpp"
 #include "log/Logger.h"
 #include "pane/PropertiesPane.hpp"
-#include "pane/SceneOutlinerPane.hpp"
+#include "pane/OutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
 
@@ -48,7 +48,7 @@ bool FlexoApp::OnInit()
     auto& mgr = window.GetPaneManager();
     auto page = window.GetMainPage();
 
-    auto* outliner = new SceneOutlinerPane(page, project);
+    auto* outliner = new OutlinerPane(page, project);
     auto* som = new SelfOrganizingMapPane(page, project);
     auto* properties = new PropertiesPane(page, project);
 
