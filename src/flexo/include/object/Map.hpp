@@ -25,6 +25,7 @@ struct Map : public Object {
     virtual ~Map() = default;
     Vec<OutDim, int> size;
     std::vector<Node<InDim, OutDim>> nodes;
+    std::vector<Node<InDim, OutDim>> anchors;
     MapFlags flags;
     std::string textureName;
 

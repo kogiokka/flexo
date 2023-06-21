@@ -48,6 +48,9 @@ SceneController::SceneController(FlexoProject& project)
     m_project.Bind(EVT_ADD_OBJECT_TORUS, &SceneController::OnAddTorus, this);
     m_project.Bind(EVT_ADD_OBJECT_MAP, &SceneController::OnAddMap, this);
 
+    m_project.Bind(EVT_ADD_OBJECT_TEST_GRID, &SceneController::OnAddTestGrid, this);
+    m_project.Bind(EVT_ADD_OBJECT_TEST_MAP, &SceneController::OnAddTestMap, this);
+
     m_project.Bind(EVT_DELETE_OBJECT, &SceneController::OnDeleteObject, this);
 }
 
@@ -324,4 +327,47 @@ void SceneController::OnAddMap(wxCommandEvent&)
 void SceneController::OnDeleteObject(wxCommandEvent& event)
 {
     ObjectList::Get(m_project).Delete(event.GetString().ToStdString());
+}
+
+void SceneController::OnAddTestMap(wxCommandEvent&)
+{
+    int width = 32;
+    int height = 32;
+    float size = 150.0f;
+
+    auto map = std::make_shared<Map<3, 2>>();
+    float const w = static_cast<float>(width - 1);
+    float const h = static_cast<float>(height - 1);
+
+    float dx = size / static_cast<float>(width - 1);
+    float dy = size / static_cast<float>(height - 1);
+    float x0 = -0.5 * size;
+    float y0 = -0.5 * size;
+
+    for (int j = 0; j < height; ++j) {
+        for (int i = 0; i < width; ++i) {
+            map->nodes.emplace_back(Vec3f { x0 + i * dx, y0 + j * dy, 0.005f },
+                                    Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
+        }
+    }
+
+    auto& gfx = SceneViewportPane::Get(m_project).GetGL();
+
+    map->size.x = width;
+    map->size.y = height;
+    map->flags = MapFlags_CyclicNone;
+    map->GenerateDrawables(gfx);
+    map->SetTexture(Bind::TextureManager::Resolve(gfx, "images/blank.png", 0));
+    map->SetViewFlags(ObjectViewFlag_Textured);
+
+    map->anchors = { map->nodes.front(), map->nodes.back() };
+
+    AcceptObject(map);
+}
+
+void SceneController::OnAddTestGrid(wxCommandEvent&)
+{
+    auto obj = std::make_shared<Object>(ObjectType_Grid, ConstructGrid(300, 300, 150.0f));
+    obj->SetViewFlags(ObjectViewFlag_Wire);
+    AcceptObject(obj);
 }

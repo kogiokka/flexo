@@ -14,7 +14,9 @@
     X(EVT_ADD_OBJECT_CUBE, "Cube")                                                                                     \
     X(EVT_ADD_OBJECT_UV_SPHERE, "UV Sphere")                                                                           \
     X(EVT_ADD_OBJECT_TORUS, "Torus")                                                                                   \
-    X(EVT_ADD_OBJECT_MAP, "Map (3 to 2)")
+    X(EVT_ADD_OBJECT_MAP, "Map (3 to 2)")                                                                              \
+    X(EVT_ADD_OBJECT_TEST_MAP, "Test Map")                                                                             \
+    X(EVT_ADD_OBJECT_TEST_GRID, "Test Grid")
 
 #define X(evt, name) wxDECLARE_EVENT(evt, wxCommandEvent);
 ADD_OBJECT_LIST
@@ -43,6 +45,9 @@ private:
     void OnAddTorus(wxCommandEvent& event);
     void OnAddMap(wxCommandEvent& event);
     void OnDeleteObject(wxCommandEvent& event);
+
+    void OnAddTestMap(wxCommandEvent& event);
+    void OnAddTestGrid(wxCommandEvent& event);
 
     FlexoProject& m_project;
 };

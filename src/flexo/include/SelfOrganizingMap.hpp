@@ -9,6 +9,7 @@
 #include <glm/glm.hpp>
 #include <wx/event.h>
 
+#include "AnchorFunction.hpp"
 #include "Attachable.hpp"
 #include "Dataset.hpp"
 #include "LearningRate.hpp"
@@ -200,7 +201,22 @@ void SelfOrganizingMap::UpdateNodes(Map<InDim, OutDim>& map, Vec<InDim> input, N
                 auto& node = nodes[modX + modY * width];
                 Vec<OutDim> const bmuCoord = bmu.coords;
                 Vec<OutDim> const nodeCoord(static_cast<float>(x), static_cast<float>(y));
-                node.weights += learnRate(m_t) * neighborhood(m_t, bmuCoord, nodeCoord) * (input - node.weights);
+
+                float anchorCoef = 1.0f;
+                for (auto const& anchorNode : map.anchors) {
+
+                    AnchorFunction anchorFunc(10.0f);
+                    float const dx = anchorNode.X() - x;
+                    float const dy = anchorNode.Y() - y;
+                    float const distToAnchorSqr = dx * dx + dy * dy;
+                    if (distToAnchorSqr <= anchorFunc.radius) {
+                        Vec<OutDim> const anchorCoord(static_cast<float>(anchorNode.X()),
+                                                      static_cast<float>(anchorNode.Y()));
+                        anchorCoef = anchorCoef * anchorFunc(anchorCoord, nodeCoord);
+                    }
+                }
+                node.weights
+                    += anchorCoef * learnRate(m_t) * neighborhood(m_t, bmuCoord, nodeCoord) * (input - node.weights);
             }
         }
     }
