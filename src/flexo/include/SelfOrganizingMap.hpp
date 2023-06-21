@@ -115,7 +115,6 @@ SelfOrganizingMap::SelfOrganizingMap(SelfOrganizingMapModel<InDim, OutDim>& mode
 
     auto const& pos = object->GetPositions();
     auto dataset = std::make_shared<Dataset<3>>(pos);
-    object->SetViewFlags(ObjectViewFlag_Solid);
     log_info("Dataset count: %lu", pos.size());
 
     void (SelfOrganizingMap::*Train)(std::shared_ptr<Map<InDim, OutDim>>, std::shared_ptr<Dataset<InDim>>)
