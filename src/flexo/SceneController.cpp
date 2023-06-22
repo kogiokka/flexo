@@ -339,14 +339,14 @@ void SceneController::OnAddTestMap(wxCommandEvent&)
     float const w = static_cast<float>(width - 1);
     float const h = static_cast<float>(height - 1);
 
-    float dx = size / static_cast<float>(width - 1);
-    float dy = size / static_cast<float>(height - 1);
+    float dx = size / w;
+    float dy = size / h;
     float x0 = -0.5 * size;
     float y0 = -0.5 * size;
 
     for (int j = 0; j < height; ++j) {
         for (int i = 0; i < width; ++i) {
-            map->nodes.emplace_back(Vec3f { x0 + i * dx, y0 + j * dy, 0.005f },
+            map->nodes.emplace_back(Vec3f { x0 + i * dx, y0 + j * dy, 0.0f },
                                     Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
         }
     }
@@ -360,7 +360,7 @@ void SceneController::OnAddTestMap(wxCommandEvent&)
     map->SetTexture(Bind::TextureManager::Resolve(gfx, "images/blank.png", 0));
     map->SetViewFlags(ObjectViewFlag_Textured);
 
-    map->anchors = { map->nodes.front(), map->nodes.back() };
+    map->anchors = { map->nodes.front(), map->nodes[width - 1], map->nodes[width * height - width], map->nodes.back() };
 
     AcceptObject(map);
 }

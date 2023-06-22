@@ -138,6 +138,11 @@ void SelfOrganizingMap::Train(std::shared_ptr<Map<InDim, OutDim>> map, std::shar
         auto const& bmu = FindBMU(*map, input);
         UpdateNodes(*map, input, bmu, m_learnRate, m_neighborhood);
 
+        for (auto const& anchor : map->anchors) {
+            auto const& bmu = FindBMU(*map, anchor.weights);
+            UpdateNodes(*map, anchor.weights, bmu, m_learnRate, m_neighborhood);
+        }
+
         ++m_t;
     }
 

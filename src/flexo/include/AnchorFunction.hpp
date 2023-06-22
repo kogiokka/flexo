@@ -27,7 +27,7 @@ float AnchorFunction::operator()(Vec<OutDim> coordAnchor, Vec<OutDim> coordNode)
         dist += diff * diff;
     }
 
-    return 1.0f - expf(-dist / (10000.0f * (radius * radius)));
+    return dist / radius * radius;
 }
 
 #endif
