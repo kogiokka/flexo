@@ -1,6 +1,27 @@
-#include "object/Map.hpp"
+#include <array>
+#include <utility>
+
 #include "EditableMesh.hpp"
 #include "VecUtil.hpp"
+#include "object/Map.hpp"
+
+template <int InDim, int OutDim>
+template <typename... Params>
+Node<InDim, OutDim>& Map<InDim, OutDim>::At(Params&&... coordinates)
+{
+    static_assert(sizeof...(Params) == OutDim);
+
+    std::array<int, OutDim> const coords { std::forward<Params>(coordinates)... };
+    std::array<unsigned int, OutDim> mul { 1 };
+    unsigned int index = coords[0];
+
+    for (unsigned int i = 1; i < OutDim; i++) {
+        mul[i] = mul[i - 1] * size[i - 1];
+        index += mul[i] * coords[i];
+    }
+
+    return nodes[index];
+}
 
 template <int InDim, int OutDim>
 EditableMesh const& Map<InDim, OutDim>::GetMesh() const
