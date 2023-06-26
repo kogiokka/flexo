@@ -29,6 +29,8 @@ struct Map : public Object {
     MapFlags flags;
     std::string textureName;
 
+    template <typename... Params>
+    Node<InDim, OutDim>& At(Params&&... coordinates);
     EditableMesh const& GetMesh() const;
     void GenerateDrawables(Graphics& gfx) override;
     void ApplyTransform() override;
