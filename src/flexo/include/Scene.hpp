@@ -28,7 +28,7 @@ public:
     void AddTorus(int majorSeg = 48, int minorSeg = 12, float majorRad = 1.0f, float minorRad = 0.25f);
     void AddGrid(int numXDiv = 10, int numYDiv = 10, float size = 2.0f);
     void AddMap(int width, int height, MapFlags flags, MapInitState initState);
-    void AddModel(VolumetricModelData& data);
+    void AddModel(VolumetricModelData const& data);
 
     void Delete(std::string const& id);
 

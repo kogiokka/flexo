@@ -39,23 +39,23 @@ void VolumetricModelData::Read(std::string const filename)
     m_origin = orig;
 }
 
-unsigned char const* VolumetricModelData::GetBuffer()
+unsigned char const* VolumetricModelData::GetBuffer() const
 {
     void const* buf = rvl_get_voxels(m_rvl);
     return static_cast<unsigned char const*>(buf);
 }
 
-glm::ivec3 VolumetricModelData::GetResolution()
+glm::ivec3 VolumetricModelData::GetResolution() const
 {
     return m_resolution;
 }
 
-glm::vec3 VolumetricModelData::GetVoxelDims()
+glm::vec3 VolumetricModelData::GetVoxelDims() const
 {
     return m_vxDims;
 }
 
-glm::vec3 VolumetricModelData::GetGridOrigin()
+glm::vec3 VolumetricModelData::GetGridOrigin() const
 {
     return m_origin;
 }

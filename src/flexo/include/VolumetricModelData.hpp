@@ -13,10 +13,10 @@ public:
     VolumetricModelData();
     ~VolumetricModelData();
     void Read(std::string const filename);
-    unsigned char const* GetBuffer();
-    glm::ivec3 GetResolution();
-    glm::vec3 GetVoxelDims();
-    glm::vec3 GetGridOrigin();
+    unsigned char const* GetBuffer() const;
+    glm::ivec3 GetResolution() const;
+    glm::vec3 GetVoxelDims() const;
+    glm::vec3 GetGridOrigin() const;
 
 private:
     glm::ivec3 m_resolution;

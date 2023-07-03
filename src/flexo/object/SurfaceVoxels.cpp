@@ -16,7 +16,7 @@ using VoxelFaceList = std::array<EditableMesh, 6>;
 static VoxelFaceList ConstructVoxelFaceList();
 static void AddFace(EditableMesh& mesh, EditableMesh const& voxelFace, glm::vec3 position, glm::vec3 scale);
 
-SurfaceVoxels::SurfaceVoxels(VolumetricModelData& modelData)
+SurfaceVoxels::SurfaceVoxels(VolumetricModelData const& modelData)
     : Object(ObjectType_Model)
 {
     glm::ivec3 n = modelData.GetResolution();

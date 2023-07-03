@@ -127,7 +127,7 @@ void Scene::AddMap(int width, int height, MapFlags flags, MapInitState initState
     AcceptObject(map);
 }
 
-void Scene::AddModel(VolumetricModelData& data)
+void Scene::AddModel(VolumetricModelData const& data)
 {
     auto obj = std::make_shared<SurfaceVoxels>(data);
     AcceptObject(obj);

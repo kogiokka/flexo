@@ -16,7 +16,7 @@ class VolumetricModelData;
 class SurfaceVoxels : public Object
 {
 public:
-    SurfaceVoxels(VolumetricModelData& modelData);
+    SurfaceVoxels(VolumetricModelData const& modelData);
     virtual ~SurfaceVoxels() = default;
     std::vector<Voxel> const& Voxels() const;
     virtual std::vector<glm::vec3> GetPositions() const override;
