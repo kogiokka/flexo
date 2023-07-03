@@ -4,7 +4,7 @@
 #include <string>
 #include <wx/event.h>
 
-#include "object/ObjectList.hpp"
+#include "object/Object.hpp"
 
 class ObjectSelectEvent : public wxEvent
 {

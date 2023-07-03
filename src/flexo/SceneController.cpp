@@ -3,17 +3,14 @@
 #include "Dataset.hpp"
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
-#include "RandomRealNumber.hpp"
+#include "Scene.hpp"
 #include "SceneController.hpp"
 #include "VolumetricModelData.hpp"
 #include "dialog/AddDialog.hpp"
 #include "gfx/bindable/TextureManager.hpp"
 #include "object/Object.hpp"
-#include "object/ObjectList.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "pane/SceneViewportPane.hpp"
-
-constexpr auto PI = 3.14159265358979323846;
 
 #define X(evt, name) wxDEFINE_EVENT(evt, wxCommandEvent);
 ADD_OBJECT_LIST
@@ -53,32 +50,15 @@ SceneController::SceneController(FlexoProject& project)
 
 void SceneController::CreateScene()
 {
-    auto& viewport = SceneViewportPane::Get(m_project);
-
-    auto cube = std::make_shared<Object>(ObjectType_Cube, ConstructCube());
-    cube->SetTexture(Bind::TextureManager::Resolve(viewport.GetGL(), "images/blank.png", 0));
-    cube->SetViewFlags(ObjectViewFlag_Solid);
-
-    AcceptObject(cube);
-}
-
-void SceneController::AcceptObject(std::shared_ptr<Object> object)
-{
-    ObjectList::Get(m_project).Add(object);
+    SceneViewportPane::Get(m_project);
+    Scene::Get(m_project).AddCube();
 }
 
 void SceneController::OnImportModel(wxCommandEvent& event)
 {
     VolumetricModelData data;
     data.Read(event.GetString().ToStdString().c_str());
-
-    auto model = std::make_shared<SurfaceVoxels>(data);
-    model->SetViewFlags(ObjectViewFlag_Solid);
-    model->SetTexture(Bind::TextureManager::Resolve(SceneViewportPane::Get(m_project).GetGL(), "images/blank.png", 0));
-
-    log_info("%lu voxels will be rendered.", model->Voxels().size());
-
-    AcceptObject(model);
+    Scene::Get(m_project).AddModel(data);
 }
 
 void SceneController::OnAddPlane(wxCommandEvent&)
@@ -96,9 +76,7 @@ void SceneController::OnAddPlane(wxCommandEvent&)
         dlg.ShowModal();
     }
 
-    auto obj = std::make_shared<Object>(ObjectType_Plane, ConstructPlane(size));
-    AcceptObject(obj);
-
+    Scene::Get(m_project).AddPlane(size);
     log_info("Added Plane (size: %.3f)", size);
 }
 
@@ -123,9 +101,7 @@ void SceneController::OnAddGrid(wxCommandEvent&)
         return;
     }
 
-    auto obj = std::make_shared<Object>(ObjectType_Grid, ConstructGrid(xdiv, ydiv, size));
-    AcceptObject(obj);
-
+    Scene::Get(m_project).AddGrid(xdiv, ydiv, size);
     log_info("Added Grid (X-div: %ld, Y-div: %ld, size: %.3f)", xdiv, ydiv, size);
 }
 
@@ -144,9 +120,7 @@ void SceneController::OnAddCube(wxCommandEvent&)
         return;
     }
 
-    auto obj = std::make_shared<Object>(ObjectType_Cube, ConstructCube(size));
-    AcceptObject(obj);
-
+    Scene::Get(m_project).AddCube(size);
     log_info("Added Cube (size: %.3f)", size);
 }
 
@@ -171,8 +145,7 @@ void SceneController::OnAddUVSphere(wxCommandEvent&)
         return;
     }
 
-    auto obj = std::make_shared<Object>(ObjectType_Sphere, ConstructSphere(segs, rings, radius));
-    AcceptObject(obj);
+    Scene::Get(m_project).AddUVSphere(segs, rings, radius);
 
     log_info("Added UV Sphere (segments: %ld, rings: %ld, radius: %.3f)", segs, rings, radius);
 }
@@ -201,8 +174,7 @@ void SceneController::OnAddTorus(wxCommandEvent&)
         return;
     }
 
-    auto obj = std::make_shared<Object>(ObjectType_Torus, ConstructTorus(mjSeg, mnSeg, mjRad, mnRad));
-    AcceptObject(obj);
+    Scene::Get(m_project).AddTorus(mjSeg, mnSeg, mjRad, mnRad);
 
     log_info("Added Torus: (major segments: %ld, minor segments: %ld, major radius: %.3f, minor radius: %.3f)", mjSeg,
              mnSeg, mjRad, mnRad);
@@ -215,13 +187,9 @@ void SceneController::OnAddMap(wxCommandEvent&)
     long height = 32;
     bool isCyclicX = false;
     bool isCyclicY = false;
-    MapFlags flags = MapFlags_CyclicNone;
 
-    enum MapInitState {
-        MapInitState_Plane = 0,
-        MapInitState_Cylinder,
-        MapInitState_Random,
-    };
+    MapFlags flags = MapFlags_CyclicNone;
+    int initState = 0;
 
     auto* widthCtrl = dlg.AddInputInteger("Width", width);
     auto* heightCtrl = dlg.AddInputInteger("Height", height);
@@ -256,72 +224,19 @@ void SceneController::OnAddMap(wxCommandEvent&)
         flags |= MapFlags_CyclicY;
     }
 
-    auto map = std::make_shared<Map<3, 2>>();
-    float const w = static_cast<float>(width - 1);
-    float const h = static_cast<float>(height - 1);
-
-    int state = 0;
     for (auto* btn = initStatePlane->GetFirstInGroup(); btn != nullptr; btn = btn->GetNextInGroup()) {
         if (btn->GetValue()) {
             break;
         }
-        ++state;
+        ++initState;
     }
 
-    switch (static_cast<MapInitState>(state)) {
-    default:
-    case MapInitState_Random: {
-        BoundingBox box = { { 5.0f, 5.0f, 5.0f }, { -5.0f, -5.0f, -5.0f } };
-        RandomRealNumber<float> xRng(box.min.x, box.max.x);
-        RandomRealNumber<float> yRng(box.min.y, box.max.y);
-        RandomRealNumber<float> zRng(box.min.z, box.max.z);
-
-        for (int j = 0; j < height; ++j) {
-            for (int i = 0; i < width; ++i) {
-                map->nodes.emplace_back(Vec3f { xRng.scalar(), yRng.scalar(), zRng.scalar() },
-                                        Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
-            }
-        }
-    } break;
-    case MapInitState_Plane: {
-        float dx = 2.0f / static_cast<float>(width - 1);
-        float dy = 2.0f / static_cast<float>(height - 1);
-
-        for (int j = 0; j < height; ++j) {
-            for (int i = 0; i < width; ++i) {
-                map->nodes.emplace_back(Vec3f { -1.0f + i * dx, -1.0f + j * dy, 0.005f },
-                                        Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
-            }
-        }
-    } break;
-    case MapInitState_Cylinder: {
-        float dr = glm::radians(360.0f) / static_cast<float>(width - 1);
-        float dz = 2.0f * PI * 1.0f / static_cast<float>(height - 1);
-
-        for (int j = 0; j < height; ++j) {
-            for (int i = 0; i < width; ++i) {
-                auto rad = i * dr;
-                map->nodes.emplace_back(Vec3f { cos(rad), sin(rad), j * dz },
-                                        Vec2f { static_cast<float>(i), static_cast<float>(j) }, Vec2f { i / w, j / h });
-            }
-        }
-    } break;
-    }
-
-    auto& gfx = SceneViewportPane::Get(m_project).GetGL();
-
-    map->size.x = width;
-    map->size.y = height;
-    map->flags = flags;
-    map->GenerateDrawables(gfx);
-    map->SetTexture(Bind::TextureManager::Resolve(gfx, "images/blank.png", 0));
-    map->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
-    AcceptObject(map);
+    Scene::Get(m_project).AddMap(width, height, flags, static_cast<MapInitState>(initState));
 
     log_info("Added Map: (width: %ld, height: %ld)", width, height);
 }
 
 void SceneController::OnDeleteObject(wxCommandEvent& event)
 {
-    ObjectList::Get(m_project).Delete(event.GetString().ToStdString());
+    Scene::Get(m_project).Delete(event.GetString().ToStdString());
 }

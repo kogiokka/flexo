@@ -69,7 +69,7 @@ EditableMesh ConstructCube(float size)
     return mesh;
 }
 
-EditableMesh ConstructSphere(int numSegments, int numRings, float radius)
+EditableMesh ConstructUVSphere(int numSegments, int numRings, float radius)
 {
     EditableMesh mesh;
 

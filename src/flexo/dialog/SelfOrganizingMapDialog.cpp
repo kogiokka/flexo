@@ -1,8 +1,8 @@
 #include "dialog/SelfOrganizingMapDialog.hpp"
 #include "Project.hpp"
+#include "Scene.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "event/SliderFloatEvent.hpp"
-#include "object/ObjectList.hpp"
 
 #include <wx/artprov.h>
 #include <wx/bmpcbox.h>
@@ -67,7 +67,7 @@ SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject&
     *textIter << m_maxIterations;
     *textRate << m_leanringRate;
 
-    for (auto& o : ObjectList::Get(m_project)) {
+    for (auto& o : Scene::Get(m_project)) {
         auto const type = o->GetType();
         switch (type) {
         case ObjectType_Map:
@@ -153,7 +153,7 @@ SelfOrganizingMapModel<3, 2> SelfOrganizingMapDialog::GetConfig() const
 void SelfOrganizingMapDialog::OnModelSelected(wxCommandEvent& event)
 {
     auto modelID = event.GetString();
-    for (auto const& o : ObjectList::Get(m_project)) {
+    for (auto const& o : Scene::Get(m_project)) {
         auto const& id = o->GetID();
         if (id == modelID) {
             m_object = o;
@@ -165,7 +165,7 @@ void SelfOrganizingMapDialog::OnMapSelected(wxCommandEvent& event)
 {
     auto mapID = event.GetString();
 
-    for (auto const& o : ObjectList::Get(m_project)) {
+    for (auto const& o : Scene::Get(m_project)) {
         auto const& id = o->GetID();
         if (id == mapID) {
             m_map = std::dynamic_pointer_cast<Map<3, 2>>(o);

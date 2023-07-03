@@ -16,7 +16,6 @@
 #include "dialog/SelfOrganizingMapDialog.hpp"
 #include "event/SliderFloatEvent.hpp"
 #include "object/Map.hpp"
-#include "object/ObjectList.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"

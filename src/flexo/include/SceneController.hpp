@@ -32,7 +32,6 @@ public:
 
     SceneController(FlexoProject& project);
     void CreateScene();
-    void AcceptObject(std::shared_ptr<Object> object);
 
 private:
     void OnImportModel(wxCommandEvent& event);

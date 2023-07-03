@@ -10,6 +10,12 @@
 
 using MapFlags = int;
 
+enum MapInitState {
+    MapInitState_Plane = 0,
+    MapInitState_Cylinder,
+    MapInitState_Random,
+};
+
 enum MapFlags_ : int {
     MapFlags_CyclicNone = 1 << 0,
     MapFlags_CyclicX = 1 << 1,

@@ -1,9 +1,9 @@
 #include "pane/PropertiesPane.hpp"
 
 #include "Project.hpp"
+#include "Scene.hpp"
 #include "gfx/Renderer.hpp"
 #include "object/Object.hpp"
-#include "object/ObjectList.hpp"
 #include "pane/MapPropertiesPane.hpp"
 #include "pane/MeshObjectPropertiesPane.hpp"
 
@@ -37,7 +37,7 @@ void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
         m_props = new MeshObjectPropertiesPane(this, m_project);
     }
 
-    for (auto const& obj : ObjectList::Get(m_project)) {
+    for (auto const& obj : Scene::Get(m_project)) {
         if (obj->GetID() == id) {
             m_props->BindObject(obj);
             break;

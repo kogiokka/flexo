@@ -23,6 +23,7 @@ PRIVATE
     "Project.cpp"
     "ProjectWindow.cpp"
     "SceneController.cpp"
+    "Scene.cpp"
 
     "dialog/AddDialog.cpp"
     "dialog/SelfOrganizingMapDialog.cpp"
@@ -42,7 +43,6 @@ PRIVATE
     "event/SliderFloatEvent.cpp"
 
     "object/Object.cpp"
-    "object/ObjectList.cpp"
     "object/SurfaceVoxels.cpp"
 
     "VolumetricModelData.cpp"

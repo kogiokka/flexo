@@ -9,11 +9,11 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "Scene.hpp"
 #include "dialog/ViewportSettingsDialog.hpp"
 #include "gfx/Camera.hpp"
 #include "gfx/Renderer.hpp"
 #include "log/Logger.h"
-#include "object/ObjectList.hpp"
 #include "pane/SceneViewportPane.hpp"
 
 enum {
@@ -124,7 +124,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
     auto& renderer = *m_renderer;
     m_overlays->Submit(renderer);
 
-    for (auto const& obj : ObjectList::Get(m_project)) {
+    for (auto const& obj : Scene::Get(m_project)) {
         for (auto const& drawable : obj->GetDrawList()) {
             drawable->Submit(renderer);
         }
