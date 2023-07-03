@@ -1,7 +1,7 @@
 #include "pane/PropertiesPane.hpp"
 
 #include "Project.hpp"
-#include "Scene.hpp"
+#include "SceneController.hpp"
 #include "gfx/Renderer.hpp"
 #include "object/Object.hpp"
 #include "pane/MapPropertiesPane.hpp"
@@ -37,11 +37,8 @@ void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
         m_props = new MeshObjectPropertiesPane(this, m_project);
     }
 
-    for (auto const& obj : Scene::Get(m_project)) {
-        if (obj->GetID() == id) {
-            m_props->BindObject(obj);
-            break;
-        }
+    if (auto obj = SceneController::Get(m_project).FindObject(id).lock()) {
+        m_props->BindObject(obj);
     }
 
     m_layout->Add(m_props, wxSizerFlags(0).Expand());

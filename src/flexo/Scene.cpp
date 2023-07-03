@@ -134,6 +134,17 @@ void Scene::AddModel(VolumetricModelData const& data)
     log_info("%lu voxels will be rendered.", obj->Voxels().size());
 }
 
+std::weak_ptr<Object> Scene::GetObject(std::string const& id) const
+{
+    for (auto const& obj : m_list) {
+        if (obj->GetID() == id) {
+            return obj;
+        }
+    }
+
+    return std::weak_ptr<Object>();
+}
+
 void Scene::Delete(std::string const& id)
 {
     for (auto it = m_list.begin(); it != m_list.end();) {

@@ -54,6 +54,20 @@ void SceneController::CreateScene()
     Scene::Get(m_project).AddCube();
 }
 
+std::weak_ptr<Object> SceneController::FindObject(std::string const& id) const
+{
+    return Scene::Get(m_project).GetObject(id);
+}
+
+void SceneController::SubmitDrawables(Renderer& renderer) const
+{
+    for (auto const& obj : Scene::Get(m_project)) {
+        for (auto const& drawable : obj->GetDrawList()) {
+            drawable->Submit(renderer);
+        }
+    }
+}
+
 void SceneController::OnImportModel(wxCommandEvent& event)
 {
     VolumetricModelData data;

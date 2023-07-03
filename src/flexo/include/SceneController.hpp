@@ -2,6 +2,7 @@
 #define SCENE_CONTROLLER_H
 
 #include <memory>
+#include <string>
 
 #include <wx/event.h>
 
@@ -23,6 +24,7 @@ ADD_OBJECT_LIST
 wxDECLARE_EVENT(EVT_DELETE_OBJECT, wxCommandEvent);
 
 class FlexoProject;
+class Renderer;
 
 class SceneController : public AttachableBase
 {
@@ -32,6 +34,8 @@ public:
 
     SceneController(FlexoProject& project);
     void CreateScene();
+    std::weak_ptr<Object> FindObject(std::string const& id) const;
+    void SubmitDrawables(Renderer& renderer) const;
 
 private:
     void OnImportModel(wxCommandEvent& event);

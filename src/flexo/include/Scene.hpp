@@ -29,6 +29,7 @@ public:
     void AddGrid(int numXDiv = 10, int numYDiv = 10, float size = 2.0f);
     void AddMap(int width, int height, MapFlags flags, MapInitState initState);
     void AddModel(VolumetricModelData const& data);
+    std::weak_ptr<Object> GetObject(std::string const& id) const;
 
     void Delete(std::string const& id);
 
