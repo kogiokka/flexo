@@ -7,7 +7,6 @@
 #include <wx/treelist.h>
 
 #include "Attachable.hpp"
-#include "Mesh.hpp"
 #include "pane/ControlsPaneBase.hpp"
 
 wxDECLARE_EVENT(EVT_OUTLINER_ADD_OBJECT, wxCommandEvent);
