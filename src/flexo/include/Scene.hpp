@@ -14,6 +14,7 @@
 #include "object/Object.hpp"
 
 class FlexoProject;
+class Renderer;
 
 class Scene : public AttachableBase
 {
@@ -32,20 +33,9 @@ public:
     std::weak_ptr<Object> GetObject(std::string const& id) const;
     std::vector<std::string> GetAllModelsByID() const;
     std::vector<std::string> GetAllMapsByID() const;
+    void SubmitDrawables(Renderer& renderer) const;
 
     void Delete(std::string const& id);
-
-public:
-    // Forward the iterator functions
-    using iterator = std::vector<std::shared_ptr<Object>>::iterator;
-    iterator begin();
-    iterator end();
-    using const_iterator = std::vector<std::shared_ptr<Object>>::const_iterator;
-    const_iterator cbegin() const;
-    const_iterator cend() const;
-
-    using size_type = std::vector<std::shared_ptr<Object>>::size_type;
-    size_type size() const;
 
 private:
     void AcceptObject(std::shared_ptr<Object> object);

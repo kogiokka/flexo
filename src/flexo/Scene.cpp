@@ -7,6 +7,7 @@
 #include "Project.hpp"
 #include "RandomRealNumber.hpp"
 #include "Scene.hpp"
+#include "gfx/Renderer.hpp"
 #include "object/SurfaceVoxels.hpp"
 #include "pane/OutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
@@ -184,6 +185,15 @@ std::vector<std::string> Scene::GetAllMapsByID() const
     return ids;
 }
 
+void Scene::SubmitDrawables(Renderer& renderer) const
+{
+    for (auto const& obj : m_list) {
+        for (auto const& drawable : obj->GetDrawList()) {
+            drawable->Submit(renderer);
+        }
+    }
+}
+
 void Scene::Delete(std::string const& id)
 {
     for (auto it = m_list.begin(); it != m_list.end();) {
@@ -194,31 +204,6 @@ void Scene::Delete(std::string const& id)
             it++;
         }
     }
-}
-
-Scene::iterator Scene::begin()
-{
-    return m_list.begin();
-}
-
-Scene::iterator Scene::end()
-{
-    return m_list.end();
-}
-
-Scene::const_iterator Scene::cbegin() const
-{
-    return m_list.cbegin();
-}
-
-Scene::const_iterator Scene::cend() const
-{
-    return m_list.cend();
-}
-
-Scene::size_type Scene::size() const
-{
-    return m_list.size();
 }
 
 void Scene::AcceptObject(std::shared_ptr<Object> object)

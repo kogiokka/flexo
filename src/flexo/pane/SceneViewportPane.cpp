@@ -9,6 +9,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "Scene.hpp"
 #include "SceneController.hpp"
 #include "dialog/ViewportSettingsDialog.hpp"
 #include "gfx/Camera.hpp"
@@ -123,7 +124,7 @@ void SceneViewportPane::OnPaint(wxPaintEvent&)
 
     auto& renderer = *m_renderer;
     m_overlays->Submit(renderer);
-    SceneController::Get(m_project).SubmitDrawables(renderer);
+    m_scene->SubmitDrawables(renderer);
 
     renderer.Render(gfx);
     gfx.Present();
@@ -174,6 +175,11 @@ void SceneViewportPane::InitGL()
 void SceneViewportPane::SetCurrentMap(std::weak_ptr<Map<3, 2>> map)
 {
     m_currMap = map;
+}
+
+void SceneViewportPane::SetScene(Scene const& scene)
+{
+    m_scene = &scene;
 }
 
 Graphics& SceneViewportPane::GetGL()

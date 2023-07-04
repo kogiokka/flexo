@@ -19,6 +19,7 @@
 #include "object/Map.hpp"
 
 class FlexoProject;
+class Scene;
 
 class SceneViewportPane : public wxGLCanvas
 {
@@ -39,6 +40,7 @@ public:
     Graphics& GetGL();
     Settings GetSettings() const;
     void SetCurrentMap(std::weak_ptr<Map<3, 2>> map);
+    void SetScene(Scene const& scene);
 
 private:
     void OnPaint(wxPaintEvent& event);
@@ -66,6 +68,7 @@ private:
     std::unique_ptr<Overlays> m_overlays;
     Settings m_settings;
     std::weak_ptr<Map<3, 2>> m_currMap;
+    Scene const* m_scene;
 
     FlexoProject& m_project;
 

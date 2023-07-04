@@ -25,7 +25,7 @@ ADD_OBJECT_LIST
 wxDECLARE_EVENT(EVT_DELETE_OBJECT, wxCommandEvent);
 
 class FlexoProject;
-class Renderer;
+class SceneViewportPane;
 
 class SceneController : public AttachableBase
 {
@@ -36,7 +36,7 @@ public:
     SceneController(FlexoProject& project);
     void CreateScene();
     std::weak_ptr<Object> FindObject(std::string const& id) const;
-    void SubmitDrawables(Renderer& renderer) const;
+    void SubmitScene(SceneViewportPane& viewport) const;
     std::vector<std::string> GetAllModelsByID() const;
     std::vector<std::string> GetAllMapsByID() const;
 

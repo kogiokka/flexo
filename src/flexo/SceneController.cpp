@@ -50,8 +50,10 @@ SceneController::SceneController(FlexoProject& project)
 
 void SceneController::CreateScene()
 {
-    SceneViewportPane::Get(m_project);
-    Scene::Get(m_project).AddCube();
+    auto& viewport = SceneViewportPane::Get(m_project);
+    auto& scene = Scene::Get(m_project);
+    scene.AddCube();
+    SubmitScene(viewport);
 }
 
 std::weak_ptr<Object> SceneController::FindObject(std::string const& id) const
@@ -59,13 +61,9 @@ std::weak_ptr<Object> SceneController::FindObject(std::string const& id) const
     return Scene::Get(m_project).GetObject(id);
 }
 
-void SceneController::SubmitDrawables(Renderer& renderer) const
+void SceneController::SubmitScene(SceneViewportPane& viewport) const
 {
-    for (auto const& obj : Scene::Get(m_project)) {
-        for (auto const& drawable : obj->GetDrawList()) {
-            drawable->Submit(renderer);
-        }
-    }
+    viewport.SetScene(Scene::Get(m_project));
 }
 
 std::vector<std::string> SceneController::GetAllModelsByID() const
