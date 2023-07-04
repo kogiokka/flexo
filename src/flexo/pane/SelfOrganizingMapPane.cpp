@@ -12,6 +12,7 @@
 
 #include "Project.hpp"
 #include "ProjectWindow.hpp"
+#include "SceneController.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "dialog/SelfOrganizingMapDialog.hpp"
 #include "event/SliderFloatEvent.hpp"
@@ -98,7 +99,8 @@ void SelfOrganizingMapPane::PopulateTrainingPane()
 
 void SelfOrganizingMapPane::OnConfigure(wxCommandEvent&)
 {
-    SelfOrganizingMapDialog dlg(m_project.GetWindow(), m_project);
+    auto const& scene = SceneController::Get(m_project);
+    SelfOrganizingMapDialog dlg(m_project.GetWindow(), scene.GetAllMapsByID(), scene.GetAllModelsByID(), m_project);
 
     if (dlg.ShowModal() == wxID_OK) {
         m_somModel = std::make_unique<SelfOrganizingMapModel<3, 2>>(dlg.GetConfig());

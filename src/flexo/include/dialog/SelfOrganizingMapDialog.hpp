@@ -2,6 +2,7 @@
 #define SOM_PROJECT_DIALOG
 
 #include <memory>
+#include <vector>
 
 #include <wx/checkbox.h>
 #include <wx/dialog.h>
@@ -19,7 +20,8 @@ class FlexoProject;
 class SelfOrganizingMapDialog : public wxDialog
 {
 public:
-    SelfOrganizingMapDialog(wxWindow* parent, FlexoProject& project);
+    SelfOrganizingMapDialog(wxWindow* parent, std::vector<std::string> mapIDs, std::vector<std::string> objectIDs,
+                            FlexoProject& project);
     SelfOrganizingMapModel<3, 2> GetConfig() const;
 
 protected:

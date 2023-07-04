@@ -68,6 +68,16 @@ void SceneController::SubmitDrawables(Renderer& renderer) const
     }
 }
 
+std::vector<std::string> SceneController::GetAllModelsByID() const
+{
+    return Scene::Get(m_project).GetAllModelsByID();
+}
+
+std::vector<std::string> SceneController::GetAllMapsByID() const
+{
+    return Scene::Get(m_project).GetAllMapsByID();
+}
+
 void SceneController::OnImportModel(wxCommandEvent& event)
 {
     VolumetricModelData data;

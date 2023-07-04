@@ -1,6 +1,6 @@
 #include "dialog/SelfOrganizingMapDialog.hpp"
 #include "Project.hpp"
-#include "Scene.hpp"
+#include "SceneController.hpp"
 #include "SelfOrganizingMap.hpp"
 #include "event/SliderFloatEvent.hpp"
 
@@ -12,7 +12,8 @@
 #include <wx/textctrl.h>
 #include <wx/valnum.h>
 
-SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject& project)
+SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, std::vector<std::string> mapIDs,
+                                                 std::vector<std::string> objectIDs, FlexoProject& project)
     : wxDialog(parent, wxID_ANY, "Create SOM Project", wxDefaultPosition, wxDefaultSize,
                wxDEFAULT_DIALOG_STYLE | wxRESIZE_BORDER)
     , m_maxIterations(0)
@@ -67,23 +68,12 @@ SelfOrganizingMapDialog::SelfOrganizingMapDialog(wxWindow* parent, FlexoProject&
     *textIter << m_maxIterations;
     *textRate << m_leanringRate;
 
-    for (auto& o : Scene::Get(m_project)) {
-        auto const type = o->GetType();
-        switch (type) {
-        case ObjectType_Map:
-            comboMap->Append(o->GetID(), wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
-            break;
-        case ObjectType_Model:
-        case ObjectType_Plane:
-        case ObjectType_Grid:
-        case ObjectType_Sphere:
-        case ObjectType_Torus:
-        case ObjectType_Cube:
-            comboModel->Append(o->GetID(), wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
-            break;
-        default:
-            continue;
-        }
+    for (auto id : mapIDs) {
+        comboMap->Append(id, wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
+    }
+
+    for (auto id : objectIDs) {
+        comboModel->Append(id, wxArtProvider::GetBitmap(wxART_WX_LOGO, wxART_OTHER, wxSize(16, 16)));
     }
 
     wxIntegerValidator<int> validIter;
@@ -152,25 +142,14 @@ SelfOrganizingMapModel<3, 2> SelfOrganizingMapDialog::GetConfig() const
 
 void SelfOrganizingMapDialog::OnModelSelected(wxCommandEvent& event)
 {
-    auto modelID = event.GetString();
-    for (auto const& o : Scene::Get(m_project)) {
-        auto const& id = o->GetID();
-        if (id == modelID) {
-            m_object = o;
-        }
-    }
+    auto modelID = event.GetString().ToStdString();
+    m_object = SceneController::Get(m_project).FindObject(modelID);
 }
 
 void SelfOrganizingMapDialog::OnMapSelected(wxCommandEvent& event)
 {
-    auto mapID = event.GetString();
-
-    for (auto const& o : Scene::Get(m_project)) {
-        auto const& id = o->GetID();
-        if (id == mapID) {
-            m_map = std::dynamic_pointer_cast<Map<3, 2>>(o);
-        }
-    }
+    auto mapID = event.GetString().ToStdString();
+    m_map = std::dynamic_pointer_cast<Map<3, 2>>(SceneController::Get(m_project).FindObject(mapID).lock());
 
     if (auto map = m_map.lock()) {
         int const width = map->size.x;

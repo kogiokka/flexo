@@ -145,6 +145,45 @@ std::weak_ptr<Object> Scene::GetObject(std::string const& id) const
     return std::weak_ptr<Object>();
 }
 
+std::vector<std::string> Scene::GetAllModelsByID() const
+{
+    std::vector<std::string> ids;
+
+    for (auto const& o : m_list) {
+        switch (o->GetType()) {
+        case ObjectType_Cube:
+        case ObjectType_Plane:
+        case ObjectType_Torus:
+        case ObjectType_Sphere:
+        case ObjectType_Grid:
+        case ObjectType_Model:
+            ids.push_back(o->GetID());
+            break;
+        default:
+            break;
+        }
+    }
+
+    return ids;
+}
+
+std::vector<std::string> Scene::GetAllMapsByID() const
+{
+    std::vector<std::string> ids;
+
+    for (auto const& o : m_list) {
+        switch (o->GetType()) {
+        case ObjectType_Map:
+            ids.push_back(o->GetID());
+            break;
+        default:
+            break;
+        }
+    }
+
+    return ids;
+}
+
 void Scene::Delete(std::string const& id)
 {
     for (auto it = m_list.begin(); it != m_list.end();) {

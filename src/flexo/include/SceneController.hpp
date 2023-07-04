@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <wx/event.h>
 
@@ -36,6 +37,8 @@ public:
     void CreateScene();
     std::weak_ptr<Object> FindObject(std::string const& id) const;
     void SubmitDrawables(Renderer& renderer) const;
+    std::vector<std::string> GetAllModelsByID() const;
+    std::vector<std::string> GetAllMapsByID() const;
 
 private:
     void OnImportModel(wxCommandEvent& event);

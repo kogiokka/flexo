@@ -30,6 +30,8 @@ public:
     void AddMap(int width, int height, MapFlags flags, MapInitState initState);
     void AddModel(VolumetricModelData const& data);
     std::weak_ptr<Object> GetObject(std::string const& id) const;
+    std::vector<std::string> GetAllModelsByID() const;
+    std::vector<std::string> GetAllMapsByID() const;
 
     void Delete(std::string const& id);
 
