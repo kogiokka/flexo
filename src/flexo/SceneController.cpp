@@ -1,3 +1,4 @@
+#include <wx/event.h>
 #include <wx/valnum.h>
 
 #include "Dataset.hpp"
