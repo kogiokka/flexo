@@ -42,4 +42,5 @@ void PropertiesPane::OnObjectSelected(ObjectSelectEvent& event)
     }
 
     m_layout->Add(m_props, wxSizerFlags(0).Expand());
+    Layout();
 }
