@@ -2,7 +2,7 @@
 #define SOLID_DRAWABLE_H
 
 #include "Drawable.hpp"
-#include "Mesh.hpp"
+#include "gfx/Mesh.hpp"
 #include "gfx/Graphics.hpp"
 #include "gfx/UniformBlock.hpp"
 

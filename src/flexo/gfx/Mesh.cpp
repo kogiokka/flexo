@@ -1,4 +1,4 @@
-#include "Mesh.hpp"
+#include "gfx/Mesh.hpp"
 
 #include <cstddef>
 #include <string>

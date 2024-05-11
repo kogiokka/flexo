@@ -30,7 +30,7 @@ target_sources(drawable
 target_include_directories(drawable PUBLIC include)
 target_link_libraries(drawable PRIVATE
     flexo::gfx
-    flexo::util
     flexo::log
+    flexo::util
 )
 add_library(flexo::drawable ALIAS drawable)

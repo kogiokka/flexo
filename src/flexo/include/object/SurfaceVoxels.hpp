@@ -7,9 +7,9 @@
 #include <glm/glm.hpp>
 
 #include "Map.hpp"
-#include "Mesh.hpp"
 #include "Object.hpp"
 #include "Voxel.hpp"
+#include "gfx/Mesh.hpp"
 
 class VolumetricModelData;
 

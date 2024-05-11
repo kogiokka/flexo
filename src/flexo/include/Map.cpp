@@ -1,7 +1,7 @@
 #include <array>
 #include <utility>
 
-#include "EditableMesh.hpp"
+#include "gfx/EditableMesh.hpp"
 #include "VecUtil.hpp"
 #include "object/Map.hpp"
 

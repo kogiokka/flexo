@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include "EditableMesh.hpp"
+#include "gfx/EditableMesh.hpp"
 #include "WireDrawable.hpp"
 
 class Graphics;

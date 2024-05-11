@@ -25,6 +25,8 @@ target_sources(gfx
         "BindStep.cpp"
         "DrawTask.cpp"
         "Camera.cpp"
+        "EditableMesh.cpp"
+        "Mesh.cpp"
         "glwr/IGLWRState.cpp"
         "glwr/IGLWRBuffer.cpp"
         "glwr/IGLWRInputLayout.cpp"
@@ -51,6 +53,6 @@ target_sources(gfx
 
 target_include_directories(gfx PUBLIC include)
 target_link_libraries(gfx PUBLIC glad::glad)
-target_link_libraries(gfx PRIVATE stb::image glm::glm flexo::log)
+target_link_libraries(gfx PRIVATE stb::image glm::glm flexo::log flexo::util)
 
 add_library(flexo::gfx ALIAS gfx)

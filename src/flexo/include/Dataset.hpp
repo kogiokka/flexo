@@ -4,7 +4,7 @@
 #include <glm/glm.hpp>
 #include <vector>
 
-#include "Mesh.hpp"
+#include "gfx/Mesh.hpp"
 #include "RandomIntNumber.hpp"
 #include "Vec.hpp"
 

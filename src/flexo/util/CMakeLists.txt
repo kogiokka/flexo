@@ -18,13 +18,11 @@ endif()
 
 target_sources(util
     PRIVATE
-        "EditableMesh.cpp"
-        "Mesh.cpp"
         "TransformStack.cpp"
         "Colors.cpp"
 )
 
 target_include_directories(util PUBLIC include)
 target_link_libraries(util PUBLIC glm::glm)
-target_link_libraries(util PRIVATE flexo::gfx flexo::log)
+target_link_libraries(util PRIVATE flexo::log)
 add_library(flexo::util ALIAS util)

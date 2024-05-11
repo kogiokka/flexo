@@ -3,12 +3,12 @@
 #include <cstdio>
 #include <string>
 
-#include "EditableMesh.hpp"
 #include "Project.hpp"
 #include "RandomRealNumber.hpp"
 #include "Scene.hpp"
 #include "gfx/Renderer.hpp"
 #include "object/SurfaceVoxels.hpp"
+#include "gfx/EditableMesh.hpp"
 #include "pane/OutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"

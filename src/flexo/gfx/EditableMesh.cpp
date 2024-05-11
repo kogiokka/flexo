@@ -2,7 +2,7 @@
 
 #include <glm/gtc/matrix_transform.hpp>
 
-#include "EditableMesh.hpp"
+#include "gfx/EditableMesh.hpp"
 
 bool EditableMesh::HasPositions() const
 {

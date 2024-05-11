@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Mesh.hpp"
+#include "gfx/Mesh.hpp"
 
 class BaseImporter
 {

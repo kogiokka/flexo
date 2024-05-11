@@ -5,13 +5,13 @@
 #include <string>
 #include <vector>
 
-#include "EditableMesh.hpp"
-#include "Mesh.hpp"
 #include "SolidDrawable.hpp"
 #include "TexturedDrawable.hpp"
 #include "TransformStack.hpp"
 #include "WireDrawable.hpp"
 #include "Wireframe.hpp"
+#include "gfx/EditableMesh.hpp"
+#include "gfx/Mesh.hpp"
 #include "gfx/DrawableBase.hpp"
 #include "gfx/bindable/Texture2D.hpp"
 #include "gfx/bindable/TextureManager.hpp"
