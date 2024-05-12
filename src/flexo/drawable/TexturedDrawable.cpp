@@ -8,6 +8,7 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
+#include "ResourcePath.hpp"
 
 TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_ptr<Bind::Texture2D> texture)
 {
@@ -67,9 +68,9 @@ TexturedDrawable::TexturedDrawable(Graphics& gfx, Mesh const& mesh, std::shared_
 
     BindStep step;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/TexturedDrawable.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, ResourcePath::GetOpenGLShaderFile("TexturedDrawable.vert"));
     step.AddBindable(vs);
-    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/TexturedDrawable.frag"));
+    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, ResourcePath::GetOpenGLShaderFile("TexturedDrawable.frag")));
     step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     for (auto const& [id, ub] : m_ubs) {
         step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));

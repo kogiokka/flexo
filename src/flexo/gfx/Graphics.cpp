@@ -5,6 +5,7 @@
 
 #include "gfx/Graphics.hpp"
 #include "log/Logger.h"
+#include "ResourcePath.hpp"
 
 Graphics::Graphics()
 {
@@ -22,8 +23,8 @@ Graphics::Graphics()
     glGenProgramPipelines(1, &m_ctx.pipeline);
     glBindProgramPipeline(m_ctx.pipeline);
 
-    std::string vertSource = SlurpShaderSource("shader/Screen.vert");
-    std::string fragSource = SlurpShaderSource("shader/Screen.frag");
+    std::string vertSource = SlurpShaderSource(ResourcePath::GetOpenGLShaderFile("Screen.vert"));
+    std::string fragSource = SlurpShaderSource(ResourcePath::GetOpenGLShaderFile("Screen.frag"));
     CreateVertexShader(vertSource.data(), &m_ctx.vert);
     CreateFragmentShader(fragSource.data(), &m_ctx.frag);
     CreateInputLayout(inputs.data(), inputs.size(), m_ctx.vert.Get(), &m_ctx.inputLayout);

@@ -16,13 +16,16 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(util PRIVATE /wd4996)
 endif()
 
+configure_file("include/ResourcePath.hpp.in" "${CMAKE_CURRENT_BINARY_DIR}/include/ResourcePath.hpp" @ONLY)
+
 target_sources(util
     PRIVATE
         "TransformStack.cpp"
         "Colors.cpp"
+        "ResourcePath.cpp"
 )
 
-target_include_directories(util PUBLIC include)
+target_include_directories(util PUBLIC include "${CMAKE_CURRENT_BINARY_DIR}/include")
 target_link_libraries(util PUBLIC glm::glm)
 target_link_libraries(util PRIVATE flexo::log)
 add_library(flexo::util ALIAS util)

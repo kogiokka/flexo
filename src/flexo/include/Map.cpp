@@ -4,6 +4,7 @@
 #include "gfx/EditableMesh.hpp"
 #include "VecUtil.hpp"
 #include "object/Map.hpp"
+#include "ResourcePath.hpp"
 
 template <int InDim, int OutDim>
 template <typename... Params>
@@ -77,7 +78,7 @@ void Map<InDim, OutDim>::GenerateDrawables(Graphics& gfx)
     GenerateMesh();
 
     if (!m_texture) {
-        m_texture = Bind::TextureManager::Resolve(gfx, "images/blank.png", 0);
+        m_texture = Bind::TextureManager::Resolve(gfx, ResourcePath::GetImageFile("blank.png"), 0);
     }
     auto m = m_mesh.GenerateMesh();
     m_solid = std::make_shared<SolidDrawable>(gfx, m);

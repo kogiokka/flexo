@@ -63,7 +63,7 @@ add_subdirectory(log)
 add_subdirectory(gfx)
 add_subdirectory(drawable)
 add_subdirectory(msw)
-add_subdirectory(shader)
+add_subdirectory(program)
 
 target_include_directories(flexo PRIVATE include)
 
@@ -92,10 +92,10 @@ endif()
 add_custom_command(TARGET flexo POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/data"
-        "$<TARGET_FILE_DIR:flexo>/data"
+        "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_DATADIR}/flexo/data"
     COMMAND ${CMAKE_COMMAND} -E copy_directory
         "${CMAKE_CURRENT_SOURCE_DIR}/images"
-        "$<TARGET_FILE_DIR:flexo>/images"
+        "${CMAKE_BINARY_DIR}/${CMAKE_INSTALL_DATADIR}/flexo/images"
     COMMENT "Copying resources to build tree..."
     VERBATIM
 )
@@ -115,3 +115,16 @@ if (CMAKE_SYSTEM_NAME MATCHES "Windows")
         COMMENT "Copying dynamic libraries to the build tree..."
     )
 endif()
+
+install(
+    TARGETS flexo
+    EXPORT flexoTargets
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}/flexo"
+    LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}/flexo"
+    RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}"
+)
+
+install(
+    DIRECTORY "images"
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/flexo"
+)

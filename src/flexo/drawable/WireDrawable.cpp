@@ -15,6 +15,7 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
+#include "ResourcePath.hpp"
 
 WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
 {
@@ -56,9 +57,9 @@ WireDrawable::WireDrawable(Graphics& gfx, Wireframe const& wireframe)
     AddBind(std::make_shared<Bind::IndexBuffer>(gfx, indices));
 
     BindStep step;
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/WireDrawable.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, ResourcePath::GetOpenGLShaderFile("WireDrawable.vert"));
     step.AddBindable(vs);
-    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/WireDrawable.frag"));
+    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, ResourcePath::GetOpenGLShaderFile("WireDrawable.frag")));
     step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     for (auto const& [id, ub] : m_ubs) {
         step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));

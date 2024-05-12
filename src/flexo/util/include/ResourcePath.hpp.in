@@ -1,0 +1,16 @@
+#ifndef RESOURCE_PATH_H
+#define RESOURCE_PATH_H
+
+#include <string>
+
+#define INSTALL_LIBDIR "@CMAKE_INSTALL_LIBDIR@"
+#define INSTALL_DATADIR "@CMAKE_INSTALL_DATADIR@"
+
+class ResourcePath
+{
+public:
+    static std::string GetOpenGLShaderFile(std::string const& filename);
+    static std::string GetImageFile(std::string const& filename);
+};
+
+#endif

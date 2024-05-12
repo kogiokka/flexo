@@ -12,6 +12,7 @@
 #include "gfx/bindable/VertexBuffer.hpp"
 #include "gfx/bindable/program/FragmentShaderProgram.hpp"
 #include "gfx/bindable/program/VertexShaderProgram.hpp"
+#include "ResourcePath.hpp"
 
 SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
 {
@@ -64,9 +65,9 @@ SolidDrawable::SolidDrawable(Graphics& gfx, Mesh const& mesh)
 
     BindStep step;
 
-    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, "shader/SolidDrawable.vert");
+    auto vs = std::make_shared<Bind::VertexShaderProgram>(gfx, ResourcePath::GetOpenGLShaderFile("SolidDrawable.vert"));
     step.AddBindable(vs);
-    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, "shader/SolidDrawable.frag"));
+    step.AddBindable(std::make_shared<Bind::FragmentShaderProgram>(gfx, ResourcePath::GetOpenGLShaderFile("SolidDrawable.frag")));
     step.AddBindable(std::make_shared<Bind::InputLayout>(gfx, inputs, vs.get()));
     for (auto const& [id, ub] : m_ubs) {
         step.AddBindable(std::make_shared<Bind::UniformBuffer>(gfx, ub, id));

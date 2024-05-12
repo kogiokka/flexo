@@ -12,6 +12,7 @@
 #include "pane/OutlinerPane.hpp"
 #include "pane/SceneViewportPane.hpp"
 #include "pane/SelfOrganizingMapPane.hpp"
+#include "ResourcePath.hpp"
 
 constexpr auto PI = 3.14159265358979323846;
 
@@ -123,7 +124,7 @@ void Scene::AddMap(int width, int height, MapFlags flags, MapInitState initState
     map->size.y = height;
     map->flags = flags;
     map->GenerateDrawables(gfx);
-    map->SetTexture(Bind::TextureManager::Resolve(gfx, "images/blank.png", 0));
+    map->SetTexture(Bind::TextureManager::Resolve(gfx, ResourcePath::GetImageFile("blank.png"), 0));
     map->SetViewFlags(ObjectViewFlag_TexturedWithWireframe);
     AcceptObject(map);
 }

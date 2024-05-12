@@ -2,6 +2,7 @@
 #include "gfx/Graphics.hpp"
 #include "log/Logger.h"
 #include "Colors.hpp"
+#include "ResourcePath.hpp"
 
 Object::Object(ObjectType type, EditableMesh mesh)
     : m_type(type)
@@ -16,7 +17,7 @@ void Object::GenerateDrawables(Graphics& gfx)
 {
     // FIXME
     if (!m_texture) {
-        m_texture = Bind::TextureManager::Resolve(gfx, "images/blank.png", 0);
+        m_texture = Bind::TextureManager::Resolve(gfx, ResourcePath::GetImageFile("blank.png"), 0);
     }
     auto m = m_mesh.GenerateMesh();
     m_solid = std::make_shared<SolidDrawable>(gfx, m);
