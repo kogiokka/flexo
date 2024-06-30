@@ -1,3 +1,5 @@
+#include <algorithm>
+
 #include "TexturedDrawable.hpp"
 #include "gfx/BindStep.hpp"
 #include "gfx/bindable/InputLayout.hpp"
