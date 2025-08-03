@@ -1,13 +1,13 @@
 if (wxWidgets_FOUND)
-    if (NOT ((wxWidgets_VERSION VERSION_LESS "3.2.2") AND MINGW))
+    if (NOT ((wxWidgets_VERSION VERSION_LESS "3.2.8") AND MINGW))
         return()
     endif()
 endif()
 
 FetchContent_Declare(
     wxWidgets
-    URL "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.2.1/wxWidgets-3.2.2.1.7z"
-    URL_HASH MD5=c8e79bdccb93f076756ff3d6c44a418c
+    URL "https://github.com/wxWidgets/wxWidgets/releases/download/v3.2.8/wxWidgets-3.2.8.7z"
+    URL_HASH SHA256=368516aaebb00e1194326644e6ce917906d9cf90deaf81f5e8bb50c46023b370
 )
 
 set(wxBUILD_SHARED ON CACHE BOOL "Build shared or static libraries")
